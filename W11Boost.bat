@@ -1,26 +1,32 @@
 @echo off
 title W11Tweak by https://github.com/nermur
 
-REM Disables GPS services, which always run even if there's no GPS hardware installed.
-set /A disable_geolocation=0
-
-REM Printers are heavily exploitable, avoid using one if possible.
-set /A disable_printer_support=0
-
-REM Disable Explorer's thumbnail border shadows.
-set /A disable_thumbnail_shadows=0
+REM Disables Sticky, Filter, and Toggle Keys.
+set /A avoid_key_annoyances=1
 
 REM Ensures Windows' audio ducking/attenuation is disabled.
 set /A disable_audio_reduction=0
 
-REM Routing through IPv6 is worse than IPv4 in some areas (higher latency/ping).
-set /A disable_ipv6=0
-
 REM Undermines software that clear the clipboard automatically.
 set /A disable_clipboard_history=1
 
-REM More comprehensive than GRC's InSpectre tool, but still doesn't interfere with anti-cheats (such as Vanguard).
-set /A disable_mitigations=1
+REM Use NVIDIA ShadowPlay, AMD ReLive, or OBS Studio instead.
+set /A disable_game_dvr=1
+
+REM Disables GPS services, which always run even if there's no GPS hardware installed.
+set /A disable_geolocation=0
+
+REM Routing through IPv6 is worse than IPv4 in some areas (higher latency/ping).
+set /A disable_ipv6=0
+
+REM Printers are heavily exploitable, avoid using one if possible.
+set /A disable_printer_support=0
+
+REM If you don't want to install apps using the Microsoft Store from other devices or a web browser.
+set /A disable_remote_msstore_installs=1
+
+REM Disable Explorer's thumbnail border shadows.
+set /A disable_thumbnail_shadows=0
 
 REM Disables power saving features for network switches to increase their reliability.
 set /A network_adapter_tweaks=1
@@ -28,14 +34,6 @@ set /A network_adapter_tweaks=1
 REM Makes disks using the default file system (NTFS) faster, but disables File History and File Access Dates.
 set /A ntfs_tweaks=1
 
-REM Disables Sticky, Filter, and Toggle Keys.
-set /A avoid_key_annoyances=1
-
-REM If you don't want to install apps using the Microsoft Store from other devices or a web browser.
-set /A disable_remote_msstore_installs=1
-
-REM Use NVIDIA ShadowPlay, AMD ReLive, or OBS Studio instead.
-set /A disable_game_dvr=1
 
 reg.exe query HKU\S-1-5-19 || (
 	echo ==== Error ====
@@ -45,17 +43,17 @@ reg.exe query HKU\S-1-5-19 || (
 	exit /b
 )
 
-REM If these are disabled, Windows Update will break and so will this script
+REM If these are disabled, Windows Update will break and so will this script.
 reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\AppXSvc" /v "Start" /t REG_DWORD /d 3 /f
 reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\ClipSVC" /v "Start" /t REG_DWORD /d 3 /f
 reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\TokenBroker" /v "Start" /t REG_DWORD /d 3 /f
-REM Specifically breaks Windows Store if disabled previously (by you)
+REM Specifically breaks Windows Store if disabled previously.
 reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\StorSvc" /v "Start" /t REG_DWORD /d 3 /f
 sc.exe start AppXSvc
 sc.exe start ClipSVC
 sc.exe start StorSvc
 
-REM Required for System Restore functionality
+REM Required for System Restore functionality.
 net start VSS
 powershell.exe -Command "Enable-ComputerRestore -Drive 'C:\'"
 
@@ -64,36 +62,48 @@ echo.
 echo ==== Current settings ====
 echo.
 echo avoid_key_annoyances = %avoid_key_annoyances%
+echo disable_audio_reduction = %disable_audio_reduction%
+echo disable_clipboard_history = %disable_clipboard_history%
 echo disable_game_dvr = %disable_game_dvr%
 echo disable_geolocation = %disable_geolocation%
-echo disable_audio_reduction = %disable_audio_reduction%
 echo disable_ipv6 = %disable_ipv6%
-echo disable_mitigations = %disable_mitigations%
 echo disable_printer_support = %disable_printer_support%
+echo disable_remote_msstore_installs = %disable_remote_msstore_installs%
 echo disable_thumbnail_shadows = %disable_thumbnail_shadows%
 echo network_adapter_tweaks = %network_adapter_tweaks%
 echo ntfs_tweaks = %ntfs_tweaks%
 echo 
 echo.
 Pause
-cd %SystemRoot%\System32
 
-REM Won't make a restore point if there's already one within the past 24 hours
-WMIC.exe /Namespace:\\root\default Path SystemRestore Call CreateRestorePoint "W11Tweak", 100, 7
-
-REM Allow PowerShell scripts in current directory
+cd %~dp0
+REM Allow PowerShell scripts in current directory.
 powershell.exe -Command "Get-ChildItem *.ps*1 -recurse | Unblock-File"
 
-REM Bitsum Highest Performance profile cannot install if any Power Plans were previously removed
+REM Won't make a restore point if there's already one within the past 24 hours.
+WMIC.exe /Namespace:\\root\default Path SystemRestore Call CreateRestorePoint "W11Boost", 100, 7
+
+REM Bitsum Highest Performance profile cannot install if any Power Plans were previously removed.
 powercfg -restoredefaultschemes
-REM Sleep mode achieves the same goal while not hammering the primary hard drive, but will break in power outages/surges; regardless, leaving a PC unattended is bad. Also fixes "Fast startup" problems by disabling it
+REM Sleep mode achieves the same goal while not hammering the primary hard drive, but will break in power outages/surges; regardless, leaving a PC unattended is bad. Also fixes "Fast startup" problems by disabling it.
 powercfg.exe /hibernate on
 reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Power" /V HiberbootEnabled /T REG_DWORD /D 0 /F
+attrib +R %WinDir%\System32\SleepStudy\UserNotPresentSession.etl
 
 if %avoid_key_annoyances%==1 (
 	reg.exe add "HKCU\Control Panel\Accessibility\StickyKeys" /v "Flags" /t REG_SZ /d 50 /f
 	reg.exe add "HKCU\Control Panel\Accessibility\ToggleKeys" /v "Flags" /t REG_SZ /d 58 /f
 	reg.exe add "HKCU\Control Panel\Accessibility\Keyboard Response" /v "Flags" /t REG_SZ /d 122 /f
+)
+
+if %disable_audio_reduction%==1 (
+	reg.exe add "HKCU\SOFTWARE\Microsoft\Multimedia\Audio" /v "UserDuckingPreference" /t REG_DWORD /d "3" /f
+	reg.exe delete "HKCU\SOFTWARE\Microsoft\Internet Explorer\LowRegistry\Audio\PolicyConfig\PropertyStore" /f
+)
+
+if %disable_clipboard_history%==1 (
+	reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v "AllowClipboardHistory" /t REG_DWORD /d 0 /f
+	reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v "AllowCrossDeviceClipboard" /t REG_DWORD /d 0 /f
 )
 
 if %disable_game_dvr%==1 (
@@ -113,32 +123,6 @@ if %disable_geolocation%==1 (
 	reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors" /v "DisableLocationScripting" /t REG_DWORD /d 1 /f
 )
 
-if %disable_printer_support%==1 (
-	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\Spooler" /v "Start" /t REG_DWORD /d 4 /f
-	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\PrintNotify" /v "Start" /t REG_DWORD /d 4 /f
-)
-
-if %network_adapter_tweaks%==1 (
-	powershell.exe -Command ".\network_adapter_tweaks.ps1"
-)
-
-if %disable_clipboard_history%==1 (
-	reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v "AllowClipboardHistory" /t REG_DWORD /d 0 /f
-	reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v "AllowCrossDeviceClipboard" /t REG_DWORD /d 0 /f
-)
-
-if %disable_mitigations%==1 (
-	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" /v FeatureSettingsOverride /t REG_DWORD /d 3 /f 
-	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" /v FeatureSettingsOverrideMask /t REG_DWORD /d 3 /f
-	REM Use the faster but less secure Hyper-V scheduler.
-	bcdedit.exe /set hypervisorschedulertype classic
-	REM Allow Intel TSX.
-	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Kernel" /v DisableTsx /t REG_DWORD /d 0 /f
-	powershell.exe -Command "Set-ProcessMitigation -PolicyFilePath disable_system_exploit_mitigations.xml"
-	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\CredentialGuard" /v "Enabled" /t REG_DWORD /d 0 /f
-	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" /v "Enabled" /t REG_DWORD /d 0 /f
-)
-
 if %disable_ipv6%==1 (
 	sc.exe stop iphlpsvc
 	sc.exe stop IpxlatCfgSvc
@@ -147,9 +131,23 @@ if %disable_ipv6%==1 (
 	reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce" /v "disable_ipv6" /t REG_SZ /f /d "powershell -Command Set-NetAdapterBinding -Name '*' -DisplayName 'Internet Protocol Version 6 (TCP/IPv6)' -Enabled 0"
 )
 
+if %disable_printer_support%==1 (
+	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\Spooler" /v "Start" /t REG_DWORD /d 4 /f
+	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\PrintNotify" /v "Start" /t REG_DWORD /d 4 /f
+)
+
 if %disable_remote_msstore_installs%==1 (
 	reg.exe add "HKLM\Software\Policies\Microsoft\PushToInstall" /v "DisablePushToInstall" /t REG_DWORD /d "1" /f
 	schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\PushToInstall\Registration"
+)
+
+if %disable_thumbnail_shadows%==1 (
+	reg.exe add "HKCR\SystemFileAssociations\image" /v "Treatment" /t REG_DWORD /d 0 /f
+	reg.exe add "HKCR\SystemFileAssociations\image" /v "TypeOverlay" /t REG_SZ /d "" /f
+)
+
+if %network_adapter_tweaks%==1 (
+	powershell.exe -Command ".\network_adapter_tweaks.ps1"
 )
 
 if %ntfs_tweaks%==1 (
@@ -160,17 +158,6 @@ if %ntfs_tweaks%==1 (
 	schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\FileHistory\File History (maintenance mode)"
 )
 
-if %disable_thumbnail_shadows%==1 (
-	reg.exe add "HKCR\SystemFileAssociations\image" /v "Treatment" /t REG_DWORD /d 0 /f
-	reg.exe add "HKCR\SystemFileAssociations\image" /v "TypeOverlay" /t REG_SZ /d "" /f
-)
-
-if %disable_audio_reduction%==1 (
-	reg.exe add "HKCU\SOFTWARE\Microsoft\Multimedia\Audio" /v "UserDuckingPreference" /t REG_DWORD /d "3" /f
-	reg.exe delete "HKCU\SOFTWARE\Microsoft\Internet Explorer\LowRegistry\Audio\PolicyConfig\PropertyStore" /f
-)
-
-
 reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v "NoLowDiskSpaceChecks" /t REG_DWORD /d 1 /f
 reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v "LinkResolveIgnoreLinkInfo" /t REG_DWORD /d 1 /f
 
@@ -180,28 +167,33 @@ reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /
 REM Don't search all paths related to the missing shortcut.
 reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v "NoResolveTrack" /t REG_DWORD /d 1 /f
 
-REM Don't waste CPU cycles to remove thumbnail caches.
+REM Don't waste time removing thumbnail caches; if they corrupt themselves, the user will do this themself.
 reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VolumeCaches\Thumbnail Cache" /v "Autorun" /t REG_DWORD /d 0 /f
 reg.exe add "HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Explorer\VolumeCaches\Thumbnail Cache" /v "Autorun" /t REG_DWORD /d 0 /f
 
-REM Don't check for an active connection through Microsoft's servers
+REM Don't check for an active connection through Microsoft's servers.
 reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\NlaSvc\Parameters\Internet" /v EnableActiveProbing /t REG_DWORD /d 0 /f
-
-reg.exe add "HKLM\SYSTEM\ControlSet001\Services\DiagTrack" /v "Start" /t REG_DWORD /d 4 /f
-reg.exe add "HKLM\SYSTEM\ControlSet001\Services\dmwappushservice" /v "Start" /t REG_DWORD /d 4 /f
-reg.exe add "HKLM\SYSTEM\ControlSet001\Control\WMI\Autologger\AutoLogger-Diagtrack-Listener" /v "Start" /t REG_DWORD /d 0 /f
 
 REM Ask OneDrive to only generate network traffic if signed in to OneDrive.
 reg.exe add "HKLM\SOFTWARE\Microsoft\OneDrive" /v "PreventNetworkTrafficPreUserSignIn" /t REG_DWORD /d 1 /f
 
 REM Ask nicely to stop sending diagnostic data to Microsoft.
 reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection" /v "AllowTelemetry" /t REG_DWORD /d 0 /f
+reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Privacy" /v "TailoredExperiencesWithDiagnosticDataEnabled" /t REG_DWORD /d 0 /f
 reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v "AllowTelemetry" /t REG_DWORD /d 0 /f
 reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v "DisableEnterpriseAuthProxy" /t REG_DWORD /d 1 /f
 reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v "DisableOneSettingsDownloads" /t REG_DWORD /d 1 /f
 reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v "DisableTelemetryOptInChangeNotification" /t REG_DWORD /d 1 /f
 reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v "DoNotShowFeedbackNotifications" /t REG_DWORD /d 1 /f
+reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v "PublishUserActivities" /t REG_DWORD /d 0 /f
 reg.exe add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Policies\DataCollection" /v "AllowTelemetry" /t REG_DWORD /d 0 /f
+reg.exe add "HKLM\SYSTEM\ControlSet001\Control\WMI\Autologger\AutoLogger-Diagtrack-Listener" /v "Start" /t REG_DWORD /d 0 /f
+reg.exe add "HKLM\SYSTEM\ControlSet001\Services\DiagTrack" /v "Start" /t REG_DWORD /d 4 /f
+
+REM Disable "Customer Experience Improvement Program"; also implies turning off the Inventory Collector.
+reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\AppV\CEIP" /v "CEIPEnable" /t REG_DWORD /d 0 /f
+reg.exe add "HKLM\SOFTWARE\Microsoft\SQMClient\Windows" /v "CEIPEnable" /t REG_DWORD /d 0 /f
+reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Messenger\Client" /v "CEIP" /t REG_DWORD /d 2 /f
 
 REM Disable "Application Compatibility Engine".
 reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\AppCompat" /v "DisableEngine" /t REG_DWORD /d 1 /f
@@ -214,8 +206,6 @@ reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\AppCompat" /v "SbEnable" /
 REM Disable user steps recorder.
 reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\AppCompat" /v "DisableUAR" /t REG_DWORD /d 1 /f
 
-reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Privacy" /v "TailoredExperiencesWithDiagnosticDataEnabled" /t REG_DWORD /d 0 /f
-
 REM Disable Autoplay on all disk types.
 reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v "NoDriveTypeAutoRun" /t REG_DWORD /d 255 /f
 
@@ -226,7 +216,7 @@ reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Error Reporting" /
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Windows Error Reporting\QueueReporting"
 
 REM Disallow execution of experiments by Microsoft.
-reg.exe add "HKLM64\SOFTWARE\Microsoft\PolicyManager\current\device\System" /v "AllowExperimentation" /t REG_DWORD /d 0 /f
+reg.exe add "HKLM\SOFTWARE\Microsoft\PolicyManager\current\device\System" /v "AllowExperimentation" /t REG_DWORD /d 0 /f
 
 REM Disable tracking of application startups.
 reg.exe add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "Start_TrackProgs" /t REG_DWORD /d 0 /f
@@ -246,8 +236,8 @@ reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManag
 
 REM Disable SmartScreen, it delays the launch of software and is better done by other anti-malware software (like Kaspersky).
 reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v "EnableSmartScreen" /t REG_DWORD /d 0 /f
-reg.exe add "HKLM64\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer" /v "SmartScreenEnabled" /t REG_SZ /d "Off" /f
-reg.exe add "HKLM64\SOFTWARE\Microsoft\Windows\CurrentVersion\AppHost" /v "EnableWebContentEvaluation" /t REG_DWORD /d 0 /f
+reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer" /v "SmartScreenEnabled" /t REG_SZ /d "Off" /f
+reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\AppHost" /v "EnableWebContentEvaluation" /t REG_DWORD /d 0 /f
 
 REM Disable legacy PowerShell.
 powershell.exe -Command "Disable-WindowsOptionalFeature -NoRestart -Online -FeatureName "MicrosoftWindowsPowerShellV2Root""
@@ -287,7 +277,6 @@ schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\DiskFootprint\StorageSense
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Feedback\Siuf\DmClient"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Feedback\Siuf\DmClientOnScenarioDownload"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\File Classification Infrastructure\Property Definition Sync"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\FileHistory\File History (maintenance mode)"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\HelloFace\FODCleanupTask"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\InstallService\ScanForUpdates"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\InstallService\ScanForUpdatesAsUser"
@@ -308,11 +297,9 @@ schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Power Efficiency Diagnosti
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Printing\EduPrintProv"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Ras\MobilityManager"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\RecoveryEnvironment\VerifyWinRE"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Registry\RegIdleBackup"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\RemoteAssistance\RemoteAssistanceTask"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\SettingSync\BackgroundUploadTask"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\SettingSync\NetworkStateChangeTask"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Setup\SetupCleanupTask"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Shell\FamilySafetyMonitor"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Shell\FamilySafetyRefreshTask"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Shell\IndexerAutomaticMaintenance"
@@ -339,33 +326,9 @@ schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Work Folders\Work Folders 
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Work Folders\Work Folders Maintenance Work"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\WS\WSTask"
 
-reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce" /v "removetask1" /t REG_SZ /f /d "schtasks.exe /Delete /F /TN \Microsoft\Windows\RetailDemo\CleanupOfflineContent"
-reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce" /v "removetask2" /t REG_SZ /f /d "schtasks.exe /Delete /F /TN \Microsoft\Windows\Setup\SetupCleanupTask"
-
-attrib +R %WinDir%\System32\SleepStudy\UserNotPresentSession.etl
-
-if exist "%WinDir%\Microsoft.NET\Framework\v2.0.50727\ngen.exe" (
-	reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" /v "DOTNET20_Optimize1" /t REG_SZ /f /d "schtasks.exe /Create /Delay 0000:02 /TR \"cmd /c start /min %WinDir%\Microsoft.NET\Framework\v2.0.50727\ngen.exe ExecuteQueuedItems\" /RU Administrator /TN NETOptimize1 /SC ONLOGON /IT"
-	reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" /v "DOTNET20_Optimize2" /t REG_SZ /f /d "schtasks.exe /Create /Delay 0000:02 /TR \"cmd /c start /min %WinDir%\Microsoft.NET\Framework64\v2.0.50727\ngen.exe ExecuteQueuedItems\" /RU Administrator /TN DOTNET20_Optimize3 /SC ONLOGON /IT"
-)
-if exist "%WinDir%\Microsoft.NET\Framework\v4.0.30319\ngen.exe" (
-	reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" /v "DOTNET40_Optimize1" /t REG_SZ /f /d "schtasks.exe /Create /Delay 0000:02 /TR \"cmd /c start /min %WinDir%\Microsoft.NET\Framework\v4.0.30319\ngen.exe ExecuteQueuedItems\" /RU Administrator /TN NETOptimize2 /SC ONLOGON /IT"
-	reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" /v "DOTNET40_Optimize2" /t REG_SZ /f /d "schtasks.exe /Create /Delay 0000:02 /TR \"cmd /c start /min %WinDir%\Microsoft.NET\Framework64\v4.0.30319\ngen.exe ExecuteQueuedItems\" /RU Administrator /TN DOTNET40_Optimize3 /SC ONLOGON /IT"
-	schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\.NET Framework\.NET Framework NGEN v4.0.30319 64 Critical"
-	schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\.NET Framework\.NET Framework NGEN v4.0.30319 64"
-	schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\.NET Framework\.NET Framework NGEN v4.0.30319 Critical"
-	schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\.NET Framework\.NET Framework NGEN v4.0.30319"
-)
-
-REM Disable "Customer Experience Improvement Program"; also implies turning off the Inventory Collector.
-reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\AppV\CEIP" /v "CEIPEnable" /t REG_DWORD /d 0 /f
-reg.exe add "HKLM\SOFTWARE\Microsoft\SQMClient\Windows" /v "CEIPEnable" /t REG_DWORD /d 0 /f
-reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Messenger\Client" /v "CEIP" /t REG_DWORD /d 2 /f
-
-reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v "PublishUserActivities" /t REG_DWORD /d 0 /f
-
 REM Disable "Delivery Optimization".
 reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\DoSvc" /v Start /t REG_DWORD /d 4 /f
+
 REM Disables "Diagnostic Policy Service"; logs tons of information to be sent off and analyzed by Microsoft, and in some cases caused noticeable performance slowdown.
 reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\DPS" /v Start /t REG_DWORD /d 4 /f
 reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\PcaSvc" /v Start /t REG_DWORD /d 4 /f

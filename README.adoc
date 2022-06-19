@@ -21,7 +21,6 @@ A no non-sense Windows 11 optimiser that covers what other tools miss, and avoid
 == Instructions
 . link:https://github.com/nermur/W11Boost/archive/refs/heads/master.zip[Download W11Boost], then extract it.
 . Configure the options located inside `W11Boost.bat`, then run it as Administrator.
-. Install link:https://dl.bitsum.com/files/processlassosetup64.exe[Process Lasso] from Bitsum; better thread scheduling and the best power plan for gaming ("Bitsum Highest Performance").
 
 == Recommendations
 * Enable the following options in your motherboard's BIOS:
@@ -31,8 +30,6 @@ A no non-sense Windows 11 optimiser that covers what other tools miss, and avoid
 
 * Windows Settings -> Gaming -> Enable "Game Mode"
 ** -> Graphics -> Change default graphics settings -> Enable "Hardware-accelerated GPU scheduling", "Variable refresh rate", and "Optimizations for windowed games"
-
-* Enable "User Account Control" if it's disabled. Disabled will break startup of some software, such as: https://eddie.website/
 
 * link:https://www.oo-software.com/en/shutup10[ShutUp10]
 ** A safe to use (as in not breaking Windows 11) privacy enhancer.
@@ -45,3 +42,12 @@ A no non-sense Windows 11 optimiser that covers what other tools miss, and avoid
 
 * link:https://www.speedguide.net/downloads.php[SG TCP Optimizer]
 ** Gets higher speeds and lower latency out of your network connection.
+
+* link:https://dl.bitsum.com/files/processlassosetup64.exe[Process Lasso]
+** Better thread scheduling (for specific CPUs) and the best power plan for gaming ("Bitsum Highest Performance").
+
+* link:https://github.com/jbara2002/windows-defender-remover[Windows Defender Remover]
+** Disables all security mitigations and completely removes Windows Defender. This can drastically improve performance for older CPUs (such as an Intel i7-4790K).
+*** Kaspersky is the best "anti-virus" in terms of performance + protection; you can get it for much cheaper from Amazon.
+
+* Enable "User Account Control" if it's disabled. Disabled will break startup of some software, such as: https://eddie.website/
