@@ -1,5 +1,5 @@
 @echo off
-title W11Tweak by https://github.com/nermur
+title W11Boost by https://github.com/nermur
 
 REM Disables Sticky, Filter, and Toggle Keys.
 set /A avoid_key_annoyances=1
