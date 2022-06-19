@@ -1,0 +1,47 @@
+:experimental:
+:imagesdir: imgs/
+ifdef::env-github[]
+:icons:
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+
+A no non-sense Windows 11 optimiser that covers what other tools miss, and avoids overwriting user preferences for the sake of "privacy" (with a few expections).
+
+* Gets rid of some of the auto-piloting that accumulatively is intensive on system resources, such as the link:https://admx.help/?Category=Windows_11_2022&Policy=Microsoft.Policies.ApplicationCompatibility::AppCompatTurnOffEngine[Application Compatibility Engine]; for ACE being off specifically, you would manually specific to run a legacy application in a compatibility mode (likely for Windows XP).
+
+== Requirements
+* Windows has to be activated for some changes, use your license key, or use...
+** https://github.com/abbodi1406/KMS_VL_ALL_AIO
+*** If that didn't work: https://github.com/massgravel/Microsoft-Activation-Scripts
+
+== Instructions
+. link:https://github.com/nermur/W11Boost/archive/refs/heads/master.zip[Download W11Boost], then extract it.
+. Configure the options located inside `W11Boost.bat`, then run it as Administrator.
+. Install link:https://dl.bitsum.com/files/processlassosetup64.exe[Process Lasso] from Bitsum; better thread scheduling and the best power plan for gaming ("Bitsum Highest Performance").
+
+== Recommendations
+* Enable the following options in your motherboard's BIOS:
+** I/O APIC (IOAPIC 24-119 Entries)
+** Above 4G Decoding
+** Resizable BAR [NOTE: If Windows cannot boot (due to using MBR instead of GPT), disable this]
+
+* Windows Settings -> Gaming -> Enable "Game Mode"
+** -> Graphics -> Change default graphics settings -> Enable "Hardware-accelerated GPU scheduling", "Variable refresh rate", and "Optimizations for windowed games"
+
+* Enable "User Account Control" if it's disabled. Disabled will break startup of some software, such as: https://eddie.website/
+
+* link:https://www.oo-software.com/en/shutup10[ShutUp10]
+** A safe to use (as in not breaking Windows 11) privacy enhancer.
+
+* link:https://github.com/WereDev/Wu10Man[Wu10Man]
+** Fully disable and enable Windows Update whenever, with no need to reboot for changes.
+
+* link:https://winaerotweaker.com/[Winaero Tweaker]
+** Extensive number of usability and visual tweaks.
+
+* link:https://www.speedguide.net/downloads.php[SG TCP Optimizer]
+** Gets higher speeds and lower latency out of your network connection.
