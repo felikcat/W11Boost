@@ -1,4 +1,4 @@
-@echo off
+@echo on
 title W11Boost by https://github.com/nermur
 
 REM Disables Sticky, Filter, and Toggle Keys.
@@ -19,6 +19,9 @@ set /A disable_geolocation=0
 REM Routing through IPv6 is worse than IPv4 in some areas (higher latency/ping).
 set /A disable_ipv6=0
 
+REM Set to '1' if using a CPU that supports: https://en.wikipedia.org/wiki/Intel_5-level_paging
+set /A disable_la57_cleanup=0
+
 REM Printers are heavily exploitable, avoid using one if possible.
 set /A disable_printer_support=0
 
@@ -30,6 +33,10 @@ set /A disable_thumbnail_shadows=0
 
 REM Disables power saving features for network switches to increase their reliability.
 set /A network_adapter_tweaks=1
+
+REM Disables all security mitigations; drastically improves performance for older CPUs (such as an Intel i7-4790K).
+REM Set to 1 by default simply cause there isn't solid evidence to Spectre and other related vulnerabilities being exploited on non-businesses in the wild.
+set /A no_mitigations=1
 
 REM Makes disks using the default file system (NTFS) faster, but disables File History and File Access Dates.
 set /A ntfs_tweaks=1
@@ -53,10 +60,6 @@ sc.exe start AppXSvc
 sc.exe start ClipSVC
 sc.exe start StorSvc
 
-REM Required for System Restore functionality.
-net start VSS
-powershell.exe -Command "Enable-ComputerRestore -Drive 'C:\'"
-
 cls
 echo.
 echo ==== Current settings ====
@@ -67,26 +70,27 @@ echo disable_clipboard_history = %disable_clipboard_history%
 echo disable_game_dvr = %disable_game_dvr%
 echo disable_geolocation = %disable_geolocation%
 echo disable_ipv6 = %disable_ipv6%
+echo disable_la57_cleanup = %disable_la57_cleanup%
 echo disable_printer_support = %disable_printer_support%
 echo disable_remote_msstore_installs = %disable_remote_msstore_installs%
 echo disable_thumbnail_shadows = %disable_thumbnail_shadows%
 echo network_adapter_tweaks = %network_adapter_tweaks%
+echo no_mitigations = %no_mitigations%
 echo ntfs_tweaks = %ntfs_tweaks%
 echo 
 echo.
 Pause
 
 cd %~dp0
-REM Allow PowerShell scripts in current directory.
-powershell.exe -Command "Get-ChildItem *.ps*1 -recurse | Unblock-File"
+REM Enables System Restore, and allows all PowerShell scripts in current directory.
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "& {Start-Process powershell.exe -ArgumentList '-NoProfile -ExecutionPolicy Bypass -File ""preparation.ps1""' -Verb RunAs}"
 
 REM Won't make a restore point if there's already one within the past 24 hours.
 WMIC.exe /Namespace:\\root\default Path SystemRestore Call CreateRestorePoint "W11Boost", 100, 7
 
-REM Bitsum Highest Performance profile cannot install if any Power Plans were previously removed.
-powercfg -restoredefaultschemes
-REM Sleep mode achieves the same goal while not hammering the primary hard drive, but will break in power outages/surges; regardless, leaving a PC unattended is bad. Also fixes "Fast startup" problems by disabling it.
+REM Sleep mode achieves the same goal without hammering the primary disk; downside: breaks if power cuts off; regardless, leaving a PC unattended is bad.
 powercfg.exe /hibernate on
+REM "Fast startup" causes stability issues, increases disk wear (from excessive I/O usage), and can drastically increase shutdown times on slow disks. 
 reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Power" /V HiberbootEnabled /T REG_DWORD /D 0 /F
 attrib +R %WinDir%\System32\SleepStudy\UserNotPresentSession.etl
 
@@ -116,11 +120,13 @@ if %disable_game_dvr%==1 (
 )
 
 if %disable_geolocation%==1 (
-	sc.exe stop lfsvc
-	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\lfsvc" /v "Start" /t REG_DWORD /d 4 /f
 	reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors" /v "DisableLocation" /t REG_DWORD /d 1 /f
-	reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors" /v "DisableWindowsLocationProvider" /t REG_DWORD /d 1 /f
 	reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors" /v "DisableLocationScripting" /t REG_DWORD /d 1 /f
+	reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors" /v "DisableWindowsLocationProvider" /t REG_DWORD /d 1 /f
+	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\lfsvc" /v "Start" /t REG_DWORD /d 4 /f
+	sc.exe stop lfsvc
+	schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Location\Notifications"
+	schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Location\WindowsActionDialog"
 )
 
 if %disable_ipv6%==1 (
@@ -129,6 +135,10 @@ if %disable_ipv6%==1 (
 	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\iphlpsvc" /v Start /t REG_DWORD /d 4 /f
 	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\IpxlatCfgSvc" /v Start /t REG_DWORD /d 4 /f
 	reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce" /v "disable_ipv6" /t REG_SZ /f /d "powershell -Command Set-NetAdapterBinding -Name '*' -DisplayName 'Internet Protocol Version 6 (TCP/IPv6)' -Enabled 0"
+)
+
+if %disable_la57_cleanup%==1 (
+	schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Kernel\La57Cleanup"
 )
 
 if %disable_printer_support%==1 (
@@ -148,6 +158,21 @@ if %disable_thumbnail_shadows%==1 (
 
 if %network_adapter_tweaks%==1 (
 	powershell.exe -Command ".\network_adapter_tweaks.ps1"
+)
+
+if %no_mitigations%==1 (
+	REM From: https://github.com/jbara2002/windows-defender-remover/blob/main/defender_registry.reg
+	regedit.exe /S disable_defender.reg
+
+	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" /v FeatureSettingsOverride /t REG_DWORD /d 3 /f 
+	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" /v FeatureSettingsOverrideMask /t REG_DWORD /d 3 /f
+	REM Use the faster but less secure Hyper-V scheduler.
+	bcdedit.exe /set hypervisorschedulertype classic
+	REM Allow Intel TSX.
+	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Kernel" /v DisableTsx /t REG_DWORD /d 0 /f
+	powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "& {Start-Process powershell.exe -ArgumentList '-NoProfile -ExecutionPolicy Bypass -File ""set_exploit_mitigations.ps1""' -Verb RunAs}"
+	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\CredentialGuard" /v "Enabled" /t REG_DWORD /d 0 /f
+	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" /v "Enabled" /t REG_DWORD /d 0 /f
 )
 
 if %ntfs_tweaks%==1 (
@@ -177,6 +202,10 @@ reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\NlaSvc\Parameters\Internet" 
 REM Ask OneDrive to only generate network traffic if signed in to OneDrive.
 reg.exe add "HKLM\SOFTWARE\Microsoft\OneDrive" /v "PreventNetworkTrafficPreUserSignIn" /t REG_DWORD /d 1 /f
 
+REM Don't allow automatic: software updates, security scanning, and system diagnostics.
+reg.exe add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\Maintenance" /v "MaintenanceDisabled" /t REG_DWORD /d 1 /f
+schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Diagnosis\Scheduled"
+
 REM Ask nicely to stop sending diagnostic data to Microsoft.
 reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection" /v "AllowTelemetry" /t REG_DWORD /d 0 /f
 reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Privacy" /v "TailoredExperiencesWithDiagnosticDataEnabled" /t REG_DWORD /d 0 /f
@@ -189,14 +218,29 @@ reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v "PublishUserAct
 reg.exe add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Policies\DataCollection" /v "AllowTelemetry" /t REG_DWORD /d 0 /f
 reg.exe add "HKLM\SYSTEM\ControlSet001\Control\WMI\Autologger\AutoLogger-Diagtrack-Listener" /v "Start" /t REG_DWORD /d 0 /f
 reg.exe add "HKLM\SYSTEM\ControlSet001\Services\DiagTrack" /v "Start" /t REG_DWORD /d 4 /f
+schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Feedback\Siuf\DmClient"
+schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Feedback\Siuf\DmClientOnScenarioDownload"
+schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Flighting\FeatureConfig\ReconcileFeatures"
+schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Flighting\FeatureConfig\UsageDataFlushing"
+schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Flighting\FeatureConfig\UsageDataReporting"
+schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Flighting\OneSettings\RefreshCache"
 
 REM Disable "Customer Experience Improvement Program"; also implies turning off the Inventory Collector.
-reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\AppV\CEIP" /v "CEIPEnable" /t REG_DWORD /d 0 /f
 reg.exe add "HKLM\SOFTWARE\Microsoft\SQMClient\Windows" /v "CEIPEnable" /t REG_DWORD /d 0 /f
+reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\AppV\CEIP" /v "CEIPEnable" /t REG_DWORD /d 0 /f
 reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Messenger\Client" /v "CEIP" /t REG_DWORD /d 2 /f
+schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Customer Experience Improvement Program\Consolidator"
+schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Customer Experience Improvement Program\KernelCeipTask"
+schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Customer Experience Improvement Program\UsbCeip"
+schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Application Experience\Microsoft Compatibility Appraiser"
+schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Autochk\Proxy"
+schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\DiskDiagnostic\Microsoft-Windows-DiskDiagnosticDataCollector"
 
 REM Disable "Application Compatibility Engine".
 reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\AppCompat" /v "DisableEngine" /t REG_DWORD /d 1 /f
+schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Application Experience\PcaPatchDbTask"
+schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Application Experience\ProgramDataUpdater"
+
 REM Disable "Application Telemetry".
 reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\AppCompat" /v "AITEnable" /t REG_DWORD /d 0 /f
 REM Disable "Program Compatibility Assistant".
@@ -249,41 +293,27 @@ reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Power\PowerThrottling" /v "Po
 REM Automated file cleanup (without user interaction) is a bad idea; Storage Sense only runs on low-disk space events.
 reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\StorageSense" /v "AllowStorageSenseGlobal" /t REG_DWORD /d 0 /f
 reg.exe delete "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\StorageSense" /f
+schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\DiskFootprint\Diagnostics"
+schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\DiskFootprint\StorageSense"
+schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\DiskCleanup\SilentCleanup"
 
 REM Disable these scheduler tasks to keep performance and bandwidth usage more consistent.
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Office\OfficeTelemetryAgentFallBack"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Office\OfficeTelemetryAgentLogOn"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\AppID\SmartScreenSpecific"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Application Experience\Microsoft Compatibility Appraiser"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Application Experience\PcaPatchDbTask"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Application Experience\ProgramDataUpdater"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Application Experience\StartupAppTask"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\ApplicationData\DsSvcCleanup"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\AppxDeploymentClient\Pre-staged app cleanup"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Autochk\Proxy"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\CertificateServicesClient\UserTask-Roam"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Chkdsk\ProactiveScan"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Clip\License Validation"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\CloudExperienceHost\CreateObjectTask"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Customer Experience Improvement Program\Consolidator"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Customer Experience Improvement Program\KernelCeipTask"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Customer Experience Improvement Program\UsbCeip"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Defrag\ScheduledDefrag"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Diagnosis\Scheduled"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\DiskCleanup\SilentCleanup"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\DiskDiagnostic\Microsoft-Windows-DiskDiagnosticDataCollector"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\DiskFootprint\Diagnostics"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\DiskFootprint\StorageSense"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Feedback\Siuf\DmClient"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Feedback\Siuf\DmClientOnScenarioDownload"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\File Classification Infrastructure\Property Definition Sync"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\HelloFace\FODCleanupTask"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\InstallService\ScanForUpdates"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\InstallService\ScanForUpdatesAsUser"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\InstallService\SmartRetry"
+schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\International\Synchronize Language Settings"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\LanguageComponentsInstaller\ReconcileLanguageResources"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Location\Notifications"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Location\WindowsActionDialog"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Maintenance\WinSAT"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Maps\MapsToastTask"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Maps\MapsUpdateTask"
@@ -292,7 +322,6 @@ schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\MUI\LPRemove"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Multimedia\SystemSoundsService"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\NetTrace\GatherNetworkInfo"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\PI\Sqm-Tasks"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Plug and Play\Device Install Reboot Required"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Power Efficiency Diagnostics\AnalyzeSystem"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Printing\EduPrintProv"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Ras\MobilityManager"
@@ -306,7 +335,7 @@ schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Shell\IndexerAutomaticMain
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\SoftwareProtectionPlatform\SvcRestartTask"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\SoftwareProtectionPlatform\SvcRestartTaskLogon"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\SoftwareProtectionPlatform\SvcRestartTaskNetwork"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Speech\HeadsetButtonPress"
+schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\SoftwareProtectionPlatform\SvcTrigger"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Speech\SpeechModelDownloadTask"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Sysmain\ResPriStaticDbSync"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Sysmain\WsSwapAssessmentTask"
@@ -316,15 +345,16 @@ schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\UpdateOrchestrator\UpdateM
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\UpdateOrchestrator\USO_UxBroker"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\USB\Usb-Notifications"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\WDI\ResolutionHost"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Windows Error Reporting\QueueReporting"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Windows Filtering Platform\BfeOnServiceStartTypeChange"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\WindowsUpdate\Scheduled Start"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\WindowsUpdate\sih"
+schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\WlanSvc\CDSSync"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\WOF\WIM-Hash-Management"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\WOF\WIM-Hash-Validation"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Work Folders\Work Folders Logon Synchronization"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Work Folders\Work Folders Maintenance Work"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\WS\WSTask"
+schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\WwanSvc\OobeDiscovery"
 
 REM Disable "Delivery Optimization".
 reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\DoSvc" /v Start /t REG_DWORD /d 4 /f
@@ -340,7 +370,7 @@ bcdedit.exe /deletevalue x2apicpolicy
 bcdedit.exe /set disabledynamictick yes
 bcdedit.exe /set uselegacyapicmode no
 
-REM Don't draw the Windows logo for faster boot times.
+REM Don't draw graphical elements for boot (spinner, Windows or BIOS logo, etc).
 bcdedit.exe /set bootuxdisabled on
 
 REM A worthless security measure, just use BitLocker.
@@ -363,21 +393,6 @@ reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control" /v WaitToKillServiceTimeout 
 reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control" /v HungAppTimeout /t REG_SZ /d 2000 /f
 reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control" /v AutoEndTasks /t REG_SZ /d 1 /f
 reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v DisableShutdownNamedPipe /t REG_DWORD /d 1 /f
-
-REM Clean out font cache; incase font cache was corrupted before running this script.
-:FontCache
-sc stop "FontCache"
-reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\FontCache" /v "Start" /t REG_DWORD /d 4 /f
-sc query FontCache | findstr /I /C:"STOPPED" 
-if not %errorlevel%==0 (goto FontCache)
-
-REM Grant access rights to current user for "%WinDir%\ServiceProfiles\LocalService" folder and contents.
-icacls.exe "%WinDir%\ServiceProfiles\LocalService" /grant "%UserName%":F /C /T /Q
-REM Delete font cache.
-del /A /F /Q "%WinDir%\ServiceProfiles\LocalService\AppData\Local\FontCache\*FontCache*"
-del /A /F /Q "%WinDir%\System32\FNTCACHE.DAT"
-
-reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\FontCache" /v "Start" /t REG_DWORD /d 2 /f
 
 taskkill.exe /IM explorer.exe /F
 start explorer.exe
