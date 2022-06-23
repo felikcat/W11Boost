@@ -1,4 +1,4 @@
-@echo on
+@echo off
 title W11Boost by https://github.com/nermur
 
 REM Disables Sticky, Filter, and Toggle Keys.
