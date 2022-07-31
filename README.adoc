@@ -30,7 +30,13 @@ NOTE: Disable all anti-virus software before running `W11Boost.bat`.
 ** Above 4G Decoding
 ** Resizable BAR [NOTE: If Windows cannot boot (due to using MBR instead of GPT), disable this]
 
-* Kaspersky is the best "anti-virus" in terms of performance + protection; you can get it for much cheaper from Amazon.
+* Disable the following options in your motherboard's BIOS:
+** XHCI Hands Off
+** USB Legacy
+*** link:https://techcommunity.microsoft.com/t5/microsoft-usb-blog/reasons-to-avoid-companion-controllers/ba-p/270710[Why disable these two?] +
+Note: if a USB is no longer bootable after these two changes, temporarily turn them both back on.
+
+* Kaspersky is the best "anti-virus" in terms of performance + protection; you can get it for much cheaper from Amazon or other third-party markets.
 
 * Enable "User Account Control" if it's disabled; disabled will break some software, such as: link:https://eddie.website/[AirVPN's client].
 

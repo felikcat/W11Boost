@@ -176,7 +176,7 @@ if %no_mitigations%==1 (
 )
 
 if %ntfs_tweaks%==1 (
-	fsutil behavior set disablelastaccess 3
+	fsutil behavior set disablelastaccess 1
 	fsutil behavior set encryptpagingfile 0
 	reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\FileHistory" /v "Disabled" /t REG_DWORD /d 1 /f
 	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\I/O System" /v "IoBlockLegacyFsFilters" /t REG_DWORD /d 1 /f
@@ -362,6 +362,9 @@ reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\DoSvc" /v Start /t REG_DWORD
 REM Disables "Diagnostic Policy Service"; logs tons of information to be sent off and analyzed by Microsoft, and in some cases caused noticeable performance slowdown.
 reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\DPS" /v Start /t REG_DWORD /d 4 /f
 reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\PcaSvc" /v Start /t REG_DWORD /d 4 /f
+
+REM Don't analyze programs' execution time data.
+reg.exe add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Perflib" /v "Disable Performance Counters" /t REG_DWORD /d 1 /f
 
 REM Use sane defaults for these sensitive settings, incase a modded Windows screwed them up.
 bcdedit.exe /deletevalue useplatformclock
