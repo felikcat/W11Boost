@@ -28,6 +28,8 @@ endif::[]
 NOTE: Disable all anti-virus software before running `W11Boost.bat`.
 
 == Recommendations
+
+=== Tweaks
 * Enable the following options in your motherboard's BIOS:
 ** I/O APIC (IOAPIC 24-119 Entries)
 ** Above 4G Decoding
@@ -46,6 +48,7 @@ Note: if a USB is no longer bootable after these two changes, temporarily turn t
 * Windows Settings -> Gaming -> Enable "Game Mode"
 ** -> Graphics -> Change default graphics settings -> Enable "Hardware-accelerated GPU scheduling", "Variable refresh rate", and "Optimizations for windowed games"
 
+=== Software
 * link:https://www.oo-software.com/en/shutup10[ShutUp10]
 ** A privacy enhancer that doesn't break software.
 
