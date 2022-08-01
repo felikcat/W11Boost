@@ -9,9 +9,12 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
-A no non-sense Windows 11 optimiser that covers what other tools miss, and avoids overwriting user preferences for the sake of "privacy" (with a few expections).
+== Notes
+* Does not overwrite user preferences for increased privacy, except for preferences with a noticeable performance impact.
+** It's assumed third-party tools do this job better.
 
-* Gets rid of some of the auto-piloting that accumulatively is intensive on system resources, such as the link:https://admx.help/?Category=Windows_11_2022&Policy=Microsoft.Policies.ApplicationCompatibility::AppCompatTurnOffEngine[Application Compatibility Engine]; for ACE being off specifically, you would manually specific to run a legacy application in a compatibility mode (likely for Windows XP).
+* Gets rid of some of the auto-piloting that accumulatively is intensive on system resources, such as the link:https://admx.help/?Category=Windows_11_2022&Policy=Microsoft.Policies.ApplicationCompatibility::AppCompatTurnOffEngine[Application Compatibility Engine].
+** For ACE being off specifically, you would manually specify to run a legacy application in compatibility mode (likely for Windows XP).
 
 == Requirements
 * Windows has to be activated for some changes, use your license key, or use...
@@ -44,7 +47,7 @@ Note: if a USB is no longer bootable after these two changes, temporarily turn t
 ** -> Graphics -> Change default graphics settings -> Enable "Hardware-accelerated GPU scheduling", "Variable refresh rate", and "Optimizations for windowed games"
 
 * link:https://www.oo-software.com/en/shutup10[ShutUp10]
-** A safe to use (doesn't break Windows 11) privacy enhancer.
+** A privacy enhancer that doesn't break software.
 
 * link:https://github.com/WereDev/Wu10Man[Wu10Man]
 ** Safely fully disables and enables Windows Update whenever, with no need to reboot for changes.
