@@ -161,9 +161,6 @@ if %network_adapter_tweaks%==1 (
 )
 
 if %no_mitigations%==1 (
-	REM From: https://github.com/jbara2002/windows-defender-remover/blob/main/defender_registry.reg
-	regedit.exe /S disable_defender.reg
-
 	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" /v FeatureSettingsOverride /t REG_DWORD /d 3 /f 
 	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" /v FeatureSettingsOverrideMask /t REG_DWORD /d 3 /f
 	REM Use the faster but less secure Hyper-V scheduler.

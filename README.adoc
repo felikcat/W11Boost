@@ -10,7 +10,7 @@ ifdef::env-github[]
 endif::[]
 
 == Notes
-* Does not overwrite user preferences for increased privacy, except for preferences with a noticeable performance impact.
+* Does not overwrite user preferences that decrease privacy, except for those with a noticeable performance impact.
 ** It's assumed third-party tools do this job better.
 
 * Gets rid of some of the auto-piloting that accumulatively is intensive on system resources, such as the link:https://admx.help/?Category=Windows_11_2022&Policy=Microsoft.Policies.ApplicationCompatibility::AppCompatTurnOffEngine[Application Compatibility Engine].
@@ -55,6 +55,10 @@ Note: if a USB is no longer bootable after these two changes, temporarily turn t
 * link:https://github.com/WereDev/Wu10Man[Wu10Man]
 ** Safely fully disables and enables Windows Update whenever, with no need to reboot for changes.
 
+* link:https://github.com/jbara2002/windows-defender-remover[Windows Defender Remover]
+** Disables (recommended), or removes Windows Defender.
+*** Removing Windows Defender will break updates; you'd have to manually update through Microsoft's Update Catalog instead.
+
 * link:https://winaerotweaker.com/[Winaero Tweaker]
 ** Extensive number of usability and visual tweaks.
 
@@ -64,4 +68,4 @@ Note: if a USB is no longer bootable after these two changes, temporarily turn t
 * link:https://dl.bitsum.com/files/processlassosetup64.exe[Process Lasso]
 ** Better thread scheduling (for specific CPUs) and the best power plan for gaming ("Bitsum Highest Performance").
 
-TIP: If you ever removed Power Profiles, run `powercfg -restoredefaultschemes` before installing Process Lasso; otherwise "Bitsum Highest Performance" can't apply.
+TIP: If you ever removed Power Profiles, run `powercfg -restoredefaultschemes` before installing Process Lasso, otherwise "Bitsum Highest Performance" can't apply.
