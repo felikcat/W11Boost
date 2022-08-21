@@ -24,6 +24,7 @@ endif::[]
 *** `wsreset -i`
 *** After that command is completed, reboot.
 *** Open the Microsoft Store, then install "App Installer" through it.
+
 ** For Windows 10 LTSC 2016, install the Microsoft Store (provides the AppX installer, which provides `winget`) link:https://forums.mydigitallife.net/threads/guide-add-store-to-windows-10-enterprises-sku-ltsb-ltsc.70741/page-18#post-1388330[here].
 
 
