@@ -374,10 +374,11 @@ reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\PcaSvc" /v Start /t REG_DWOR
 REM Don't analyze programs' execution time data.
 reg.exe add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Perflib" /v "Disable Performance Counters" /t REG_DWORD /d 1 /f
 
-REM Use sane defaults for these sensitive settings, incase a modded Windows screwed them up.
+REM Use sane defaults for these sensitive timer related settings, incase a modded Windows screwed them up.
 bcdedit.exe /deletevalue useplatformclock
 bcdedit.exe /deletevalue uselegacyapicmode
 bcdedit.exe /deletevalue x2apicpolicy
+bcdedit.exe /deletevalue tscsyncpolicy
 bcdedit.exe /set disabledynamictick yes
 bcdedit.exe /set uselegacyapicmode no
 

@@ -37,47 +37,55 @@ NOTE: Disable all anti-virus software before running `W11Boost.bat`.
 == Recommendations
 
 === Tweaks
-* Enable the following options in your motherboard's BIOS:
+. Enable the following options in your motherboard's BIOS:
 ** I/O APIC (IOAPIC 24-119 Entries)
 ** Above 4G Decoding
-** Resizable BAR [NOTE: If Windows cannot boot (due to using MBR instead of GPT), disable this]
+** Resizable BAR
+*** NOTE: If Windows cannot boot (likely from using MBR instead of GPT), disable Resizable BAR.
+** HPET (High Precision Event Timer)
 
-* Disable the following options in your motherboard's BIOS:
+. Disable the following options in your motherboard's BIOS:
 ** XHCI Hands Off
 ** USB Legacy
 *** link:https://techcommunity.microsoft.com/t5/microsoft-usb-blog/reasons-to-avoid-companion-controllers/ba-p/270710[Why disable these two?] +
 Note: if a USB is no longer bootable after these two changes, temporarily turn them both back on.
 
-* Kaspersky is the preferred anti-virus for consistently having these following reasons according to link:https://www.av-comparatives.org/vendors/kaspersky/[AV comparatives] and personal opinion:
+. Windows Settings -> Gaming -> Enable "Game Mode"
+** -> Graphics -> Change default graphics settings -> Enable "Hardware-accelerated GPU scheduling", "Variable refresh rate", and "Optimizations for windowed games"
+
+. AMD CPUs: Install link:https://www.amd.com/en/support[AMD's Chipset Drivers]. +
+Intel CPUs: Install link:https://www.intel.com/content/www/us/en/support/articles/000005533/software/chipset-software.html[Intel's Chipset Drivers].
+** This will utilize their drivers instead of the generic drivers Microsoft provides, meaning better performance and lower DPC latency.
+
+. Enable "User Account Control" if it's disabled; disabled will break some software, such as: link:https://eddie.website/[AirVPN's client].
+
+. Kaspersky is the preferred anti-virus for consistently having these following reasons according to link:https://www.av-comparatives.org/vendors/kaspersky/[AV comparatives] and personal opinion:
 ** Very low performance impact.
 ** Consistently top-tier detection ratios, with minimal false positives.
 ** Pricing is reasonable, unlike ESET.
 
 TIP: Kaspersky is much cheaper to buy from Amazon or other third-party markets that sell legitimate keys (not compromised accounts/keys).
 
-* Enable "User Account Control" if it's disabled; disabled will break some software, such as: link:https://eddie.website/[AirVPN's client].
-
-* Windows Settings -> Gaming -> Enable "Game Mode"
-** -> Graphics -> Change default graphics settings -> Enable "Hardware-accelerated GPU scheduling", "Variable refresh rate", and "Optimizations for windowed games"
 
 === Software
-* link:https://www.oo-software.com/en/shutup10[ShutUp10]
-** A privacy enhancer that doesn't break software.
 
-* link:https://github.com/WereDev/Wu10Man[Wu10Man]
-** Safely fully disables and enables Windows Update whenever, with no need to reboot for changes.
+. link:https://www.speedguide.net/downloads.php[SG TCP Optimizer]
+** Gets higher speeds and lower latency out of your network connection.
 
-* link:https://github.com/jbara2002/windows-defender-remover[Windows Defender Remover]
+. link:https://winaerotweaker.com/[Winaero Tweaker]
+** Extensive number of usability and visual tweaks.
+
+. link:https://github.com/jbara2002/windows-defender-remover[Windows Defender Remover]
 ** Disables or removes Windows Defender.
 *** Removing Windows Defender will break updates; you'd have to manually update through Microsoft's Update Catalog instead.
 
-* link:https://winaerotweaker.com/[Winaero Tweaker]
-** Extensive number of usability and visual tweaks.
+. link:https://www.oo-software.com/en/shutup10[ShutUp10]
+** A privacy enhancer that doesn't break software.
 
-* link:https://www.speedguide.net/downloads.php[SG TCP Optimizer]
-** Gets higher speeds and lower latency out of your network connection.
+. link:https://github.com/WereDev/Wu10Man[Wu10Man]
+** Safely fully disables and enables Windows Update whenever, with no need to reboot for changes.
 
-* link:https://dl.bitsum.com/files/processlassosetup64.exe[Process Lasso]
+. link:https://dl.bitsum.com/files/processlassosetup64.exe[Process Lasso]
 ** Better thread scheduling (for specific CPUs) and the best power plan for gaming ("Bitsum Highest Performance").
 
 TIP: If you ever removed Power Profiles, run `powercfg -restoredefaultschemes` before installing Process Lasso, otherwise "Bitsum Highest Performance" can't apply.
