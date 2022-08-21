@@ -371,6 +371,7 @@ reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\PcaSvc" /v Start /t REG_DWOR
 REM Don't analyze programs' execution time data.
 reg.exe add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Perflib" /v "Disable Performance Counters" /t REG_DWORD /d 1 /f
 
+
 REM == Clean up mistakes modded Windows ISOs and other optimizer scripts make ==
 
 REM Use sane defaults for these sensitive timer related settings.
@@ -381,7 +382,7 @@ bcdedit.exe /deletevalue tscsyncpolicy
 bcdedit.exe /set disabledynamictick yes
 bcdedit.exe /set uselegacyapicmode no
 
-REM MemoryCompression: Reduces I/O load and prevents an Out Of Memory situation, akin to Linux's zRAM.
+REM MemoryCompression: Slightly increases CPU load, but reduces I/O load and makes Windows handle Out Of Memory situations smoothly; akin to Linux's zRAM.
 powershell.exe -Command "Enable-MMAgent -ApplicationLaunchPrefetching -ApplicationPreLaunch -MemoryCompression"
 
 REM Delaying the startup of third-party programs gives Windows more room to breathe for its own jobs, speeding up the overall startup time.
@@ -390,7 +391,11 @@ reg.exe delete "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Serializ
 REM Programs that rely on 8.3 filenames from the DOS-era will break if this is disabled.
 fsutil.exe behavior set disable8dot3 2
 
+REM Splitting SvcHost less decreases Windows' stability; set it to defaults.
+reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control" /v SvcHostSplitThresholdInKB /t REG_DWORD /d 3670016 /f
+
 REM == GROUP END ==
+
 
 REM Don't draw graphical elements for boot (spinner, Windows or BIOS logo, etc).
 bcdedit.exe /set bootuxdisabled on
