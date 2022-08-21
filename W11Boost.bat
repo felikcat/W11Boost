@@ -42,7 +42,7 @@ REM Makes disks using the default file system (NTFS) faster, but disables File H
 set /A ntfs_tweaks=1
 
 REM "Everything" can circumvent the performance impact of Windows Search Indexing while providing faster and more accurate results.
-set /A replace_windows_search=1
+set /A replace_windows_search=0
 
 
 reg.exe query HKU\S-1-5-19 || (
