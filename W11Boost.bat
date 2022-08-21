@@ -41,6 +41,9 @@ set /A no_mitigations=1
 REM Makes disks using the default file system (NTFS) faster, but disables File History and File Access Dates.
 set /A ntfs_tweaks=1
 
+REM "Everything" can circumvent the performance impact of Windows Search Indexing while providing faster and more accurate results.
+set /A replace_windows_search=1
+
 
 reg.exe query HKU\S-1-5-19 || (
 	echo ==== Error ====
@@ -77,6 +80,7 @@ echo disable_thumbnail_shadows = %disable_thumbnail_shadows%
 echo network_adapter_tweaks = %network_adapter_tweaks%
 echo no_mitigations = %no_mitigations%
 echo ntfs_tweaks = %ntfs_tweaks%
+echo replace_windows_search = %replace_windows_search%
 echo 
 echo.
 Pause
@@ -178,6 +182,13 @@ if %ntfs_tweaks%==1 (
 	reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\FileHistory" /v "Disabled" /t REG_DWORD /d 1 /f
 	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\I/O System" /v "IoBlockLegacyFsFilters" /t REG_DWORD /d 1 /f
 	schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\FileHistory\File History (maintenance mode)"
+)
+
+if %replace_windows_search%==1 (
+	sc.exe stop WSearch
+	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\WSearch" /v Start /t REG_DWORD /d 4 /f
+	winget install voidtools.Everything -eh
+	winget install stnkl.EverythingToolbar -eh
 )
 
 reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v "NoLowDiskSpaceChecks" /t REG_DWORD /d 1 /f

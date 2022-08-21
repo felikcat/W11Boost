@@ -17,9 +17,13 @@ endif::[]
 ** For ACE being off specifically, you would manually specify to run a legacy application in compatibility mode (likely for Windows XP).
 
 == Requirements
-* Windows has to be activated for some changes, use your license key, or use...
-** https://github.com/abbodi1406/KMS_VL_ALL_AIO
-*** If that didn't work: https://github.com/massgravel/Microsoft-Activation-Scripts
+. Windows has to be activated for some changes, use your license key, or use either link:https://github.com/abbodi1406/KMS_VL_ALL_AIO[abbodi1406's KMS_VL_ALL_AIO] or massgravel's link:https://github.com/massgravel/Microsoft-Activation-Scripts[Microsoft Activation Scripts].
+
+. W11Boost.bat's `replace_windows_search=1` requires `winget`.
+** For Windows 10 LTSC 2019 or 2022, run in Command Prompt as Administrator to install `winget`:
+*** `wsreset -i`
+** For Windows 10 LTSC 2016, install the Microsoft Store (provides the AppX installer, which provides `winget`) link:https://forums.mydigitallife.net/threads/guide-add-store-to-windows-10-enterprises-sku-ltsb-ltsc.70741/page-18#post-1388330[here].
+
 
 == Instructions
 . link:https://github.com/nermur/W11Boost/archive/refs/heads/master.zip[Download W11Boost], then extract it.
@@ -41,7 +45,12 @@ NOTE: Disable all anti-virus software before running `W11Boost.bat`.
 *** link:https://techcommunity.microsoft.com/t5/microsoft-usb-blog/reasons-to-avoid-companion-controllers/ba-p/270710[Why disable these two?] +
 Note: if a USB is no longer bootable after these two changes, temporarily turn them both back on.
 
-* Kaspersky is the best "anti-virus" in terms of performance + protection; you can get it for much cheaper from Amazon or other third-party markets.
+* Kaspersky is the preferred anti-virus for consistently having these following reasons according to link:https://www.av-comparatives.org/vendors/kaspersky/[AV comparatives] and personal opinion:
+** Very low performance impact.
+** Consistently top-tier detection ratios, with minimal false positives.
+** Pricing is reasonable, unlike ESET.
+
+TIP: Kaspersky is much cheaper to buy from Amazon or other third-party markets that sell legitimate keys (not compromised accounts/keys).
 
 * Enable "User Account Control" if it's disabled; disabled will break some software, such as: link:https://eddie.website/[AirVPN's client].
 
@@ -56,7 +65,7 @@ Note: if a USB is no longer bootable after these two changes, temporarily turn t
 ** Safely fully disables and enables Windows Update whenever, with no need to reboot for changes.
 
 * link:https://github.com/jbara2002/windows-defender-remover[Windows Defender Remover]
-** Disables (recommended), or removes Windows Defender.
+** Disables or removes Windows Defender.
 *** Removing Windows Defender will break updates; you'd have to manually update through Microsoft's Update Catalog instead.
 
 * link:https://winaerotweaker.com/[Winaero Tweaker]
