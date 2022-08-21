@@ -9,12 +9,38 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
+.Learning resources used
+[%collapsible]
+====
+
+. https://archive.org/details/windows-internals-part1-7th/mode/2up
+** https://github.com/zodiacon/WindowsInternals
+. https://www.microsoftpressstore.com/store/windows-internals-part-2-9780135462409
+** This can be viewed for free from link:https://en.wikipedia.org/wiki/Z-Library[Z-Library].
+====
+
 == Notes
 * Does not overwrite user preferences that decrease privacy, except for those with a noticeable performance impact.
 ** It's assumed third-party tools do this job better, and not everyone wants to disable features that have privacy concerns.
 
 * Gets rid of some of the auto-piloting that accumulatively is intensive on system resources, such as the link:https://admx.help/?Category=Windows_11_2022&Policy=Microsoft.Policies.ApplicationCompatibility::AppCompatTurnOffEngine[Application Compatibility Engine].
 ** For ACE being off specifically, you would manually specify to run a legacy application in compatibility mode (likely for Windows XP).
+
+* Fixes fuck-ups made by other optimizers and modded Windows ISOs.
+
+* Only Windows 10 LTSC 2022 and newer are tested. 
+** Older versions of Windows are worse in terms of stability, which also includes Windows 7.
+
+.Developer notes
+[%collapsible]
+====
+
+* `reg.exe` is used instead of `reg` incase the system environment variables are misconfigured, same applies to anything else with `.exe` appended to its end.
+
+* `reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\EXAMPLE" /v "Start" /t REG_DWORD /d 4 /f` is preferred over using `sc.exe config EXAMPLE start=disabled` since Windows rejects this request depending on the service.
+
+* MMCSS (Multimedia Class Scheduler) doesn't exist in Windows 10 LTSC 2022 and newer.
+====
 
 == Requirements
 . Windows has to be activated for some changes, use your license key, or use either link:https://github.com/abbodi1406/KMS_VL_ALL_AIO[abbodi1406's KMS_VL_ALL_AIO] or massgravel's link:https://github.com/massgravel/Microsoft-Activation-Scripts[Microsoft Activation Scripts].
@@ -25,7 +51,7 @@ endif::[]
 *** After that command is completed, reboot.
 *** Open the Microsoft Store, then install "App Installer" through it.
 
-** For Windows 10 LTSC 2016, install the Microsoft Store (provides the AppX installer, which provides `winget`) link:https://forums.mydigitallife.net/threads/guide-add-store-to-windows-10-enterprises-sku-ltsb-ltsc.70741/page-18#post-1388330[here].
+** For Windows 10 LTSB 2016, install the Microsoft Store (provides the AppX installer, which provides `winget`) link:https://forums.mydigitallife.net/threads/guide-add-store-to-windows-10-enterprises-sku-ltsb-ltsc.70741/page-18#post-1388330[here].
 
 
 == Instructions

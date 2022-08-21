@@ -81,13 +81,10 @@ echo network_adapter_tweaks = %network_adapter_tweaks%
 echo no_mitigations = %no_mitigations%
 echo ntfs_tweaks = %ntfs_tweaks%
 echo replace_windows_search = %replace_windows_search%
-echo 
 echo.
 Pause
 
 cd %~dp0
-REM Enables System Restore, and allows all PowerShell scripts in current directory.
-powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "& {Start-Process powershell.exe -ArgumentList '-NoProfile -ExecutionPolicy Bypass -File ""preparation.ps1""' -Verb RunAs}"
 
 REM Won't make a restore point if there's already one within the past 24 hours.
 WMIC.exe /Namespace:\\root\default Path SystemRestore Call CreateRestorePoint "W11Boost", 100, 7
@@ -161,7 +158,7 @@ if %disable_thumbnail_shadows%==1 (
 )
 
 if %network_adapter_tweaks%==1 (
-	powershell.exe -Command ".\network_adapter_tweaks.ps1"
+	powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "& {Start-Process powershell.exe -ArgumentList '-NoProfile -ExecutionPolicy Bypass -File ""network_adapter_tweaks.ps1""' -Verb RunAs}"
 )
 
 if %no_mitigations%==1 (
@@ -177,8 +174,8 @@ if %no_mitigations%==1 (
 )
 
 if %ntfs_tweaks%==1 (
-	fsutil behavior set disablelastaccess 1
-	fsutil behavior set encryptpagingfile 0
+	fsutil.exe behavior set disablelastaccess 1
+	fsutil.exe behavior set encryptpagingfile 0
 	reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\FileHistory" /v "Disabled" /t REG_DWORD /d 1 /f
 	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\I/O System" /v "IoBlockLegacyFsFilters" /t REG_DWORD /d 1 /f
 	schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\FileHistory\File History (maintenance mode)"
@@ -187,8 +184,8 @@ if %ntfs_tweaks%==1 (
 if %replace_windows_search%==1 (
 	sc.exe stop WSearch
 	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\WSearch" /v Start /t REG_DWORD /d 4 /f
-	winget install voidtools.Everything -eh
-	winget install stnkl.EverythingToolbar -eh
+	winget.exe install voidtools.Everything -eh
+	winget.exe install stnkl.EverythingToolbar -eh
 )
 
 reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v "NoLowDiskSpaceChecks" /t REG_DWORD /d 1 /f
@@ -267,7 +264,7 @@ reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Error Reporting" /
 reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Error Reporting" /v "DontSendAdditionalData" /t REG_DWORD /d 1 /f
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Windows Error Reporting\QueueReporting"
 
-REM Disallow execution of experiments by Microsoft.
+REM Ask nicely to not allow execution of experiments by Microsoft.
 reg.exe add "HKLM\SOFTWARE\Microsoft\PolicyManager\current\device\System" /v "AllowExperimentation" /t REG_DWORD /d 0 /f
 
 REM Disable tracking of application startups.
@@ -374,13 +371,26 @@ reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\PcaSvc" /v Start /t REG_DWOR
 REM Don't analyze programs' execution time data.
 reg.exe add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Perflib" /v "Disable Performance Counters" /t REG_DWORD /d 1 /f
 
-REM Use sane defaults for these sensitive timer related settings, incase a modded Windows screwed them up.
+REM == Clean up mistakes modded Windows ISOs and other optimizer scripts make ==
+
+REM Use sane defaults for these sensitive timer related settings.
 bcdedit.exe /deletevalue useplatformclock
 bcdedit.exe /deletevalue uselegacyapicmode
 bcdedit.exe /deletevalue x2apicpolicy
 bcdedit.exe /deletevalue tscsyncpolicy
 bcdedit.exe /set disabledynamictick yes
 bcdedit.exe /set uselegacyapicmode no
+
+REM MemoryCompression: Reduces I/O load and prevents an Out Of Memory situation, akin to Linux's zRAM.
+powershell.exe -Command "Enable-MMAgent -ApplicationLaunchPrefetching -ApplicationPreLaunch -MemoryCompression"
+
+REM Delaying the startup of third-party programs gives Windows more room to breathe for its own jobs, speeding up the overall startup time.
+reg.exe delete "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Serialize" /v "Startupdelayinmsec" /f
+
+REM Programs that rely on 8.3 filenames from the DOS-era will break if this is disabled.
+fsutil.exe behavior set disable8dot3 2
+
+REM == GROUP END ==
 
 REM Don't draw graphical elements for boot (spinner, Windows or BIOS logo, etc).
 bcdedit.exe /set bootuxdisabled on
@@ -390,14 +400,6 @@ reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Manage
 
 REM Don't log events without warnings or errors.
 auditpol.exe /set /category:* /Success:disable
-
-REM Game scheduler tweaks; doubles GPU priority, then sets I/O and CPU priority to High.
-reg.exe add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games" /v "GPU Priority" /t REG_DWORD /d 16 /f
-reg.exe add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games" /v "SFIO Priority" /t REG_SZ /d "High" /f
-reg.exe add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games" /v "Scheduling Category" /t REG_SZ /d "High" /f
-
-REM Don't delay startup of programs.
-reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Serialize" /v "Startupdelayinmsec" /t REG_DWORD /d 0 /f
 
 REM Decrease shutdown time.
 reg.exe add "HKCU\Control Panel\Desktop" /v WaitToKillAppTimeOut /t REG_SZ /d 2000 /f
