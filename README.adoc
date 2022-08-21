@@ -11,7 +11,7 @@ endif::[]
 
 == Notes
 * Does not overwrite user preferences that decrease privacy, except for those with a noticeable performance impact.
-** It's assumed third-party tools do this job better.
+** It's assumed third-party tools do this job better, and not everyone wants to disable features that have privacy concerns.
 
 * Gets rid of some of the auto-piloting that accumulatively is intensive on system resources, such as the link:https://admx.help/?Category=Windows_11_2022&Policy=Microsoft.Policies.ApplicationCompatibility::AppCompatTurnOffEngine[Application Compatibility Engine].
 ** For ACE being off specifically, you would manually specify to run a legacy application in compatibility mode (likely for Windows XP).
