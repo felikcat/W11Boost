@@ -82,6 +82,8 @@ Note: if a USB is no longer bootable after these two changes, temporarily turn t
 . Windows Settings -> Gaming -> Enable "Game Mode"
 ** -> Graphics -> Change default graphics settings -> Enable "Hardware-accelerated GPU scheduling", "Variable refresh rate", and "Optimizations for windowed games"
 
+. Install all optional updates through Windows Update; it can include device drivers.
+
 . Auto-detect and install link:https://www.amd.com/en/support[AMD's drivers]. +
 Auto-detect and install link:https://www.intel.com/content/www/us/en/support/detect.html[Intel's drivers].
 ** This will utilize their drivers instead of the generic drivers Microsoft provides, meaning better performance and lower DPC latency.
