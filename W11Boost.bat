@@ -43,8 +43,7 @@ set /A reset_network_interface_settings=1
 
 
 
-reg.exe query HKU\S-1-5-19 ||
-(
+reg.exe query HKU\S-1-5-19 || (
 	echo ==== Error ====
 	echo Right click on this file and select 'Run as administrator'
 	echo Press any key to exit...
@@ -94,27 +93,23 @@ REM "Fast startup" causes stability issues, increases disk wear (from excessive 
 reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Power" /V HiberbootEnabled /T REG_DWORD /D 0 /F
 attrib +R %WinDir%\System32\SleepStudy\UserNotPresentSession.etl
 
-if %avoid_key_annoyances%==1
-(
+if %avoid_key_annoyances%==1 (
 	reg.exe add "HKCU\Control Panel\Accessibility\StickyKeys" /v "Flags" /t REG_SZ /d 50 /f
 	reg.exe add "HKCU\Control Panel\Accessibility\ToggleKeys" /v "Flags" /t REG_SZ /d 58 /f
 	reg.exe add "HKCU\Control Panel\Accessibility\Keyboard Response" /v "Flags" /t REG_SZ /d 122 /f
 )
 
-if %no_audio_reduction%==1
-(
+if %no_audio_reduction%==1 (
 	reg.exe add "HKCU\SOFTWARE\Microsoft\Multimedia\Audio" /v "UserDuckingPreference" /t REG_DWORD /d "3" /f
 	reg.exe delete "HKCU\SOFTWARE\Microsoft\Internet Explorer\LowRegistry\Audio\PolicyConfig\PropertyStore" /f
 )
 
-if %no_clipboard_history%==1
-(
+if %no_clipboard_history%==1 (
 	reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v "AllowClipboardHistory" /t REG_DWORD /d 0 /f
 	reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v "AllowCrossDeviceClipboard" /t REG_DWORD /d 0 /f
 )
 
-if %no_game_dvr%==1
-(
+if %no_game_dvr%==1 (
 	reg.exe add "HKCU\System\GameConfigStore" /v "GameDVR_Enabled" /t REG_DWORD /d 0 /f
 	reg.exe add "HKLM\Software\Policies\Microsoft\Windows\GameDVR" /v "AllowGameDVR" /t REG_DWORD /d 0 /f
 	reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\GameDVR" /v "AppCaptureEnabled" /t REG_DWORD /d 0 /f
@@ -123,8 +118,7 @@ if %no_game_dvr%==1
 	reg.exe add "HKCU\Software\Microsoft\GameBar" /v "ShowStartupPanel" /t REG_DWORD /d 0 /f
 )
 
-if %no_geolocation%==1
-(
+if %no_geolocation%==1 (
 	reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors" /v "DisableLocation" /t REG_DWORD /d 1 /f
 	reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors" /v "DisableLocationScripting" /t REG_DWORD /d 1 /f
 	reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors" /v "DisableWindowsLocationProvider" /t REG_DWORD /d 1 /f
@@ -134,34 +128,28 @@ if %no_geolocation%==1
 	schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Location\WindowsActionDialog"
 )
 
-if %no_la57_cleanup%==1
-(
+if %no_la57_cleanup%==1 (
 	schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Kernel\La57Cleanup"
 )
 
-if %no_thumbnail_shadows%==1
-(
+if %no_thumbnail_shadows%==1 (
 	reg.exe add "HKCR\SystemFileAssociations\image" /v "Treatment" /t REG_DWORD /d 0 /f
 	reg.exe add "HKCR\SystemFileAssociations\image" /v "TypeOverlay" /t REG_SZ /d "" /f
 )
 
-if %reset_network_interface_settings%==1
-(
+if %reset_network_interface_settings%==1 (
 	powershell.exe -Command "Reset-NetAdapterAdvancedProperty -Name '*' -DisplayName '*'"
 )
 
-if %recommended_ethernet_tweaks%==1
-(
+if %recommended_ethernet_tweaks%==1 (
 	powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "& {Start-Process powershell.exe -ArgumentList '-NoProfile -ExecutionPolicy Bypass -File ""Networking\Ethernet\recommended_tweaks.ps1""' -Verb RunAs}"
 )
 
-if %no_ethernet_power_saving%==1
-(
+if %no_ethernet_power_saving%==1 (
 	powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "& {Start-Process powershell.exe -ArgumentList '-NoProfile -ExecutionPolicy Bypass -File ""Networking\Ethernet\no_power_saving.ps1""' -Verb RunAs}"
 )
 
-if %no_mitigations%==1
-(
+if %no_mitigations%==1 (
 	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" /v FeatureSettingsOverride /t REG_DWORD /d 3 /f 
 	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" /v FeatureSettingsOverrideMask /t REG_DWORD /d 3 /f
 	powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "& {Start-Process powershell.exe -ArgumentList '-NoProfile -ExecutionPolicy Bypass -File ""set_exploit_mitigations.ps1""' -Verb RunAs}"
@@ -179,19 +167,15 @@ if %no_mitigations%==1
 	bcdedit.exe /set nx Optin	
 )
 
-if %file_history%==1
-(
+if %file_history%==1 (
 	reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\FileHistory" /v "Disabled" /t REG_DWORD /d 0 /f
 	schtasks.exe /Change /ENABLE /TN "\Microsoft\Windows\FileHistory\File History (maintenance mode)" 
-)
-	else
-	(
+) else (
 		reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\FileHistory" /v "Disabled" /t REG_DWORD /d 1 /f
 		schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\FileHistory\File History (maintenance mode)"
-	)
+)
 
-if %replace_windows_search%==1
-(
+if %replace_windows_search%==1 (
 	sc.exe stop WSearch
 	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\WSearch" /v Start /t REG_DWORD /d 4 /f
 	winget.exe install voidtools.Everything -eh
