@@ -4,48 +4,47 @@ title W11Boost by https://github.com/nermur
 REM Disables Sticky, Filter, and Toggle Keys.
 set /A avoid_key_annoyances=1
 
+REM 0 = disables File History.
+set /A file_history=1
+
 REM Ensures Windows' audio ducking/attenuation is disabled.
-set /A disable_audio_reduction=0
+set /A no_audio_reduction=0
 
 REM Undermines software that clear the clipboard automatically.
-set /A disable_clipboard_history=1
+set /A no_clipboard_history=1
+
+REM Prevents random packet loss/drop-outs in exchange for a higher battery drain.
+set /A no_ethernet_power_saving=1
 
 REM Use NVIDIA ShadowPlay, AMD ReLive, or OBS Studio instead.
-set /A disable_game_dvr=1
+set /A no_game_dvr=1
 
 REM Disables GPS services, which always run even if there's no GPS hardware installed.
-set /A disable_geolocation=0
-
-REM Routing through IPv6 is worse than IPv4 in some areas (higher latency/ping).
-set /A disable_ipv6=0
+set /A no_geolocation=0
 
 REM Set to '1' if using a CPU that supports: https://en.wikipedia.org/wiki/Intel_5-level_paging
-set /A disable_la57_cleanup=0
+set /A no_la57_cleanup=0
 
-REM Printers are heavily exploitable, avoid using one if possible.
-set /A disable_printer_support=0
-
-REM If you don't want to install apps using the Microsoft Store from other devices or a web browser.
-set /A disable_remote_msstore_installs=1
-
-REM Disable Explorer's thumbnail border shadows.
-set /A disable_thumbnail_shadows=0
-
-REM Disables power saving features for network switches to increase their reliability.
-set /A network_adapter_tweaks=1
-
-REM Disables all security mitigations; drastically improves performance for older CPUs (such as an Intel i7-4790K).
-REM Set to 1 by default simply cause there isn't solid evidence to Spectre and other related vulnerabilities being exploited on non-businesses in the wild.
+REM Disables all non-essential security mitigations; drastically improves performance for older CPUs (such as an Intel i7-4790K).
 set /A no_mitigations=1
 
-REM Makes disks using the default file system (NTFS) faster, but disables File History and File Access Dates.
-set /A ntfs_tweaks=1
+REM Disable Explorer's thumbnail border shadows.
+set /A no_thumbnail_shadows=1
+
+REM NOTICE: Some settings set might intersect with WiFi adapters, as tweaks are applied to all network interfaces.
+set /A recommended_ethernet_tweaks=1
 
 REM "Everything" can circumvent the performance impact of Windows Search Indexing while providing faster and more accurate results.
 set /A replace_windows_search=0
 
+REM Resets all network interfaces back to their manufacturer's default settings.
+REM Recommended before applying our network tweaks, as it's a "clean slate".
+set /A reset_network_interface_settings=1
 
-reg.exe query HKU\S-1-5-19 || (
+
+
+reg.exe query HKU\S-1-5-19 ||
+(
 	echo ==== Error ====
 	echo Right click on this file and select 'Run as administrator'
 	echo Press any key to exit...
@@ -57,7 +56,7 @@ REM If these are disabled, Windows Update will break and so will this script.
 reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\AppXSvc" /v "Start" /t REG_DWORD /d 3 /f
 reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\ClipSVC" /v "Start" /t REG_DWORD /d 3 /f
 reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\TokenBroker" /v "Start" /t REG_DWORD /d 3 /f
-REM Specifically breaks Windows Store if disabled previously.
+REM StorSvc being disabled breaks the Windows Store.
 reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\StorSvc" /v "Start" /t REG_DWORD /d 3 /f
 sc.exe start AppXSvc
 sc.exe start ClipSVC
@@ -68,50 +67,54 @@ echo.
 echo ==== Current settings ====
 echo.
 echo avoid_key_annoyances = %avoid_key_annoyances%
-echo disable_audio_reduction = %disable_audio_reduction%
-echo disable_clipboard_history = %disable_clipboard_history%
-echo disable_game_dvr = %disable_game_dvr%
-echo disable_geolocation = %disable_geolocation%
-echo disable_ipv6 = %disable_ipv6%
-echo disable_la57_cleanup = %disable_la57_cleanup%
-echo disable_printer_support = %disable_printer_support%
-echo disable_remote_msstore_installs = %disable_remote_msstore_installs%
-echo disable_thumbnail_shadows = %disable_thumbnail_shadows%
-echo network_adapter_tweaks = %network_adapter_tweaks%
+echo file_history = %file_history%
+echo no_audio_reduction = %no_audio_reduction%
+echo no_clipboard_history = %no_clipboard_history%
+echo no_ethernet_power_saving = %no_ethernet_power_saving%
+echo no_game_dvr = %no_game_dvr%
+echo no_geolocation = %no_geolocation%
+echo no_la57_cleanup = %no_la57_cleanup%
 echo no_mitigations = %no_mitigations%
-echo ntfs_tweaks = %ntfs_tweaks%
+echo no_thumbnail_shadows = %no_thumbnail_shadows%
+echo recommended_ethernet_tweaks = %recommended_ethernet_tweaks%
 echo replace_windows_search = %replace_windows_search%
+echo reset_network_interface_settings = %reset_network_interface_settings%
 echo.
 Pause
 
 cd %~dp0
 
 REM Won't make a restore point if there's already one within the past 24 hours.
-WMIC.exe /Namespace:\\root\default Path SystemRestore Call CreateRestorePoint "W11Boost", 100, 7
+WMIC.exe /Namespace:\\root\default Path SystemRestore Call CreateRestorePoint "W11Boost by nermur", 100, 7
 
-REM Sleep mode achieves the same goal without hammering the primary disk; downside: breaks if power cuts off; regardless, leaving a PC unattended is bad.
+REM Sleep mode achieves the same goal without hammering the primary disk.
+REM Downside: breaks if power cuts off; regardless, leaving a PC unattended while in a low power (and exploitable) state is bad.
 powercfg.exe /hibernate on
-REM "Fast startup" causes stability issues, increases disk wear (from excessive I/O usage), and can drastically increase shutdown times on slow disks. 
+REM "Fast startup" causes stability issues, increases disk wear (from excessive I/O usage), and noticeably increases shutdown times on slow disks. 
 reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Power" /V HiberbootEnabled /T REG_DWORD /D 0 /F
 attrib +R %WinDir%\System32\SleepStudy\UserNotPresentSession.etl
 
-if %avoid_key_annoyances%==1 (
+if %avoid_key_annoyances%==1
+(
 	reg.exe add "HKCU\Control Panel\Accessibility\StickyKeys" /v "Flags" /t REG_SZ /d 50 /f
 	reg.exe add "HKCU\Control Panel\Accessibility\ToggleKeys" /v "Flags" /t REG_SZ /d 58 /f
 	reg.exe add "HKCU\Control Panel\Accessibility\Keyboard Response" /v "Flags" /t REG_SZ /d 122 /f
 )
 
-if %disable_audio_reduction%==1 (
+if %no_audio_reduction%==1
+(
 	reg.exe add "HKCU\SOFTWARE\Microsoft\Multimedia\Audio" /v "UserDuckingPreference" /t REG_DWORD /d "3" /f
 	reg.exe delete "HKCU\SOFTWARE\Microsoft\Internet Explorer\LowRegistry\Audio\PolicyConfig\PropertyStore" /f
 )
 
-if %disable_clipboard_history%==1 (
+if %no_clipboard_history%==1
+(
 	reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v "AllowClipboardHistory" /t REG_DWORD /d 0 /f
 	reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v "AllowCrossDeviceClipboard" /t REG_DWORD /d 0 /f
 )
 
-if %disable_game_dvr%==1 (
+if %no_game_dvr%==1
+(
 	reg.exe add "HKCU\System\GameConfigStore" /v "GameDVR_Enabled" /t REG_DWORD /d 0 /f
 	reg.exe add "HKLM\Software\Policies\Microsoft\Windows\GameDVR" /v "AllowGameDVR" /t REG_DWORD /d 0 /f
 	reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\GameDVR" /v "AppCaptureEnabled" /t REG_DWORD /d 0 /f
@@ -120,7 +123,8 @@ if %disable_game_dvr%==1 (
 	reg.exe add "HKCU\Software\Microsoft\GameBar" /v "ShowStartupPanel" /t REG_DWORD /d 0 /f
 )
 
-if %disable_geolocation%==1 (
+if %no_geolocation%==1
+(
 	reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors" /v "DisableLocation" /t REG_DWORD /d 1 /f
 	reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors" /v "DisableLocationScripting" /t REG_DWORD /d 1 /f
 	reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors" /v "DisableWindowsLocationProvider" /t REG_DWORD /d 1 /f
@@ -130,58 +134,64 @@ if %disable_geolocation%==1 (
 	schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Location\WindowsActionDialog"
 )
 
-if %disable_ipv6%==1 (
-	sc.exe stop iphlpsvc
-	sc.exe stop IpxlatCfgSvc
-	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\iphlpsvc" /v Start /t REG_DWORD /d 4 /f
-	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\IpxlatCfgSvc" /v Start /t REG_DWORD /d 4 /f
-	reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce" /v "disable_ipv6" /t REG_SZ /f /d "powershell -Command Set-NetAdapterBinding -Name '*' -DisplayName 'Internet Protocol Version 6 (TCP/IPv6)' -Enabled 0"
-)
-
-if %disable_la57_cleanup%==1 (
+if %no_la57_cleanup%==1
+(
 	schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Kernel\La57Cleanup"
 )
 
-if %disable_printer_support%==1 (
-	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\Spooler" /v "Start" /t REG_DWORD /d 4 /f
-	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\PrintNotify" /v "Start" /t REG_DWORD /d 4 /f
-)
-
-if %disable_remote_msstore_installs%==1 (
-	reg.exe add "HKLM\Software\Policies\Microsoft\PushToInstall" /v "DisablePushToInstall" /t REG_DWORD /d "1" /f
-	schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\PushToInstall\Registration"
-)
-
-if %disable_thumbnail_shadows%==1 (
+if %no_thumbnail_shadows%==1
+(
 	reg.exe add "HKCR\SystemFileAssociations\image" /v "Treatment" /t REG_DWORD /d 0 /f
 	reg.exe add "HKCR\SystemFileAssociations\image" /v "TypeOverlay" /t REG_SZ /d "" /f
 )
 
-if %network_adapter_tweaks%==1 (
-	powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "& {Start-Process powershell.exe -ArgumentList '-NoProfile -ExecutionPolicy Bypass -File ""network_adapter_tweaks.ps1""' -Verb RunAs}"
+if %reset_network_interface_settings%==1
+(
+	powershell.exe -Command "Reset-NetAdapterAdvancedProperty -Name '*' -DisplayName '*'"
 )
 
-if %no_mitigations%==1 (
+if %recommended_ethernet_tweaks%==1
+(
+	powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "& {Start-Process powershell.exe -ArgumentList '-NoProfile -ExecutionPolicy Bypass -File ""Networking\Ethernet\recommended_tweaks.ps1""' -Verb RunAs}"
+)
+
+if %no_ethernet_power_saving%==1
+(
+	powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "& {Start-Process powershell.exe -ArgumentList '-NoProfile -ExecutionPolicy Bypass -File ""Networking\Ethernet\no_power_saving.ps1""' -Verb RunAs}"
+)
+
+if %no_mitigations%==1
+(
 	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" /v FeatureSettingsOverride /t REG_DWORD /d 3 /f 
 	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" /v FeatureSettingsOverrideMask /t REG_DWORD /d 3 /f
-	REM Use the faster but less secure Hyper-V scheduler.
-	bcdedit.exe /set hypervisorschedulertype classic
-	REM Allow Intel TSX.
-	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Kernel" /v DisableTsx /t REG_DWORD /d 0 /f
 	powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "& {Start-Process powershell.exe -ArgumentList '-NoProfile -ExecutionPolicy Bypass -File ""set_exploit_mitigations.ps1""' -Verb RunAs}"
 	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\CredentialGuard" /v "Enabled" /t REG_DWORD /d 0 /f
 	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" /v "Enabled" /t REG_DWORD /d 0 /f
-)
 
-if %ntfs_tweaks%==1 (
-	fsutil.exe behavior set disablelastaccess 1
+	REM Allow Intel TSX.
+	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Kernel" /v DisableTsx /t REG_DWORD /d 0 /f
+
+	REM Ensure "Virtual Memory Pagefile Encryption" is disabled; by default it's not configured.
 	fsutil.exe behavior set encryptpagingfile 0
-	reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\FileHistory" /v "Disabled" /t REG_DWORD /d 1 /f
-	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\I/O System" /v "IoBlockLegacyFsFilters" /t REG_DWORD /d 1 /f
-	schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\FileHistory\File History (maintenance mode)"
+
+	REM Ensure "Data Execution Prevention" (DEP) only applies to operating system components, along with Ring 0 (kernel-mode) drivers.
+	REM Applying DEP to Ring 3 (user-mode) programs will slow down and break some, such as the original Deus Ex.
+	bcdedit.exe /set nx Optin	
 )
 
-if %replace_windows_search%==1 (
+if %file_history%==1
+(
+	reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\FileHistory" /v "Disabled" /t REG_DWORD /d 0 /f
+	schtasks.exe /Change /ENABLE /TN "\Microsoft\Windows\FileHistory\File History (maintenance mode)" 
+)
+	else
+	(
+		reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\FileHistory" /v "Disabled" /t REG_DWORD /d 1 /f
+		schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\FileHistory\File History (maintenance mode)"
+	)
+
+if %replace_windows_search%==1
+(
 	sc.exe stop WSearch
 	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\WSearch" /v Start /t REG_DWORD /d 4 /f
 	winget.exe install voidtools.Everything -eh
@@ -283,7 +293,7 @@ reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManag
 reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v "SoftLandingEnabled" /t REG_DWORD /d 0 /f
 reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v "SystemPaneSuggestionsEnabled" /t REG_DWORD /d 0 /f
 
-REM Disable SmartScreen, it delays the launch of software and is better done by other anti-malware software (like Kaspersky).
+REM Disable SmartScreen, it delays the launch of software and is better done by other anti-malware software.
 reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v "EnableSmartScreen" /t REG_DWORD /d 0 /f
 reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer" /v "SmartScreenEnabled" /t REG_SZ /d "Off" /f
 reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\AppHost" /v "EnableWebContentEvaluation" /t REG_DWORD /d 0 /f
@@ -371,8 +381,11 @@ reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\PcaSvc" /v Start /t REG_DWOR
 REM Don't analyze programs' execution time data.
 reg.exe add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Perflib" /v "Disable Performance Counters" /t REG_DWORD /d 1 /f
 
+REM Don't use NTFS' "Last Access Time Stamp Updates" by default; a program can still explicitly update them for itself.
+fsutil.exe behavior set disablelastaccess 3
 
-REM == Clean up mistakes modded Windows ISOs and other optimizer scripts make ==
+
+REM == GROUP 1: Correct mistakes by others ==
 
 REM Use sane defaults for these sensitive timer related settings.
 bcdedit.exe /deletevalue useplatformclock
@@ -381,6 +394,18 @@ bcdedit.exe /deletevalue x2apicpolicy
 bcdedit.exe /deletevalue tscsyncpolicy
 bcdedit.exe /set disabledynamictick yes
 bcdedit.exe /set uselegacyapicmode no
+
+REM Using the "classic" Hyper-V scheduler can break Hyper-V for QEMU with KVM.
+bcdedit.exe /set hypervisorschedulertype core
+
+REM https://docs.microsoft.com/en-US/troubleshoot/windows-server/networking/configure-ipv6-in-windows#use-registry-key-to-configure-ipv6
+REM Prefer IPv6 whenever possible; avoids NAT, and handles fragmentation locally instead of on the router.
+reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters" /v "DisabledComponents" /t REG_DWORD /d "0" /f
+
+REM Ensure IPv6 and its related features are enabled.
+reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\iphlpsvc" /v Start /t REG_DWORD /d 2 /f
+reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\IpxlatCfgSvc" /v Start /t REG_DWORD /d 3 /f
+powershell.exe -Command "Set-NetAdapterBinding -Name '*' -DisplayName 'Internet Protocol Version 6 (TCP/IPv6)' -Enabled 1"
 
 REM MemoryCompression: Slightly increases CPU load, but reduces I/O load and makes Windows handle Out Of Memory situations smoothly; akin to Linux's zRAM.
 powershell.exe -Command "Enable-MMAgent -ApplicationLaunchPrefetching -ApplicationPreLaunch -MemoryCompression"
@@ -394,7 +419,12 @@ fsutil.exe behavior set disable8dot3 2
 REM Splitting SvcHost less decreases Windows' stability; set it to defaults.
 reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control" /v SvcHostSplitThresholdInKB /t REG_DWORD /d 3670016 /f
 
-REM == GROUP END ==
+REM Disabling "smart multi-homed name resolution" can make DNS requests extremely slow.
+REM If this is used to stop a VPN's DNS leaks, use a different VPN client (eddie.website) or change VPN providers.
+reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows NT\DNSClient" /v DisableSmartNameResolution /t REG_DWORD /d 0 /f
+reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters" /v DisableParallelAandAAAA /t REG_DWORD /d 0 /f
+
+REM == GROUP 1: END ==
 
 
 REM Don't draw graphical elements for boot (spinner, Windows or BIOS logo, etc).

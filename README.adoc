@@ -17,6 +17,8 @@ endif::[]
 ** https://github.com/zodiacon/WindowsInternals
 . https://www.microsoftpressstore.com/store/windows-internals-part-2-9780135462409
 ** This can be viewed for free from link:https://en.wikipedia.org/wiki/Z-Library[Z-Library].
+
+. https://github.com/MicrosoftDocs/windows-driver-docs/tree/staging/windows-driver-docs-pr
 ====
 
 == Notes
@@ -30,6 +32,9 @@ endif::[]
 
 * Only Windows 10 LTSC 2022 and newer are tested. 
 ** Older versions of Windows are worse in terms of stability, which also includes Windows 7.
+
+* You have to run W11Boost again after applying a major Windows update.
+** Reason: Windows components aren't stripped out; we only ask nicely to disable or modify certain functions of the OS.
 
 .Developer notes
 [%collapsible]
@@ -46,7 +51,7 @@ endif::[]
 ====
 
 == Requirements
-. Windows has to be activated for some changes, use your license key, or use either link:https://github.com/abbodi1406/KMS_VL_ALL_AIO[abbodi1406's KMS_VL_ALL_AIO] or massgravel's link:https://github.com/massgravel/Microsoft-Activation-Scripts[Microsoft Activation Scripts].
+. Windows has to be activated for some changes, use a license key, or use either link:https://github.com/abbodi1406/KMS_VL_ALL_AIO[abbodi1406's KMS_VL_ALL_AIO] or massgravel's link:https://github.com/massgravel/Microsoft-Activation-Scripts[Microsoft Activation Scripts].
 
 . W11Boost.bat's `replace_windows_search=1` requires `winget`.
 ** For Windows 10 LTSC 2019 or 2022, run in Command Prompt as Administrator to install `winget`:
