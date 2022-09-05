@@ -1,4 +1,5 @@
 # Disable features that can cause random packet loss/drop-outs.
+Set-NetAdapterAdvancedProperty -Name '*' -DisplayName 'Advanced EEE' -RegistryValue 0
 Set-NetAdapterAdvancedProperty -Name '*' -DisplayName 'Auto Disable Gigabit' -RegistryValue 0
 Set-NetAdapterAdvancedProperty -Name '*' -DisplayName 'Energy Efficient Ethernet' -RegistryValue 0
 Set-NetAdapterAdvancedProperty -Name '*' -DisplayName 'Gigabit Lite' -RegistryValue 0
