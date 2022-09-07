@@ -111,15 +111,11 @@ TIP: Kaspersky is cheaper to buy from Amazon or other third-party markets that s
 . link:https://winaerotweaker.com/[Winaero Tweaker]
 ** Extensive number of usability and visual tweaks.
 
-. link:https://github.com/jbara2002/windows-defender-remover[Windows Defender Remover]
-** Disables or removes Windows Defender.
-*** Removing Windows Defender will break updates; you'd have to manually update through Microsoft's Update Catalog instead.
-
 . link:https://www.oo-software.com/en/shutup10[ShutUp10]
-** A privacy enhancer that doesn't break software.
+** A privacy enhancer that on its recommended settings doesn't break software.
 
 . link:https://github.com/WereDev/Wu10Man[Wu10Man]
-** Safely fully disables and enables Windows Update whenever, with no need to reboot for changes.
+** Can fully and safely disable or enable Windows updates without rebooting.
 
 . link:https://dl.bitsum.com/files/processlassosetup64.exe[Process Lasso]
 ** Better thread scheduling (for specific CPUs) and the best power plan for gaming ("Bitsum Highest Performance").
