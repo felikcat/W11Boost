@@ -21,20 +21,25 @@ endif::[]
 . https://github.com/MicrosoftDocs/windows-driver-docs/tree/staging/windows-driver-docs-pr
 ====
 
+== Before continuing
+. This mainly modifies registry keys, which just like Group Policy Editor, asks nicely for its modifications instead of enforcing it (as NTLite or MSMG Toolkit would).
+** Disabling some features, especially about telemetry, are ignored on Windows versions that aren't Enterprise/Education/Server editions.
+. It's assumed you have to reapply W11Boost after major Windows feature updates.
+. Windows can at any time decide to revert single or multiple changes done by this script.
+
+TIP: DuxOS is currently being worked on to make Windows 11 squeaky clean, and to be mostly a Windows 10 LTSC 2022 replica; the NTLite preset used and any other tweaks will be open-sourced, along with including a downloadable ISO for those that haven't purchased NTLite.
+
 == Notes
 * Does not overwrite user preferences that decrease privacy, except for those with a noticeable performance impact.
 ** It's assumed third-party tools do this job better, and not everyone wants to disable features that have privacy concerns.
 
-* Gets rid of some of the auto-piloting that accumulatively is intensive on system resources, such as the link:https://admx.help/?Category=Windows_11_2022&Policy=Microsoft.Policies.ApplicationCompatibility::AppCompatTurnOffEngine[Application Compatibility Engine].
+* Gets rid of some of the auto-piloting that uses system resources, such as the link:https://admx.help/?Category=Windows_11_2022&Policy=Microsoft.Policies.ApplicationCompatibility::AppCompatTurnOffEngine[Application Compatibility Engine].
 ** For ACE being off specifically, you would manually specify to run a legacy application in compatibility mode (likely for Windows XP).
 
-* Fixes fuck-ups made by other optimizers and modded Windows ISOs.
+* Fixes a few mistakes made by other optimizers.
 
 * Only Windows 10 LTSC 2022 and newer are tested. 
-** Older versions of Windows are worse in terms of stability, which also includes Windows 7.
-
-* You have to run W11Boost again after applying a major Windows update.
-** Reason: Windows components aren't stripped out; we only ask nicely to disable or modify certain functions of the OS.
+** Older versions of Windows are worse in terms of stability, including Windows 7.
 
 .Developer notes
 [%collapsible]
@@ -53,10 +58,13 @@ endif::[]
 == Requirements
 . Windows has to be activated for some changes, use a license key, or use either link:https://github.com/abbodi1406/KMS_VL_ALL_AIO[abbodi1406's KMS_VL_ALL_AIO] or massgravel's link:https://github.com/massgravel/Microsoft-Activation-Scripts[Microsoft Activation Scripts].
 
-. W11Boost.bat's `replace_windows_search=1` requires `winget`.
+. W11Boost.bat's `replace_windows_search=1` or `replace_windows11_interface=1` requires `winget`.
+** For Windows 11, ensure `winget` is working, if not:
+*** Open the Microsoft Store, then update "App Installer" through it.
+
 ** For Windows 10 LTSC 2019 or 2022, run in Command Prompt as Administrator to install `winget`:
 *** `wsreset -i`
-*** After that command is completed, reboot.
+*** If the Microsoft store doesn't show up after this command is complete, reboot.
 *** Open the Microsoft Store, then install "App Installer" through it.
 
 ** For Windows 10 LTSB 2016, install the Microsoft Store (provides the AppX installer, which provides `winget`) link:https://forums.mydigitallife.net/threads/guide-add-store-to-windows-10-enterprises-sku-ltsb-ltsc.70741/page-18#post-1388330[here].
@@ -67,6 +75,11 @@ endif::[]
 . Configure the options located inside `W11Boost.bat`, then run it as Administrator.
 
 NOTE: Disable all anti-virus software before running `W11Boost.bat`.
+
+== About "Optional extras"
+* `W11_LTSC_2022.ps1`
+** Uninstalls a lot of default apps to replicate what Windows 10 LTSC 2022 includes by default.
+*** Exceptions: App Installer, Store Experience Host, Windows Store, Windows Terminal.
 
 == Recommendations
 
@@ -120,4 +133,4 @@ TIP: Kaspersky is cheaper to buy from Amazon or other third-party markets that s
 . link:https://dl.bitsum.com/files/processlassosetup64.exe[Process Lasso]
 ** Better thread scheduling (for specific CPUs) and the best power plan for gaming ("Bitsum Highest Performance").
 
-TIP: If you ever removed Power Profiles, run `powercfg -restoredefaultschemes` before installing Process Lasso, otherwise "Bitsum Highest Performance" can't apply.
+INFO: If you ever removed Power Profiles, run `powercfg -restoredefaultschemes` before installing Process Lasso, otherwise "Bitsum Highest Performance" can't apply.

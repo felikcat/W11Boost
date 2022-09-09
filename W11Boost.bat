@@ -22,14 +22,8 @@ set /A no_game_dvr=1
 REM Disables GPS services, which always run even if there's no GPS hardware installed.
 set /A no_geolocation=0
 
-REM Set to '1' if using a CPU that supports: https://en.wikipedia.org/wiki/Intel_5-level_paging
-set /A no_la57_cleanup=0
-
 REM Disables all non-essential security mitigations; drastically improves performance for older CPUs (such as an Intel i7-4790K).
 set /A no_mitigations=1
-
-REM Disable Explorer's thumbnail border shadows.
-set /A no_thumbnail_shadows=1
 
 REM NOTICE: Some settings set might intersect with WiFi adapters, as tweaks are applied to all network interfaces.
 set /A recommended_ethernet_tweaks=1
@@ -37,10 +31,15 @@ set /A recommended_ethernet_tweaks=1
 REM "Everything" can circumvent the performance impact of Windows Search Indexing while providing faster and more accurate results.
 set /A replace_windows_search=0
 
+REM See https://www.startallback.com/ for more information.
+set /A replace_windows11_interface=0
+
 REM Resets all network interfaces back to their manufacturer's default settings.
 REM Recommended before applying our network tweaks, as it's a "clean slate".
 set /A reset_network_interface_settings=1
 
+REM 0 = disable Explorer's thumbnail (images/video previews) border shadows.
+set /A thumbnail_shadows=1
 
 
 reg.exe query HKU\S-1-5-19 || (
@@ -72,12 +71,12 @@ echo no_clipboard_history = %no_clipboard_history%
 echo no_ethernet_power_saving = %no_ethernet_power_saving%
 echo no_game_dvr = %no_game_dvr%
 echo no_geolocation = %no_geolocation%
-echo no_la57_cleanup = %no_la57_cleanup%
 echo no_mitigations = %no_mitigations%
-echo no_thumbnail_shadows = %no_thumbnail_shadows%
 echo recommended_ethernet_tweaks = %recommended_ethernet_tweaks%
 echo replace_windows_search = %replace_windows_search%
+echo replace_windows11_interface = %replace_windows11_interface%
 echo reset_network_interface_settings = %reset_network_interface_settings%
+echo thumbnail_shadows = %thumbnail_shadows%
 echo.
 Pause
 
@@ -86,17 +85,24 @@ cd %~dp0
 REM Won't make a restore point if there's already one within the past 24 hours.
 WMIC.exe /Namespace:\\root\default Path SystemRestore Call CreateRestorePoint "W11Boost by nermur", 100, 7
 
-REM Sleep mode achieves the same goal without hammering the primary disk.
-REM Downside: breaks if power cuts off; regardless, leaving a PC unattended while in a low power (and exploitable) state is bad.
-powercfg.exe /hibernate on
-REM "Fast startup" causes stability issues, increases disk wear (from excessive I/O usage), and noticeably increases shutdown times on slow disks. 
-reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Power" /V HiberbootEnabled /T REG_DWORD /D 0 /F
+REM "Fast startup" causes stability issues, and increases disk wear from excessive I/O usage.
+reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Power" /V "HiberbootEnabled" /T REG_DWORD /D 0 /F
 attrib +R %WinDir%\System32\SleepStudy\UserNotPresentSession.etl
 
 if %avoid_key_annoyances%==1 (
 	reg.exe add "HKCU\Control Panel\Accessibility\StickyKeys" /v "Flags" /t REG_SZ /d 50 /f
 	reg.exe add "HKCU\Control Panel\Accessibility\ToggleKeys" /v "Flags" /t REG_SZ /d 58 /f
 	reg.exe add "HKCU\Control Panel\Accessibility\Keyboard Response" /v "Flags" /t REG_SZ /d 122 /f
+)
+
+if %file_history%==1 (
+	reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\FileHistory" /v "Disabled" /t REG_DWORD /d 0 /f
+	schtasks.exe /Change /ENABLE /TN "\Microsoft\Windows\FileHistory\File History (maintenance mode)" 
+) else (
+	if %file_history%==0 (
+		reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\FileHistory" /v "Disabled" /t REG_DWORD /d 1 /f
+		schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\FileHistory\File History (maintenance mode)"
+	)
 )
 
 if %no_audio_reduction%==1 (
@@ -107,6 +113,10 @@ if %no_audio_reduction%==1 (
 if %no_clipboard_history%==1 (
 	reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v "AllowClipboardHistory" /t REG_DWORD /d 0 /f
 	reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v "AllowCrossDeviceClipboard" /t REG_DWORD /d 0 /f
+)
+
+if %no_ethernet_power_saving%==1 (
+	powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "& {Start-Process powershell.exe -ArgumentList '-NoProfile -ExecutionPolicy Bypass -File ""Networking\Ethernet\no_power_saving.ps1""' -Verb RunAs}"
 )
 
 if %no_game_dvr%==1 (
@@ -128,36 +138,15 @@ if %no_geolocation%==1 (
 	schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Location\WindowsActionDialog"
 )
 
-if %no_la57_cleanup%==1 (
-	schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Kernel\La57Cleanup"
-)
-
-if %no_thumbnail_shadows%==1 (
-	reg.exe add "HKCR\SystemFileAssociations\image" /v "Treatment" /t REG_DWORD /d 0 /f
-	reg.exe add "HKCR\SystemFileAssociations\image" /v "TypeOverlay" /t REG_SZ /d "" /f
-)
-
-if %reset_network_interface_settings%==1 (
-	powershell.exe -Command "Reset-NetAdapterAdvancedProperty -Name '*' -DisplayName '*'"
-)
-
-if %recommended_ethernet_tweaks%==1 (
-	powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "& {Start-Process powershell.exe -ArgumentList '-NoProfile -ExecutionPolicy Bypass -File ""Networking\Ethernet\recommended_tweaks.ps1""' -Verb RunAs}"
-)
-
-if %no_ethernet_power_saving%==1 (
-	powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "& {Start-Process powershell.exe -ArgumentList '-NoProfile -ExecutionPolicy Bypass -File ""Networking\Ethernet\no_power_saving.ps1""' -Verb RunAs}"
-)
-
 if %no_mitigations%==1 (
-	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" /v FeatureSettingsOverride /t REG_DWORD /d 3 /f 
-	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" /v FeatureSettingsOverrideMask /t REG_DWORD /d 3 /f
+	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" /v "FeatureSettingsOverride" /t REG_DWORD /d 3 /f 
+	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" /v "FeatureSettingsOverrideMask" /t REG_DWORD /d 3 /f
 	powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "& {Start-Process powershell.exe -ArgumentList '-NoProfile -ExecutionPolicy Bypass -File ""set_exploit_mitigations.ps1""' -Verb RunAs}"
 	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\CredentialGuard" /v "Enabled" /t REG_DWORD /d 0 /f
 	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" /v "Enabled" /t REG_DWORD /d 0 /f
 
 	REM Allow Intel TSX.
-	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Kernel" /v DisableTsx /t REG_DWORD /d 0 /f
+	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Kernel" /v "DisableTsx" /t REG_DWORD /d 0 /f
 
 	REM Ensure "Virtual Memory Pagefile Encryption" is disabled; by default it's not configured.
 	fsutil.exe behavior set encryptpagingfile 0
@@ -167,12 +156,8 @@ if %no_mitigations%==1 (
 	bcdedit.exe /set nx Optin	
 )
 
-if %file_history%==1 (
-	reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\FileHistory" /v "Disabled" /t REG_DWORD /d 0 /f
-	schtasks.exe /Change /ENABLE /TN "\Microsoft\Windows\FileHistory\File History (maintenance mode)" 
-) else (
-		reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\FileHistory" /v "Disabled" /t REG_DWORD /d 1 /f
-		schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\FileHistory\File History (maintenance mode)"
+if %recommended_ethernet_tweaks%==1 (
+	powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "& {Start-Process powershell.exe -ArgumentList '-NoProfile -ExecutionPolicy Bypass -File ""Networking\Ethernet\recommended_tweaks.ps1""' -Verb RunAs}"
 )
 
 if %replace_windows_search%==1 (
@@ -180,6 +165,24 @@ if %replace_windows_search%==1 (
 	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\WSearch" /v Start /t REG_DWORD /d 4 /f
 	winget.exe install voidtools.Everything -eh
 	winget.exe install stnkl.EverythingToolbar -eh
+)
+
+if %replace_windows11_interface%==1 (
+	winget.exe install StartIsBack.StartAllBack -eh
+)
+
+if %reset_network_interface_settings%==1 (
+	powershell.exe -Command "Reset-NetAdapterAdvancedProperty -Name '*' -DisplayName '*'"
+)
+
+if %thumbnail_shadows%==0 (
+	reg.exe add "HKCR\SystemFileAssociations\image" /v "Treatment" /t REG_DWORD /d 0 /f
+	reg.exe add "HKCR\SystemFileAssociations\image" /v "TypeOverlay" /t REG_SZ /d "" /f
+) else (
+	if %thumbnail_shadows%==1 (
+		reg.exe add "HKCR\SystemFileAssociations\image" /v "Treatment" /t REG_DWORD /d 2 /f
+		reg.exe add "HKCR\SystemFileAssociations\image" /v "TypeOverlay" /t REG_SZ /d "" /f
+	)
 )
 
 reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v "NoLowDiskSpaceChecks" /t REG_DWORD /d 1 /f
@@ -193,28 +196,34 @@ reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /
 
 REM Don't waste time removing thumbnail caches; if they corrupt themselves, the user will do this themself.
 reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VolumeCaches\Thumbnail Cache" /v "Autorun" /t REG_DWORD /d 0 /f
-reg.exe add "HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Explorer\VolumeCaches\Thumbnail Cache" /v "Autorun" /t REG_DWORD /d 0 /f
 
 REM Don't check for an active connection through Microsoft's servers.
-reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\NlaSvc\Parameters\Internet" /v EnableActiveProbing /t REG_DWORD /d 0 /f
+reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\NlaSvc\Parameters\Internet" /v "EnableActiveProbing" /t REG_DWORD /d 0 /f
 
 REM Ask OneDrive to only generate network traffic if signed in to OneDrive.
 reg.exe add "HKLM\SOFTWARE\Microsoft\OneDrive" /v "PreventNetworkTrafficPreUserSignIn" /t REG_DWORD /d 1 /f
 
-REM Don't allow automatic: software updates, security scanning, and system diagnostics.
+REM Disallow automatic: software updates, security scanning, and system diagnostics.
 reg.exe add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\Maintenance" /v "MaintenanceDisabled" /t REG_DWORD /d 1 /f
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Diagnosis\Scheduled"
 
-REM Ask nicely to stop sending diagnostic data to Microsoft.
-reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection" /v "AllowTelemetry" /t REG_DWORD /d 0 /f
-reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Privacy" /v "TailoredExperiencesWithDiagnosticDataEnabled" /t REG_DWORD /d 0 /f
+
+REM == GROUP 1: Ask to stop sending diagnostic data to Microsoft ==
+
+REM Prevent running CompatTelRunner.exe, which can cause severe CPU usage until it's forcefully ended by you, but gets triggered again once a day.
 reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v "AllowTelemetry" /t REG_DWORD /d 0 /f
+reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection" /v "AllowTelemetry" /t REG_DWORD /d 0 /f
+schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Application Experience\Microsoft Compatibility Appraiser"
+schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Application Experience\ProgramDataUpdater"
+
+reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Privacy" /v "TailoredExperiencesWithDiagnosticDataEnabled" /t REG_DWORD /d 0 /f
+
 reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v "DisableEnterpriseAuthProxy" /t REG_DWORD /d 1 /f
 reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v "DisableOneSettingsDownloads" /t REG_DWORD /d 1 /f
 reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v "DisableTelemetryOptInChangeNotification" /t REG_DWORD /d 1 /f
 reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v "DoNotShowFeedbackNotifications" /t REG_DWORD /d 1 /f
+
 reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v "PublishUserActivities" /t REG_DWORD /d 0 /f
-reg.exe add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Policies\DataCollection" /v "AllowTelemetry" /t REG_DWORD /d 0 /f
 reg.exe add "HKLM\SYSTEM\ControlSet001\Control\WMI\Autologger\AutoLogger-Diagtrack-Listener" /v "Start" /t REG_DWORD /d 0 /f
 reg.exe add "HKLM\SYSTEM\ControlSet001\Services\DiagTrack" /v "Start" /t REG_DWORD /d 4 /f
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Feedback\Siuf\DmClient"
@@ -231,19 +240,22 @@ reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Messenger\Client" /v "CEIP" /t REG
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Customer Experience Improvement Program\Consolidator"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Customer Experience Improvement Program\KernelCeipTask"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Customer Experience Improvement Program\UsbCeip"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Application Experience\Microsoft Compatibility Appraiser"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Autochk\Proxy"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\DiskDiagnostic\Microsoft-Windows-DiskDiagnosticDataCollector"
+
+REM Disable "Application Telemetry".
+reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\AppCompat" /v "AITEnable" /t REG_DWORD /d 0 /f
+
+REM == GROUP 1: END ==
+
+
+REM Disable "Program Compatibility Assistant".
+reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\AppCompat" /v "DisablePCA" /t REG_DWORD /d 1 /f
 
 REM Disable "Application Compatibility Engine".
 reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\AppCompat" /v "DisableEngine" /t REG_DWORD /d 1 /f
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Application Experience\PcaPatchDbTask"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Application Experience\ProgramDataUpdater"
 
-REM Disable "Application Telemetry".
-reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\AppCompat" /v "AITEnable" /t REG_DWORD /d 0 /f
-REM Disable "Program Compatibility Assistant".
-reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\AppCompat" /v "DisablePCA" /t REG_DWORD /d 1 /f
 REM Disable "SwitchBack Compatibility Engine".
 reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\AppCompat" /v "SbEnable" /t REG_DWORD /d 0 /f
 REM Disable user steps recorder.
@@ -258,7 +270,7 @@ reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Error Reporting" /
 reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Error Reporting" /v "DontSendAdditionalData" /t REG_DWORD /d 1 /f
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Windows Error Reporting\QueueReporting"
 
-REM Ask nicely to not allow execution of experiments by Microsoft.
+REM Ask to not allow execution of experiments by Microsoft.
 reg.exe add "HKLM\SOFTWARE\Microsoft\PolicyManager\current\device\System" /v "AllowExperimentation" /t REG_DWORD /d 0 /f
 
 REM Disable tracking of application startups.
@@ -282,14 +294,10 @@ reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v "EnableSmartScr
 reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer" /v "SmartScreenEnabled" /t REG_SZ /d "Off" /f
 reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\AppHost" /v "EnableWebContentEvaluation" /t REG_DWORD /d 0 /f
 
-REM Disable legacy PowerShell.
-powershell.exe -Command "Disable-WindowsOptionalFeature -NoRestart -Online -FeatureName "MicrosoftWindowsPowerShellV2Root""
-powershell.exe -Command "Disable-WindowsOptionalFeature -NoRestart -Online -FeatureName "MicrosoftWindowsPowerShellV2""
-
-REM Increasing overall system/DPC latency for the sake of minimal power saving is bad.
+REM Don't increase overall system/DPC latency just for minimal power saving.
 reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Power\PowerThrottling" /v "PowerThrottlingOff" /t REG_DWORD /d 1 /f
 
-REM Automated file cleanup (without user interaction) is a bad idea; Storage Sense only runs on low-disk space events.
+REM Automated file cleanup without user interaction is a bad idea; Storage Sense only runs on low-disk space events.
 reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\StorageSense" /v "AllowStorageSenseGlobal" /t REG_DWORD /d 0 /f
 reg.exe delete "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\StorageSense" /f
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\DiskFootprint\Diagnostics"
@@ -369,7 +377,7 @@ REM Don't use NTFS' "Last Access Time Stamp Updates" by default; a program can s
 fsutil.exe behavior set disablelastaccess 3
 
 
-REM == GROUP 1: Correct mistakes by others ==
+REM == GROUP 2: Correct mistakes by others ==
 
 REM Use sane defaults for these sensitive timer related settings.
 bcdedit.exe /deletevalue useplatformclock
@@ -387,8 +395,8 @@ REM Prefer IPv6 whenever possible; avoids NAT, and handles fragmentation locally
 reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters" /v "DisabledComponents" /t REG_DWORD /d "0" /f
 
 REM Ensure IPv6 and its related features are enabled.
-reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\iphlpsvc" /v Start /t REG_DWORD /d 2 /f
-reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\IpxlatCfgSvc" /v Start /t REG_DWORD /d 3 /f
+reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\iphlpsvc" /v "Start" /t REG_DWORD /d 2 /f
+reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\IpxlatCfgSvc" /v "Start" /t REG_DWORD /d 3 /f
 powershell.exe -Command "Set-NetAdapterBinding -Name '*' -DisplayName 'Internet Protocol Version 6 (TCP/IPv6)' -Enabled 1"
 
 REM MemoryCompression: Slightly increases CPU load, but reduces I/O load and makes Windows handle Out Of Memory situations smoothly; akin to Linux's zRAM.
@@ -401,31 +409,31 @@ REM Programs that rely on 8.3 filenames from the DOS-era will break if this is d
 fsutil.exe behavior set disable8dot3 2
 
 REM Splitting SvcHost less decreases Windows' stability; set it to defaults.
-reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control" /v SvcHostSplitThresholdInKB /t REG_DWORD /d 3670016 /f
+reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control" /v "SvcHostSplitThresholdInKB" /t REG_DWORD /d 3670016 /f
 
 REM Disabling "smart multi-homed name resolution" can make DNS requests extremely slow.
 REM If this is used to stop a VPN's DNS leaks, use a different VPN client (eddie.website) or change VPN providers.
-reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows NT\DNSClient" /v DisableSmartNameResolution /t REG_DWORD /d 0 /f
-reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters" /v DisableParallelAandAAAA /t REG_DWORD /d 0 /f
+reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows NT\DNSClient" /v "DisableSmartNameResolution" /t REG_DWORD /d 0 /f
+reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters" /v "DisableParallelAandAAAA" /t REG_DWORD /d 0 /f
 
-REM == GROUP 1: END ==
+REM A security feature that's disabled by default in Windows 11 Pro. Enabling this makes shutdown times slow.
+reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" /v "ClearPageFileAtShutdown" /t REG_DWORD /d 0 /f
+
+REM == GROUP 2: END ==
 
 
 REM Don't draw graphical elements for boot (spinner, Windows or BIOS logo, etc).
 bcdedit.exe /set bootuxdisabled on
 
-REM A worthless security measure, just use BitLocker.
-reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" /v ClearPageFileAtShutdown /t REG_DWORD /d 0 /f
-
 REM Don't log events without warnings or errors.
 auditpol.exe /set /category:* /Success:disable
 
 REM Decrease shutdown time.
-reg.exe add "HKCU\Control Panel\Desktop" /v WaitToKillAppTimeOut /t REG_SZ /d 2000 /f
-reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control" /v WaitToKillServiceTimeout /t REG_SZ /d 2000 /f
-reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control" /v HungAppTimeout /t REG_SZ /d 2000 /f
-reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control" /v AutoEndTasks /t REG_SZ /d 1 /f
-reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v DisableShutdownNamedPipe /t REG_DWORD /d 1 /f
+reg.exe add "HKCU\Control Panel\Desktop" /v "WaitToKillAppTimeOut" /t REG_SZ /d 2000 /f
+reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control" /v "WaitToKillServiceTimeout" /t REG_SZ /d 2000 /f
+reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control" /v "HungAppTimeout" /t REG_SZ /d 2000 /f
+reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control" /v "AutoEndTasks" /t REG_SZ /d 1 /f
+reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v "DisableShutdownNamedPipe" /t REG_DWORD /d 1 /f
 
 taskkill.exe /IM explorer.exe /F
 start explorer.exe
