@@ -22,12 +22,16 @@ endif::[]
 ====
 
 == Before continuing
-. It's preferred to use DuxOS (WIP, not yet released) if you don't mind reinstalling Windows, as it can be comprehensive about removing features that have minimal/no use which impact performance noticeably.
-** Disabling some features are ignored on Windows versions that aren't Enterprise/Education/Server editions, especially about telemetry. Which is what DuxOS solves.
+. Use alongside my link:https://github.com/nermur/DuxOS[DuxOS] if you don't mind reinstalling Windows; it's comprehensive on removing features that have minimal/no use which impact performance noticeably.
+** Disabling some features are ignored on Windows versions that aren't Enterprise/Education/Server editions, especially regarding telemetry.
 . It's assumed you have to reapply W11Boost after major Windows feature updates.
 . Windows can at any time decide to revert single or multiple changes done by this script.
 
-== Notes
+___
+
+.User notes
+[%collapsible]
+====
 * Does not overwrite user preferences that decrease privacy, except for those with a noticeable performance impact.
 ** It's assumed third-party tools do this job better, and not everyone wants to disable features that have privacy concerns.
 
@@ -38,6 +42,8 @@ endif::[]
 
 * Only Windows 10 LTSC 2022 and newer are tested. 
 ** Older versions of Windows are worse in terms of stability, including Windows 7.
+
+====
 
 .Developer notes
 [%collapsible]
@@ -51,10 +57,11 @@ endif::[]
 
 * Registry keys usually don't self-regenerate themselves if their key doesn't exist.
 ** If the purpose is to revert back to defaults, manually set the default value instead.
+
 ====
 
 == Requirements
-. Windows has to be activated for some changes, use a license key, or use either link:https://github.com/abbodi1406/KMS_VL_ALL_AIO[abbodi1406's KMS_VL_ALL_AIO] or massgravel's link:https://github.com/massgravel/Microsoft-Activation-Scripts[Microsoft Activation Scripts].
+. Windows has to be activated for some changes, use a license key, or run either link:https://github.com/abbodi1406/KMS_VL_ALL_AIO[abbodi1406's KMS_VL_ALL_AIO] or massgravel's link:https://github.com/massgravel/Microsoft-Activation-Scripts[Microsoft Activation Scripts].
 
 . W11Boost.bat's `replace_windows_search=1` or `replace_windows11_interface=1` requires `winget`.
 ** For Windows 11, ensure `winget` is working, if not:
@@ -65,18 +72,17 @@ endif::[]
 *** If the Microsoft store doesn't show up after this command is complete, reboot.
 *** Open the Microsoft Store, then install "App Installer" through it.
 
-** For Windows 10 LTSB 2016, install the Microsoft Store (provides the AppX installer, which provides `winget`) link:https://forums.mydigitallife.net/threads/guide-add-store-to-windows-10-enterprises-sku-ltsb-ltsc.70741/page-18#post-1388330[here].
-
 
 == Instructions
 . link:https://github.com/nermur/W11Boost/archive/refs/heads/master.zip[Download W11Boost], then extract it.
-. Configure the options located inside `W11Boost.bat`, then run it as Administrator.
-
-NOTE: Disable all anti-virus software before running `W11Boost.bat`.
+. Configure the options by editing `W11Boost.bat`.
+. Temporarily disable all anti-virus software.
+. Run `W11Boost.bat` as Administrator.
 
 == About "Optional extras"
 * `W11_LTSC_2022.ps1`
 ** Uninstalls a lot of default apps to replicate what Windows 10 LTSC 2022 includes by default.
+*** This is unnecessary on DuxOS.
 *** Exceptions: App Installer, Store Experience Host, Windows Store, Windows Terminal.
 
 == Recommendations
