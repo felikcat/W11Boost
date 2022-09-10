@@ -80,10 +80,16 @@ endif::[]
 . Run `W11Boost.bat` as Administrator.
 
 == Extras
-* `W11_LTSC_2022.ps1`
+* `W11_LTSC_2022.bat`
 ** Uninstalls a lot of default apps to replicate what Windows 10 LTSC 2022 includes by default.
 *** This is unnecessary on DuxOS.
-*** Exceptions: App Installer, Store Experience Host, Windows Store, Windows Terminal.
+*** Exceptions: App Installer, Store Experience Host, Windows Store, Windows Terminal, Xbox Game Speech Window.
+*** Warning: Run this first before other extras if you plan on using it.
+
+* `Xbox_minimal.bat`
+** Note: Login to the Microsoft Store before using this script, otherwise it will not work.
+** Installs only what's required to use Xbox Controllers (interface not included, get it link:ms-windows-store://pdp/?PFN=Microsoft.XboxDevices_8wekyb3d8bbwe[here]), Game Pass, and specific games like Forza Horizon 4 & 5.
+*** To also get Game Bar, install the following link:ms-windows-store://pdp/?PFN=Microsoft.XboxGameOverlay_8wekyb3d8bbwe[here] and link:ms-windows-store://pdp/?PFN=Microsoft.XboxGamingOverlay_8wekyb3d8bbwe[here].
 
 == Recommendations
 
