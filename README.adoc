@@ -23,11 +23,11 @@ endif::[]
 
 == Before continuing
 . Use alongside my link:https://github.com/nermur/DuxOS[DuxOS] if you don't mind reinstalling Windows; it's comprehensive on removing features that have minimal/no use which impact performance noticeably.
-** Disabling some features are ignored on Windows versions that aren't Enterprise/Education/Server editions, especially regarding telemetry.
-. It's assumed you have to reapply W11Boost after major Windows feature updates.
-. Windows can at any time decide to revert single or multiple changes done by this script.
 
-___
+. It's assumed that:
+** Disabling some features are ignored on Windows versions that aren't Enterprise/Education/Server editions, especially regarding telemetry.
+** You have to reapply W11Boost after major Windows feature updates, such as going from 21H2 -> 22H2.
+** Windows can at any time decide to revert single or multiple changes done by this script.
 
 .User notes
 [%collapsible]
@@ -79,7 +79,7 @@ ___
 . Temporarily disable all anti-virus software.
 . Run `W11Boost.bat` as Administrator.
 
-== About "Optional extras"
+== Extras
 * `W11_LTSC_2022.ps1`
 ** Uninstalls a lot of default apps to replicate what Windows 10 LTSC 2022 includes by default.
 *** This is unnecessary on DuxOS.
