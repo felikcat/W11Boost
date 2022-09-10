@@ -13,16 +13,16 @@ endif::[]
 [%collapsible]
 ====
 
-. https://archive.org/details/windows-internals-part1-7th/mode/2up
-** https://github.com/zodiacon/WindowsInternals
-. https://www.microsoftpressstore.com/store/windows-internals-part-2-9780135462409
-** This can be viewed for free from link:https://en.wikipedia.org/wiki/Z-Library[Z-Library].
+. //archive.org/details/windows-internals-part1-7th/mode/2up
+** //github.com/zodiacon/WindowsInternals
+. //www.microsoftpressstore.com/store/windows-internals-part-2-9780135462409
+** This can be viewed for free from link://en.wikipedia.org/wiki/Z-Library[Z-Library].
 
-. https://github.com/MicrosoftDocs/windows-driver-docs/tree/staging/windows-driver-docs-pr
+. //github.com/MicrosoftDocs/windows-driver-docs/tree/staging/windows-driver-docs-pr
 ====
 
 == Before continuing
-. Use alongside my link:https://github.com/nermur/DuxOS[DuxOS] if you don't mind reinstalling Windows; it's comprehensive on removing features that have minimal/no use which impact performance noticeably.
+. Use alongside my link://github.com/nermur/DuxOS[DuxOS] if you don't mind reinstalling Windows; it's comprehensive on removing features that have minimal/no use which impact performance noticeably.
 
 . It's assumed that:
 ** Disabling some features are ignored on Windows versions that aren't Enterprise/Education/Server editions, especially regarding telemetry.
@@ -35,7 +35,7 @@ endif::[]
 * Does not overwrite user preferences that decrease privacy, except for those with a noticeable performance impact.
 ** It's assumed third-party tools do this job better, and not everyone wants to disable features that have privacy concerns.
 
-* Gets rid of some of the auto-piloting that uses system resources, such as the link:https://admx.help/?Category=Windows_11_2022&Policy=Microsoft.Policies.ApplicationCompatibility::AppCompatTurnOffEngine[Application Compatibility Engine].
+* Gets rid of some of the auto-piloting that uses system resources, such as the link://admx.help/?Category=Windows_11_2022&Policy=Microsoft.Policies.ApplicationCompatibility::AppCompatTurnOffEngine[Application Compatibility Engine].
 ** For ACE being off specifically, you would manually specify to run a legacy application in compatibility mode (likely for Windows XP).
 
 * Fixes a few mistakes made by other optimizers.
@@ -61,7 +61,7 @@ endif::[]
 ====
 
 == Requirements
-. Windows has to be activated for some changes, use a license key, or run either link:https://github.com/abbodi1406/KMS_VL_ALL_AIO[abbodi1406's KMS_VL_ALL_AIO] or massgravel's link:https://github.com/massgravel/Microsoft-Activation-Scripts[Microsoft Activation Scripts].
+. Windows has to be activated for some changes, use a license key, or run either link://github.com/abbodi1406/KMS_VL_ALL_AIO[abbodi1406's KMS_VL_ALL_AIO] or massgravel's link://github.com/massgravel/Microsoft-Activation-Scripts[Microsoft Activation Scripts].
 
 . W11Boost.bat's `replace_windows_search=1` or `replace_windows11_interface=1` requires `winget`.
 ** For Windows 11, ensure `winget` is working, if not:
@@ -74,7 +74,7 @@ endif::[]
 
 
 == Instructions
-. link:https://github.com/nermur/W11Boost/archive/refs/heads/master.zip[Download W11Boost], then extract it.
+. link://github.com/nermur/W11Boost/archive/refs/heads/master.zip[Download W11Boost], then extract it.
 . Configure the options by editing `W11Boost.bat`.
 . Temporarily disable all anti-virus software.
 . Run `W11Boost.bat` as Administrator.
@@ -88,8 +88,8 @@ endif::[]
 
 * `Xbox_minimal.bat`
 ** Note: Login to the Microsoft Store before using this script, otherwise it will not work.
-** Installs only what's required to use Xbox Controllers (interface not included, get it link:ms-windows-store://pdp/?PFN=Microsoft.XboxDevices_8wekyb3d8bbwe[here]), Game Pass, and specific games like Forza Horizon 4 & 5.
-*** To also get Game Bar, install the following link:ms-windows-store://pdp/?PFN=Microsoft.XboxGameOverlay_8wekyb3d8bbwe[here] and link:ms-windows-store://pdp/?PFN=Microsoft.XboxGamingOverlay_8wekyb3d8bbwe[here].
+** Installs only what's required to use Xbox Controllers (interface not included, get it link://www.microsoft.com/store/productId/9NBLGGH30XJ3[here]), Game Pass, and specific games like Forza Horizon 4 & 5.
+*** To also get Game Bar, install the following link://www.microsoft.com/store/productId/9NZKPSTSNW4P[here] and link://www.microsoft.com/store/productId/9NBLGGH537C2[here].
 
 == Recommendations
 
@@ -104,7 +104,7 @@ endif::[]
 . Disable the following options in your motherboard's BIOS:
 ** XHCI Hands Off
 ** USB Legacy
-*** link:https://techcommunity.microsoft.com/t5/microsoft-usb-blog/reasons-to-avoid-companion-controllers/ba-p/270710[Why disable these two?] +
+*** link://techcommunity.microsoft.com/t5/microsoft-usb-blog/reasons-to-avoid-companion-controllers/ba-p/270710[Why disable these two?] +
 Note: if a USB is no longer bootable after these two changes, temporarily turn them both back on.
 
 . Windows Settings -> Gaming -> Enable "Game Mode"
@@ -112,13 +112,13 @@ Note: if a USB is no longer bootable after these two changes, temporarily turn t
 
 . Install all optional updates through Windows Update; it can include device drivers.
 
-. Auto-detect and install link:https://www.amd.com/en/support[AMD's drivers]. +
-Auto-detect and install link:https://www.intel.com/content/www/us/en/support/detect.html[Intel's drivers].
+. Auto-detect and install link://www.amd.com/en/support[AMD's drivers]. +
+Auto-detect and install link://www.intel.com/content/www/us/en/support/detect.html[Intel's drivers].
 ** This will utilize their drivers instead of the generic drivers Microsoft provides, meaning better performance and lower DPC latency.
 
-. Enable "User Account Control" if it's disabled; disabled will break some software, such as: link:https://eddie.website/[AirVPN's client].
+. Enable "User Account Control" if it's disabled; disabled will break some software, such as: link://eddie.website/[AirVPN's client].
 
-. Kaspersky is the preferred anti-virus for consistently having these following reasons according to link:https://www.av-comparatives.org/vendors/kaspersky-lab/[AV comparatives] and personal opinion:
+. Kaspersky is the preferred anti-virus for consistently having these following reasons according to link://www.av-comparatives.org/vendors/kaspersky-lab/[AV comparatives] and personal opinion:
 ** Very low performance impact.
 ** Top-tier detection ratios, with minimal false positives.
 ** Pricing is reasonable, unlike ESET.
@@ -128,19 +128,19 @@ TIP: Kaspersky is cheaper to buy from Amazon or other third-party markets that s
 
 === Software
 
-. link:https://www.speedguide.net/downloads.php[SG TCP Optimizer]
+. link://www.speedguide.net/downloads.php[SG TCP Optimizer]
 ** Gets higher speeds and lower latency out of your network connection.
 
-. link:https://winaerotweaker.com/[Winaero Tweaker]
+. link://winaerotweaker.com/[Winaero Tweaker]
 ** Extensive number of usability and visual tweaks.
 
-. link:https://www.oo-software.com/en/shutup10[ShutUp10]
+. link://www.oo-software.com/en/shutup10[ShutUp10]
 ** A privacy enhancer that on its recommended settings doesn't break software.
 
-. link:https://github.com/WereDev/Wu10Man[Wu10Man]
+. link://github.com/WereDev/Wu10Man[Wu10Man]
 ** Can fully and safely disable or enable Windows updates without rebooting.
 
-. link:https://dl.bitsum.com/files/processlassosetup64.exe[Process Lasso]
+. link://dl.bitsum.com/files/processlassosetup64.exe[Process Lasso]
 ** Better thread scheduling (for specific CPUs) and the best power plan for gaming ("Bitsum Highest Performance").
 
 INFO: If you ever removed Power Profiles, run `powercfg -restoredefaultschemes` before installing Process Lasso, otherwise "Bitsum Highest Performance" can't apply.
