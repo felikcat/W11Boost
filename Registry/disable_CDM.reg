@@ -1,0 +1,14 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager]
+"ContentDeliveryAllowed"=dword:0
+"FeatureManagementEnabled"=dword:0
+"OemPreInstalledAppsEnabled"=dword:0
+"PreInstalledAppsEnabled"=dword:0
+"PreInstalledAppsEverEnabled"=dword:0
+"RemediationRequired"=dword:0
+"RotatingLockScreenEnabled"=dword:0
+"RotatingLockScreenOverlayEnabled"=dword:0
+"SilentInstalledAppsEnabled"=dword:0
+"SoftLandingEnabled"=dword:0
+"SystemPaneSuggestionsEnabled"=dword:0

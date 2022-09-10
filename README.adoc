@@ -22,12 +22,10 @@ endif::[]
 ====
 
 == Before continuing
-. This mainly modifies registry keys, which just like Group Policy Editor, asks nicely for its modifications instead of enforcing it (as NTLite or MSMG Toolkit would).
-** Disabling some features, especially about telemetry, are ignored on Windows versions that aren't Enterprise/Education/Server editions.
+. It's preferred to use DuxOS (WIP, not yet released) if you don't mind reinstalling Windows, as it can be comprehensive about removing features that have minimal/no use which impact performance noticeably.
+** Disabling some features are ignored on Windows versions that aren't Enterprise/Education/Server editions, especially about telemetry. Which is what DuxOS solves.
 . It's assumed you have to reapply W11Boost after major Windows feature updates.
 . Windows can at any time decide to revert single or multiple changes done by this script.
-
-TIP: DuxOS is currently being worked on to make Windows 11 squeaky clean, and to be mostly a Windows 10 LTSC 2022 replica; the NTLite preset used and any other tweaks will be open-sourced, along with including a downloadable ISO for those that haven't purchased NTLite.
 
 == Notes
 * Does not overwrite user preferences that decrease privacy, except for those with a noticeable performance impact.

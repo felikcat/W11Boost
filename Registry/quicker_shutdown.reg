@@ -1,0 +1,12 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CURRENT_USER\Control Panel\Desktop]
+"WaitToKillAppTimeOut"="2000"
+
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control]
+"AutoEndTasks"="1"
+"HungAppTimeout"="2000"
+"WaitToKillServiceTimeout"="2000"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System]
+"DisableShutdownNamedPipe"=dword:1
