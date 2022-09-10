@@ -13,12 +13,13 @@ endif::[]
 [%collapsible]
 ====
 
-. //archive.org/details/windows-internals-part1-7th/mode/2up
-** //github.com/zodiacon/WindowsInternals
-. //www.microsoftpressstore.com/store/windows-internals-part-2-9780135462409
+. link://archive.org/details/windows-internals-part1-7th/mode/2up[Windows Internals, Part 1, 7th Edition]
+** link://github.com/zodiacon/WindowsInternals[Windows Internals, Part 1, 7th edition (unofficial) Tools]
+
+. link://www.microsoftpressstore.com/store/windows-internals-part-2-9780135462409[Windows Internals, Part 2, 7th Edition]
 ** This can be viewed for free from link://en.wikipedia.org/wiki/Z-Library[Z-Library].
 
-. //github.com/MicrosoftDocs/windows-driver-docs/tree/staging/windows-driver-docs-pr
+. link://github.com/MicrosoftDocs/windows-driver-docs/tree/staging/windows-driver-docs-pr[Windows Driver Documentation]
 ====
 
 == Before continuing
