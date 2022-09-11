@@ -9,12 +9,14 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
+NOTE: The link://discord.com/invite/YC8Q8XSDhQ[Discord group]; mention any issues or improvements you have there.
+
 .Learning resources used
 [%collapsible]
 ====
 
 . link://archive.org/details/windows-internals-part1-7th/mode/2up[Windows Internals, Part 1, 7th Edition]
-** link://github.com/zodiacon/WindowsInternals[Windows Internals, Part 1, 7th edition (unofficial) Tools]
+** link://github.com/zodiacon/WindowsInternals[Windows Internals, Part 1, 7th Edition (unofficial) Tools]
 
 . link://www.microsoftpressstore.com/store/windows-internals-part-2-9780135462409[Windows Internals, Part 2, 7th Edition]
 ** This can be viewed for free from link://en.wikipedia.org/wiki/Z-Library[Z-Library].
@@ -23,10 +25,10 @@ endif::[]
 ====
 
 == Before continuing
-. Use alongside my link://github.com/nermur/DuxOS[DuxOS] if you don't mind reinstalling Windows; it's comprehensive on removing features that have minimal/no use which impact performance noticeably.
+. Use alongside my link://github.com/nermur/DuxOS[DuxOS] if you don't mind reinstalling Windows; it's comprehensive on removing components that have minimal/no use which impact performance noticeably.
 
 . It's assumed that:
-** Disabling some features are ignored on Windows versions that aren't Enterprise/Education/Server editions, especially regarding telemetry.
+** Disabling some components are ignored on Windows versions that aren't Enterprise/Education/Server editions, especially regarding telemetry.
 ** You have to reapply W11Boost after major Windows feature updates, such as going from 21H2 -> 22H2.
 ** Windows can at any time decide to revert single or multiple changes done by this script.
 
@@ -34,7 +36,7 @@ endif::[]
 [%collapsible]
 ====
 * Does not overwrite user preferences that decrease privacy, except for those with a noticeable performance impact.
-** It's assumed third-party tools do this job better, and not everyone wants to disable features that have privacy concerns.
+** It's assumed third-party tools do this job better, and not everyone wants to disable components that have privacy concerns.
 
 * Gets rid of some of the auto-piloting that uses system resources, such as the link://admx.help/?Category=Windows_11_2022&Policy=Microsoft.Policies.ApplicationCompatibility::AppCompatTurnOffEngine[Application Compatibility Engine].
 ** For ACE being off specifically, you would manually specify to run a legacy application in compatibility mode (likely for Windows XP).
