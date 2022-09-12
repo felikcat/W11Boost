@@ -235,9 +235,7 @@ REM Disable Autoplay on all disk types.
 reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v "NoDriveTypeAutoRun" /t REG_DWORD /d 255 /f
 
 REM Disable WER (Windows Error Reporting).
-reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\Windows Error Reporting" /v "Disabled" /t REG_DWORD /d 1 /f
-reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\Windows Error Reporting" /v "AutoApproveOSDumps" /t REG_DWORD /d 0 /f
-reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\Windows Error Reporting" /v "DontSendAdditionalData" /t REG_DWORD /d 1 /f
+reg.exe import Registry\disable_WER.reg
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Windows Error Reporting\QueueReporting"
 
 REM Ask to not allow execution of experiments by Microsoft.
@@ -339,6 +337,8 @@ fsutil.exe behavior set disablelastaccess 3
 
 REM == GROUP 2: Correct mistakes by others ==
 
+reg.exe import Registry\mistake_corrections.reg
+
 REM Use sane defaults for these sensitive timer related settings.
 bcdedit.exe /deletevalue useplatformclock
 bcdedit.exe /deletevalue uselegacyapicmode
@@ -350,10 +350,6 @@ bcdedit.exe /set uselegacyapicmode no
 REM Using the "classic" Hyper-V scheduler can break Hyper-V for QEMU with KVM.
 bcdedit.exe /set hypervisorschedulertype core
 
-REM https://docs.microsoft.com/en-US/troubleshoot/windows-server/networking/configure-ipv6-in-windows#use-registry-key-to-configure-ipv6
-REM Prefer IPv6 whenever possible; avoids NAT, and handles fragmentation locally instead of on the router.
-reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters" /v "DisabledComponents" /t REG_DWORD /d "0" /f
-
 REM Ensure IPv6 and its related features are enabled.
 reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\iphlpsvc" /v "Start" /t REG_DWORD /d 2 /f
 reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\IpxlatCfgSvc" /v "Start" /t REG_DWORD /d 3 /f
@@ -362,22 +358,8 @@ powershell.exe -Command "Set-NetAdapterBinding -Name '*' -DisplayName 'Internet 
 REM MemoryCompression: Slightly increases CPU load, but reduces I/O load and makes Windows handle Out Of Memory situations smoothly; akin to Linux's zRAM.
 powershell.exe -Command "Enable-MMAgent -ApplicationLaunchPrefetching -ApplicationPreLaunch -MemoryCompression"
 
-REM Delaying the startup of third-party programs gives Windows more room to breathe for its own jobs, speeding up the overall startup time.
-reg.exe delete "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Serialize" /v "Startupdelayinmsec" /f
-
 REM Programs that rely on 8.3 filenames from the DOS-era will break if this is disabled.
 fsutil.exe behavior set disable8dot3 2
-
-REM Splitting SvcHost less decreases Windows' stability; set it to defaults.
-reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control" /v "SvcHostSplitThresholdInKB" /t REG_DWORD /d 3670016 /f
-
-REM Disabling "smart multi-homed name resolution" can make DNS requests extremely slow.
-REM If this is used to stop a VPN's DNS leaks, use a different VPN client (eddie.website) or change VPN providers.
-reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows NT\DNSClient" /v "DisableSmartNameResolution" /t REG_DWORD /d 0 /f
-reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters" /v "DisableParallelAandAAAA" /t REG_DWORD /d 0 /f
-
-REM A security feature that's disabled by default in Windows 11 Pro. Enabling this makes shutdown times slow.
-reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" /v "ClearPageFileAtShutdown" /t REG_DWORD /d 0 /f
 
 REM == GROUP 2: END ==
 

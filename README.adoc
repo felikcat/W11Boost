@@ -22,6 +22,8 @@ NOTE: The link://discord.com/invite/YC8Q8XSDhQ[Discord group]; mention any issue
 ** This can be viewed for free from link://en.wikipedia.org/wiki/Z-Library[Z-Library].
 
 . link://github.com/MicrosoftDocs/windows-driver-docs/tree/staging/windows-driver-docs-pr[Windows Driver Documentation]
+
+. link://therealmjp.github.io/posts/breaking-down-barriers-part-1-whats-a-barrier/[TheRealMJP's blog posts on how GPU synchronization and preemption work]
 ====
 
 == Before continuing

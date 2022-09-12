@@ -1,0 +1,33 @@
+Windows Registry Editor Version 5.00
+
+; Prefer IPv6 whenever possible; avoids NAT, and handles fragmentation locally instead of on the router.
+; https://docs.microsoft.com/en-US/troubleshoot/windows-server/networking/configure-ipv6-in-windows#use-registry-key-to-configure-ipv6
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters]
+"DisabledComponents"=dword:0
+
+; Delaying the startup of third-party programs gives Windows more room to breathe for its own jobs, speeding up the overall startup time.
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Serialize]
+"Startupdelayinmsec"=-
+
+; Splitting SvcHost less decreases Windows' stability; set it to defaults.
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control]
+"SvcHostSplitThresholdInKB"=dword:3670016
+
+; Disabling "smart multi-homed name resolution" can make DNS requests extremely slow.
+; If this is used to stop a VPN's DNS leaks, use a different VPN client (eddie.website) or change VPN providers.
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows NT\DNSClient]
+"DisableSmartNameResolution"=dword:0
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters]
+"DisableParallelAandAAAA"=dword:0
+
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management]
+; A security feature that's disabled by default in Windows 11 Pro. Enabling this makes shutdown times slow.
+"ClearPageFileAtShutdown"=dword:0
+; https://docs.microsoft.com/en-us/windows/win32/cimwin32prov/win32-operatingsystem
+; LargeSystemCache is obsolete and not supported.
+"LargeSystemCache"=dword:0
+
+; Modern GPUs can dispatch multiple high-priority queues without slowing each other down, so enable preemption.
+; If a high-priority job is running and preemption off, it could lead to other software waiting too long to get a share of the GPU's time, and become noticeably slow.
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\GraphicsDrivers\Scheduler]
+"EnablePreemption"=-

@@ -1,0 +1,6 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\Windows Error Reporting]
+"Disabled"=dword:1
+"AutoApproveOSDumps"=dword:0
+"DontSendAdditionalData"=dword:1
