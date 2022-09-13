@@ -1,6 +1,29 @@
 Windows Registry Editor Version 5.00
 
 [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\Windows Error Reporting]
-"Disabled"=dword:1
 "AutoApproveOSDumps"=dword:0
+; 1 = Minimum level; "Always ask before sending data: Windows prompts users for consent to send reports."
+"DefaultConsent"=dword:1
+; 0 = Don't ignore custom consent settings.
+"DefaultOverrideBehavior"=dword:0
+"Disabled"=dword:1
 "DontSendAdditionalData"=dword:1
+"LoggingDisabled"=dword:1
+
+; Incase error reports do get sent, minimize the amount of data processed.
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting]
+AllOrNone=dword:0
+IncludeKernelFaults=dword:0
+IncludeMicrosoftApps=dword:0
+IncludeShutdownErrs=dword:0
+IncludeWindowsApps=dword:0
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting\ExclusionList]
+"*"="*"
+
+[-HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting\InclusionList]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\Windows Error Reporting\ExcludedApplications]
+"*"="*"
+
+[-HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\Windows Error Reporting\Consent]

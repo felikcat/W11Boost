@@ -150,7 +150,7 @@ if %recommended_ethernet_tweaks%==1 (
 
 if %replace_windows_search%==1 (
 	sc.exe stop WSearch
-	reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\WSearch" /v Start /t REG_DWORD /d 4 /f
+	reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\WSearch" /v "Start" /t REG_DWORD /d 4 /f
 	winget.exe install voidtools.Everything -eh
 	winget.exe install stnkl.EverythingToolbar -eh
 )
@@ -219,17 +219,9 @@ schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\DiskDiagnostic\Microsoft-W
 REM == GROUP 1: END ==
 
 
-REM Disable "Program Compatibility Assistant".
-reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\AppCompat" /v "DisablePCA" /t REG_DWORD /d 1 /f
-
-REM Disable "Application Compatibility Engine".
-reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\AppCompat" /v "DisableEngine" /t REG_DWORD /d 1 /f
+reg.exe import Registry\application_compatibility.reg
+REM Task is for "Application Compatibility Engine".
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Application Experience\PcaPatchDbTask"
-
-REM Disable "SwitchBack Compatibility Engine".
-reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\AppCompat" /v "SbEnable" /t REG_DWORD /d 0 /f
-REM Disable user steps recorder.
-reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\AppCompat" /v "DisableUAR" /t REG_DWORD /d 1 /f
 
 REM Disable Autoplay on all disk types.
 reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v "NoDriveTypeAutoRun" /t REG_DWORD /d 255 /f
@@ -322,17 +314,21 @@ schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\WS\WSTask"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\WwanSvc\OobeDiscovery"
 
 REM Disable "Delivery Optimization".
-reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\DoSvc" /v Start /t REG_DWORD /d 4 /f
+reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\DoSvc" /v "Start" /t REG_DWORD /d 4 /f
 
 REM Disables "Diagnostic Policy Service"; logs tons of information to be sent off and analyzed by Microsoft, and in some cases caused noticeable performance slowdown.
-reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\DPS" /v Start /t REG_DWORD /d 4 /f
-reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\PcaSvc" /v Start /t REG_DWORD /d 4 /f
+reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\DPS" /v "Start" /t REG_DWORD /d 4 /f
+reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\PcaSvc" /v "Start" /t REG_DWORD /d 4 /f
 
 REM Don't analyze programs' execution time data.
 reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Perflib" /v "Disable Performance Counters" /t REG_DWORD /d 1 /f
 
 REM Don't use NTFS' "Last Access Time Stamp Updates" by default; a program can still explicitly update them for itself.
 fsutil.exe behavior set disablelastaccess 3
+
+REM Can severely degrade a program's performance if it got marked for "crashing" too often, such is the case for Assetto Corsa.
+REM https://docs.microsoft.com/en-us/windows/desktop/win7appqual/fault-tolerant-heap
+reg.exe add "HKEY_LOCAL_MACHINE\Software\Microsoft\FTH" /v "Enabled" /t REG_DWORD /d 0 /f
 
 
 REM == GROUP 2: Correct mistakes by others ==
