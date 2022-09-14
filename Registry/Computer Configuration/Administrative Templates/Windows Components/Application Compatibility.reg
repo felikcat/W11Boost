@@ -7,7 +7,7 @@ DisablePCA=dword:1
 DisableEngine=dword:1
 ; Disable "SwitchBack Compatibility Engine".
 SbEnable=dword:0
-; Disable user steps recorder.
+; Disable user Steps Recorder.
 DisableUAR=dword:1
 ; Disable "Remove Program Compatibility Property Page".
 DisablePropPage=-

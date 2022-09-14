@@ -6,7 +6,6 @@ Windows Registry Editor Version 5.00
 "DefaultConsent"=dword:1
 ; 0 = Don't ignore custom consent settings.
 "DefaultOverrideBehavior"=dword:0
-"Disabled"=dword:1
 "DontSendAdditionalData"=dword:1
 "LoggingDisabled"=dword:1
 

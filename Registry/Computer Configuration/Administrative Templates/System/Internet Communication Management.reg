@@ -1,0 +1,20 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\SQMClient\Windows]
+; Disable Windows Customer Experience Improvement Program (a type of telemetry).
+"CEIPEnable"=dword:0
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\Windows Error Reporting]
+"Disabled"=dword:1
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\NetworkConnectivityStatusIndicator]
+; Don't perform connection tests to Microsoft to see if internet is connected, or connected but limited.
+"NoActiveProbe"=dword:1
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Messenger\Client]
+; Disable telemetry for Windows Messenger.
+"CEIP"=dword:2
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\TabletPC]
+; Disable telemetry for Tablet PC's handwriting recognition.
+"PreventHandwritingDataSharing"=dword:1

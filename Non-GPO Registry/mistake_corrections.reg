@@ -28,6 +28,6 @@ Windows Registry Editor Version 5.00
 "LargeSystemCache"=dword:0
 
 ; Modern GPUs can dispatch multiple high-priority queues without slowing each other down, so enable preemption.
-; If a high-priority job is running and preemption off, it could lead to other software waiting too long to get a share of the GPU's time, and become noticeably slow.
+; If a high-priority job is running and preemption is off, it could lead to other software waiting too long to get a share of the GPU's time, and become noticeably slow.
 [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\GraphicsDrivers\Scheduler]
 "EnablePreemption"=-

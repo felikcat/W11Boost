@@ -1,0 +1,5 @@
+Windows Registry Editor Version 5.00
+
+; Prioritize installing drivers signed with the "Microsoft Windows Publisher" signature over others.
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Settings]
+"AllSigningEqual"=-

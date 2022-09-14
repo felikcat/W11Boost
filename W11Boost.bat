@@ -1,5 +1,5 @@
 @echo off
-title W11Boost by https://github.com/nermur
+title W11Boost by Felik @ https://github.com/nermur
 
 REM Disables Sticky, Filter, and Toggle Keys.
 set /A avoid_key_annoyances=1
@@ -83,14 +83,14 @@ Pause
 cd %~dp0
 
 REM Won't make a restore point if there's already one within the past 24 hours.
-WMIC.exe /Namespace:\\root\default Path SystemRestore Call CreateRestorePoint "W11Boost by nermur", 100, 7
+WMIC.exe /Namespace:\\root\default Path SystemRestore Call CreateRestorePoint "W11Boost by Felik @ github.com/nermur", 100, 7
 
 REM "Fast startup" causes stability issues, and increases disk wear from excessive I/O usage.
 reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Power" /V "HiberbootEnabled" /T REG_DWORD /D 0 /F
 attrib +R %WinDir%\System32\SleepStudy\UserNotPresentSession.etl
 
 if %avoid_key_annoyances%==1 (
-	reg.exe import Registry\Optional\avoid_key_annoyances.reg
+	reg.exe import "Non-GPO Registry\avoid_key_annoyances.reg"
 )
 
 if %file_history%==1 (
@@ -118,7 +118,7 @@ if %no_ethernet_power_saving%==1 (
 )
 
 if %no_game_dvr%==1 (
-	reg.exe import Registry\Optional\no_game_dvr.reg
+	reg.exe import "Non-GPO Registry\no_game_dvr.reg"
 )
 
 if %no_geolocation%==1 (
@@ -132,16 +132,9 @@ if %no_geolocation%==1 (
 )
 
 if %no_mitigations%==1 (
-	reg.exe import Registry\Optional\no_mitigations.reg
+	reg.exe import "Non-GPO Registry\no_mitigations.reg"
 
 	powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "& {Start-Process powershell.exe -ArgumentList '-NoProfile -ExecutionPolicy Bypass -File ""set_exploit_mitigations.ps1""' -Verb RunAs}"
-
-	REM Ensure "Virtual Memory Pagefile Encryption" is disabled; by default it's not configured.
-	fsutil.exe behavior set encryptpagingfile 0
-
-	REM Ensure "Data Execution Prevention" (DEP) only applies to operating system components, along with Ring 0 (kernel-mode) drivers.
-	REM Applying DEP to Ring 3 (user-mode) programs will slow down and break some, such as the original Deus Ex.
-	bcdedit.exe /set nx Optin	
 )
 
 if %recommended_ethernet_tweaks%==1 (
@@ -188,19 +181,15 @@ reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explor
 REM Don't check for an active connection through Microsoft's servers.
 reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\NlaSvc\Parameters\Internet" /v "EnableActiveProbing" /t REG_DWORD /d 0 /f
 
-REM Ask OneDrive to only generate network traffic if signed in to OneDrive.
-reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\OneDrive" /v "PreventNetworkTrafficPreUserSignIn" /t REG_DWORD /d 1 /f
-
 REM Disallow automatic: software updates, security scanning, and system diagnostics.
 reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\Maintenance" /v "MaintenanceDisabled" /t REG_DWORD /d 1 /f
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Diagnosis\Scheduled"
 
+REM Ask OneDrive to only generate network traffic if signed in to OneDrive.
+reg.exe import "Registry\Computer Configuration\Windows Components\OneDrive.reg"
 
-REM == GROUP 1: Ask to stop sending diagnostic data to Microsoft ==
-
-reg.exe import Registry/prevent_microsoft_diagnostics.reg
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Application Experience\Microsoft Compatibility Appraiser"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Application Experience\ProgramDataUpdater"
+REM Ask to stop sending diagnostic data to Microsoft.
+reg.exe import "Registry\Computer Configuration\Administrative Templates\Windows Components\Data Collection and Preview Builds.reg"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Feedback\Siuf\DmClient"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Feedback\Siuf\DmClientOnScenarioDownload"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Flighting\FeatureConfig\ReconcileFeatures"
@@ -208,26 +197,26 @@ schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Flighting\FeatureConfig\Us
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Flighting\FeatureConfig\UsageDataReporting"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Flighting\OneSettings\RefreshCache"
 
+REM Disables various compatibility assistants and engines; it's assumed a W11Boost user is going to manually set compatibility when needed.
+reg.exe import "Registry\Computer Configuration\Administrative Templates\Windows Components\Application Compatibility.reg"
+schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Application Experience\Microsoft Compatibility Appraiser"
+schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Application Experience\ProgramDataUpdater"
+schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Application Experience\PcaPatchDbTask"
+
 REM Disable "Customer Experience Improvement Program"; also implies turning off the Inventory Collector.
-reg.exe import Registry\disable_CEIP.reg
+reg.exe import "Registry\Computer Configuration\Administrative Templates\System\App-V.reg"
+reg.exe import "Registry\Computer Configuration\Administrative Templates\System\Internet Communication Management.reg"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Customer Experience Improvement Program\Consolidator"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Customer Experience Improvement Program\KernelCeipTask"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Customer Experience Improvement Program\UsbCeip"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Autochk\Proxy"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\DiskDiagnostic\Microsoft-Windows-DiskDiagnosticDataCollector"
 
-REM == GROUP 1: END ==
-
-
-reg.exe import Registry\application_compatibility.reg
-REM Task is for "Application Compatibility Engine".
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Application Experience\PcaPatchDbTask"
-
 REM Disable Autoplay on all disk types.
 reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v "NoDriveTypeAutoRun" /t REG_DWORD /d 255 /f
 
-REM Disable WER (Windows Error Reporting).
-reg.exe import Registry\disable_WER.reg
+REM Disable Windows Error Reporting (WER).
+reg.exe import "Registry\Computer Configuration\Administrative Templates\Windows Components\Windows Error Reporting.reg"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Windows Error Reporting\QueueReporting"
 
 REM Ask to not allow execution of experiments by Microsoft.
@@ -236,11 +225,13 @@ reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\PolicyManager\current\device\
 REM Disable tracking of application startups.
 reg.exe add "HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "Start_TrackProgs" /t REG_DWORD /d 0 /f
 
-REM Disable all Content Delivery Manager features, which stops automatic installation of advertised apps among others.
-reg.exe import Registry\disable_CDM.reg
+REM Disables Cloud Content features; stops automatic installation of advertised ("suggested") apps among others.
+REM Apparently is called "Content Delivery Manager" in Windows 10.
+reg.exe import "Registry\Computer Configuration\Administrative Templates\Windows Components\Cloud Content.reg"
+reg.exe import "LTSC 2022 Registry\disable_CDM.reg"
 
 REM Disable SmartScreen, it delays the launch of software and is better done by other anti-malware software.
-reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\System" /v "EnableSmartScreen" /t REG_DWORD /d 0 /f
+reg.exe import "Registry\Computer Configuration\Windows Components\Windows Defender SmartScreen.reg"
 reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer" /v "SmartScreenEnabled" /t REG_SZ /d "Off" /f
 reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\AppHost" /v "EnableWebContentEvaluation" /t REG_DWORD /d 0 /f
 
@@ -323,17 +314,19 @@ reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\PcaSvc" /v "St
 REM Don't analyze programs' execution time data.
 reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Perflib" /v "Disable Performance Counters" /t REG_DWORD /d 1 /f
 
+REM == NTFS tweaks ==
+reg.exe import "Registry\Computer Configuration\Administrative Templates\System\Filesystem.reg"
 REM Don't use NTFS' "Last Access Time Stamp Updates" by default; a program can still explicitly update them for itself.
 fsutil.exe behavior set disablelastaccess 3
+REM ====
 
 REM Can severely degrade a program's performance if it got marked for "crashing" too often, such is the case for Assetto Corsa.
 REM https://docs.microsoft.com/en-us/windows/desktop/win7appqual/fault-tolerant-heap
 reg.exe add "HKEY_LOCAL_MACHINE\Software\Microsoft\FTH" /v "Enabled" /t REG_DWORD /d 0 /f
 
 
-REM == GROUP 2: Correct mistakes by others ==
-
-reg.exe import Registry\mistake_corrections.reg
+REM == Correct mistakes by others ==
+reg.exe import "Non-GPO Registry\mistake_corrections.reg"
 
 REM Use sane defaults for these sensitive timer related settings.
 bcdedit.exe /deletevalue useplatformclock
@@ -356,9 +349,7 @@ powershell.exe -Command "Enable-MMAgent -ApplicationLaunchPrefetching -Applicati
 
 REM Programs that rely on 8.3 filenames from the DOS-era will break if this is disabled.
 fsutil.exe behavior set disable8dot3 2
-
-REM == GROUP 2: END ==
-
+REM ====
 
 REM Don't draw graphical elements for boot (spinner, Windows or BIOS logo, etc).
 bcdedit.exe /set bootuxdisabled on
@@ -367,12 +358,18 @@ REM Don't log events without warnings or errors.
 auditpol.exe /set /category:* /Success:disable
 
 REM Decrease shutdown time.
-reg.exe import Registry\quicker_shutdown.reg
+reg.exe import "Non-GPO Registry\quicker_shutdown.reg"
 
-taskkill.exe /IM explorer.exe /F
-start explorer.exe
+REM == Other registry imports ==
+
+reg.exe import "Registry\Computer Configuration\Administrative Templates\Windows Components\Windows Security.reg"
+reg.exe import "Registry\Computer Configuration\Administrative Templates\System\Device Installation.reg"
+
+REM ====
+
 echo.
-echo Your PC will restart after a key is pressed; required to fully apply changes
+echo Your PC will restart after a key is pressed!
+echo It's required to fully apply changes.
 echo.
 Pause
 shutdown.exe /r /t 00

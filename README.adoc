@@ -30,23 +30,27 @@ NOTE: The link://discord.com/invite/YC8Q8XSDhQ[Discord group]; mention any issue
 . Use alongside my link://github.com/nermur/DuxOS[DuxOS] if you don't mind reinstalling Windows; it's comprehensive on removing components that have minimal/no use which impact performance noticeably.
 
 . It's assumed that:
-** Disabling some components are ignored on Windows versions that aren't Enterprise/Education/Server editions, especially regarding telemetry.
+** Disabling some components are ignored on Windows versions that aren't Enterprise/Education/Server SKUs, especially regarding telemetry.
 ** You have to reapply W11Boost after major Windows feature updates, such as going from 21H2 -> 22H2.
 ** Windows can at any time decide to revert single or multiple changes done by this script.
 
 .User notes
 [%collapsible]
 ====
-* Does not overwrite user preferences that decrease privacy, except for those with a noticeable performance impact.
+* Does not overwrite user preferences that decrease privacy, except for those with a noticeable performance impact, or can be distracting/annoying.
 ** It's assumed third-party tools do this job better, and not everyone wants to disable components that have privacy concerns.
 
 * Gets rid of some of the auto-piloting that uses system resources, such as the link://admx.help/?Category=Windows_11_2022&Policy=Microsoft.Policies.ApplicationCompatibility::AppCompatTurnOffEngine[Application Compatibility Engine].
 ** For ACE being off specifically, you would manually specify to run a legacy application in compatibility mode (likely for Windows XP).
 
-* Fixes a few mistakes made by other optimizers.
+* What is repaired:
+** Mistakes made by other optimizers.
 
-* Only Windows 10 LTSC 2022 and newer are tested. 
-** Older versions of Windows are worse in terms of stability, including Windows 7.
+* What explicitly isn't repaired:
+** Damage caused by malware, such as:
+*** Disabling programs.
+
+* Only Windows 10 LTSC 2022, Windows 11 Pro 21H2, and Windows 11 Enterprise 22H2 have been tested.
 
 ====
 
@@ -64,9 +68,14 @@ NOTE: The link://discord.com/invite/YC8Q8XSDhQ[Discord group]; mention any issue
 ** If the purpose is to revert back to defaults, manually set the default value instead.
 
 * The registry changes Group Policy edits do can be traced with link://docs.microsoft.com/en-us/sysinternals/downloads/procmon[Sysinternals Process Monitor].
-** Filter to the process containing gpedit.msc: image:Procmon64_1.png[]
-** Filter to registry changes only: image:Procmon64_2.png[]
+** Filter to the process containing gpedit.msc: +
+image:Procmon64_1.png[]
+** Filter to registry changes only: +
+image:Procmon64_2.png[]
 *** Translate the traced registry edits to their non-group policy places, and there's your registry key edit.
+
+TIP: Example gpedit.msc registry translation: +
+`HKCU\Software\Microsoft\Windows\CurrentVersion\Group Policy Objects\{2F5A9005-4CB6-4314-B846-8C3EB66C9C24}Machine\Software\Policies\Microsoft\Windows` *->* `HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\CloudContent`
 
 ====
 

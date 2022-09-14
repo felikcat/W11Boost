@@ -1,0 +1,11 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem]
+; Allowing above 260 characters long paths prevents issues in Scoop and other programs. 
+"LongPathsEnabled"=dword:1
+
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Policies]
+; Ensure "Virtual Memory Pagefile Encryption" is disabled; by default it's not configured (off).
+"NtfsEncryptPagingFile"=dword:0
+; Reducing page-faults and stack usage is beneficial to lowering DPC latency.
+"NtfsForceNonPagedPoolAllocation"=dword:1

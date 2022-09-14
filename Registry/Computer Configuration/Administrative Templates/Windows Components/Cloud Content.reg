@@ -1,0 +1,11 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\CloudContent]
+; Do not show Windows tips
+"DisableSoftLanding"=dword:1
+; Disable Consumer Experience:
+; - In the start menu, programs that aren't installed ("suggestions") are gone.
+; - Microsoft account notifications are gone.
+"DisableConsumerAccountStateContent"=dword:1
+"DisableCloudOptimizedContent"=dword:1
+"DisableWindowsConsumerFeatures"=dword:1
