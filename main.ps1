@@ -76,9 +76,9 @@ thumbnail_shadows = $thumbnail_shadows
 Pause
 
 # - Initialize -
-Set-PSDebug -Trace 1
 Push-Location $PSScriptRoot
-Import-Module -Name .\imports.psm1
+Start-Transcript -Path "$PSScriptRoot\W11Boost_LastRun.log"
+. ".\imports.ps1"
 
 # Won't make a restore point if there's already one within the past 24 hours.
 WMIC.exe /Namespace:\\root\default Path SystemRestore Call CreateRestorePoint "W11Boost by Felik @ github.com/nermur", 100, 7
@@ -378,7 +378,7 @@ reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Syste
 
 # ====
 
-Write-Output "
+Write-Warning "
 Your PC will restart after a key is pressed!
 It's required to fully apply changes.
 "

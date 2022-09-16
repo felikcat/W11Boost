@@ -8,4 +8,6 @@ reg.exe query HKU\S-1-5-19 || (
 	exit /b
 )
 
-powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "& {Start-Process powershell.exe -ArgumentList '-NoProfile -ExecutionPolicy Bypass -File "".\main.ps1""' -Verb RunAs}" > .\logs.txt
+cd %~dp0
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "& {Start-Process powershell.exe -ArgumentList '-NoProfile -ExecutionPolicy Bypass -File "".\main.ps1""' -Verb RunAs}"
