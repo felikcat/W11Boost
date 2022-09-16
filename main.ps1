@@ -75,8 +75,11 @@ thumbnail_shadows = $thumbnail_shadows
 "
 Pause
 
-Set-Location ([System.Environment]::CurrentDirectory)
-Import-Module -Name "imports.psm1"
+# - Initialize -
+Set-PSDebug -Trace 1
+Push-Location $PSScriptRoot
+Import-Module -Name .\imports.psm1
+
 # Won't make a restore point if there's already one within the past 24 hours.
 WMIC.exe /Namespace:\\root\default Path SystemRestore Call CreateRestorePoint "W11Boost by Felik @ github.com/nermur", 100, 7
 
@@ -85,7 +88,7 @@ reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager
 attrib +R %WinDir%\System32\SleepStudy\UserNotPresentSession.etl
 
 if ($avoid_key_annoyances) {
-	reg.exe import "Non-GPO Registry\avoid_key_annoyances.reg"
+	reg.exe import ".\Non-GPO Registry\avoid_key_annoyances.reg"
 }
 
 if ($file_history) {
@@ -112,7 +115,7 @@ if ($no_ethernet_power_saving) {
 }
 
 if ($no_game_dvr) {
-	reg.exe import "Non-GPO Registry\no_game_dvr.reg"
+	reg.exe import ".\Non-GPO Registry\no_game_dvr.reg"
 }
 
 if ($no_geolocation) {
@@ -126,7 +129,7 @@ if ($no_geolocation) {
 }
 
 if ($no_mitigations) {
-	reg.exe import "Non-GPO Registry\no_mitigations.reg"
+	reg.exe import ".\Non-GPO Registry\no_mitigations.reg"
 	Remove-All-ProcessMitigations
 	Remove-All-SystemMitigations
 
@@ -189,10 +192,10 @@ reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Sch
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Diagnosis\Scheduled"
 
 # Ask OneDrive to only generate network traffic if signed in to OneDrive.
-reg.exe import "Registry\Computer Configuration\Windows Components\OneDrive.reg"
+reg.exe import ".\Registry\Computer Configuration\Windows Components\OneDrive.reg"
 
 # Ask to stop sending diagnostic data to Microsoft.
-reg.exe import "Registry\Computer Configuration\Administrative Templates\Windows Components\Data Collection and Preview Builds.reg"
+reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Data Collection and Preview Builds.reg"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Feedback\Siuf\DmClient"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Feedback\Siuf\DmClientOnScenarioDownload"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Flighting\FeatureConfig\ReconcileFeatures"
@@ -201,14 +204,14 @@ schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Flighting\FeatureConfig\Us
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Flighting\OneSettings\RefreshCache"
 
 # Disables various compatibility assistants and engines; it's assumed a W11Boost user is going to manually set compatibility when needed.
-reg.exe import "Registry\Computer Configuration\Administrative Templates\Windows Components\Application Compatibility.reg"
+reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Application Compatibility.reg"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Application Experience\Microsoft Compatibility Appraiser"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Application Experience\ProgramDataUpdater"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Application Experience\PcaPatchDbTask"
 
 # Disable "Customer Experience Improvement Program"; also implies turning off the Inventory Collector.
-reg.exe import "Registry\Computer Configuration\Administrative Templates\System\App-V.reg"
-reg.exe import "Registry\Computer Configuration\Administrative Templates\System\Internet Communication Management.reg"
+reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\App-V.reg"
+reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\Internet Communication Management.reg"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Customer Experience Improvement Program\Consolidator"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Customer Experience Improvement Program\KernelCeipTask"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Customer Experience Improvement Program\UsbCeip"
@@ -219,7 +222,7 @@ schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\DiskDiagnostic\Microsoft-W
 reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v "NoDriveTypeAutoRun" /t REG_DWORD /d 255 /f
 
 # Disable Windows Error Reporting (WER).
-reg.exe import "Registry\Computer Configuration\Administrative Templates\Windows Components\Windows Error Reporting.reg"
+reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Windows Error Reporting.reg"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Windows Error Reporting\QueueReporting"
 
 # Ask to not allow execution of experiments by Microsoft.
@@ -230,11 +233,11 @@ reg.exe add "HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explore
 
 # Disables Cloud Content features; stops automatic installation of advertised ("suggested") apps among others.
 # Apparently is called "Content Delivery Manager" in Windows 10.
-reg.exe import "Registry\Computer Configuration\Administrative Templates\Windows Components\Cloud Content.reg"
-reg.exe import "LTSC 2022 Registry\disable_CDM.reg"
+reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Cloud Content.reg"
+reg.exe import ".\LTSC 2022 Registry\disable_CDM.reg"
 
 # Disable SmartScreen, it delays the launch of software and is better done by other anti-malware software.
-reg.exe import "Registry\Computer Configuration\Windows Components\Windows Defender SmartScreen.reg"
+reg.exe import ".\Registry\Computer Configuration\Windows Components\Windows Defender SmartScreen.reg"
 reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer" /v "SmartScreenEnabled" /t REG_SZ /d "Off" /f
 reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\AppHost" /v "EnableWebContentEvaluation" /t REG_DWORD /d 0 /f
 
@@ -301,7 +304,7 @@ schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\WwanSvc\OobeDiscovery"
 # ====
 
 # == Prevent Windows Update obstructions and other annoyances. ==
-reg.exe import "Registry\Computer Configuration\Administrative Templates\Windows Components\Windows Update.reg"
+reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Windows Update.reg"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\InstallService\ScanForUpdates"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\InstallService\ScanForUpdatesAsUser"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\UpdateOrchestrator\Schedule Scan Static Task"
@@ -323,7 +326,7 @@ reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\PcaSvc" /v "St
 reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Perflib" /v "Disable Performance Counters" /t REG_DWORD /d 1 /f
 
 # == NTFS tweaks ==
-reg.exe import "Registry\Computer Configuration\Administrative Templates\System\Filesystem.reg"
+reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\Filesystem.reg"
 # Don't use NTFS' "Last Access Time Stamp Updates" by default; a program can still explicitly update them for itself.
 fsutil.exe behavior set disablelastaccess 3
 # ====
@@ -334,7 +337,7 @@ reg.exe add "HKEY_LOCAL_MACHINE\Software\Microsoft\FTH" /v "Enabled" /t REG_DWOR
 
 
 # == Correct mistakes by others ==
-reg.exe import "Non-GPO Registry\mistake_corrections.reg"
+reg.exe import ".\Non-GPO Registry\mistake_corrections.reg"
 
 # Use sane defaults for these sensitive timer related settings.
 bcdedit.exe /deletevalue useplatformclock
@@ -366,12 +369,12 @@ bcdedit.exe /set bootuxdisabled on
 auditpol.exe /set /category:* /Success:disable
 
 # Decrease shutdown time.
-reg.exe import "Non-GPO Registry\quicker_shutdown.reg"
+reg.exe import ".\Non-GPO Registry\quicker_shutdown.reg"
 
 # == Other registry imports ==
 
-reg.exe import "Registry\Computer Configuration\Administrative Templates\Windows Components\Windows Security.reg"
-reg.exe import "Registry\Computer Configuration\Administrative Templates\System\Device Installation.reg"
+reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Windows Security.reg"
+reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\Device Installation.reg"
 
 # ====
 
