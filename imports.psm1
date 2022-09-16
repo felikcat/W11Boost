@@ -1,10 +1,24 @@
-# Check if Admin-Privileges are available
-function Test-IsAdmin {
-    ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")
+function Set-Recommended-Ethernet-Tweaks {
+    # Can reduce time taken to establish a connection, and prevent drop-outs.
+    # Drop-outs were the case with Intel I225-V revision 1 to 2, but not 3.
+    Set-NetAdapterAdvancedProperty -Name '*' -DisplayName 'Wait for Link' -RegistryValue 0
+
+    # TCP is to be reliable under bad network conditions, unlike UDP. Don't make it more-so like UDP.
+    Set-NetTCPSetting -SettingName InternetCustom -Timestamps Enabled
 }
 
-# Delete ExploitGuard ProcessMitigations for a given key in the registry. If no other settings exist under the specified key,
-# the key is deleted as well
+function Disable-Ethernet-Power-Saving {
+    $properties = @("Advanced EEE", "Auto Disable Gigabit", "Energy Efficient Ethernet",
+        "Gigabit Lite", "Green Ethernet", "Power Saving Mode",
+        "Selective Suspend", "ULP", "Ultra Low Power Mode")
+    # Disable features that can cause random packet loss/drop-outs.
+    for ($i = 0; $i -lt $properties.length; $i++) {
+        Set-NetAdapterAdvancedProperty -Name '*' -DisplayName $properties[$i] -RegistryValue 0
+    }
+}
+
+# Delete ExploitGuard ProcessMitigations for a given key in the registry;
+# if no other settings exist under the specified key, the key is deleted as well.
 function Remove-ProcessMitigations([Object] $Key, [string] $Name) {
     Try {
         if ($Key.GetValue("MitigationOptions")) {
@@ -34,10 +48,6 @@ function Remove-ProcessMitigations([Object] $Key, [string] $Name) {
 
 # Delete all ExploitGuard ProcessMitigations
 function Remove-All-ProcessMitigations {
-    if (!(Test-IsAdmin)) {
-        throw "ERROR: No Administrator-Privileges detected!"; return
-    }
-
     Get-ChildItem -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options" | ForEach-Object {
         $MitigationItem = $_;
         $MitigationItemName = $MitigationItem.PSChildName
@@ -74,36 +84,19 @@ function Remove-All-ProcessMitigations {
 
 # Delete all ExploitGuard System-wide Mitigations
 function Remove-All-SystemMitigations {
-
-    if (!(Test-IsAdmin)) {
-        throw "ERROR: No Administrator-Privileges detected!"; return
-    }
-
     $Kernel = Get-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\kernel"
 
     Try {
-        if ($Kernel.GetValue("MitigationOptions"))
-            { Write-Host "Removing System MitigationOptions"
-                Remove-ItemProperty -Path $Kernel.PSPath -Name "MitigationOptions" -ErrorAction Stop;
-            }
-        if ($Kernel.GetValue("MitigationAuditOptions"))
-            { Write-Host "Removing System MitigationAuditOptions"
-                Remove-ItemProperty -Path $Kernel.PSPath -Name "MitigationAuditOptions" -ErrorAction Stop;
-            }
-    } Catch {
+        if ($Kernel.GetValue("MitigationOptions")) {
+            Write-Host "Removing System MitigationOptions"
+            Remove-ItemProperty -Path $Kernel.PSPath -Name "MitigationOptions" -ErrorAction Stop;
+        }
+        if ($Kernel.GetValue("MitigationAuditOptions")) {
+            Write-Host "Removing System MitigationAuditOptions"
+            Remove-ItemProperty -Path $Kernel.PSPath -Name "MitigationAuditOptions" -ErrorAction Stop;
+        }
+    }
+    Catch {
         Write-Host "ERROR:" $_.Exception.Message "- System"
     }
 }
-
-Remove-All-ProcessMitigations
-Remove-All-SystemMitigations
-
-# DEP is required for effectively all updated game anti-cheats.
-Set-ProcessMitigation -System -Enable DEP
-
-# Ensure "Data Execution Prevention" (DEP) only applies to operating system components, along with Ring 0 (kernel-mode) drivers.
-# Applying DEP to Ring 3 (user-mode) programs will slow down and break some, such as the original Deus Ex.
-bcdedit.exe /set nx Optin
-
-# Required for Vanguard specifically, but also likely for ESEA and Faceit AC.
-Set-ProcessMitigation -System -Enable CFG
