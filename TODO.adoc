@@ -18,8 +18,6 @@ endif::[]
 . `Non-GPO Registry\avoid_key_annoyances.reg`
 ** Needs a reassessment of its contents.
 
-. `no_geolocation` option needs a reassessment of its contents.
-
 . `W11Boost.bat`
 ** Do registry backups instead of system restore. Combine this with a script to roll-back non-registry changes to factory defaults.
 

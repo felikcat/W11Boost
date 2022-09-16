@@ -17,7 +17,7 @@ $no_ethernet_power_saving = 1
 $no_game_dvr = 1
 
 # Disables GPS services, which always run even if there's no GPS hardware installed.
-$no_geolocation = 0
+$geolocation = 0
 
 # Disables all non-essential security mitigations; drastically improves performance for older CPUs (such as an Intel i7-4790K).
 $no_mitigations = 1
@@ -36,6 +36,7 @@ $replace_windows11_interface = 0
 $reset_network_interface_settings = 1
 
 # 0 = disable Explorer's thumbnail (images/video previews) border shadows.
+# 0 is recommended if dark mode is used.
 $thumbnail_shadows = 1
 
 if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
@@ -65,7 +66,7 @@ no_audio_reduction = $no_audio_reduction
 no_clipboard_history = $no_clipboard_history
 no_ethernet_power_saving = $no_ethernet_power_saving
 no_game_dvr = $no_game_dvr
-no_geolocation = $no_geolocation
+geolocation = $geolocation
 no_mitigations = $no_mitigations
 recommended_ethernet_tweaks = $recommended_ethernet_tweaks
 replace_windows_search = $replace_windows_search
@@ -79,6 +80,7 @@ Pause
 Push-Location $PSScriptRoot
 Start-Transcript -Path "$PSScriptRoot\W11Boost_LastRun.log"
 . ".\imports.ps1"
+New-PSDrive -PSProvider registry -Root HKEY_CLASSES_ROOT -Name HKCR
 
 # Won't make a restore point if there's already one within the past 24 hours.
 WMIC.exe /Namespace:\\root\default Path SystemRestore Call CreateRestorePoint "W11Boost by Felik @ github.com/nermur", 100, 7
@@ -94,7 +96,7 @@ if ($avoid_key_annoyances) {
 if ($file_history) {
 	reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\FileHistory" /v "Disabled" /t REG_DWORD /d 0 /f
 	schtasks.exe /Change /ENABLE /TN "\Microsoft\Windows\FileHistory\File History (maintenance mode)" 
-} 
+}
 elseif (!$file_history) { 
 	reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\FileHistory" /v "Disabled" /t REG_DWORD /d 1 /f
 	schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\FileHistory\File History (maintenance mode)"
@@ -118,11 +120,13 @@ if ($no_game_dvr) {
 	reg.exe import ".\Non-GPO Registry\no_game_dvr.reg"
 }
 
-if ($no_geolocation) {
-	reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors" /v "DisableLocation" /t REG_DWORD /d 1 /f
-	reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors" /v "DisableLocationScripting" /t REG_DWORD /d 1 /f
-	reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors" /v "DisableWindowsLocationProvider" /t REG_DWORD /d 1 /f
-	reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\lfsvc" /v "Start" /t REG_DWORD /d 4 /f
+if ($geolocation) {
+	reg.exe import ".\Non-GPO Registry\Geolocation\Enable.reg"
+	schtasks.exe /Change /ENABLE /TN "\Microsoft\Windows\Location\Notifications"
+	schtasks.exe /Change /ENABLE /TN "\Microsoft\Windows\Location\WindowsActionDialog"
+}
+elseif(!$geolocation) {
+	reg.exe import ".\Non-GPO Registry\Geolocation\Disable.reg"
 	sc.exe stop lfsvc
 	schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Location\Notifications"
 	schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Location\WindowsActionDialog"
@@ -164,12 +168,10 @@ if ($reset_network_interface_settings) {
 }
 
 if ($thumbnail_shadows) {
-	reg.exe add "HKCR\SystemFileAssociations\image" /v "Treatment" /t REG_DWORD /d 0 /f
-	reg.exe add "HKCR\SystemFileAssociations\image" /v "TypeOverlay" /t REG_SZ /d "" /f
+	Set-ItemProperty -Path "HKCR:\SystemFileAssociations\image" -Name "Treatment" -Type DWord -Value 0 -Force
 }
 elseif (!$thumbnail_shadows) {
-	reg.exe add "HKCR\SystemFileAssociations\image" /v "Treatment" /t REG_DWORD /d 2 /f
-	reg.exe add "HKCR\SystemFileAssociations\image" /v "TypeOverlay" /t REG_SZ /d "" /f
+	Set-ItemProperty -Path "HKCR:\SystemFileAssociations\image" -Name "Treatment" -Type DWord -Value 2 -Force
 }
 
 reg.exe add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v "NoLowDiskSpaceChecks" /t REG_DWORD /d 1 /f
