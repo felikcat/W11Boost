@@ -1,0 +1,5 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows NT\MitigationOptions]
+; Ensure loading fonts outside of %windir%\Fonts is allowed.
+"MitigationOptions_FontBocking"="2000000000000"

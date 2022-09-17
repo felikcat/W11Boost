@@ -18,3 +18,7 @@ Windows Registry Editor Version 5.00
 [HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\TabletPC]
 ; Disable telemetry for Tablet PC's handwriting recognition.
 "PreventHandwritingDataSharing"=dword:1
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\Explorer]
+; Ensure the Windows Store is allowed to be run.
+"NoUseStoreOpenWith"=-

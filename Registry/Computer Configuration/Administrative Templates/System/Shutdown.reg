@@ -1,0 +1,5 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\System]
+; Allows "Fast Startup" to be disabled.
+"HiberbootEnabled"=dword:0

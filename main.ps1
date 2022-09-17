@@ -1,23 +1,23 @@
 # Disables Sticky, Filter, and Toggle Keys.
 $avoid_key_annoyances = 1
 
+# Undermines software that clear the clipboard automatically.
+$clipboard_history = 1
+
 # 0 = disables File History.
 $file_history = 1
 
+# Disables GPS services, which always run even if there's no GPS hardware installed.
+$geolocation = 0
+
 # Ensures Windows' audio ducking/attenuation is disabled.
 $no_audio_reduction = 0
-
-# Undermines software that clear the clipboard automatically.
-$no_clipboard_history = 1
 
 # Prevents random packet loss/drop-outs in exchange for a higher battery drain.
 $no_ethernet_power_saving = 1
 
 # Use NVIDIA ShadowPlay, AMD ReLive, or OBS Studio instead.
 $no_game_dvr = 1
-
-# Disables GPS services, which always run even if there's no GPS hardware installed.
-$geolocation = 0
 
 # Disables all non-essential security mitigations; drastically improves performance for older CPUs (such as an Intel i7-4790K).
 $no_mitigations = 1
@@ -34,6 +34,12 @@ $replace_windows11_interface = 0
 # Resets all network interfaces back to their manufacturer's default settings.
 # Recommended before applying our network tweaks, as it's a "clean slate".
 $reset_network_interface_settings = 1
+
+# 0 is recommended.
+# System Restore:
+# - Cannot restore backups from previous versions of Windows; can't revert Windows updates with System Restore.
+# - Will revert other personal files (program settings and installations).
+$system_restore = 0
 
 # 0 = disable Explorer's thumbnail (images/video previews) border shadows.
 # 0 is recommended if dark mode is used.
@@ -61,17 +67,18 @@ Write-Output "
 ==== Current settings ====
 
 avoid_key_annoyances = $avoid_key_annoyances
+clipboard_history = $clipboard_history
 file_history = $file_history
+geolocation = $geolocation
 no_audio_reduction = $no_audio_reduction
-no_clipboard_history = $no_clipboard_history
 no_ethernet_power_saving = $no_ethernet_power_saving
 no_game_dvr = $no_game_dvr
-geolocation = $geolocation
 no_mitigations = $no_mitigations
 recommended_ethernet_tweaks = $recommended_ethernet_tweaks
 replace_windows_search = $replace_windows_search
 replace_windows11_interface = $replace_windows11_interface
 reset_network_interface_settings = $reset_network_interface_settings
+system_restore = $system_restore
 thumbnail_shadows = $thumbnail_shadows
 "
 Pause
@@ -86,11 +93,17 @@ New-PSDrive -PSProvider registry -Root HKEY_CLASSES_ROOT -Name HKCR
 WMIC.exe /Namespace:\\root\default Path SystemRestore Call CreateRestorePoint "W11Boost by Felik @ github.com/nermur", 100, 7
 
 # "Fast startup" causes stability issues, and increases disk wear from excessive I/O usage.
+reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\Shutdown.reg"
 reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Power" /V "HiberbootEnabled" /T REG_DWORD /D 0 /F
 attrib +R %WinDir%\System32\SleepStudy\UserNotPresentSession.etl
 
 if ($avoid_key_annoyances) {
 	reg.exe import ".\Non-GPO Registry\avoid_key_annoyances.reg"
+}
+
+reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\OS Policies.reg"
+if ($clipboard_history) {
+	reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\System" /v "AllowClipboardHistory" /t REG_DWORD /d 1 /f
 }
 
 if ($file_history) {
@@ -100,24 +113,6 @@ if ($file_history) {
 elseif (!$file_history) { 
 	reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\FileHistory" /v "Disabled" /t REG_DWORD /d 1 /f
 	schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\FileHistory\File History (maintenance mode)"
-}
-
-if ($no_audio_reduction) {
-	reg.exe add "HKEY_CURRENT_USER\SOFTWARE\Microsoft\Multimedia\Audio" /v "UserDuckingPreference" /t REG_DWORD /d "3" /f
-	reg.exe delete "HKEY_CURRENT_USER\SOFTWARE\Microsoft\Internet Explorer\LowRegistry\Audio\PolicyConfig\PropertyStore" /f
-}
-
-if ($no_clipboard_history) {
-	reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\System" /v "AllowClipboardHistory" /t REG_DWORD /d 0 /f
-	reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\System" /v "AllowCrossDeviceClipboard" /t REG_DWORD /d 0 /f
-}
-
-if ($no_ethernet_power_saving) {
-	Disable-Ethernet-Power-Saving
-}
-
-if ($no_game_dvr) {
-	reg.exe import ".\Non-GPO Registry\no_game_dvr.reg"
 }
 
 if ($geolocation) {
@@ -130,6 +125,19 @@ elseif(!$geolocation) {
 	sc.exe stop lfsvc
 	schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Location\Notifications"
 	schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Location\WindowsActionDialog"
+}
+
+if ($no_audio_reduction) {
+	reg.exe add "HKEY_CURRENT_USER\SOFTWARE\Microsoft\Multimedia\Audio" /v "UserDuckingPreference" /t REG_DWORD /d "3" /f
+	reg.exe delete "HKEY_CURRENT_USER\SOFTWARE\Microsoft\Internet Explorer\LowRegistry\Audio\PolicyConfig\PropertyStore" /f
+}
+
+if ($no_ethernet_power_saving) {
+	Disable-Ethernet-Power-Saving
+}
+
+if ($no_game_dvr) {
+	reg.exe import ".\Non-GPO Registry\no_game_dvr.reg"
 }
 
 if ($no_mitigations) {
@@ -165,6 +173,12 @@ if ($replace_windows11_interface) {
 
 if ($reset_network_interface_settings) {
 	Reset-NetAdapterAdvancedProperty -Name '*' -DisplayName '*'
+}
+
+if (!$system_restore) {
+	reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\System Restore.reg"
+	# Delete all restore points.
+	vssadmin.exe delete shadows /all /quiet
 }
 
 if ($thumbnail_shadows) {
@@ -243,11 +257,8 @@ reg.exe import ".\Registry\Computer Configuration\Windows Components\Windows Def
 reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer" /v "SmartScreenEnabled" /t REG_SZ /d "Off" /f
 reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\AppHost" /v "EnableWebContentEvaluation" /t REG_DWORD /d 0 /f
 
-# Don't increase overall system/DPC latency just for minimal power saving.
-reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Power\PowerThrottling" /v "PowerThrottlingOff" /t REG_DWORD /d 1 /f
-
-# Automated file cleanup without user interaction is a bad idea; Storage Sense only runs on low-disk space events.
-reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\StorageSense" /v "AllowStorageSenseGlobal" /t REG_DWORD /d 0 /f
+# Automated file cleanup without user interaction is a bad idea, even if Storage Sense only runs on low-disk space events.
+reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\Storage Sense.reg"
 reg.exe delete "HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\StorageSense" /f
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\DiskFootprint\Diagnostics"
 schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\DiskFootprint\StorageSense"
@@ -340,6 +351,7 @@ reg.exe add "HKEY_LOCAL_MACHINE\Software\Microsoft\FTH" /v "Enabled" /t REG_DWOR
 
 # == Correct mistakes by others ==
 reg.exe import ".\Non-GPO Registry\mistake_corrections.reg"
+reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\Power Management.reg"
 
 # Use sane defaults for these sensitive timer related settings.
 bcdedit.exe /deletevalue useplatformclock
@@ -373,11 +385,11 @@ auditpol.exe /set /category:* /Success:disable
 # Decrease shutdown time.
 reg.exe import ".\Non-GPO Registry\quicker_shutdown.reg"
 
-# == Other registry imports ==
-
+# == Other registry tweaks ==
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Windows Security.reg"
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\Device Installation.reg"
-
+reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\Group Policy.reg"
+reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\Mitigation Options.reg"
 # ====
 
 Write-Warning "
