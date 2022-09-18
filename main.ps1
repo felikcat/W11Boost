@@ -91,7 +91,6 @@ thumbnail_shadows = $thumbnail_shadows
 Pause
 
 # - Initialize -
-Set-PSDebug -Trace 1
 Push-Location $PSScriptRoot
 Start-Transcript -Path "$PSScriptRoot\W11Boost_LastRun.log"
 . ".\imports.ps1"
@@ -404,7 +403,6 @@ reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windo
 reg.exe import ".\Registry\User Configuration\Administrative Templates\Desktop.reg"
 # ====
 
-Set-PSDebug -Off
 Clear-Host
 Write-Warning "
 Your PC will restart after a key is pressed!
