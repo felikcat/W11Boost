@@ -2,7 +2,7 @@
 $avoid_key_annoyances = 1
 
 # Undermines software that clear the clipboard automatically.
-$clipboard_history = 1
+$clipboard_history = 0
 
 # File History:
 # - Is unreliable with creating snapshots of files.
@@ -32,10 +32,10 @@ $optimal_online_ntp = 1
 $recommended_ethernet_tweaks = 1
 
 # "Everything" can circumvent the performance impact of Windows Search Indexing while providing faster and more accurate results.
-$replace_windows_search = 0
+$replace_windows_search = 1
 
 # See https://www.startallback.com/ for more information.
-$replace_windows11_interface = 0
+$replace_windows11_interface = 1
 
 # Resets all network interfaces back to their manufacturer's default settings.
 # Recommended before applying our network tweaks, as it's a "clean slate".
