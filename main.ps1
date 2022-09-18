@@ -262,7 +262,7 @@ reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windo
 reg.exe import ".\LTSC 2022 Registry\disable_CDM.reg"
 
 # Disable SmartScreen, it delays the launch of software and is better done by other anti-malware software.
-reg.exe import ".\Registry\Computer Configuration\Windows Components\Windows Defender SmartScreen.reg"
+.\NSudoLC.exe -U:T -P:E -M:S -ShowWindowMode:Hide reg.exe import ".\Registry\Computer Configuration\Windows Components\Windows Defender SmartScreen.reg"
 reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer" /v "SmartScreenEnabled" /t REG_SZ /d "Off" /f
 reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\AppHost" /v "EnableWebContentEvaluation" /t REG_DWORD /d 0 /f
 
@@ -326,7 +326,7 @@ Disable-ScheduledTask -TaskName "\Microsoft\Windows\WwanSvc\OobeDiscovery"
 # ====
 
 # == Prevent Windows Update obstructions and other annoyances. ==
-reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Windows Update.reg"
+.\NSudoLC.exe -U:T -P:E -M:S -ShowWindowMode:Hide reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Windows Update.reg"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\InstallService\ScanForUpdates"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\InstallService\ScanForUpdatesAsUser"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\UpdateOrchestrator\Schedule Scan Static Task"
