@@ -4,8 +4,10 @@ $avoid_key_annoyances = 1
 # Undermines software that clear the clipboard automatically.
 $clipboard_history = 1
 
-# 0 = disables File History.
-$file_history = 1
+# File History:
+# - Is unreliable with creating snapshots of files.
+# - Use https://restic.net/ for automated backups instead, and Git for your own projects.
+$file_history = 0
 
 # Disables GPS services, which always run even if there's no GPS hardware installed.
 $geolocation = 0
@@ -21,6 +23,10 @@ $no_game_dvr = 1
 
 # Disables all non-essential security mitigations; drastically improves performance for older CPUs (such as an Intel i7-4790K).
 $no_mitigations = 1
+
+# Prevents time desync issues that were caused by using time.windows.com
+# If you run and are connected to your own local NTP server, don't use this.
+$optimal_online_ntp = 1
 
 # NOTICE: Some settings set might intersect with WiFi adapters, as tweaks are applied to all network interfaces.
 $recommended_ethernet_tweaks = 1
@@ -74,6 +80,7 @@ no_audio_reduction = $no_audio_reduction
 no_ethernet_power_saving = $no_ethernet_power_saving
 no_game_dvr = $no_game_dvr
 no_mitigations = $no_mitigations
+optimal_online_ntp = $optimal_online_ntp
 recommended_ethernet_tweaks = $recommended_ethernet_tweaks
 replace_windows_search = $replace_windows_search
 replace_windows11_interface = $replace_windows11_interface
@@ -107,11 +114,13 @@ if ($clipboard_history) {
 }
 
 if ($file_history) {
-	reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\FileHistory" /v "Disabled" /t REG_DWORD /d 0 /f
-	schtasks.exe /Change /ENABLE /TN "\Microsoft\Windows\FileHistory\File History (maintenance mode)" 
+	Set-ItemProperty -Path "HKCR:\SOFTWARE\Policies\Microsoft\Windows\FileHistory" -Name "Disabled" -Type DWord -Value 0 -Force
+	Set-ItemProperty -Path "HKCR:\SYSTEM\CurrentControlSet\Services\fhsvc" -Name "Start" -Type DWord -Value 3 -Force
+	schtasks.exe /Change /ENABLE /TN "\Microsoft\Windows\FileHistory\File History (maintenance mode)"
 }
 elseif (!$file_history) { 
-	reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\FileHistory" /v "Disabled" /t REG_DWORD /d 1 /f
+	Set-ItemProperty -Path "HKCR:\SOFTWARE\Policies\Microsoft\Windows\FileHistory" -Name "Disabled" -Type DWord -Value 1 -Force
+	Set-ItemProperty -Path "HKCR:\SYSTEM\CurrentControlSet\Services\fhsvc" -Name "Start" -Type DWord -Value 4 -Force
 	schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\FileHistory\File History (maintenance mode)"
 }
 
@@ -154,6 +163,12 @@ if ($no_mitigations) {
 
 	# Required for Vanguard specifically, but also likely for ESEA and Faceit AC.
 	Set-ProcessMitigation -System -Enable CFG
+}
+
+if ($optimal_online_ntp) {
+	reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\Windows Time Service.reg"
+	# Tier 1 ASNs like NTT are preferred since they are critical to routing functioning correctly for ISPs around the world.
+	w32tm.exe /config /syncfromflags:manual /manualpeerlist:"x.ns.gin.ntt.net y.ns.gin.ntt.net ntp.ripe.net time.nist.gov time.cloudflare.com time.google.com"
 }
 
 if ($recommended_ethernet_tweaks) {
@@ -331,10 +346,6 @@ schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\WindowsUpdate\sih"
 # Disable "Delivery Optimization".
 reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\DoSvc" /v "Start" /t REG_DWORD /d 4 /f
 
-# Disables "Diagnostic Policy Service"; logs tons of information to be sent off and analyzed by Microsoft, and in some cases caused noticeable performance slowdown.
-reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\DPS" /v "Start" /t REG_DWORD /d 4 /f
-reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\PcaSvc" /v "Start" /t REG_DWORD /d 4 /f
-
 # Don't analyze programs' execution time data.
 reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Perflib" /v "Disable Performance Counters" /t REG_DWORD /d 1 /f
 
@@ -390,6 +401,8 @@ reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windo
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\Device Installation.reg"
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\Group Policy.reg"
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\Mitigation Options.reg"
+reg.exe import ".\Non-GPO Registry\disable_services.reg"
+reg.exe import ".\Registry\User Configuration\Administrative Templates\Desktop.reg"
 # ====
 
 Write-Warning "

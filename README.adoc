@@ -11,6 +11,9 @@ endif::[]
 
 NOTE: The link://discord.gg/asX52MHXy5[Discord group]; mention any issues or improvements you have there.
 
+== About
+W11Boost goes after maximum performance, reduces the amount of distractions, and all without breaking programs (if it does please report it).
+
 .Learning resources used
 [%collapsible]
 ====
@@ -26,29 +29,14 @@ NOTE: The link://discord.gg/asX52MHXy5[Discord group]; mention any issues or imp
 . link://therealmjp.github.io/posts/breaking-down-barriers-part-1-whats-a-barrier/[TheRealMJP's blog posts on how GPU synchronization and preemption work]
 ====
 
-== Before continuing
-. Use alongside my link://github.com/nermur/DuxOS[DuxOS] if you don't mind reinstalling Windows; it's comprehensive on removing components that have minimal/no use which impact performance noticeably.
-
-. It's assumed that:
-** Disabling some components are ignored on Windows versions that aren't Enterprise/Education/Server SKUs, especially regarding telemetry.
-** You have to reapply W11Boost after major Windows feature updates, such as going from 21H2 -> 22H2.
-** Windows can at any time decide to revert single or multiple changes done by this script.
-
 .User notes
 [%collapsible]
 ====
 * Does not overwrite user preferences that decrease privacy, except for those with a noticeable performance impact, or can be distracting/annoying.
 ** It's assumed third-party tools do this job better, and not everyone wants to disable components that have privacy concerns.
 
-* Gets rid of some of the auto-piloting that uses system resources, such as the link://admx.help/?Category=Windows_11_2022&Policy=Microsoft.Policies.ApplicationCompatibility::AppCompatTurnOffEngine[Application Compatibility Engine].
-** For ACE being off specifically, you would manually specify to run a legacy application in compatibility mode (likely for Windows XP).
-
 * What is repaired:
 ** Mistakes made by other optimizers.
-
-* What explicitly isn't repaired:
-** Damage caused by malware, such as:
-*** Disabling programs.
 
 * Only Windows 10 LTSC 2022, Windows 11 Pro 21H2, and Windows 11 Enterprise 22H2 have been tested.
 
@@ -57,8 +45,6 @@ NOTE: The link://discord.gg/asX52MHXy5[Discord group]; mention any issues or imp
 .Developer notes
 [%collapsible]
 ====
-
-* `reg.exe` is used instead of `reg` incase the system environment variables are misconfigured, same applies to anything else with `.exe` appended to its end.
 
 * `reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\EXAMPLE" /v "Start" /t REG_DWORD /d 4 /f` is preferred over using `sc.exe config EXAMPLE start=disabled` since Windows rejects this request depending on the service.
 
@@ -91,11 +77,22 @@ TIP: Example gpedit.msc registry translation: +
 
 ====
 
+
+== Before continuing
+. Use alongside my link://github.com/nermur/DuxOS[DuxOS] if you don't mind reinstalling Windows; it's comprehensive on removing components that have minimal/no use which impact performance noticeably.
+
+. It's assumed that:
+** Disabling some components are ignored on Windows versions that aren't Enterprise/Education/Server SKUs, especially regarding telemetry.
+** You have to reapply W11Boost after major Windows feature updates, such as going from 21H2 -> 22H2.
+** Windows can at any time decide to revert single or multiple changes done by this script.
+** You can handle Windows without its auto-piloting features, such as the link://admx.help/?Category=Windows_11_2022&Policy=Microsoft.Policies.ApplicationCompatibility::AppCompatTurnOffEngine[Application Compatibility Engine].
+*** For ACE being off specifically, you would manually specify to run a legacy application in compatibility mode (likely for Windows XP).
+
 == Requirements
 . Windows has to be activated for some changes, use a license key, or run either link://github.com/abbodi1406/KMS_VL_ALL_AIO[abbodi1406's KMS_VL_ALL_AIO] or massgravel's link://github.com/massgravel/Microsoft-Activation-Scripts[Microsoft Activation Scripts].
 
-. W11Boost.bat's `replace_windows_search=1` or `replace_windows11_interface=1` requires `winget`.
-** For Windows 11, ensure `winget` is working, if not:
+. Windows Package Manager is installed and functional.
+** For Windows 11, open PowerShell and run `winget`; if it's working:
 *** Open the Microsoft Store, then update "App Installer" through it.
 
 ** For Windows 10 LTSC 2019 or 2022, run in Command Prompt as Administrator to install `winget`:
@@ -126,47 +123,77 @@ TIP: Example gpedit.msc registry translation: +
 
 === Tweaks
 . Enable the following options in your motherboard's BIOS:
-** I/O APIC (IOAPIC 24-119 Entries)
-** Above 4G Decoding
-** Resizable BAR
-*** NOTE: If Windows cannot boot (likely from using MBR instead of GPT), disable Resizable BAR.
-** HPET (High Precision Event Timer)
+* I/O APIC (IOAPIC 24-119 Entries)
+* Above 4G Decoding
+* Resizable BAR
+** NOTE: If Windows cannot boot (likely from using MBR instead of GPT), disable Resizable BAR.
+* HPET (High Precision Event Timer)
 
 . Disable the following options in your motherboard's BIOS:
-** XHCI Hands Off
-** USB Legacy
-*** link://techcommunity.microsoft.com/t5/microsoft-usb-blog/reasons-to-avoid-companion-controllers/ba-p/270710[Why disable these two?] +
+* XHCI Hands Off
+* USB Legacy
+** link://techcommunity.microsoft.com/t5/microsoft-usb-blog/reasons-to-avoid-companion-controllers/ba-p/270710[Why disable these two?] +
 Note: if a USB is no longer bootable after these two changes, temporarily turn them both back on.
 
 . Windows Settings -> Gaming -> Enable "Game Mode"
-** -> Graphics -> Change default graphics settings -> Enable "Hardware-accelerated GPU scheduling", "Variable refresh rate", and "Optimizations for windowed games"
+* -> Graphics -> Change default graphics settings -> Enable "Hardware-accelerated GPU scheduling", "Variable refresh rate", and "Optimizations for windowed games"
 
 . Install all optional updates through Windows Update; it can include device drivers.
 
 . Auto-detect and install link://www.amd.com/en/support[AMD's drivers]. +
 Auto-detect and install link://www.intel.com/content/www/us/en/support/detect.html[Intel's drivers].
-** This will utilize their drivers instead of the generic drivers Microsoft provides, meaning better performance and lower DPC latency.
+* This will utilize their drivers instead of the generic drivers Microsoft provides, meaning better performance and lower DPC latency.
 
 . Kaspersky is the preferred anti-virus for consistently having the following reasons according to link://www.av-comparatives.org/vendors/kaspersky-lab/[AV comparatives] and personal opinion:
-** Very low performance impact.
-** Top-tier detection ratios, with minimal false positives.
-** Pricing is reasonable, unlike ESET.
+* Very low performance impact.
+* Top-tier detection ratios, with minimal false positives.
+* Pricing is reasonable, unlike ESET.
 
 TIP: Kaspersky is cheaper to buy from Amazon or other third-party markets that sell legitimate keys (not compromised accounts/keys).
 
 
-=== Software
+=== Replace problematic software
+
+This contains a long but important list. Be sure to check it if you're not sure.
+[%collapsible]
+====
+. Use link:https://www.revouninstaller.com/products/revo-uninstaller-pro/[Revo Uninstaller] (moderate scan mode) to remove these programs that cause BSODs and anti-cheat problems, along with slower performance:
+* In general, any software except OpenRGB that configure RGB.
+* ASUS Armoury Crate
+* CORSAIR iCUE
+* ASRock Polychrome RGB
+* Gigabyte RGBFusion
+* TT RGB Plus
+* Razer Synapse
+* Sapphire TriXX
+* MSI Dragon Center
+* HyperX NGENUITY
+* Logitech G HUB
+** Don't remove if using a Logitech steering wheel, it's required.
+* NZXT CAM
+* Any keyboard programs, such as Ducky RGB.
+
+. Alternatives:
+* link:https://openrgb.org/[OpenRGB] for RGB configuration.
+* link:https://www.msi.com/Landing/afterburner/graphics-cards[MSI Afterburner] for general GPU management and overclocking.
+** Disable Afterburner's "Enable low-level IO driver" +
+image:MSIAfterburner_1.png[] +
+image:MSIAfterburner_2.png[]
+
+====
+
+=== Other recommended software
 
 . link://www.oo-software.com/en/shutup10[ShutUp10]
-** A privacy enhancer that on its green (recommended) settings doesn't break software.
+* A privacy enhancer that on its green (recommended) settings doesn't break software.
 
 . link://www.speedguide.net/downloads.php[SG TCP Optimizer]
-** Gets higher speeds and lower latency peaks out of your network connection.
+* Gets higher speeds and lower latency peaks out of your network connection.
 
 . link://winaerotweaker.com/[Winaero Tweaker]
-** Extensive number of usability and visual tweaks.
+* Extensive number of usability and visual tweaks.
 
 . link://dl.bitsum.com/files/processlassosetup64.exe[Process Lasso]
-** Better thread scheduling (for specific CPUs) and the best power plan for gaming ("Bitsum Highest Performance").
+* Better thread scheduling (for specific CPUs) and the best power plan for gaming ("Bitsum Highest Performance").
 
-INFO: If you ever removed Power Profiles, run `powercfg -restoredefaultschemes` before installing Process Lasso, otherwise "Bitsum Highest Performance" can't apply.
+TIP: If you ever removed Power Profiles, run `powercfg -restoredefaultschemes` before installing Process Lasso, otherwise "Bitsum Highest Performance" can't apply.
