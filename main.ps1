@@ -404,7 +404,7 @@ reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windo
 reg.exe import ".\Registry\User Configuration\Administrative Templates\Desktop.reg"
 # ====
 
-Set-PSDebug -Trace 0
+Set-PSDebug -Off
 Clear-Host
 Write-Warning "
 Your PC will restart after a key is pressed!
