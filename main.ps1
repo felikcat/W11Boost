@@ -217,7 +217,7 @@ reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Sch
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Diagnosis\Scheduled"
 
 # Ask OneDrive to only generate network traffic if signed in to OneDrive.
-reg.exe import ".\Registry\Computer Configuration\Windows Components\OneDrive.reg"
+.\NSudoLC.exe -U:T -P:E -M:S -ShowWindowMode:Hide reg.exe import ".\Registry\Computer Configuration\Windows Components\OneDrive.reg"
 
 # Ask to stop sending diagnostic data to Microsoft.
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Data Collection and Preview Builds.reg"
@@ -259,7 +259,7 @@ reg.exe add "HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explore
 # Disables Cloud Content features; stops automatic installation of advertised ("suggested") apps among others.
 # Apparently is called "Content Delivery Manager" in Windows 10.
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Cloud Content.reg"
-reg.exe import ".\LTSC 2022 Registry\disable_CDM.reg"
+.\NSudoLC.exe -U:T -P:E -M:S -ShowWindowMode:Hide reg.exe import ".\LTSC 2022 Registry\disable_CDM.reg"
 
 # Disable SmartScreen, it delays the launch of software and is better done by other anti-malware software.
 .\NSudoLC.exe -U:T -P:E -M:S -ShowWindowMode:Hide reg.exe import ".\Registry\Computer Configuration\Windows Components\Windows Defender SmartScreen.reg"
