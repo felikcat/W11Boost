@@ -405,6 +405,7 @@ reg.exe import ".\Non-GPO Registry\disable_services.reg"
 reg.exe import ".\Registry\User Configuration\Administrative Templates\Desktop.reg"
 # ====
 
+Clear-Host
 Write-Warning "
 Your PC will restart after a key is pressed!
 It's required to fully apply changes.
