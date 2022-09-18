@@ -91,13 +91,14 @@ thumbnail_shadows = $thumbnail_shadows
 Pause
 
 # - Initialize -
+Set-PSDebug -Trace 1
 Push-Location $PSScriptRoot
 Start-Transcript -Path "$PSScriptRoot\W11Boost_LastRun.log"
 . ".\imports.ps1"
 New-PSDrive -PSProvider registry -Root HKEY_CLASSES_ROOT -Name HKCR
 
-# Won't make a restore point if there's already one within the past 24 hours.
-WMIC.exe /Namespace:\\root\default Path SystemRestore Call CreateRestorePoint "W11Boost by Felik @ github.com/nermur", 100, 7
+# Backup registry entries incase the user wants to restore them later.
+
 
 # "Fast startup" causes stability issues, and increases disk wear from excessive I/O usage.
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\Shutdown.reg"
@@ -116,24 +117,24 @@ if ($clipboard_history) {
 if ($file_history) {
 	Set-ItemProperty -Path "HKCR:\SOFTWARE\Policies\Microsoft\Windows\FileHistory" -Name "Disabled" -Type DWord -Value 0 -Force
 	Set-ItemProperty -Path "HKCR:\SYSTEM\CurrentControlSet\Services\fhsvc" -Name "Start" -Type DWord -Value 3 -Force
-	schtasks.exe /Change /ENABLE /TN "\Microsoft\Windows\FileHistory\File History (maintenance mode)"
+	Enable-ScheduledTask -TaskName "\Microsoft\Windows\FileHistory\File History (maintenance mode)"
 }
 elseif (!$file_history) { 
 	Set-ItemProperty -Path "HKCR:\SOFTWARE\Policies\Microsoft\Windows\FileHistory" -Name "Disabled" -Type DWord -Value 1 -Force
 	Set-ItemProperty -Path "HKCR:\SYSTEM\CurrentControlSet\Services\fhsvc" -Name "Start" -Type DWord -Value 4 -Force
-	schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\FileHistory\File History (maintenance mode)"
+	Disable-ScheduledTask -TaskName "\Microsoft\Windows\FileHistory\File History (maintenance mode)"
 }
 
 if ($geolocation) {
 	reg.exe import ".\Non-GPO Registry\Geolocation\Enable.reg"
-	schtasks.exe /Change /ENABLE /TN "\Microsoft\Windows\Location\Notifications"
-	schtasks.exe /Change /ENABLE /TN "\Microsoft\Windows\Location\WindowsActionDialog"
+	Enable-ScheduledTask -TaskName "\Microsoft\Windows\Location\Notifications"
+	Enable-ScheduledTask -TaskName "\Microsoft\Windows\Location\WindowsActionDialog"
 }
 elseif(!$geolocation) {
 	reg.exe import ".\Non-GPO Registry\Geolocation\Disable.reg"
 	sc.exe stop lfsvc
-	schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Location\Notifications"
-	schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Location\WindowsActionDialog"
+	Disable-ScheduledTask -TaskName "\Microsoft\Windows\Location\Notifications"
+	Disable-ScheduledTask -TaskName "\Microsoft\Windows\Location\WindowsActionDialog"
 }
 
 if ($no_audio_reduction) {
@@ -214,41 +215,41 @@ reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\NlaSvc\Paramet
 
 # Disallow automatic: software updates, security scanning, and system diagnostics.
 reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\Maintenance" /v "MaintenanceDisabled" /t REG_DWORD /d 1 /f
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Diagnosis\Scheduled"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\Diagnosis\Scheduled"
 
 # Ask OneDrive to only generate network traffic if signed in to OneDrive.
 reg.exe import ".\Registry\Computer Configuration\Windows Components\OneDrive.reg"
 
 # Ask to stop sending diagnostic data to Microsoft.
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Data Collection and Preview Builds.reg"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Feedback\Siuf\DmClient"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Feedback\Siuf\DmClientOnScenarioDownload"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Flighting\FeatureConfig\ReconcileFeatures"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Flighting\FeatureConfig\UsageDataFlushing"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Flighting\FeatureConfig\UsageDataReporting"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Flighting\OneSettings\RefreshCache"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\Feedback\Siuf\DmClient"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\Feedback\Siuf\DmClientOnScenarioDownload"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\Flighting\FeatureConfig\ReconcileFeatures"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\Flighting\FeatureConfig\UsageDataFlushing"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\Flighting\FeatureConfig\UsageDataReporting"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\Flighting\OneSettings\RefreshCache"
 
 # Disables various compatibility assistants and engines; it's assumed a W11Boost user is going to manually set compatibility when needed.
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Application Compatibility.reg"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Application Experience\Microsoft Compatibility Appraiser"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Application Experience\ProgramDataUpdater"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Application Experience\PcaPatchDbTask"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\Application Experience\Microsoft Compatibility Appraiser"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\Application Experience\ProgramDataUpdater"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\Application Experience\PcaPatchDbTask"
 
 # Disable "Customer Experience Improvement Program"; also implies turning off the Inventory Collector.
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\App-V.reg"
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\Internet Communication Management.reg"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Customer Experience Improvement Program\Consolidator"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Customer Experience Improvement Program\KernelCeipTask"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Customer Experience Improvement Program\UsbCeip"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Autochk\Proxy"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\DiskDiagnostic\Microsoft-Windows-DiskDiagnosticDataCollector"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\Customer Experience Improvement Program\Consolidator"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\Customer Experience Improvement Program\KernelCeipTask"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\Customer Experience Improvement Program\UsbCeip"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\Autochk\Proxy"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\DiskDiagnostic\Microsoft-Windows-DiskDiagnosticDataCollector"
 
 # Disable Autoplay on all disk types.
 reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v "NoDriveTypeAutoRun" /t REG_DWORD /d 255 /f
 
 # Disable Windows Error Reporting (WER).
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Windows Error Reporting.reg"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Windows Error Reporting\QueueReporting"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\Windows Error Reporting\QueueReporting"
 
 # Ask to not allow execution of experiments by Microsoft.
 reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\PolicyManager\current\device\System" /v "AllowExperimentation" /t REG_DWORD /d 0 /f
@@ -269,72 +270,72 @@ reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\AppHos
 # Automated file cleanup without user interaction is a bad idea, even if Storage Sense only runs on low-disk space events.
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\Storage Sense.reg"
 reg.exe delete "HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\StorageSense" /f
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\DiskFootprint\Diagnostics"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\DiskFootprint\StorageSense"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\DiskCleanup\SilentCleanup"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\DiskFootprint\Diagnostics"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\DiskFootprint\StorageSense"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\DiskCleanup\SilentCleanup"
 
 # == Disable these scheduler tasks to keep performance and bandwidth usage more consistent. ==
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Office\OfficeTelemetryAgentFallBack"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Office\OfficeTelemetryAgentLogOn"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\AppID\SmartScreenSpecific"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Application Experience\StartupAppTask"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\ApplicationData\DsSvcCleanup"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\AppxDeploymentClient\Pre-staged app cleanup"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\CertificateServicesClient\UserTask-Roam"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Clip\License Validation"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\CloudExperienceHost\CreateObjectTask"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\File Classification Infrastructure\Property Definition Sync"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\HelloFace\FODCleanupTask"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\InstallService\SmartRetry"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\International\Synchronize Language Settings"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\LanguageComponentsInstaller\ReconcileLanguageResources"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Maintenance\WinSAT"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Maps\MapsToastTask"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Maps\MapsUpdateTask"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Mobile Broadband Accounts\MNO Metadata Parser"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\MUI\LPRemove"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Multimedia\SystemSoundsService"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\NetTrace\GatherNetworkInfo"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\PI\Sqm-Tasks"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Power Efficiency Diagnostics\AnalyzeSystem"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Printing\EduPrintProv"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Ras\MobilityManager"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\RecoveryEnvironment\VerifyWinRE"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\RemoteAssistance\RemoteAssistanceTask"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\SettingSync\BackgroundUploadTask"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\SettingSync\NetworkStateChangeTask"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Shell\FamilySafetyMonitor"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Shell\FamilySafetyRefreshTask"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Shell\IndexerAutomaticMaintenance"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\SoftwareProtectionPlatform\SvcRestartTask"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\SoftwareProtectionPlatform\SvcRestartTaskLogon"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\SoftwareProtectionPlatform\SvcRestartTaskNetwork"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\SoftwareProtectionPlatform\SvcTrigger"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Speech\SpeechModelDownloadTask"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Sysmain\ResPriStaticDbSync"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Sysmain\WsSwapAssessmentTask"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\USB\Usb-Notifications"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\WDI\ResolutionHost"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Windows Filtering Platform\BfeOnServiceStartTypeChange"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\WlanSvc\CDSSync"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\WOF\WIM-Hash-Management"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\WOF\WIM-Hash-Validation"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Work Folders\Work Folders Logon Synchronization"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\Work Folders\Work Folders Maintenance Work"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\WS\WSTask"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\WwanSvc\OobeDiscovery"
+Disable-ScheduledTask -TaskName "\Microsoft\Office\OfficeTelemetryAgentFallBack"
+Disable-ScheduledTask -TaskName "\Microsoft\Office\OfficeTelemetryAgentLogOn"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\AppID\SmartScreenSpecific"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\Application Experience\StartupAppTask"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\ApplicationData\DsSvcCleanup"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\AppxDeploymentClient\Pre-staged app cleanup"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\CertificateServicesClient\UserTask-Roam"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\Clip\License Validation"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\CloudExperienceHost\CreateObjectTask"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\File Classification Infrastructure\Property Definition Sync"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\HelloFace\FODCleanupTask"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\InstallService\SmartRetry"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\International\Synchronize Language Settings"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\LanguageComponentsInstaller\ReconcileLanguageResources"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\Maintenance\WinSAT"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\Maps\MapsToastTask"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\Maps\MapsUpdateTask"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\Mobile Broadband Accounts\MNO Metadata Parser"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\MUI\LPRemove"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\Multimedia\SystemSoundsService"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\NetTrace\GatherNetworkInfo"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\PI\Sqm-Tasks"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\Power Efficiency Diagnostics\AnalyzeSystem"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\Printing\EduPrintProv"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\Ras\MobilityManager"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\RecoveryEnvironment\VerifyWinRE"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\RemoteAssistance\RemoteAssistanceTask"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\SettingSync\BackgroundUploadTask"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\SettingSync\NetworkStateChangeTask"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\Shell\FamilySafetyMonitor"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\Shell\FamilySafetyRefreshTask"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\Shell\IndexerAutomaticMaintenance"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\SoftwareProtectionPlatform\SvcRestartTask"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\SoftwareProtectionPlatform\SvcRestartTaskLogon"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\SoftwareProtectionPlatform\SvcRestartTaskNetwork"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\SoftwareProtectionPlatform\SvcTrigger"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\Speech\SpeechModelDownloadTask"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\Sysmain\ResPriStaticDbSync"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\Sysmain\WsSwapAssessmentTask"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\USB\Usb-Notifications"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\WDI\ResolutionHost"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\Windows Filtering Platform\BfeOnServiceStartTypeChange"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\WlanSvc\CDSSync"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\WOF\WIM-Hash-Management"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\WOF\WIM-Hash-Validation"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\Work Folders\Work Folders Logon Synchronization"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\Work Folders\Work Folders Maintenance Work"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\WS\WSTask"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\WwanSvc\OobeDiscovery"
 # ====
 
 # == Prevent Windows Update obstructions and other annoyances. ==
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Windows Update.reg"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\InstallService\ScanForUpdates"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\InstallService\ScanForUpdatesAsUser"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\UpdateOrchestrator\Schedule Scan Static Task"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\UpdateOrchestrator\Schedule Scan"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\UpdateOrchestrator\UpdateModelTask"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\UpdateOrchestrator\USO_UxBroker"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\WindowsUpdate\Scheduled Start"
-schtasks.exe /Change /DISABLE /TN "\Microsoft\Windows\WindowsUpdate\sih"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\InstallService\ScanForUpdates"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\InstallService\ScanForUpdatesAsUser"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\UpdateOrchestrator\Schedule Scan Static Task"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\UpdateOrchestrator\Schedule Scan"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\UpdateOrchestrator\UpdateModelTask"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\UpdateOrchestrator\USO_UxBroker"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\WindowsUpdate\Scheduled Start"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\WindowsUpdate\sih"
 # ====
 
 # Disable "Delivery Optimization".
@@ -403,6 +404,7 @@ reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windo
 reg.exe import ".\Registry\User Configuration\Administrative Templates\Desktop.reg"
 # ====
 
+Set-PSDebug -Trace 0
 Clear-Host
 Write-Warning "
 Your PC will restart after a key is pressed!
