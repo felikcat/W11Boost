@@ -60,7 +60,8 @@ image:Procmon64_1.png[]
 image:Procmon64_2.png[]
 *** Translate the traced registry edits to their non-group policy places, and there's your registry key edit.
 **** Other processes of interest: +
-`SystemPropertiesPerformance.exe`, `SystemSettings.exe`, `DllHost.exe`
+`SystemPropertiesPerformance.exe`, `SystemSettings.exe`, `DllHost.exe` +
+`SecurityHealthService.exe`
 
 TIP: Example gpedit.msc registry translation: +
 `HKCU\Software\Microsoft\Windows\CurrentVersion\Group Policy Objects\{2F5A9005-4CB6-4314-B846-8C3EB66C9C24}Machine\Software\Policies\Microsoft\Windows` *->* `HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\CloudContent`

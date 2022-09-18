@@ -15,14 +15,8 @@ endif::[]
 . `Non-GPO Registry\quicker_shutdown.reg`
 ** Needs a reassessment of its contents.
 
-. `Non-GPO Registry\avoid_key_annoyances.reg`
-** Needs a reassessment of its contents.
-
-. `W11Boost.bat`
+. `main.ps1`
 ** Do registry backups instead of system restore. Combine this with a script to roll-back non-registry changes to factory defaults.
 
-** Make a pop-up notification when the main (W11Boost.bat) script is done. 
-
-** Descriptions in general need a rework.
-
-** Convert more registry keys to the GPO structure.
+** Automatically add the Everything toolbar to the taskbar if `$replace_windows_search = 1`
+*** Hide the default "Show Search button"

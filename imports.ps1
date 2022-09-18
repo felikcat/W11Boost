@@ -81,22 +81,3 @@ function Remove-All-ProcessMitigations {
         }
     }
 }
-
-# Delete all ExploitGuard System-wide Mitigations
-function Remove-All-SystemMitigations {
-    $Kernel = Get-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\kernel"
-
-    Try {
-        if ($Kernel.GetValue("MitigationOptions")) {
-            Write-Host "Removing System MitigationOptions"
-            Remove-ItemProperty -Path $Kernel.PSPath -Name "MitigationOptions" -ErrorAction Stop;
-        }
-        if ($Kernel.GetValue("MitigationAuditOptions")) {
-            Write-Host "Removing System MitigationAuditOptions"
-            Remove-ItemProperty -Path $Kernel.PSPath -Name "MitigationAuditOptions" -ErrorAction Stop;
-        }
-    }
-    Catch {
-        Write-Host "ERROR:" $_.Exception.Message "- System"
-    }
-}

@@ -152,17 +152,11 @@ if ($no_game_dvr) {
 if ($no_mitigations) {
 	reg.exe import ".\Non-GPO Registry\no_mitigations.reg"
 	Remove-All-ProcessMitigations
-	Remove-All-SystemMitigations
-
-	# DEP is required for effectively all updated game anti-cheats.
-	Set-ProcessMitigation -System -Enable DEP
+	Set-ProcessMitigation -PolicyFilePath mitigations.xml
 
 	# Ensure "Data Execution Prevention" (DEP) only applies to operating system components, along with kernel-mode drivers.
 	# Applying DEP to user-mode programs will slow down and break some, such as the original Deus Ex.
 	bcdedit.exe /set nx Optin
-
-	# Required for Vanguard specifically, but also likely for ESEA and Faceit AC.
-	Set-ProcessMitigation -System -Enable CFG
 }
 
 if ($optimal_online_ntp) {

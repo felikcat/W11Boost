@@ -2,3 +2,5 @@
 *.cmd encoding=cp1252
 *.bat encoding=cp1252
 *.vbs encoding=cp1252
+*.reg encoding=cp1252
+*.xml encoding=cp1252
