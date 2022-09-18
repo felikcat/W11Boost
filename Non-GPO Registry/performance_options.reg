@@ -11,7 +11,7 @@ Windows Registry Editor Version 5.00
 ; Disable "Slide open combo boxes"
 ; Enable "Smooth-scroll list boxes"
 ; Enable "Use drop shadows for icon labels on the desktop"
-"UserPreferencesMask"=hex:98,12,03,80,10,00,00,00
+"UserPreferencesMask"=hex:90,12,03,80,10,00,00,00
 ; Enable "Smooth edges of screen fonts"
 "FontSmoothing"="2"
 
