@@ -10,4 +10,4 @@ reg.exe query HKU\S-1-5-19 || (
 
 cd %~dp0
 
-NSudoLC.exe -U:T -P:E -M:S -Wait powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "& {Start-Process powershell.exe -ArgumentList '-NoProfile -ExecutionPolicy Bypass -File "".\main.ps1""' -Verb RunAs}"
+NSudoLC.exe -U:T -P:E -M:S -Priority:High -Wait powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "& {Start-Process powershell.exe -ArgumentList '-NoProfile -ExecutionPolicy Bypass -File "".\main.ps1""' -Verb RunAs}"
