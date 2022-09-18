@@ -1,0 +1,7 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CURRENT_USER\Software\Microsoft\Input\Settings]
+; ctfmon.exe obessively writes to "HKCU\Software\Microsoft\Input\TypingInsights\Insights" if enabled.
+; It's meant to provide prediction for software (touch) and hardware keyboards.
+; Settings -> Time & language -> Typing -> Typing insights
+"InsightsEnabled"=dword:0

@@ -397,11 +397,15 @@ auditpol.exe /set /category:* /Success:disable
 reg.exe import ".\Non-GPO Registry\quicker_shutdown.reg"
 
 # == Other registry tweaks ==
-reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Windows Security.reg"
+reg.exe import ".\Non-GPO Registry\disable_services.reg"
+reg.exe import ".\Non-GPO Registry\disable_typing_insights.reg"
+reg.exe import ".\Non-GPO Registry\performance_options.reg"
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\Device Installation.reg"
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\Group Policy.reg"
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\Mitigation Options.reg"
-reg.exe import ".\Non-GPO Registry\disable_services.reg"
+reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\App Package Deployment.reg"
+reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Microsoft Edge.reg"
+reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Windows Security.reg"
 reg.exe import ".\Registry\User Configuration\Administrative Templates\Desktop.reg"
 # ====
 

@@ -1,5 +1,5 @@
 Windows Registry Editor Version 5.00
 
 [HKEY_CURRENT_USER\Software\Policies\Microsoft\Windows\Explorer]
-; Disable Aero Snap.
+; Disable "Title bar window shake"; used to be called "Aero shake".
 "NoWindowMinimizingShortcuts"=dword:1

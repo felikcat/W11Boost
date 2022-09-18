@@ -1,0 +1,5 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\Appx]
+; If allowed: unused apps would be uninstalled with their user data left intact, then reinstalled if launched afterwards.
+"AllowAutomaticAppArchiving"=dword:0
