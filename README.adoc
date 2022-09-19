@@ -105,7 +105,7 @@ TIP: Example gpedit.msc registry translation: +
 
 
 == Instructions
-. link://github.com/nermur/W11Boost/archive/refs/heads/master.zip[Download W11Boost], then extract it.
+. link:https://github.com/nermur/W11Boost/releases/download/v1.0.0/W11Boost.zip[Download W11Boost], then extract it.
 . Configure the options by editing `main.ps1`.
 . Temporarily disable all anti-virus software.
 . Run `Backup_Registry.bat` as Administrator a single time; only redo this after an update to a new major OS version (such as 21H2 -> 22H2)
