@@ -96,9 +96,6 @@ Start-Transcript -Path "$PSScriptRoot\W11Boost_LastRun.log"
 . ".\imports.ps1"
 New-PSDrive -PSProvider registry -Root HKEY_CLASSES_ROOT -Name HKCR
 
-# Backup registry entries incase the user wants to restore them later.
-
-
 # "Fast startup" causes stability issues, and increases disk wear from excessive I/O usage.
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\Shutdown.reg"
 reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Power" /V "HiberbootEnabled" /T REG_DWORD /D 0 /F
@@ -261,10 +258,13 @@ reg.exe add "HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explore
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Cloud Content.reg"
 .\NSudoLC.exe -U:T -P:E -M:S -ShowWindowMode:Hide reg.exe import ".\LTSC 2022 Registry\disable_CDM.reg"
 
-# Disable SmartScreen, it delays the launch of software and is better done by other anti-malware software.
+# == Disable SmartScreen; delays program launches and is better done by other anti-malware software. ==
 .\NSudoLC.exe -U:T -P:E -M:S -ShowWindowMode:Hide reg.exe import ".\Registry\Computer Configuration\Windows Components\Windows Defender SmartScreen.reg"
-reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer" /v "SmartScreenEnabled" /t REG_SZ /d "Off" /f
-reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\AppHost" /v "EnableWebContentEvaluation" /t REG_DWORD /d 0 /f
+
+.\NSudoLC.exe -U:T -P:E -M:S -ShowWindowMode:Hide reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer" /v "SmartScreenEnabled" /t REG_SZ /d "Off" /f
+
+.\NSudoLC.exe -U:T -P:E -M:S -ShowWindowMode:Hide reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\AppHost" /v "EnableWebContentEvaluation" /t REG_DWORD /d 0 /f
+# ====
 
 # Automated file cleanup without user interaction is a bad idea, even if Storage Sense only runs on low-disk space events.
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\Storage Sense.reg"
@@ -276,6 +276,7 @@ Disable-ScheduledTask -TaskName "\Microsoft\Windows\DiskCleanup\SilentCleanup"
 # == Disable these scheduler tasks to keep performance and bandwidth usage more consistent. ==
 Disable-ScheduledTask -TaskName "\Microsoft\Office\OfficeTelemetryAgentFallBack"
 Disable-ScheduledTask -TaskName "\Microsoft\Office\OfficeTelemetryAgentLogOn"
+
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\AppID\SmartScreenSpecific"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Application Experience\StartupAppTask"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\ApplicationData\DsSvcCleanup"
@@ -289,8 +290,10 @@ Disable-ScheduledTask -TaskName "\Microsoft\Windows\InstallService\SmartRetry"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\International\Synchronize Language Settings"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\LanguageComponentsInstaller\ReconcileLanguageResources"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Maintenance\WinSAT"
+
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Maps\MapsToastTask"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Maps\MapsUpdateTask"
+
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Mobile Broadband Accounts\MNO Metadata Parser"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\MUI\LPRemove"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Multimedia\SystemSoundsService"
@@ -301,26 +304,35 @@ Disable-ScheduledTask -TaskName "\Microsoft\Windows\Printing\EduPrintProv"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Ras\MobilityManager"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\RecoveryEnvironment\VerifyWinRE"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\RemoteAssistance\RemoteAssistanceTask"
+
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\SettingSync\BackgroundUploadTask"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\SettingSync\NetworkStateChangeTask"
+
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Shell\FamilySafetyMonitor"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Shell\FamilySafetyRefreshTask"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Shell\IndexerAutomaticMaintenance"
+
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\SoftwareProtectionPlatform\SvcRestartTask"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\SoftwareProtectionPlatform\SvcRestartTaskLogon"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\SoftwareProtectionPlatform\SvcRestartTaskNetwork"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\SoftwareProtectionPlatform\SvcTrigger"
+
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Speech\SpeechModelDownloadTask"
+
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Sysmain\ResPriStaticDbSync"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Sysmain\WsSwapAssessmentTask"
+
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\USB\Usb-Notifications"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\WDI\ResolutionHost"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Windows Filtering Platform\BfeOnServiceStartTypeChange"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\WlanSvc\CDSSync"
+
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\WOF\WIM-Hash-Management"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\WOF\WIM-Hash-Validation"
+
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Work Folders\Work Folders Logon Synchronization"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Work Folders\Work Folders Maintenance Work"
+
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\WS\WSTask"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\WwanSvc\OobeDiscovery"
 # ====
@@ -394,12 +406,15 @@ reg.exe import ".\Non-GPO Registry\quicker_shutdown.reg"
 reg.exe import ".\Non-GPO Registry\disable_services.reg"
 reg.exe import ".\Non-GPO Registry\disable_typing_insights.reg"
 reg.exe import ".\Non-GPO Registry\performance_options.reg"
-reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\Device Installation.reg"
+
+.\NSudoLC.exe -U:T -P:E -M:S -ShowWindowMode:Hide reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\Device Installation.reg"
+
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\Group Policy.reg"
-reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\Mitigation Options.reg"
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\App Package Deployment.reg"
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Microsoft Edge.reg"
-reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Windows Security.reg"
+
+.\NSudoLC.exe -U:T -P:E -M:S -ShowWindowMode:Hide reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Windows Security.reg"
+
 reg.exe import ".\Registry\User Configuration\Administrative Templates\Desktop.reg"
 # ====
 
