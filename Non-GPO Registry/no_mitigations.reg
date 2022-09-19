@@ -8,6 +8,7 @@ Windows Registry Editor Version 5.00
 "Enabled"=dword:0
 
 [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity]
+; Disable Core isolation's "Memory integrity"
 "Enabled"=dword:0
 
 ; Allow Intel TSX.

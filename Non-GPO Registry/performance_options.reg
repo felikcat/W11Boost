@@ -1,0 +1,41 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CURRENT_USER\Control Panel\Desktop]
+; Enable "Show window contents while dragging"
+"DragFullWindows"="1"
+; Disable "Fade or slide menus into view"
+; Disable "Fade or Slide ToolTips into view"
+; Disable "Fade out menu items after clicking"
+; Disable "Show shadows under mouse pointer"
+; Disable "Show shadows under windows"
+; Disable "Slide open combo boxes"
+; Enable "Smooth-scroll list boxes"
+; Enable "Use drop shadows for icon labels on the desktop"
+"UserPreferencesMask"=hex:90,12,03,80,10,00,00,00
+; Enable "Smooth edges of screen fonts"
+"FontSmoothing"="2"
+
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects]
+; Disable "Animate controls and elements inside windows"
+"VisualFXSetting"=dword:3
+
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced]
+; Enable "Show thumbnails instead of icons"
+"HideIcons"=dword:0
+; Disable "Animations in taskbar"
+"TaskbarAnimations"=dword:0
+; Enable "Show translucent selection rectangle"
+"ListviewAlphaSelect"=dword:1
+
+[HKEY_CURRENT_USER\Control Panel\Desktop\WindowMetrics\MinAnimate]
+; Disable "Animate windows when minimizing and maximizing"
+"MinAnimate"="0"
+
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize]
+"EnableTransparency"=dword:0
+
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\DWM]
+; Disable "Enable Peek"
+"EnableAeroPeek"=dword:0
+; Enable "Save taskbar thumbnail previews"
+"AlwaysHibernateThumbnails"=dword:1

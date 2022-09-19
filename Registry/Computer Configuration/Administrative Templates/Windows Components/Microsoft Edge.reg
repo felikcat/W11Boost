@@ -1,0 +1,5 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\MicrosoftEdge\Main]
+; Disables: running Microsoft Edge on startup, re-opening while idle, and going to the background after closed.
+"AllowPrelaunch"=dword:0

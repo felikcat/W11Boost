@@ -1,0 +1,6 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Power\PowerThrottling]
+; Process Lasso or manually setting a non-battery saving power profile is preferred instead.
+; Don't make the power saving profiles less helpful.
+"PowerThrottlingOff"=-
