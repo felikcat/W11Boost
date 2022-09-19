@@ -3,7 +3,7 @@
 set Command=reg.exe export
 
 for /f "tokens=1,2*" %%A in (
-    'reg query "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" /v Personal'
+    'reg.exe query "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" /v Personal'
 ) do if /i "%%~A" == "Personal" set "Documents=%%~C"
 REM exitcode 2 = File cannot be found.
 if not defined Documents exit /b 2
