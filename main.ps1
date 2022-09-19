@@ -92,7 +92,7 @@ Pause
 
 # - Initialize -
 Push-Location $PSScriptRoot
-Start-Transcript -Path "$PSScriptRoot\W11Boost_LastRun.log"
+Start-Transcript -Path ([Environment]::GetFolderPath('MyDocuments')+"\W11Boost_LastRun.log")
 . ".\imports.ps1"
 New-PSDrive -PSProvider registry -Root HKEY_CLASSES_ROOT -Name HKCR
 
