@@ -1,3 +1,10 @@
+== 1.0.2 -> 20 September 2022
+* `W11Boost.bat`, `Install_Xbox_Minimal.ps1`, `W11_LTSC_2022.ps1`
+- Bypass license & source agreements for winget.
+
+* `Install_Xbox_Minimal.ps1`, `W11_LTSC_2022.ps1`
+- Check for Administrator (Elevated CurrentUser).
+
 == 1.0.1 -> 20 September 2022
 * `W11Boost.bat`
 - Speed up Administrator check in `W11Boost.bat`.

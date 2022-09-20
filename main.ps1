@@ -95,6 +95,7 @@ Push-Location $PSScriptRoot
 Start-Transcript -Path ([Environment]::GetFolderPath('MyDocuments')+"\W11Boost_LastRun.log")
 . ".\imports.ps1"
 New-PSDrive -PSProvider registry -Root HKEY_CLASSES_ROOT -Name HKCR
+$WINGET_PARMS="--exact --silent --accept-package-agreements --accept-source-agreements"
 
 # "Fast startup" causes stability issues, and increases disk wear from excessive I/O usage.
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\Shutdown.reg"
@@ -169,12 +170,12 @@ if ($recommended_ethernet_tweaks) {
 if ($replace_windows_search) {
 	sc.exe stop WSearch
 	reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\WSearch" /v "Start" /t REG_DWORD /d 4 /f
-	.\NSudoLC.exe -U:E -P:E -M:S powershell.exe -Command "winget.exe install voidtools.Everything -eh"
-	.\NSudoLC.exe -U:E -P:E -M:S powershell.exe -Command "winget.exe install stnkl.EverythingToolbar -eh"
+	.\NSudoLC.exe -U:E -P:E -M:S powershell.exe -Command "winget.exe install voidtools.Everything $WINGET_PARMS"
+	.\NSudoLC.exe -U:E -P:E -M:S powershell.exe -Command "winget.exe install stnkl.EverythingToolbar $WINGET_PARMS"
 }
 
 if ($replace_windows11_interface) {
-	.\NSudoLC.exe -U:E -P:E -M:S powershell.exe -Command "winget.exe install StartIsBack.StartAllBack -eh"
+	.\NSudoLC.exe -U:E -P:E -M:S powershell.exe -Command "winget.exe install StartIsBack.StartAllBack $WINGET_PARMS"
 }
 
 if ($reset_network_interface_settings) {

@@ -1,3 +1,8 @@
+if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
+	Write-Warning "ERROR: W11_LTSC_2022 -> Right click on this file and select 'Run as administrator'"
+	Break
+}
+
 # Microsoft's Publisher ID.
 $ID="8wekyb3d8bbwe"
 
@@ -40,5 +45,5 @@ $apps = @("Clipchamp.Clipchamp_yxz26nhyzhsrt", "Disney.37853FC22B2CE_6rarf9sa4v8
 "SpotifyAB.SpotifyMusic_zpdnekdrzrea0")
 
 for ($i = 0; $i -lt $apps.length; $i++) {
-    winget.exe uninstall $apps[$i] --exact --silent --accept-source-agreements
+    winget.exe uninstall $apps[$i] --exact --silent --accept-package-agreements --accept-source-agreements
 }
