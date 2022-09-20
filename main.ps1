@@ -52,7 +52,7 @@ $system_restore = 0
 $thumbnail_shadows = 1
 
 if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
-	Write-Warning "W11Boost -> Right click on this file and select 'Run as administrator'"
+	Write-Warning "ERROR: W11Boost -> Right click on this file and select 'Run as administrator'"
 	Break
 }
 
@@ -169,12 +169,12 @@ if ($recommended_ethernet_tweaks) {
 if ($replace_windows_search) {
 	sc.exe stop WSearch
 	reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\WSearch" /v "Start" /t REG_DWORD /d 4 /f
-	winget.exe install voidtools.Everything -eh
-	winget.exe install stnkl.EverythingToolbar -eh
+	.\NSudoLC.exe -U:E -P:E -M:S powershell.exe -Command "winget.exe install voidtools.Everything -eh"
+	.\NSudoLC.exe -U:E -P:E -M:S powershell.exe -Command "winget.exe install stnkl.EverythingToolbar -eh"
 }
 
 if ($replace_windows11_interface) {
-	winget.exe install StartIsBack.StartAllBack -eh
+	.\NSudoLC.exe -U:E -P:E -M:S powershell.exe -Command "winget.exe install StartIsBack.StartAllBack -eh"
 }
 
 if ($reset_network_interface_settings) {
@@ -214,7 +214,7 @@ reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Sch
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Diagnosis\Scheduled"
 
 # Ask OneDrive to only generate network traffic if signed in to OneDrive.
-.\NSudoLC.exe -U:T -P:E -M:S -ShowWindowMode:Hide reg.exe import ".\Registry\Computer Configuration\Windows Components\OneDrive.reg"
+reg.exe import ".\Registry\Computer Configuration\Windows Components\OneDrive.reg"
 
 # Ask to stop sending diagnostic data to Microsoft.
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Data Collection and Preview Builds.reg"
@@ -256,14 +256,14 @@ reg.exe add "HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explore
 # Disables Cloud Content features; stops automatic installation of advertised ("suggested") apps among others.
 # Apparently is called "Content Delivery Manager" in Windows 10.
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Cloud Content.reg"
-.\NSudoLC.exe -U:T -P:E -M:S -ShowWindowMode:Hide reg.exe import ".\LTSC 2022 Registry\disable_CDM.reg"
+reg.exe import ".\LTSC 2022 Registry\disable_CDM.reg"
 
 # == Disable SmartScreen; delays program launches and is better done by other anti-malware software. ==
-.\NSudoLC.exe -U:T -P:E -M:S -ShowWindowMode:Hide reg.exe import ".\Registry\Computer Configuration\Windows Components\Windows Defender SmartScreen.reg"
+reg.exe import ".\Registry\Computer Configuration\Windows Components\Windows Defender SmartScreen.reg"
 
-.\NSudoLC.exe -U:T -P:E -M:S -ShowWindowMode:Hide reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer" /v "SmartScreenEnabled" /t REG_SZ /d "Off" /f
+reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer" /v "SmartScreenEnabled" /t REG_SZ /d "Off" /f
 
-.\NSudoLC.exe -U:T -P:E -M:S -ShowWindowMode:Hide reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\AppHost" /v "EnableWebContentEvaluation" /t REG_DWORD /d 0 /f
+reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\AppHost" /v "EnableWebContentEvaluation" /t REG_DWORD /d 0 /f
 # ====
 
 # Automated file cleanup without user interaction is a bad idea, even if Storage Sense only runs on low-disk space events.
@@ -338,7 +338,7 @@ Disable-ScheduledTask -TaskName "\Microsoft\Windows\WwanSvc\OobeDiscovery"
 # ====
 
 # == Prevent Windows Update obstructions and other annoyances. ==
-.\NSudoLC.exe -U:T -P:E -M:S -ShowWindowMode:Hide reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Windows Update.reg"
+reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Windows Update.reg"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\InstallService\ScanForUpdates"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\InstallService\ScanForUpdatesAsUser"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\UpdateOrchestrator\Schedule Scan Static Task"
@@ -407,13 +407,13 @@ reg.exe import ".\Non-GPO Registry\disable_services.reg"
 reg.exe import ".\Non-GPO Registry\disable_typing_insights.reg"
 reg.exe import ".\Non-GPO Registry\performance_options.reg"
 
-.\NSudoLC.exe -U:T -P:E -M:S -ShowWindowMode:Hide reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\Device Installation.reg"
+reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\Device Installation.reg"
 
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\Group Policy.reg"
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\App Package Deployment.reg"
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Microsoft Edge.reg"
 
-.\NSudoLC.exe -U:T -P:E -M:S -ShowWindowMode:Hide reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Windows Security.reg"
+reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Windows Security.reg"
 
 reg.exe import ".\Registry\User Configuration\Administrative Templates\Desktop.reg"
 # ====
