@@ -1,6 +1,6 @@
 == 1.0.1 -> 20 September 2022
 * `W11Boost.bat`
-- Speed up Administrator check in `W11Boost.bat
+- Speed up Administrator check in `W11Boost.bat`.
 
 * `main.ps1`
 - Use highest permission levels by default with NSudo. Programs not compatible with this are manually ran with Elevated CurrentUser instead of TrustedInstaller.
