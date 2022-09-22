@@ -107,7 +107,7 @@ TIP: Example gpedit.msc registry translation: +
 == Instructions
 . link:https://github.com/nermur/W11Boost/releases/download/v1.0.2/W11Boost.zip[Download W11Boost], then extract it.
 . Configure the options by editing `main.ps1`.
-. Temporarily disable all anti-virus software.
+. Temporarily disable all anti-virus programs.
 . Run `Backup_Registry.bat` as Administrator a single time; only redo this after an update to a new major OS version (such as 21H2 -> 22H2)
 . Run `W11Boost.bat` as Administrator.
 
@@ -156,13 +156,13 @@ Auto-detect and install link://www.intel.com/content/www/us/en/support/detect.ht
 TIP: Kaspersky is cheaper to buy from Amazon or other third-party markets that sell legitimate keys (not compromised accounts/keys).
 
 
-=== Replace problematic software
+=== Replace problematic programs
 
 This contains a long but important list. Be sure to check it if you're not sure.
 [%collapsible]
 ====
 . Use link:https://www.revouninstaller.com/products/revo-uninstaller-pro/[Revo Uninstaller] (moderate scan mode) to remove these programs that cause BSODs and anti-cheat problems, along with slower performance:
-* In general, any software except OpenRGB that configure RGB.
+* In general, any programs except OpenRGB that configure RGB.
 * ASUS Armoury Crate
 * CORSAIR iCUE
 * ASRock Polychrome RGB
@@ -186,18 +186,13 @@ image:MSIAfterburner_2.png[]
 
 ====
 
-=== Other recommended software
+=== Other recommended programs
 
 . link://www.oo-software.com/en/shutup10[ShutUp10]
-* A privacy enhancer that on its green (recommended) settings doesn't break software.
+* A privacy enhancer that on its green (recommended) settings doesn't break programs.
 
 . link://www.speedguide.net/downloads.php[SG TCP Optimizer]
-* Gets higher speeds and lower latency peaks out of your network connection.
+* Gets higher speeds and reduces link:https://www.bing.com/search?q=what+is+bufferbloat[bufferbloat] for your network connection.
 
 . link://winaerotweaker.com/[Winaero Tweaker]
 * Extensive number of usability and visual tweaks.
-
-. link://dl.bitsum.com/files/processlassosetup64.exe[Process Lasso]
-* Better thread scheduling (for specific CPUs) and the best power plan for gaming ("Bitsum Highest Performance").
-
-TIP: If you ever removed Power Profiles, run `powercfg -restoredefaultschemes` before installing Process Lasso, otherwise "Bitsum Highest Performance" can't apply.

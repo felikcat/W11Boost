@@ -13,6 +13,7 @@
 == 1.1.0 -> 22 September 2022
 * `main.ps1` 
 - Install Process Lasso Free by default; option is `process_lasso`.
+** Also applies the fix for the "Bitsum Highest Performance" Power Plan being unable to apply.
 
 - Set `geolocation` default to 1.
 
@@ -33,6 +34,8 @@
 
 * `WL22.ps1`
 - Fixed a regression: `--accept-package-agreements` don't exist for `winget uninstall`.
+
+* Software -> Programs for naming, since that's what Microsoft refers to them as.
 
 == 1.0.2 -> 20 September 2022
 * `W11Boost.bat`, `Install_Xbox_Minimal.ps1`, `W11_LTSC_2022.ps1`

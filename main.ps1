@@ -1,7 +1,7 @@
 # Disables Sticky, Filter, and Toggle Keys.
 $avoid_key_annoyances = 1
 
-# 0: Prevent undermining software that clear the clipboard automatically, such as KeePassXC or Bitwarden.
+# 0: Prevent undermining programs that clear the clipboard automatically, such as KeePassXC or Bitwarden.
 $clipboard_history = 0
 
 # File History:
@@ -205,6 +205,8 @@ elseif (!$thumbnail_shadows) {
 }
 
 if($process_lasso) {
+	# Ensure the "Bitsum Highest Performance" power plan can apply successfully.
+	powercfg.exe -restoredefaultschemes
 	.\NSudoLC.exe -U:E -P:E -M:S powershell.exe -Command "winget.exe install BitSum.ProcessLasso -eh --accept-package-agreements --accept-source-agreements"
 }
 
@@ -223,7 +225,7 @@ reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explor
 # Don't check for an active connection through Microsoft's servers.
 reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\NlaSvc\Parameters\Internet" /v "EnableActiveProbing" /t REG_DWORD /d 0 /f
 
-# Disallow automatic: software updates, security scanning, and system diagnostics.
+# Disallow automatic: program updates, security scanning, and system diagnostics.
 reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\Maintenance" /v "MaintenanceDisabled" /t REG_DWORD /d 1 /f
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Diagnosis\Scheduled"
 
@@ -272,7 +274,7 @@ reg.exe add "HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explore
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Cloud Content.reg"
 reg.exe import ".\LTSC 2022 Registry\disable_CDM.reg"
 
-# == Disable SmartScreen; delays program launches and is better done by other anti-malware software. ==
+# == Disable SmartScreen; delays program launches and is better done by other anti-malware programs. ==
 reg.exe import ".\Registry\Computer Configuration\Windows Components\Windows Defender SmartScreen.reg"
 
 reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer" /v "SmartScreenEnabled" /t REG_SZ /d "Off" /f
