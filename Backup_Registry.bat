@@ -1,5 +1,11 @@
 @echo off
 
+fsutil dirty query %SYSTEMDRIVE% >nul
+if not %errorLevel% == 0 (
+	echo ERROR: Backup_Registry: Right click on this file and select 'Run as administrator'
+	Pause
+)
+
 set Command=reg.exe export
 
 for /f "tokens=1,2*" %%A in (

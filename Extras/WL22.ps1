@@ -45,5 +45,5 @@ $apps = @("Clipchamp.Clipchamp_yxz26nhyzhsrt", "Disney.37853FC22B2CE_6rarf9sa4v8
 "SpotifyAB.SpotifyMusic_zpdnekdrzrea0")
 
 for ($i = 0; $i -lt $apps.length; $i++) {
-    winget.exe uninstall $apps[$i] --exact --silent --accept-package-agreements --accept-source-agreements
+    winget.exe uninstall $apps[$i] --exact --silent --accept-source-agreements
 }

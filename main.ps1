@@ -1,7 +1,7 @@
 # Disables Sticky, Filter, and Toggle Keys.
 $avoid_key_annoyances = 1
 
-# Undermines software that clear the clipboard automatically.
+# 0: Prevent undermining software that clear the clipboard automatically, such as KeePassXC or Bitwarden.
 $clipboard_history = 0
 
 # File History:
@@ -9,23 +9,24 @@ $clipboard_history = 0
 # - Use https://restic.net/ for automated backups instead, and Git for your own projects.
 $file_history = 0
 
-# Disables GPS services, which always run even if there's no GPS hardware installed.
-$geolocation = 0
+# 0: Disables GPS services, which always run even if there's no GPS hardware installed.
+$geolocation = 1
 
-# Ensures Windows' audio ducking/attenuation is disabled.
-$no_audio_reduction = 0
+# 1: Ensures Windows' audio ducking/attenuation is disabled.
+$audio_reduction = 0
 
-# Prevents random packet loss/drop-outs in exchange for a higher battery drain.
-$no_ethernet_power_saving = 1
+# 0: Prevents random packet loss/drop-outs in exchange for a higher battery drain.
+$ethernet_power_saving = 0
 
 # Use NVIDIA ShadowPlay, AMD ReLive, or OBS Studio instead.
-$no_game_dvr = 1
+$game_dvr = 1
 
-# Disables all non-essential security mitigations; drastically improves performance for older CPUs (such as an Intel i7-4790K).
-$no_mitigations = 1
+# 0: Disables all non-essential security mitigations;
+# drastically improves performance for older CPUs (such as an Intel i7-4790K).
+$mitigations = 0
 
 # Prevents time desync issues that were caused by using time.windows.com
-# If you run and are connected to your own local NTP server, don't use this.
+# NOTICE: If you are connected to your own local NTP server, don't use this.
 $optimal_online_ntp = 1
 
 # NOTICE: Some settings set might intersect with WiFi adapters, as tweaks are applied to all network interfaces.
@@ -42,7 +43,7 @@ $replace_windows11_interface = 1
 $reset_network_interface_settings = 1
 
 # 0 is recommended.
-# System Restore:
+# System Restore problems:
 # - Cannot restore backups from previous versions of Windows; can't revert Windows updates with System Restore.
 # - Will revert other personal files (program settings and installations).
 $system_restore = 0
@@ -50,6 +51,11 @@ $system_restore = 0
 # 0 = disable Explorer's thumbnail (images/video previews) border shadows.
 # 0 is recommended if dark mode is used.
 $thumbnail_shadows = 1
+
+# What Process Lasso does for Free vs Paid: https://bitsum.com/howfree/
+# Buying: Use Free long enough to get a discount, then do "Entire Home -> Lifetime" in your currency.
+# Usage tutorial (recommended, but not needed): https://youtube.com/watch?v=M2TEEq5tIGM
+$process_lasso = 1
 
 if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
 	Write-Warning "ERROR: W11Boost -> Right click on this file and select 'Run as administrator'"
@@ -76,10 +82,10 @@ avoid_key_annoyances = $avoid_key_annoyances
 clipboard_history = $clipboard_history
 file_history = $file_history
 geolocation = $geolocation
-no_audio_reduction = $no_audio_reduction
-no_ethernet_power_saving = $no_ethernet_power_saving
-no_game_dvr = $no_game_dvr
-no_mitigations = $no_mitigations
+audio_reduction = $audio_reduction
+ethernet_power_saving = $ethernet_power_saving
+game_dvr = $game_dvr
+mitigations = $mitigations
 optimal_online_ntp = $optimal_online_ntp
 recommended_ethernet_tweaks = $recommended_ethernet_tweaks
 replace_windows_search = $replace_windows_search
@@ -87,15 +93,19 @@ replace_windows11_interface = $replace_windows11_interface
 reset_network_interface_settings = $reset_network_interface_settings
 system_restore = $system_restore
 thumbnail_shadows = $thumbnail_shadows
+process_lasso = $process_lasso
 "
 Pause
 
-# - Initialize -
+# == Initialize ==
 Push-Location $PSScriptRoot
 Start-Transcript -Path ([Environment]::GetFolderPath('MyDocuments')+"\W11Boost_LastRun.log")
 . ".\imports.ps1"
 New-PSDrive -PSProvider registry -Root HKEY_CLASSES_ROOT -Name HKCR
-$WINGET_PARMS="--exact --silent --accept-package-agreements --accept-source-agreements"
+if ($reset_network_interface_settings) {
+	Reset-NetAdapterAdvancedProperty -Name '*' -DisplayName '*'
+}
+# ====
 
 # "Fast startup" causes stability issues, and increases disk wear from excessive I/O usage.
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\Shutdown.reg"
@@ -134,21 +144,24 @@ elseif(!$geolocation) {
 	Disable-ScheduledTask -TaskName "\Microsoft\Windows\Location\WindowsActionDialog"
 }
 
-if ($no_audio_reduction) {
+if ($audio_reduction) {
+	reg.exe delete "HKEY_CURRENT_USER\SOFTWARE\Microsoft\Multimedia\Audio\UserDuckingPreference" /f
+}
+if (!$audio_reduction) {
 	reg.exe add "HKEY_CURRENT_USER\SOFTWARE\Microsoft\Multimedia\Audio" /v "UserDuckingPreference" /t REG_DWORD /d "3" /f
 	reg.exe delete "HKEY_CURRENT_USER\SOFTWARE\Microsoft\Internet Explorer\LowRegistry\Audio\PolicyConfig\PropertyStore" /f
 }
 
-if ($no_ethernet_power_saving) {
+if (!$ethernet_power_saving) {
 	Disable-Ethernet-Power-Saving
 }
 
-if ($no_game_dvr) {
-	reg.exe import ".\Non-GPO Registry\no_game_dvr.reg"
+if (!$game_dvr) {
+	reg.exe import ".\Non-GPO Registry\game_dvr.reg"
 }
 
-if ($no_mitigations) {
-	reg.exe import ".\Non-GPO Registry\no_mitigations.reg"
+if (!$mitigations) {
+	reg.exe import ".\Non-GPO Registry\mitigations.reg"
 	Remove-All-ProcessMitigations
 	Set-ProcessMitigation -PolicyFilePath mitigations.xml
 
@@ -170,16 +183,12 @@ if ($recommended_ethernet_tweaks) {
 if ($replace_windows_search) {
 	sc.exe stop WSearch
 	reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\WSearch" /v "Start" /t REG_DWORD /d 4 /f
-	.\NSudoLC.exe -U:E -P:E -M:S powershell.exe -Command "winget.exe install voidtools.Everything $WINGET_PARMS"
-	.\NSudoLC.exe -U:E -P:E -M:S powershell.exe -Command "winget.exe install stnkl.EverythingToolbar $WINGET_PARMS"
+	.\NSudoLC.exe -U:E -P:E -M:S powershell.exe -Command "winget.exe install voidtools.Everything -eh --accept-package-agreements --accept-source-agreements"
+	.\NSudoLC.exe -U:E -P:E -M:S powershell.exe -Command "winget.exe install stnkl.EverythingToolbar -eh --accept-package-agreements --accept-source-agreements"
 }
 
 if ($replace_windows11_interface) {
-	.\NSudoLC.exe -U:E -P:E -M:S powershell.exe -Command "winget.exe install StartIsBack.StartAllBack $WINGET_PARMS"
-}
-
-if ($reset_network_interface_settings) {
-	Reset-NetAdapterAdvancedProperty -Name '*' -DisplayName '*'
+	.\NSudoLC.exe -U:E -P:E -M:S powershell.exe -Command "winget.exe install StartIsBack.StartAllBack -eh --accept-package-agreements --accept-source-agreements"
 }
 
 if (!$system_restore) {
@@ -193,6 +202,10 @@ if ($thumbnail_shadows) {
 }
 elseif (!$thumbnail_shadows) {
 	Set-ItemProperty -Path "HKCR:\SystemFileAssociations\image" -Name "Treatment" -Type DWord -Value 2 -Force
+}
+
+if($process_lasso) {
+	.\NSudoLC.exe -U:E -P:E -M:S powershell.exe -Command "winget.exe install BitSum.ProcessLasso -eh --accept-package-agreements --accept-source-agreements"
 }
 
 reg.exe add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v "NoLowDiskSpaceChecks" /t REG_DWORD /d 1 /f
