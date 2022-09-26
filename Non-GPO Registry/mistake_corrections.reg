@@ -31,3 +31,16 @@ Windows Registry Editor Version 5.00
 ; If a high-priority job is running and preemption is off, it could lead to other software waiting too long to get a share of the GPU's time, and become noticeably slow.
 [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\GraphicsDrivers\Scheduler]
 "EnablePreemption"=-
+
+; The memory performance issues related to requesting data from disk has been solved years ago.
+; Disabling SysMain (Superfetch) would make memory page fetching slower by:
+; - Less pages being cached into memory/RAM, and in an un-intelligent manner.
+; - Increase the amount of random I/O reads and writes, which is much slower than RAM.
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\SysMain]
+"Start"=dword:2
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management]
+; These both should regenerate based on the disk type. SSD or NVMe = keys don't exist.
+"EnablePrefetcher"=-
+"EnableSuperfetch"=-
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\PrefetchParameters]
+"EnablePrefetcher"=dword:3

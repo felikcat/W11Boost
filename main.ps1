@@ -58,7 +58,7 @@ $thumbnail_shadows = 1
 $process_lasso = 1
 
 if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
-	Write-Warning "ERROR: W11Boost -> Right click on this file and select 'Run as administrator'"
+	Write-Warning "ERROR: W11Boost -> Requires Administrator!"
 	Break
 }
 
@@ -99,7 +99,7 @@ Pause
 
 # == Initialize ==
 Push-Location $PSScriptRoot
-Start-Transcript -Path ([Environment]::GetFolderPath('MyDocuments')+"\W11Boost_LastRun.log")
+Start-Transcript -Path ([Environment]::GetFolderPath('MyDocuments') + "\W11Boost_LastRun.log")
 . ".\imports.ps1"
 New-PSDrive -PSProvider registry -Root HKEY_CLASSES_ROOT -Name HKCR
 if ($reset_network_interface_settings) {
@@ -137,7 +137,7 @@ if ($geolocation) {
 	Enable-ScheduledTask -TaskName "\Microsoft\Windows\Location\Notifications"
 	Enable-ScheduledTask -TaskName "\Microsoft\Windows\Location\WindowsActionDialog"
 }
-elseif(!$geolocation) {
+elseif (!$geolocation) {
 	reg.exe import ".\Non-GPO Registry\Geolocation\Disable.reg"
 	sc.exe stop lfsvc
 	Disable-ScheduledTask -TaskName "\Microsoft\Windows\Location\Notifications"
@@ -163,7 +163,26 @@ if (!$game_dvr) {
 if (!$mitigations) {
 	reg.exe import ".\Non-GPO Registry\mitigations.reg"
 	Remove-All-ProcessMitigations
-	Set-ProcessMitigation -PolicyFilePath mitigations.xml
+	# DEP is required for effectively all updated game anti-cheats.
+	Set-ProcessMitigation -System -Enable DEP
+	# CFG is required for Valorant, but also likely ESEA and FACEIT anti-cheats.
+	Set-ProcessMitigation -System -Enable CFG
+	
+	# Data Execution Prevention (DEP).
+	# -> EmulateAtlThunks
+
+	# Address Space Layout Randomization (ASLR).
+	# -> RequireInfo, ForceRelocateImages, BottomUp, HighEntropy
+
+	# ControlFlowGuard (CFG).
+	# -> SuppressExports, StrictCFG
+
+	# Validate exception chains (SEHOP).
+	# -> SEHOP, SEHOPTelemetry, AuditSEHOP
+
+	# Heap integrity.
+	# -> TerminateOnError
+	Set-ProcessMitigation -System -Disable EmulateAtlThunks, RequireInfo, ForceRelocateImages, BottomUp, HighEntropy, SuppressExports, StrictCFG, SEHOP, SEHOPTelemetry, AuditSEHOP, TerminateOnError
 
 	# Ensure "Data Execution Prevention" (DEP) only applies to operating system components, along with kernel-mode drivers.
 	# Applying DEP to user-mode programs will slow down and break some, such as the original Deus Ex.
@@ -204,7 +223,7 @@ elseif (!$thumbnail_shadows) {
 	Set-ItemProperty -Path "HKCR:\SystemFileAssociations\image" -Name "Treatment" -Type DWord -Value 2 -Force
 }
 
-if($process_lasso) {
+if ($process_lasso) {
 	# Ensure the "Bitsum Highest Performance" power plan can apply successfully.
 	powercfg.exe -restoredefaultschemes
 	.\NSudoLC.exe -U:E -P:E -M:S powershell.exe -Command "winget.exe install BitSum.ProcessLasso -eh --accept-package-agreements --accept-source-agreements"
@@ -282,6 +301,7 @@ reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explor
 reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\AppHost" /v "EnableWebContentEvaluation" /t REG_DWORD /d 0 /f
 # ====
 
+
 # Automated file cleanup without user interaction is a bad idea, even if Storage Sense only runs on low-disk space events.
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\Storage Sense.reg"
 reg.exe delete "HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\StorageSense" /f
@@ -353,6 +373,7 @@ Disable-ScheduledTask -TaskName "\Microsoft\Windows\WS\WSTask"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\WwanSvc\OobeDiscovery"
 # ====
 
+
 # == Prevent Windows Update obstructions and other annoyances. ==
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Windows Update.reg"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\InstallService\ScanForUpdates"
@@ -364,6 +385,7 @@ Disable-ScheduledTask -TaskName "\Microsoft\Windows\UpdateOrchestrator\USO_UxBro
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\WindowsUpdate\Scheduled Start"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\WindowsUpdate\sih"
 # ====
+
 
 # Disable "Delivery Optimization".
 reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\DoSvc" /v "Start" /t REG_DWORD /d 4 /f
@@ -377,22 +399,26 @@ reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Syste
 fsutil.exe behavior set disablelastaccess 3
 # ====
 
+
 # Can severely degrade a program's performance if it got marked for "crashing" too often, such is the case for Assetto Corsa.
 # https://docs.microsoft.com/en-us/windows/desktop/win7appqual/fault-tolerant-heap
 reg.exe add "HKEY_LOCAL_MACHINE\Software\Microsoft\FTH" /v "Enabled" /t REG_DWORD /d 0 /f
-
 
 # == Correct mistakes by others ==
 reg.exe import ".\Non-GPO Registry\mistake_corrections.reg"
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\Power Management.reg"
 
 # Use sane defaults for these sensitive timer related settings.
-bcdedit.exe /deletevalue useplatformclock
-bcdedit.exe /deletevalue uselegacyapicmode
-bcdedit.exe /deletevalue x2apicpolicy
 bcdedit.exe /deletevalue tscsyncpolicy
+bcdedit.exe /deletevalue uselegacyapicmode
+bcdedit.exe /deletevalue useplatformclock
+bcdedit.exe /deletevalue x2apicpolicy
 bcdedit.exe /set disabledynamictick yes
 bcdedit.exe /set uselegacyapicmode no
+
+# Draw graphical elements for boot (progress spinner, Windows or BIOS logo, etc).
+# This is useful to tell if something went wrong if a BSOD can't show up.
+bcdedit.exe /deletevalue bootuxdisabled
 
 # Using the "classic" Hyper-V scheduler can break Hyper-V for QEMU with KVM.
 bcdedit.exe /set hypervisorschedulertype core
@@ -402,15 +428,23 @@ reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\iphlpsvc" /v "
 reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\IpxlatCfgSvc" /v "Start" /t REG_DWORD /d 3 /f
 Set-NetAdapterBinding -Name '*' -DisplayName 'Internet Protocol Version 6 (TCP/IPv6)' -Enabled 1
 
-# MemoryCompression: Slightly increases CPU load, but reduces I/O load and makes Windows handle Out Of Memory situations smoothly; akin to Linux's zRAM.
-Enable-MMAgent -ApplicationLaunchPrefetching -ApplicationPreLaunch -MemoryCompression
+# MemoryCompression: Slightly increase CPU load to reduce I/O load, and handle Out Of Memory situations smoothly; akin to Linux's zRAM.
+$options = @("-ApplicationLaunchPrefetching", "-ApplicationPreLaunch", "-MemoryCompression")
+for ($i = 0; $i -lt $options.length; $i++) {
+    Enable-MMAgent $options[$i]
+}
 
 # Programs that rely on 8.3 filenames from the DOS-era will break if this is disabled.
 fsutil.exe behavior set disable8dot3 2
 # ====
 
-# Don't draw graphical elements for boot (spinner, Windows or BIOS logo, etc).
-bcdedit.exe /set bootuxdisabled on
+
+# Trade higher memory usage for less CPU load.
+Disable-MMAgent -PageCombining
+
+# Ask to enter recovery options after 3 failed boots instead of forcing it.
+# NOTE: Does not disable the Windows Recovery Environment.
+bcdedit.exe /set recoveryenabled no
 
 # Don't log events without warnings or errors.
 auditpol.exe /set /category:* /Success:disable
@@ -421,7 +455,10 @@ reg.exe import ".\Non-GPO Registry\quicker_shutdown.reg"
 # == Other registry tweaks ==
 reg.exe import ".\Non-GPO Registry\disable_services.reg"
 reg.exe import ".\Non-GPO Registry\disable_typing_insights.reg"
+reg.exe import ".\Non-GPO Registry\Drivers.reg"
 reg.exe import ".\Non-GPO Registry\performance_options.reg"
+reg.exe import ".\Non-GPO Registry\UAC.reg"
+reg.exe import ".\Non-GPO Registry\Visual Studio 2022.reg"
 
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\Device Installation.reg"
 
@@ -433,6 +470,7 @@ reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windo
 
 reg.exe import ".\Registry\User Configuration\Administrative Templates\Desktop.reg"
 # ====
+
 
 Clear-Host
 Write-Warning "

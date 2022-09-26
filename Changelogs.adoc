@@ -10,15 +10,33 @@
 ** EV Code Signing would solve the detection issues, but costs ~$200 USD a year, and it's likely this program wouldn't pass since Microsoft verifies it manually.
 ====
 
+== 1.2.0 -> 25 September 2022
+* `main.ps1`, `W11Boost.bat`, `Backup_Registry.bat`, `W11_LTSC_2022.bat`, 'Install_Xbox_Minimal.bat', 'IXM.ps1', 'WL22.ps1'
+- Improved Administrator error messages and/or checks.
+
+* `README.adoc`
+- Stop recommending O&O ShutUp10++.
+- Add shoutout section for programs/scripts I looked at to improve W11Boost.
+
+* `main.ps1`
+- Specifically set System mitigations for `mitigations=0` through PowerShell instead of importing an XML file.
+- Improve setting the following: `-ApplicationLaunchPrefetching`, `-ApplicationPreLaunch`, `-MemoryCompression`.
+- Start enabling Boot UX; helps with troubleshooting for minimal startup time impact.
+- Disable Page Combining to trade higher MEM usage for less CPU usage.
+- Ensure SuperFetch/SysMain is enabled; explanation located in `Non-GPO Registry\mistake_corrections.reg`
+- Improved `Non-GPO Registry\disable_typing_insights.reg` by also disabling text prediction for hardware keyboards.
+- Disable telemetry for:
+** Visual Studio
+- Disable "Application Compatibility Cache" and the "BEEP" driver.
+- Ensure the "ReadyBoost" driver is enabled to prevent the `INACCESSIBLE_BOOT_DEVICE` BSOD.
+- Ensure the "LUA File Virtualization Filter" driver is enabled to keep User Account Control (UAC) working.
+
 == 1.1.0 -> 22 September 2022
 * `main.ps1` 
 - Install Process Lasso Free by default; option is `process_lasso`.
 ** Also applies the fix for the "Bitsum Highest Performance" Power Plan being unable to apply.
-
 - Set `geolocation` default to 1.
-
 - Fixed `reset_network_interface_settings=1` running too late, which removed previous networking tweaks by W11Boost.
-
 - Renamed:
 ** `no_ethernet_power_saving` -> `ethernet_power_saving`.
 ** `no_audio_reduction` -> `audio_reduction`.

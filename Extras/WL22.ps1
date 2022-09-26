@@ -1,5 +1,5 @@
 if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
-	Write-Warning "ERROR: W11_LTSC_2022 -> Right click on this file and select 'Run as administrator'"
+	Write-Warning "ERROR: WL22.ps1 -> Requires Administrator!"
 	Break
 }
 

@@ -1,0 +1,3 @@
+; LUA File Virtualization Filter Driver
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\luafv]
+"Start"=dword:2

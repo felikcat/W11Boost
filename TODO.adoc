@@ -16,8 +16,10 @@ endif::[]
 ** Needs a reassessment of its contents.
 
 . `main.ps1`
-
 ** Automatically add the Everything toolbar to the taskbar if `$replace_windows_search = 1`
 *** Hide the default "Show Search button"
 
 ** Task Scheduler needs to be revisited for DuxOS (mostly close to Windows 11 Enterprise 22H2 stock, but missing some tasks on purpose).
+
+. Features for when the GUI is ready.
+* Re-enable `Beep.sys` that `Drivers.reg` disabled.

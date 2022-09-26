@@ -14,7 +14,7 @@ NOTE: The link://discord.gg/asX52MHXy5[Discord group]; mention any issues or imp
 == About
 W11Boost goes after maximum performance, reduces the amount of distractions, and all without breaking programs (if it does please report it).
 
-.Learning resources used
+.Learning material used
 [%collapsible]
 ====
 
@@ -27,6 +27,8 @@ W11Boost goes after maximum performance, reduces the amount of distractions, and
 . link://github.com/MicrosoftDocs/windows-driver-docs/tree/staging/windows-driver-docs-pr[Windows Driver Documentation]
 
 . link://therealmjp.github.io/posts/breaking-down-barriers-part-1-whats-a-barrier/[TheRealMJP's blog posts on how GPU synchronization and preemption work]
+
+. link:https://bromiley.medium.com/windows-wednesday-shim-cache-1997ba8b13e7[Matt B's blog post on Application Compatibility Cache]
 ====
 
 .User notes
@@ -50,7 +52,7 @@ W11Boost goes after maximum performance, reduces the amount of distractions, and
 
 * MMCSS (Multimedia Class Scheduler) doesn't exist in Windows 10 LTSC 2022 and newer.
 
-* Registry keys usually don't self-regenerate themselves if their key doesn't exist.
+* Non-volatile registry keys usually don't self-regenerate themselves if their key doesn't exist.
 ** If the purpose is to revert back to defaults, manually set the default value instead.
 
 * The registry changes Group Policy edits do can be traced with link://docs.microsoft.com/en-us/sysinternals/downloads/procmon[Sysinternals Process Monitor].
@@ -65,6 +67,9 @@ image:Procmon64_2.png[]
 
 TIP: Example gpedit.msc registry translation: +
 `HKCU\Software\Microsoft\Windows\CurrentVersion\Group Policy Objects\{2F5A9005-4CB6-4314-B846-8C3EB66C9C24}Machine\Software\Policies\Microsoft\Windows` *->* `HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\CloudContent`
+
+* Drivers currently loaded by Windows can be seen with link:https://processhacker.sourceforge.io/nightly.php[Process Hacker] via:
+. The "System" proccess -> Properties (right-click or press Enter with "System" selected) -> Modules
 
 ====
 
@@ -188,11 +193,15 @@ image:MSIAfterburner_2.png[]
 
 === Other recommended programs
 
-. link://www.oo-software.com/en/shutup10[ShutUp10]
-* A privacy enhancer that on its green (recommended) settings doesn't break programs.
-
 . link://www.speedguide.net/downloads.php[SG TCP Optimizer]
 * Gets higher speeds and reduces link:https://www.bing.com/search?q=what+is+bufferbloat[bufferbloat] for your network connection.
 
 . link://winaerotweaker.com/[Winaero Tweaker]
 * Extensive number of usability and visual tweaks.
+
+=== Shoutouts
+
+* These projects helped W11Boost improve at a more rapid pace:
+. https://github.com/Atlas-OS/Atlas
+. https://github.com/beatcracker/toptout
+. https://github.com/M2Team/NSudo

@@ -1,5 +1,5 @@
 Windows Registry Editor Version 5.00
 
 [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\TextInput]
-; Don't send Microsoft inking and typing data.
+; [ctfmon.exe] Don't send Microsoft inking and typing data.
 "AllowLinguisticDataCollection"=dword:0

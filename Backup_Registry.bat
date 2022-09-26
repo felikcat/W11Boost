@@ -1,9 +1,10 @@
 @echo off
 
-fsutil dirty query %SYSTEMDRIVE% >nul
+fltmc.exe >nul
 if not %errorLevel% == 0 (
-	echo ERROR: Backup_Registry: Right click on this file and select 'Run as administrator'
+	echo ERROR: Backup Registry: Right click on this file and select 'Run as administrator'
 	Pause
+	exit 1
 )
 
 set Command=reg.exe export
