@@ -153,13 +153,6 @@ Note: if a USB is no longer bootable after these two changes, temporarily turn t
 Auto-detect and install link://www.intel.com/content/www/us/en/support/detect.html[Intel's drivers].
 * This will utilize their drivers instead of the generic drivers Microsoft provides, meaning better performance and lower DPC latency.
 
-. Kaspersky is the preferred anti-virus for consistently having the following reasons according to link://www.av-comparatives.org/vendors/kaspersky-lab/[AV comparatives] and personal opinion:
-* Very low performance impact.
-* Top-tier detection ratios, with minimal false positives.
-* Pricing is reasonable, unlike ESET.
-
-TIP: Kaspersky is cheaper to buy from Amazon or other third-party markets that sell legitimate keys (not compromised accounts/keys).
-
 
 === Replace problematic programs
 

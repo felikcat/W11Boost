@@ -10,6 +10,10 @@
 ** EV Code Signing would solve the detection issues, but costs ~$200 USD a year, and it's likely this program wouldn't pass since Microsoft verifies it manually.
 ====
 
+== 1.3.0 -> 23 October 2022
+* Removed `Drivers.reg`; it breaks Windows 11 build 22621.675 to disable 'ahcache'.
+* Removed disabling mitigations; not worth a few extra percentage increase in FPS for specific games, to then put your data in constant jeopardy. One of the more important ones being Memory Integrity, which prevents vulnerable drivers from being loaded, which would bypass anti-virus software entirely.
+
 == 1.2.0 -> 25 September 2022
 * `main.ps1`, `W11Boost.bat`, `Backup_Registry.bat`, `W11_LTSC_2022.bat`, 'Install_Xbox_Minimal.bat', 'IXM.ps1', 'WL22.ps1'
 - Improved Administrator error messages and/or checks.

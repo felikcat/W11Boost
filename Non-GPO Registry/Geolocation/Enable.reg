@@ -1,9 +1,9 @@
 Windows Registry Editor Version 5.00
 
 [HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors]
-DisableLocation=-
-DisableLocationScripting=-
-DisableWindowsLocationProvider=-
+"DisableLocation"=-
+"DisableLocationScripting"=-
+"DisableWindowsLocationProvider"=-
 
 [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\lfsvc]
-Start=dword:3
+"Start"=dword:3

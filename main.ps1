@@ -6,7 +6,7 @@ $clipboard_history = 0
 
 # File History:
 # - Is unreliable with creating snapshots of files.
-# - Use https://restic.net/ for automated backups instead, and Git for your own projects.
+# - Use Restic or TrueNAS with Syncthing for backups instead.
 $file_history = 0
 
 # 0: Disables GPS services, which always run even if there's no GPS hardware installed.
@@ -21,10 +21,6 @@ $ethernet_power_saving = 0
 # Use NVIDIA ShadowPlay, AMD ReLive, or OBS Studio instead.
 $game_dvr = 1
 
-# 0: Disables all non-essential security mitigations;
-# drastically improves performance for older CPUs (such as an Intel i7-4790K).
-$mitigations = 0
-
 # Prevents time desync issues that were caused by using time.windows.com
 # NOTICE: If you are connected to your own local NTP server, don't use this.
 $optimal_online_ntp = 1
@@ -34,9 +30,6 @@ $recommended_ethernet_tweaks = 1
 
 # "Everything" can circumvent the performance impact of Windows Search Indexing while providing faster and more accurate results.
 $replace_windows_search = 1
-
-# See https://www.startallback.com/ for more information.
-$replace_windows11_interface = 1
 
 # Resets all network interfaces back to their manufacturer's default settings.
 # Recommended before applying our network tweaks, as it's a "clean slate".
@@ -49,13 +42,11 @@ $reset_network_interface_settings = 1
 $system_restore = 0
 
 # 0 = disable Explorer's thumbnail (images/video previews) border shadows.
-# 0 is recommended if dark mode is used.
-$thumbnail_shadows = 1
+# -> 0 is recommended if dark mode is used.
+$thumbnail_shadows = 0
 
-# What Process Lasso does for Free vs Paid: https://bitsum.com/howfree/
-# Buying: Use Free long enough to get a discount, then do "Entire Home -> Lifetime" in your currency.
-# Usage tutorial (recommended, but not needed): https://youtube.com/watch?v=M2TEEq5tIGM
-$process_lasso = 1
+# Harden Windows with visual changes and security tweaks.
+$harden = 1
 
 if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
 	Write-Warning "ERROR: W11Boost -> Requires Administrator!"
@@ -85,15 +76,13 @@ geolocation = $geolocation
 audio_reduction = $audio_reduction
 ethernet_power_saving = $ethernet_power_saving
 game_dvr = $game_dvr
-mitigations = $mitigations
 optimal_online_ntp = $optimal_online_ntp
 recommended_ethernet_tweaks = $recommended_ethernet_tweaks
 replace_windows_search = $replace_windows_search
-replace_windows11_interface = $replace_windows11_interface
 reset_network_interface_settings = $reset_network_interface_settings
 system_restore = $system_restore
 thumbnail_shadows = $thumbnail_shadows
-process_lasso = $process_lasso
+harden = $harden
 "
 Pause
 
@@ -117,8 +106,9 @@ if ($avoid_key_annoyances) {
 }
 
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\OS Policies.reg"
-if ($clipboard_history) {
+if (!$clipboard_history) {
 	reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\System" /v "AllowClipboardHistory" /t REG_DWORD /d 1 /f
+	reg.exe add "HKEY_CURRENT_USER\Software\Microsoft\Clipboard" /v "EnableClipboardHistory" /t REG_DWORD /d 0 /f
 }
 
 if ($file_history) {
@@ -160,35 +150,6 @@ if (!$game_dvr) {
 	reg.exe import ".\Non-GPO Registry\game_dvr.reg"
 }
 
-if (!$mitigations) {
-	reg.exe import ".\Non-GPO Registry\mitigations.reg"
-	Remove-All-ProcessMitigations
-	# DEP is required for effectively all updated game anti-cheats.
-	Set-ProcessMitigation -System -Enable DEP
-	# CFG is required for Valorant, but also likely ESEA and FACEIT anti-cheats.
-	Set-ProcessMitigation -System -Enable CFG
-	
-	# Data Execution Prevention (DEP).
-	# -> EmulateAtlThunks
-
-	# Address Space Layout Randomization (ASLR).
-	# -> RequireInfo, ForceRelocateImages, BottomUp, HighEntropy
-
-	# ControlFlowGuard (CFG).
-	# -> SuppressExports, StrictCFG
-
-	# Validate exception chains (SEHOP).
-	# -> SEHOP, SEHOPTelemetry, AuditSEHOP
-
-	# Heap integrity.
-	# -> TerminateOnError
-	Set-ProcessMitigation -System -Disable EmulateAtlThunks, RequireInfo, ForceRelocateImages, BottomUp, HighEntropy, SuppressExports, StrictCFG, SEHOP, SEHOPTelemetry, AuditSEHOP, TerminateOnError
-
-	# Ensure "Data Execution Prevention" (DEP) only applies to operating system components, along with kernel-mode drivers.
-	# Applying DEP to user-mode programs will slow down and break some, such as the original Deus Ex.
-	bcdedit.exe /set nx Optin
-}
-
 if ($optimal_online_ntp) {
 	reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\Windows Time Service.reg"
 	# Tier 1 ASNs like NTT are preferred since they are critical to routing functioning correctly for ISPs around the world.
@@ -202,12 +163,9 @@ if ($recommended_ethernet_tweaks) {
 if ($replace_windows_search) {
 	sc.exe stop WSearch
 	reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\WSearch" /v "Start" /t REG_DWORD /d 4 /f
+	reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v "IsDeviceSearchHistoryEnabled" /t REG_DWORD /d 0 /f 
 	.\NSudoLC.exe -U:E -P:E -M:S powershell.exe -Command "winget.exe install voidtools.Everything -eh --accept-package-agreements --accept-source-agreements"
 	.\NSudoLC.exe -U:E -P:E -M:S powershell.exe -Command "winget.exe install stnkl.EverythingToolbar -eh --accept-package-agreements --accept-source-agreements"
-}
-
-if ($replace_windows11_interface) {
-	.\NSudoLC.exe -U:E -P:E -M:S powershell.exe -Command "winget.exe install StartIsBack.StartAllBack -eh --accept-package-agreements --accept-source-agreements"
 }
 
 if (!$system_restore) {
@@ -223,11 +181,40 @@ elseif (!$thumbnail_shadows) {
 	Set-ItemProperty -Path "HKCR:\SystemFileAssociations\image" -Name "Treatment" -Type DWord -Value 2 -Force
 }
 
-if ($process_lasso) {
-	# Ensure the "Bitsum Highest Performance" power plan can apply successfully.
-	powercfg.exe -restoredefaultschemes
-	.\NSudoLC.exe -U:E -P:E -M:S powershell.exe -Command "winget.exe install BitSum.ProcessLasso -eh --accept-package-agreements --accept-source-agreements"
+if ($harden) {
+	reg.exe import ".\Non-GPO Regsitry\Harden.reg"
 }
+
+# Disable the acrylic blur at sign-in screen to improve performance at that screen.
+reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\System" /v "DisableAcrylicBackgroundOnLogon" /t REG_DWORD /d 1 /f
+
+# https://www.intel.com/content/www/us/en/developer/articles/troubleshooting/openssl-sha-crash-bug-requires-application-update.html
+[Environment]::SetEnvironmentVariable("OPENSSL_ia32cap", "~0x200000200000000", "Machine")
+
+# Exclude the optional driver updates by default.
+reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" /v "ExcludeWUDriversInQualityUpdate" /t REG_DWORD /d 1 /f
+
+# Disable feedback reminders
+reg.exe add "HKEY_CURRENT_USER\Software\Microsoft\Siuf\Rules" /v "NumberOfSIUFInPeriod" /t REG_DWORD /d 0 /f
+reg.exe add "HKEY_CURRENT_USER\Software\Microsoft\Siuf\Rules" /v "PeriodInNanoSeconds" /t REG_DWORD /d 0 /f
+
+# Don't automatically update speech recognition and speech synthesis modules.
+reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Speech" /v "AllowSpeechModelUpdate" /t REG_DWORD /d 0 /f
+
+# Don't block downloaded files in Explorer, also fixes File History not working for downloaded files.
+reg.exe add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Policies\Attachments" /v "SaveZoneInformation" /t REG_DWORD /d 1 /f
+
+# If logged into a Microsoft account: Don't sync anything.
+reg.exe add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\SettingSync" /v "SyncPolicy" /t REG_DWORD /d 5 /f
+
+# Unsorted privacy stuff.
+reg.exe add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Privacy" /v "TailoredExperiencesWithDiagnosticDataEnabled" /t REG_DWORD /d 0 /f
+reg.exe add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo" /v "Enabled" /t REG_DWORD /d 0 /f
+reg.exe add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "ShowSyncProviderNotifications" /t REG_DWORD /d 0 /f
+reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v "LimitDiagnosticLogCollection" /t REG_DWORD /d 1 /f
+
+# Don't automatically search the web; annoying when trying to search to access a program quickly from the keyboard.
+reg.exe add "HKEY_CURRENT_USER\Software\Policies\Microsoft\Windows\Explorer" /v "DisableSearchBoxSuggestions" /t REG_DWORD /d 1 /f
 
 reg.exe add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v "NoLowDiskSpaceChecks" /t REG_DWORD /d 1 /f
 reg.exe add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v "LinkResolveIgnoreLinkInfo" /t REG_DWORD /d 1 /f
@@ -274,9 +261,6 @@ Disable-ScheduledTask -TaskName "\Microsoft\Windows\Customer Experience Improvem
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Customer Experience Improvement Program\UsbCeip"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Autochk\Proxy"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\DiskDiagnostic\Microsoft-Windows-DiskDiagnosticDataCollector"
-
-# Disable Autoplay on all disk types.
-reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v "NoDriveTypeAutoRun" /t REG_DWORD /d 255 /f
 
 # Disable Windows Error Reporting (WER).
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Windows Error Reporting.reg"
@@ -455,10 +439,11 @@ reg.exe import ".\Non-GPO Registry\quicker_shutdown.reg"
 # == Other registry tweaks ==
 reg.exe import ".\Non-GPO Registry\disable_services.reg"
 reg.exe import ".\Non-GPO Registry\disable_typing_insights.reg"
-reg.exe import ".\Non-GPO Registry\Drivers.reg"
 reg.exe import ".\Non-GPO Registry\performance_options.reg"
 reg.exe import ".\Non-GPO Registry\UAC.reg"
-reg.exe import ".\Non-GPO Registry\Visual Studio 2022.reg"
+reg.exe import ".\Non-GPO Registry\Deny Screenshots By Apps.reg"
+reg.exe import ".\Non-GPO Registry\Unsorted.reg"
+reg.exe import ".\Non-GPO Registry\No Edge Autorun.reg"
 
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\Device Installation.reg"
 
@@ -471,6 +456,8 @@ reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windo
 reg.exe import ".\Registry\User Configuration\Administrative Templates\Desktop.reg"
 # ====
 
+Disable-ScheduledTask -TaskName "\Microsoft\VisualStudio\Updates\BackgroundDownload"
+reg.exe import ".\Non-GPO Registry\Visual Studio 2022.reg"
 
 Clear-Host
 Write-Warning "
