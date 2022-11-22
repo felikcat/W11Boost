@@ -19,7 +19,7 @@ $audio_reduction = 0
 $ethernet_power_saving = 0
 
 # Use NVIDIA ShadowPlay, AMD ReLive, or OBS Studio instead.
-$game_dvr = 1
+$game_dvr = 0
 
 # Prevents time desync issues that were caused by using time.windows.com
 # NOTICE: If you are connected to your own local NTP server, don't use this.
@@ -147,7 +147,7 @@ if (!$ethernet_power_saving) {
 }
 
 if (!$game_dvr) {
-	reg.exe import ".\Non-GPO Registry\game_dvr.reg"
+	reg.exe import ".\Non-GPO Registry\No Game DVR.reg"
 }
 
 if ($optimal_online_ntp) {
