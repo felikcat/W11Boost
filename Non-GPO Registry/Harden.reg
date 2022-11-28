@@ -21,21 +21,3 @@ Windows Registry Editor Version 5.00
 ; Disable Autoplay before even checking for the disk type.
 [HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers]
 "DisableAutoplay"=dword:1
-
-; Disallow file, print, and named-pipe sharing over the network.
-[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\LanmanServer]
-"Start"=dword:4
-
-; Disable Internet Connection Sharing.
-[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\SharedAccess]
-"Start"=dword:4
-
-; Use WireGuard instead of IKE or AuthIP!
-[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\IKEEXT]
-"Start"=dword:4
-[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\PolicyAgent]
-"Start"=dword:4
-
-; Disable Print Spooler.
-[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Spooler]
-"Start"=dword:4

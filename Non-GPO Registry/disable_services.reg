@@ -16,8 +16,3 @@ Windows Registry Editor Version 5.00
 ; Connected User Experiences and Telemetry
 [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\DiagTrack]
 "Start"=dword:4
-
-
-; THE BELOW ARE NOT UNIVERSALLY GOOD FOR OTHER PEOPLE
-[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\PhoneSvc]
-"Start"=dword:4

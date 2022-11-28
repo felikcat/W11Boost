@@ -21,8 +21,6 @@ Windows Registry Editor Version 5.00
 "DisableParallelAandAAAA"=dword:0
 
 [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management]
-; A security feature that's disabled by default in Windows 11 Pro. Enabling this makes shutdown times slow.
-"ClearPageFileAtShutdown"=dword:0
 ; https://docs.microsoft.com/en-us/windows/win32/cimwin32prov/win32-operatingsystem
 ; LargeSystemCache is obsolete and not supported.
 "LargeSystemCache"=dword:0

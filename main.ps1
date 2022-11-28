@@ -1,9 +1,6 @@
 # Disables Sticky, Filter, and Toggle Keys.
 $avoid_key_annoyances = 1
 
-# 0: Prevent undermining programs that clear the clipboard automatically, such as KeePassXC or Bitwarden.
-$clipboard_history = 0
-
 # File History:
 # - Is unreliable with creating snapshots of files.
 # - Use Restic or TrueNAS with Syncthing for backups instead.
@@ -70,7 +67,6 @@ Write-Output "
 ==== Current settings ====
 
 avoid_key_annoyances = $avoid_key_annoyances
-clipboard_history = $clipboard_history
 file_history = $file_history
 geolocation = $geolocation
 audio_reduction = $audio_reduction
@@ -106,10 +102,6 @@ if ($avoid_key_annoyances) {
 }
 
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\OS Policies.reg"
-if (!$clipboard_history) {
-	reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\System" /v "AllowClipboardHistory" /t REG_DWORD /d 1 /f
-	reg.exe add "HKEY_CURRENT_USER\Software\Microsoft\Clipboard" /v "EnableClipboardHistory" /t REG_DWORD /d 0 /f
-}
 
 if ($file_history) {
 	Set-ItemProperty -Path "HKCR:\SOFTWARE\Policies\Microsoft\Windows\FileHistory" -Name "Disabled" -Type DWord -Value 0 -Force
