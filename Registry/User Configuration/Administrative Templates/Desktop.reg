@@ -1,5 +1,5 @@
 Windows Registry Editor Version 5.00
 
 [HKEY_CURRENT_USER\Software\Policies\Microsoft\Windows\Explorer]
-; Disable "Title bar window shake"; used to be called "Aero shake".
+; Disable "Title bar window shake"; was called "Aero shake".
 "NoWindowMinimizingShortcuts"=dword:1

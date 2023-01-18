@@ -14,7 +14,7 @@ Windows Registry Editor Version 5.00
 "SvcHostSplitThresholdInKB"=dword:3670016
 
 ; Disabling "smart multi-homed name resolution" can make DNS requests extremely slow.
-; If this is used to stop a VPN's DNS leaks, use a different VPN client (eddie.website) or change VPN providers.
+; Some VPN clients do this foolishly to prevent DNS leaks.
 [HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows NT\DNSClient]
 "DisableSmartNameResolution"=dword:0
 [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters]
@@ -33,7 +33,7 @@ Windows Registry Editor Version 5.00
 ; The memory performance issues related to requesting data from disk has been solved years ago.
 ; Disabling SysMain (Superfetch) would make memory page fetching slower by:
 ; - Less pages being cached into memory/RAM, and in an un-intelligent manner.
-; - Increase the amount of random I/O reads and writes, which is much slower than RAM.
+; - Increase the amount of random I/O reads and writes; much slower than RAM.
 [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\SysMain]
 "Start"=dword:2
 [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management]

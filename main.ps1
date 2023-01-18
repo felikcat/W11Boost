@@ -52,6 +52,13 @@ if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
 
 $host.ui.rawui.windowtitle = "W11Boost by Felik @ https://github.com/nermur"
 
+# Force a time sync to prevent clock drift causing issues with winget; entirely an assumption, not proven.
+net.exe stop w32time
+w32tm.exe /unregister
+w32tm.exe /register
+net.exe start w32time
+w32tm.exe /resync
+
 # If these are disabled, Windows Update will break and so will this script.
 reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\AppXSvc" /v "Start" /t REG_DWORD /d 3 /f
 reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\ClipSVC" /v "Start" /t REG_DWORD /d 3 /f
@@ -155,7 +162,7 @@ if ($recommended_ethernet_tweaks) {
 if ($replace_windows_search) {
 	sc.exe stop WSearch
 	reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\WSearch" /v "Start" /t REG_DWORD /d 4 /f
-	reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v "IsDeviceSearchHistoryEnabled" /t REG_DWORD /d 0 /f 
+	reg.exe add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v "IsDeviceSearchHistoryEnabled" /t REG_DWORD /d 0 /f
 	.\NSudoLC.exe -U:E -P:E -M:S powershell.exe -Command "winget.exe install voidtools.Everything -eh --accept-package-agreements --accept-source-agreements"
 	.\NSudoLC.exe -U:E -P:E -M:S powershell.exe -Command "winget.exe install stnkl.EverythingToolbar -eh --accept-package-agreements --accept-source-agreements"
 }
@@ -174,7 +181,7 @@ elseif (!$thumbnail_shadows) {
 }
 
 if ($harden) {
-	reg.exe import ".\Non-GPO Regsitry\Harden.reg"
+	reg.exe import ".\Non-GPO Registry\Harden.reg"
 }
 
 # Disable the acrylic blur at sign-in screen to improve performance at that screen.
@@ -396,9 +403,6 @@ bcdedit.exe /set uselegacyapicmode no
 # This is useful to tell if something went wrong if a BSOD can't show up.
 bcdedit.exe /deletevalue bootuxdisabled
 
-# Using the "classic" Hyper-V scheduler can break Hyper-V for QEMU with KVM.
-bcdedit.exe /set hypervisorschedulertype core
-
 # Ensure IPv6 and its related features are enabled.
 reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\iphlpsvc" /v "Start" /t REG_DWORD /d 2 /f
 reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\IpxlatCfgSvc" /v "Start" /t REG_DWORD /d 3 /f
@@ -436,8 +440,6 @@ reg.exe import ".\Non-GPO Registry\UAC.reg"
 reg.exe import ".\Non-GPO Registry\Deny Screenshots By Apps.reg"
 reg.exe import ".\Non-GPO Registry\Unsorted.reg"
 reg.exe import ".\Non-GPO Registry\No Edge Autorun.reg"
-
-reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\Device Installation.reg"
 
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\Group Policy.reg"
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\App Package Deployment.reg"

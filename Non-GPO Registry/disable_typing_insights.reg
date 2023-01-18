@@ -1,7 +1,7 @@
 Windows Registry Editor Version 5.00
 
 [HKEY_CURRENT_USER\Software\Microsoft\Input\Settings]
-; [ctfmon.exe] obessive writes to "HKCU\Software\Microsoft\Input\TypingInsights\Insights" if enabled.
+; [ctfmon.exe] obsessive writes to "HKCU\Software\Microsoft\Input\TypingInsights\Insights" if enabled.
 ; Provides prediction for software (touch) keyboards.
 ; Settings -> Time & language -> Typing -> Typing insights
 "InsightsEnabled"=dword:0

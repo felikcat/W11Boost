@@ -9,8 +9,6 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
-NOTE: The link://discord.gg/asX52MHXy5[Discord group]; mention any issues or improvements you have there.
-
 == About
 W11Boost goes after maximum performance, reduces the amount of distractions, and all without breaking programs (if it does please report it).
 
