@@ -1,6 +1,6 @@
 Windows Registry Editor Version 5.00
 
-; Diagnostic Policy
+; Diagnostic Policy Service
 ; Logs tons of information to be sent off and analyzed by Microsoft, and in some cases caused noticeable performance slowdown.
 [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\DPS]
 "Start"=dword:4
@@ -15,4 +15,8 @@ Windows Registry Editor Version 5.00
 
 ; Connected User Experiences and Telemetry
 [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\DiagTrack]
+"Start"=dword:4
+
+; Delivery Optimization
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\DoSvc]
 "Start"=dword:4

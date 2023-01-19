@@ -52,13 +52,6 @@ if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
 
 $host.ui.rawui.windowtitle = "W11Boost by Felik @ https://github.com/nermur"
 
-# Force a time sync to prevent clock drift causing issues with winget; entirely an assumption, not proven.
-net.exe stop w32time
-w32tm.exe /unregister
-w32tm.exe /register
-net.exe start w32time
-w32tm.exe /resync
-
 # If these are disabled, Windows Update will break and so will this script.
 reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\AppXSvc" /v "Start" /t REG_DWORD /d 3 /f
 reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\ClipSVC" /v "Start" /t REG_DWORD /d 3 /f
@@ -100,7 +93,6 @@ if ($reset_network_interface_settings) {
 # ====
 
 # "Fast startup" causes stability issues, and increases disk wear from excessive I/O usage.
-reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\Shutdown.reg"
 reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Power" /V "HiberbootEnabled" /T REG_DWORD /D 0 /F
 attrib +R %WinDir%\System32\SleepStudy\UserNotPresentSession.etl
 
@@ -150,9 +142,14 @@ if (!$game_dvr) {
 }
 
 if ($optimal_online_ntp) {
-	reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\Windows Time Service.reg"
+	net.exe stop w32time
+	# Make a clean slate for the time sync settings.
+	w32tm.exe /unregister
+	w32tm.exe /register
 	# Tier 1 ASNs like NTT are preferred since they are critical to routing functioning correctly for ISPs around the world.
-	w32tm.exe /config /syncfromflags:manual /manualpeerlist:"x.ns.gin.ntt.net y.ns.gin.ntt.net ntp.ripe.net time.nist.gov time.cloudflare.com time.google.com"
+	w32tm.exe /config /syncfromflags:manual /manualpeerlist:"x.ns.gin.ntt.net,y.ns.gin.ntt.net,ntp.ripe.net,time.nist.gov"
+	net.exe start w32time
+	w32tm.exe /resync
 }
 
 if ($recommended_ethernet_tweaks) {
@@ -189,6 +186,12 @@ reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\System" /v "
 
 # https://www.intel.com/content/www/us/en/developer/articles/troubleshooting/openssl-sha-crash-bug-requires-application-update.html
 [Environment]::SetEnvironmentVariable("OPENSSL_ia32cap", "~0x200000200000000", "Machine")
+
+# Skip to the sign-on screen.
+reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\Personalization" /v "NoLockScreen" /t REG_DWORD /d 1 /f
+
+# Show what's slowing down bootups and shutdowns.
+reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v "verbosestatus" /t REG_DWORD /d 1 /f
 
 # Exclude the optional driver updates by default.
 reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" /v "ExcludeWUDriversInQualityUpdate" /t REG_DWORD /d 1 /f
@@ -274,7 +277,6 @@ reg.exe add "HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explore
 # Disables Cloud Content features; stops automatic installation of advertised ("suggested") apps among others.
 # Apparently is called "Content Delivery Manager" in Windows 10.
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Cloud Content.reg"
-reg.exe import ".\LTSC 2022 Registry\disable_CDM.reg"
 
 # == Disable SmartScreen; delays program launches and is better done by other anti-malware programs. ==
 reg.exe import ".\Registry\Computer Configuration\Windows Components\Windows Defender SmartScreen.reg"
@@ -370,9 +372,6 @@ Disable-ScheduledTask -TaskName "\Microsoft\Windows\WindowsUpdate\sih"
 # ====
 
 
-# Disable "Delivery Optimization".
-reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\DoSvc" /v "Start" /t REG_DWORD /d 4 /f
-
 # Don't analyze programs' execution time data.
 reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Perflib" /v "Disable Performance Counters" /t REG_DWORD /d 1 /f
 
@@ -419,7 +418,7 @@ fsutil.exe behavior set disable8dot3 2
 # ====
 
 
-# Trade higher memory usage for less CPU load.
+# Higher memory usage for less CPU load.
 Disable-MMAgent -PageCombining
 
 # Ask to enter recovery options after 3 failed boots instead of forcing it.
@@ -429,10 +428,8 @@ bcdedit.exe /set recoveryenabled no
 # Don't log events without warnings or errors.
 auditpol.exe /set /category:* /Success:disable
 
-# Decrease shutdown time.
-reg.exe import ".\Non-GPO Registry\quicker_shutdown.reg"
-
 # == Other registry tweaks ==
+reg.exe import ".\Non-GPO Registry\Shutdown.reg"
 reg.exe import ".\Non-GPO Registry\disable_services.reg"
 reg.exe import ".\Non-GPO Registry\disable_typing_insights.reg"
 reg.exe import ".\Non-GPO Registry\performance_options.reg"

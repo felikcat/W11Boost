@@ -1,4 +1,0 @@
-Windows Registry Editor Version 5.00
-
-; Ensure our custom NTP servers are respected.
-[-HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\W32time]

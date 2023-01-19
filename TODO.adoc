@@ -12,9 +12,6 @@ endif::[]
 . `LTSC 2022 Registry\disable_CDM.reg`
 ** Match this with the new gpedit.msc formatting, and reassess the changes in this file.
 
-. `Non-GPO Registry\quicker_shutdown.reg`
-** Needs a reassessment of its contents.
-
 . `main.ps1`
 ** Automatically add the Everything toolbar to the taskbar if `$replace_windows_search = 1`
 *** Hide the default "Show Search button"
