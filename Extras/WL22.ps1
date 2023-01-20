@@ -9,7 +9,7 @@ $ID="8wekyb3d8bbwe"
 # Don't remove the following, as there's no getting them back through normal means:
 # Microsoft.XboxSpeechToTextOverlay_$ID
 
-# Clipchamp - Video Editor | Disney+
+# Clipchamp - Video Editor | Paint
 # Cortana | Microsoft News
 # MSN Weather | Xbox
 # Get Help | Microsoft Tips
@@ -22,11 +22,11 @@ $ID="8wekyb3d8bbwe"
 # Windows Maps | Windows Voice Recorder
 # Xbox Live in-game experience | Xbox Game Bar Plugin
 # Xbox Game Bar | Xbox Identity Provider
-# Phone Link | Windows Media Player (note: not the same Windows Media Player from Windows 7)
+# Phone Link | Windows Media Player (not the same as Windows 7's WMP)
 # Movies & TV | Quick Assist
 # Microsoft Teams | Windows Web Experience Pack
-# Spotify - Music and Podcasts
-$apps = @("Clipchamp.Clipchamp_yxz26nhyzhsrt", "Disney.37853FC22B2CE_6rarf9sa4v8jt",
+# Snipping Tool | Notepad
+$apps = @("Clipchamp.Clipchamp_yxz26nhyzhsrt", "Microsoft.Paint_$ID",
 "Microsoft.549981C3F5F10_$ID", "Microsoft.BingNews_$ID",
 "Microsoft.BingWeather_$ID", "Microsoft.GamingApp_$ID",
 "Microsoft.GetHelp_$ID", "Microsoft.Getstarted_$ID",
@@ -42,7 +42,7 @@ $apps = @("Clipchamp.Clipchamp_yxz26nhyzhsrt", "Disney.37853FC22B2CE_6rarf9sa4v8
 "Microsoft.YourPhone_$ID", "Microsoft.ZuneMusic_$ID",
 "Microsoft.ZuneVideo_$ID", "MicrosoftCorporationII.QuickAssist_$ID",
 "MicrosoftTeams_$ID", "MicrosoftWindows.Client.WebExperience_cw5n1h2txyewy",
-"SpotifyAB.SpotifyMusic_zpdnekdrzrea0")
+"Microsoft.ScreenSketch_$ID", "Microsoft.WindowsNotepad_$ID")
 
 for ($i = 0; $i -lt $apps.length; $i++) {
     winget.exe uninstall $apps[$i] --exact --silent --accept-source-agreements

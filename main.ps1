@@ -87,9 +87,7 @@ Push-Location $PSScriptRoot
 Start-Transcript -Path ([Environment]::GetFolderPath('MyDocuments') + "\W11Boost_LastRun.log")
 . ".\imports.ps1"
 New-PSDrive -PSProvider registry -Root HKEY_CLASSES_ROOT -Name HKCR
-if ($reset_network_interface_settings) {
-	Reset-NetAdapterAdvancedProperty -Name '*' -DisplayName '*'
-}
+
 # ====
 
 # "Fast startup" causes stability issues, and increases disk wear from excessive I/O usage.
@@ -133,14 +131,11 @@ if (!$audio_reduction) {
 	reg.exe delete "HKEY_CURRENT_USER\SOFTWARE\Microsoft\Internet Explorer\LowRegistry\Audio\PolicyConfig\PropertyStore" /f
 }
 
-if (!$ethernet_power_saving) {
-	Disable-Ethernet-Power-Saving
-}
-
 if (!$game_dvr) {
 	reg.exe import ".\Non-GPO Registry\No Game DVR.reg"
 }
 
+# Do this before resetting network interfaces!
 if ($optimal_online_ntp) {
 	net.exe stop w32time
 	# Make a clean slate for the time sync settings.
@@ -152,6 +147,14 @@ if ($optimal_online_ntp) {
 	w32tm.exe /resync
 }
 
+if ($reset_network_interface_settings) {
+	Reset-NetAdapterAdvancedProperty -Name '*' -DisplayName '*'
+}
+
+if (!$ethernet_power_saving) {
+	Disable-Ethernet-Power-Saving
+}
+
 if ($recommended_ethernet_tweaks) {
 	Set-Recommended-Ethernet-Tweaks
 }
@@ -161,13 +164,14 @@ if ($replace_windows_search) {
 	reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\WSearch" /v "Start" /t REG_DWORD /d 4 /f
 	reg.exe add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v "IsDeviceSearchHistoryEnabled" /t REG_DWORD /d 0 /f
 	.\NSudoLC.exe -U:E -P:E -M:S powershell.exe -Command "winget.exe install voidtools.Everything -eh --accept-package-agreements --accept-source-agreements"
-	.\NSudoLC.exe -U:E -P:E -M:S powershell.exe -Command "winget.exe install stnkl.EverythingToolbar -eh --accept-package-agreements --accept-source-agreements"
 }
 
 if (!$system_restore) {
 	reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\System Restore.reg"
 	# Delete all restore points.
 	vssadmin.exe delete shadows /all /quiet
+
+	Disable-ScheduledTask -TaskName "\Microsoft\Windows\SystemRestore\SR"
 }
 
 if ($thumbnail_shadows) {
@@ -236,6 +240,7 @@ reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\NlaSvc\Paramet
 # Disallow automatic: program updates, security scanning, and system diagnostics.
 reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\Maintenance" /v "MaintenanceDisabled" /t REG_DWORD /d 1 /f
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Diagnosis\Scheduled"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\Diagnosis\RecommendedTroubleshootingScanner"
 
 # Ask OneDrive to only generate network traffic if signed in to OneDrive.
 reg.exe import ".\Registry\Computer Configuration\Windows Components\OneDrive.reg"
