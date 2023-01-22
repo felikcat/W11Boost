@@ -182,6 +182,7 @@ elseif (!$thumbnail_shadows) {
 }
 
 if ($harden) {
+	sc.exe stop Spooler
 	reg.exe import ".\Non-GPO Registry\Harden.reg"
 }
 
@@ -279,6 +280,9 @@ reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\PolicyManager\current\device\
 # Disable tracking of application startups.
 reg.exe add "HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "Start_TrackProgs" /t REG_DWORD /d 0 /f
 
+# Restore the classic Windows 10 context menu; more performant, and easier to use.
+reg.exe add "HKEY_CURRENT_USER\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" /ve /d "" /f
+
 # Disables Cloud Content features; stops automatic installation of advertised ("suggested") apps among others.
 # Apparently is called "Content Delivery Manager" in Windows 10.
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Cloud Content.reg"
@@ -363,6 +367,10 @@ Disable-ScheduledTask -TaskName "\Microsoft\Windows\WS\WSTask"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\WwanSvc\OobeDiscovery"
 # ====
 
+Disable-ScheduledTask -TaskName "\NvTmRep_CrashReport1_{B2FE1952-0186-46C3-BAEC-A80AA35AC5B8}"
+Disable-ScheduledTask -TaskName "\NvTmRep_CrashReport2_{B2FE1952-0186-46C3-BAEC-A80AA35AC5B8}"
+Disable-ScheduledTask -TaskName "\NvTmRep_CrashReport3_{B2FE1952-0186-46C3-BAEC-A80AA35AC5B8}"
+Disable-ScheduledTask -TaskName "\NvTmRep_CrashReport4_{B2FE1952-0186-46C3-BAEC-A80AA35AC5B8}"
 
 # == Prevent Windows Update obstructions and other annoyances. ==
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Windows Update.reg"
@@ -376,6 +384,7 @@ Disable-ScheduledTask -TaskName "\Microsoft\Windows\WindowsUpdate\Scheduled Star
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\WindowsUpdate\sih"
 # ====
 
+reg.exe import ".\Non-GPO Registry\No Blocked Files.reg"
 
 # Don't analyze programs' execution time data.
 reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Perflib" /v "Disable Performance Counters" /t REG_DWORD /d 1 /f
@@ -454,6 +463,11 @@ reg.exe import ".\Registry\User Configuration\Administrative Templates\Desktop.r
 
 Disable-ScheduledTask -TaskName "\Microsoft\VisualStudio\Updates\BackgroundDownload"
 reg.exe import ".\Non-GPO Registry\Visual Studio 2022.reg"
+
+sc.exe stop "Razer Synapse Service"
+sc.exe stop "Razer Game Manager Service"
+sc.exe stop RzActionSvc
+reg.exe import ".\Non-GPO Registry\Disable Razer Synapse.reg"
 
 Clear-Host
 Write-Warning "

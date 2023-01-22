@@ -1,0 +1,13 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run]
+"Synapse3"=-
+
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Razer Game Manager Service]
+"Start"=dword:4
+
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Razer Synapse Service]
+"Start"=dword:4
+
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\RzActionSvc]
+"Start"=dword:4
