@@ -452,6 +452,8 @@ reg.exe import ".\Non-GPO Registry\Deny Screenshots By Apps.reg"
 reg.exe import ".\Non-GPO Registry\Unsorted.reg"
 reg.exe import ".\Non-GPO Registry\No Edge Autorun.reg"
 
+reg.exe import ".\Non-GPO Registry\HiDPI Blurry Font Fix.reg"
+
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\Group Policy.reg"
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\App Package Deployment.reg"
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Microsoft Edge.reg"
