@@ -10,11 +10,15 @@ ifdef::env-github[]
 endif::[]
 
 == Notice
-* W11Boost exceeds DoNotSpy11, W10Privacy, and O&O ShutUp 10 combined in the extensiveness and quality of its tweaks.
-** W11Boost's primary issues are the lack of configuration, partial support for Windows 10 LTSC 2022, and no GUI.
-*** Originally this was being moved into a Qt6 GUI, along with taking advantage of C++'s capabilities, but will not be completed since I switched to only using Arch Linux.
+* W11Boost exceeds DoNotSpy11, W10Privacy, and O&O ShutUp 10 combined as of 24 Jan 2023 in extensiveness, and the quality of its tweaks.
+* W11Boost's issues:
+** Lack of configuration.
+** Partial support for Windows 10 LTSC 2022.
+** No GUI.
+** Minimal effort put in by the original author at this point in time.
+*** It's unlikely these would be solved; went the trade school route instead of mentally and physically rotting at a computer desk.
 
-License is WTFPL, if you want to make something cool out of this then go ahead.
+License is WTFPL, if you want to fork this into something cool or improve on this pre-existing one, then go ahead.
 
 
 == About
