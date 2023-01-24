@@ -9,8 +9,16 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
+== Notice
+* W11Boost exceeds DoNotSpy11, W10Privacy, and O&O ShutUp 10 combined in the extensiveness and quality of its tweaks.
+** W11Boost's primary issues are the lack of configuration, partial support for Windows 10 LTSC 2022, and no GUI.
+*** Originally this was being moved into a Qt6 GUI, along with taking advantage of C++'s capabilities, but will not be completed since I switched to only using Arch Linux.
+
+License is WTFPL, if you want to make something cool out of this then go ahead.
+
+
 == About
-W11Boost goes after maximum performance, reduces the amount of distractions, and all without breaking programs (if it does please report it).
+W11Boost goes after maximum performance, reduces the amount of distractions, and avoids breaking programs.
 
 .Learning material used
 [%collapsible]
@@ -85,17 +93,17 @@ TIP: Example gpedit.msc registry translation: +
 
 
 == Before continuing
-. Use alongside my link://github.com/nermur/DuxOS[DuxOS] if you don't mind reinstalling Windows; it's comprehensive on removing components that have minimal/no use which impact performance noticeably.
 
 . It's assumed that:
 ** Disabling some components are ignored on Windows versions that aren't Enterprise/Education/Server SKUs, especially regarding telemetry.
 ** You have to reapply W11Boost after major Windows feature updates, such as going from 21H2 -> 22H2.
 ** Windows can at any time decide to revert single or multiple changes done by this script.
+*** Use link:https://github.com/henrypp/simplewall/releases[Simplewall] to prevent this.
 ** You can handle Windows without its auto-piloting features, such as the link://admx.help/?Category=Windows_11_2022&Policy=Microsoft.Policies.ApplicationCompatibility::AppCompatTurnOffEngine[Application Compatibility Engine].
 *** For ACE being off specifically, you would manually specify to run a legacy application in compatibility mode (likely for Windows XP).
 
 == Requirements
-. Windows has to be activated for some changes, use a license key, or run either link://github.com/abbodi1406/KMS_VL_ALL_AIO[abbodi1406's KMS_VL_ALL_AIO] or massgravel's link://github.com/massgravel/Microsoft-Activation-Scripts[Microsoft Activation Scripts].
+. Windows has to be activated for some changes; use a license key, or run either link://github.com/abbodi1406/KMS_VL_ALL_AIO[abbodi1406's KMS_VL_ALL_AIO] or massgravel's link://github.com/massgravel/Microsoft-Activation-Scripts[Microsoft Activation Scripts].
 
 . Windows Package Manager is installed and functional.
 ** For Windows 11, open PowerShell and run `winget`; if it's working:
@@ -117,7 +125,6 @@ TIP: Example gpedit.msc registry translation: +
 == Extras
 * `W11_LTSC_2022.bat`
 ** Uninstalls a lot of default apps to replicate what Windows 10 LTSC 2022 includes by default.
-*** This is unnecessary on DuxOS.
 *** Exceptions: App Installer, Store Experience Host, Windows Store, Windows Terminal, Xbox Game Speech Window.
 *** Warning: Run this first before other extras if you plan on using it.
 
@@ -158,7 +165,6 @@ This contains a long but important list. Be sure to check it if you're not sure.
 [%collapsible]
 ====
 . Use link:https://www.revouninstaller.com/products/revo-uninstaller-pro/[Revo Uninstaller] (moderate scan mode) to remove these programs that cause BSODs and anti-cheat problems, along with slower performance:
-* In general, any programs except OpenRGB that configure RGB.
 * ASUS Armoury Crate
 * CORSAIR iCUE
 * ASRock Polychrome RGB
@@ -176,9 +182,6 @@ This contains a long but important list. Be sure to check it if you're not sure.
 . Alternatives:
 * link:https://openrgb.org/[OpenRGB] for RGB configuration.
 * link:https://www.msi.com/Landing/afterburner/graphics-cards[MSI Afterburner] for general GPU management and overclocking.
-** Disable Afterburner's "Enable low-level IO driver" +
-image:MSIAfterburner_1.png[] +
-image:MSIAfterburner_2.png[]
 
 ====
 
@@ -190,7 +193,7 @@ image:MSIAfterburner_2.png[]
 . link://winaerotweaker.com/[Winaero Tweaker]
 * Extensive number of usability and visual tweaks.
 
-=== Shoutouts
+=== Appendices
 
 * These projects helped W11Boost improve at a more rapid pace:
 . https://github.com/Atlas-OS/Atlas
