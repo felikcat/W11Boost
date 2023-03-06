@@ -1,7 +1,14 @@
 Windows Registry Editor Version 5.00
 
+[HKEY_CURRENT_USER\Control Panel\Accessibility]
+"Sound on Activation"=dword:0
+"Warning Sounds"=dword:0
+
+[HKEY_CURRENT_USER\Control Panel\Accessibility\Keyboard Response]
+"Flags"="102"
+
 [HKEY_CURRENT_USER\Control Panel\Accessibility\StickyKeys]
-"Flags"="506"
+"Flags"="486"
 
 [HKEY_CURRENT_USER\Control Panel\Accessibility\ToggleKeys]
-"Flags"="62"
+"Flags"="38"

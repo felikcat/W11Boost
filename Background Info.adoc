@@ -1,0 +1,10 @@
+=== StartAllBack isn't used
+Why? A loss of speed. StartAllBack has its own memory space like all the other programs that are not integrated deeply in Windows; the additional clock cycling caused by unavoidable fact leads to StartAllBack being slower than the stock Windows UI, such as opening context menus or searching for programs in the start menu.
+
+=== What programs get broken by
+
+* Windows Store
+** If disabled: Windows Update
+
+* link://eddie.website/[AirVPN's client]
+** If disabled: User Account Control

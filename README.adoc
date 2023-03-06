@@ -9,105 +9,24 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
-== Notice
-* W11Boost exceeds DoNotSpy11, W10Privacy, and O&O ShutUp 10 combined as of 24 Jan 2023 in extensiveness, and the quality of its tweaks.
-* W11Boost's issues:
-** Lack of configuration.
-** Partial support for Windows 10 LTSC 2022.
-** No GUI.
-** Minimal effort put in by the original author at this point in time.
-*** It's unlikely these would be solved; went the trade school route instead of mentally and physically rotting at a computer desk.
-
-License is WTFPL, if you want to fork this into something cool or improve on this pre-existing one, then go ahead.
-
-
 == About
-W11Boost goes after maximum performance, reduces the amount of distractions, and avoids breaking programs.
+TuneUp11 speeds up your Windows 11 PC with no catches.
 
-.Learning material used
-[%collapsible]
-====
-
-. link://archive.org/details/windows-internals-part1-7th/mode/2up[Windows Internals, Part 1, 7th Edition]
-** link://github.com/zodiacon/WindowsInternals[Windows Internals, Part 1, 7th Edition (unofficial) Tools]
-
-. link://www.microsoftpressstore.com/store/windows-internals-part-2-9780135462409[Windows Internals, Part 2, 7th Edition]
-** This can be viewed for free from link://en.wikipedia.org/wiki/Z-Library[Z-Library].
-
-. link://github.com/MicrosoftDocs/windows-driver-docs/tree/staging/windows-driver-docs-pr[Windows Driver Documentation]
-
-. link://therealmjp.github.io/posts/breaking-down-barriers-part-1-whats-a-barrier/[TheRealMJP's blog posts on how GPU synchronization and preemption work]
-
-. link:https://bromiley.medium.com/windows-wednesday-shim-cache-1997ba8b13e7[Matt B's blog post on Application Compatibility Cache]
-====
-
-.User notes
-[%collapsible]
-====
-* Does not overwrite user preferences that decrease privacy, except for those with a noticeable performance impact, or can be distracting/annoying.
-** It's assumed third-party tools do this job better, and not everyone wants to disable components that have privacy concerns.
-
-* What is repaired:
-** Mistakes made by other optimizers.
-
-* Only Windows 10 LTSC 2022, Windows 11 Pro 21H2, and Windows 11 Enterprise 22H2 have been tested.
-
-====
-
-.Developer notes
-[%collapsible]
-====
-
-* `reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\EXAMPLE" /v "Start" /t REG_DWORD /d 4 /f` is preferred over using `sc.exe config EXAMPLE start=disabled` since Windows rejects this request depending on the service.
-
-* MMCSS (Multimedia Class Scheduler) doesn't exist in Windows 10 LTSC 2022 and newer.
-
-* Non-volatile registry keys usually don't self-regenerate themselves if their key doesn't exist.
-** If the purpose is to revert back to defaults, manually set the default value instead.
-
-* The registry changes Group Policy edits do can be traced with link://docs.microsoft.com/en-us/sysinternals/downloads/procmon[Sysinternals Process Monitor].
-** Filter to the process containing gpedit.msc: +
-image:Procmon64_1.png[]
-** Filter to registry changes only: +
-image:Procmon64_2.png[]
-*** Translate the traced registry edits to their non-group policy places, and there's your registry key edit.
-**** Other processes of interest: +
-`SystemPropertiesPerformance.exe`, `SystemSettings.exe`, `DllHost.exe` +
-`SecurityHealthService.exe`
-
-TIP: Example gpedit.msc registry translation: +
-`HKCU\Software\Microsoft\Windows\CurrentVersion\Group Policy Objects\{2F5A9005-4CB6-4314-B846-8C3EB66C9C24}Machine\Software\Policies\Microsoft\Windows` *->* `HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\CloudContent`
-
-* Drivers currently loaded by Windows can be seen with link:https://processhacker.sourceforge.io/nightly.php[Process Hacker] via:
-. The "System" proccess -> Properties (right-click or press Enter with "System" selected) -> Modules
-
-====
-
-.What programs get broken by
-[%collapsible]
-====
-
-* Windows Store
-** If disabled: Windows Update
-
-* link://eddie.website/[AirVPN's client]
-** If disabled: User Account Control
-
-====
+* TuneUp11 compared to: O&O ShutUp10, W10Privacy, BloatyNosy, ChrisTitusTech's winutil, Pointstone AntiTrack, Debotnet, Debloat Windows 10, Spybot Anti-Beacon, and Winrice.
+- Easier to use.
+- No programs or apps get broken after applying changes.
+- Fully open-source; some alternatives such as O&O ShutUp10 are not.
 
 
 == Before continuing
 
-. It's assumed that:
-** Disabling some components are ignored on Windows versions that aren't Enterprise/Education/Server SKUs, especially regarding telemetry.
-** You have to reapply W11Boost after major Windows feature updates, such as going from 21H2 -> 22H2.
-** Windows can at any time decide to revert single or multiple changes done by this script.
-*** Use link:https://github.com/henrypp/simplewall/releases[Simplewall] to prevent this.
-** You can handle Windows without its auto-piloting features, such as the link://admx.help/?Category=Windows_11_2022&Policy=Microsoft.Policies.ApplicationCompatibility::AppCompatTurnOffEngine[Application Compatibility Engine].
-*** For ACE being off specifically, you would manually specify to run a legacy application in compatibility mode (likely for Windows XP).
+. Only the latest Windows 11 is actively supported.
+
+. You can handle Windows without its auto-piloting features, such as the link://admx.help/?Category=Windows_11_2022&Policy=Microsoft.Policies.ApplicationCompatibility::AppCompatTurnOffEngine[Application Compatibility Engine]. Meaning old programs have to be set manually to run in compatibility mode (likely for Windows XP).
+
 
 == Requirements
-. Windows has to be activated for some changes; use a license key, or run either link://github.com/abbodi1406/KMS_VL_ALL_AIO[abbodi1406's KMS_VL_ALL_AIO] or massgravel's link://github.com/massgravel/Microsoft-Activation-Scripts[Microsoft Activation Scripts].
+. Windows has to be activated; use a license key or run link://github.com/massgravel/Microsoft-Activation-Scripts[massgravel's MAS].
 
 . Windows Package Manager is installed and functional.
 ** For Windows 11, open PowerShell and run `winget`; if it's working:
@@ -120,45 +39,54 @@ TIP: Example gpedit.msc registry translation: +
 
 
 == Instructions
-. Download the link:https://github.com/nermur/W11Boost/releases[latest W11Boost], then extract it.
-. Configure the options by editing `main.ps1`.
-. Temporarily disable all anti-virus programs.
-. Run `Backup_Registry.bat` as Administrator a single time; only redo this after an update to a new major OS version (such as 21H2 -> 22H2)
-. Run `W11Boost.bat` as Administrator.
+. Download the link:https://github.com/felikcat/TuneUp11/releases[latest TuneUp11] and extract it.
+. Run `Backup_Registry.bat` as Administrator a single time; only redo this after an update to a new major OS version (such as 21H2 -> 22H2).
+. Run `TuneUp11.bat` as Administrator.
+. After prompted to reboot, run 'Icaros'; located at: `"C:\Program Files\Icaros\IcarosConfig.exe"`
+. Use the following settings:
+image:IcarosConfig.png[]
+
 
 == Extras
-* `W11_LTSC_2022.bat`
+. `W11_LTSC_2022.bat`
 ** Uninstalls a lot of default apps to replicate what Windows 10 LTSC 2022 includes by default.
 *** Exceptions: App Installer, Store Experience Host, Windows Store, Windows Terminal, Xbox Game Speech Window.
-*** Warning: Run this first before other extras if you plan on using it.
 
-* `Install_Xbox_Minimal.bat`
-** Note: Login to the Microsoft Store before using this script, otherwise it will not work.
-** Installs only what's required to use Xbox Controllers (interface not included, get it link://www.microsoft.com/store/productId/9NBLGGH30XJ3[here]), Game Pass, and specific games like Forza Horizon 4 & 5.
-*** To also get Game Bar, install the following link://www.microsoft.com/store/productId/9NZKPSTSNW4P[here] and link://www.microsoft.com/store/productId/9NBLGGH537C2[here].
+.If `W11_LTSC_2022.bat` was used
+[%collapsible]
+====
+. `Install_Xbox_Minimal.bat`
+- *Login to the Microsoft Store before using this script, otherwise it will not work.*
+- Installs only what's required to use Xbox Controllers (interface not included, get it link://www.microsoft.com/store/productId/9NBLGGH30XJ3[here]), Game Pass, and specific games like Forza Horizon 4 & 5.
+** To also get the Game Bar, install the following link://www.microsoft.com/store/productId/9NZKPSTSNW4P[here] and link://www.microsoft.com/store/productId/9NBLGGH537C2[here].
+====
 
-== Recommendations
 
-=== Tweaks
-. Enable the following options in your motherboard's BIOS:
-* I/O APIC (IOAPIC 24-119 Entries)
-* Above 4G Decoding
-* Resizable BAR
-** NOTE: If Windows cannot boot (likely from using MBR instead of GPT), disable Resizable BAR.
-* HPET (High Precision Event Timer)
+== Recommendations for advanced/power users
 
-. Disable the following options in your motherboard's BIOS:
-* XHCI Hands Off
-* USB Legacy
+=== BIOS
+* Enable the following
+. I/O APIC (IOAPIC 24-119 Entries)
+. Above 4G Decoding
+. Resizable BAR
+** This is incompatible with Windows installed on an MBR partition; if Windows can no longer boot, this setting caused it.
+. HPET (High Precision Event Timer)
+
+* Disable the following options in your motherboard's BIOS:
+. XHCI Hands Off
+. USB Legacy
 ** link://techcommunity.microsoft.com/t5/microsoft-usb-blog/reasons-to-avoid-companion-controllers/ba-p/270710[Why disable these two?] +
 Note: if a USB is no longer bootable after these two changes, temporarily turn them both back on.
 
-. Windows Settings -> Gaming -> Enable "Game Mode"
-* -> Graphics -> Change default graphics settings -> Enable "Hardware-accelerated GPU scheduling", "Variable refresh rate", and "Optimizations for windowed games"
+
+=== Windows
+
+. Windows Settings -> Gaming -> Enable `Game Mode`
+. Windows Settings -> Graphics -> Change default graphics settings -> Enable `Hardware-accelerated GPU scheduling`, and `Optimizations for windowed games`.
 
 . Install all optional updates through Windows Update; it can include device drivers.
 
-. Auto-detect and install link://www.amd.com/en/support[AMD's drivers]. +
+. Auto-detect and install link://www.amd.com/en/support[AMD drivers]. +
 Auto-detect and install link://www.intel.com/content/www/us/en/support/detect.html[Intel's drivers].
 * This will utilize their drivers instead of the generic drivers Microsoft provides, meaning better performance and lower DPC latency.
 
@@ -189,6 +117,7 @@ This contains a long but important list. Be sure to check it if you're not sure.
 
 ====
 
+
 === Other recommended programs
 
 . link://www.speedguide.net/downloads.php[SG TCP Optimizer]
@@ -197,9 +126,61 @@ This contains a long but important list. Be sure to check it if you're not sure.
 . link://winaerotweaker.com/[Winaero Tweaker]
 * Extensive number of usability and visual tweaks.
 
-=== Appendices
+. link:https://github.com/henrypp/simplewall/releases[Simplewall]
+* An interactive firewall to block Windows telemetry and auto-updates even further.
 
-* These projects helped W11Boost improve at a more rapid pace:
+== Appendices
+
+.Developer notes
+[%collapsible]
+====
+
+* `reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\EXAMPLE" /v "Start" /t REG_DWORD /d 4 /f` is preferred over using `sc.exe config EXAMPLE start=disabled` since Windows rejects this request depending on the service.
+
+* MMCSS (Multimedia Class Scheduler) doesn't exist in Windows 10 LTSC 2022 and newer.
+
+* Non-volatile registry keys usually don't self-regenerate themselves if their key doesn't exist.
+** If the purpose is to revert back to defaults, manually set the default value instead.
+
+* The registry changes Group Policy edits do can be traced with link://docs.microsoft.com/en-us/sysinternals/downloads/procmon[Sysinternals Process Monitor].
+** Filter to the process containing gpedit.msc: +
+image:Procmon64_1.png[]
+** Filter to registry changes only: +
+image:Procmon64_2.png[]
+*** Translate the traced registry edits to their non-group policy places, and there's your registry key edit.
+**** Other processes of interest: +
+`SystemPropertiesPerformance.exe`, `SystemSettings.exe`, `DllHost.exe` +
+`SecurityHealthService.exe`
+
+TIP: Example gpedit.msc registry translation: +
+`HKCU\Software\Microsoft\Windows\CurrentVersion\Group Policy Objects\{2F5A9005-4CB6-4314-B846-8C3EB66C9C24}Machine\Software\Policies\Microsoft\Windows` *->* `HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\CloudContent`
+
+* Drivers currently loaded by Windows can be seen with link:https://processhacker.sourceforge.io/nightly.php[Process Hacker] via:
+. The "System" proccess -> Properties (right-click or press Enter with "System" selected) -> Modules
+
+====
+
+.Learning material used
+[%collapsible]
+====
+
+. link://archive.org/details/windows-internals-part1-7th/mode/2up[Windows Internals, Part 1, 7th Edition]
+** link://github.com/zodiacon/WindowsInternals[Windows Internals, Part 1, 7th Edition (unofficial) Tools]
+
+. link://www.microsoftpressstore.com/store/windows-internals-part-2-9780135462409[Windows Internals, Part 2, 7th Edition]
+** This can be viewed for free from link://en.wikipedia.org/wiki/Z-Library[Z-Library].
+
+. link://github.com/MicrosoftDocs/windows-driver-docs/tree/staging/windows-driver-docs-pr[Windows Driver Documentation]
+
+. link://therealmjp.github.io/posts/breaking-down-barriers-part-1-whats-a-barrier/[TheRealMJP's blog posts on how GPU synchronization and preemption work]
+
+. link:https://bromiley.medium.com/windows-wednesday-shim-cache-1997ba8b13e7[Matt B's blog post on Application Compatibility Cache]
+
+
+---
+
+* These projects helped TuneUp11 improve at a more rapid pace:
 . https://github.com/Atlas-OS/Atlas
 . https://github.com/beatcracker/toptout
 . https://github.com/M2Team/NSudo
+====

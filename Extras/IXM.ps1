@@ -11,5 +11,5 @@ if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
 $apps = @("9WZDNCRD1HKW", "9MWPM2CQNLHN", "9NKNC0LD5NN6", "9MV0B5HZVK9Z")
 
 for ($i = 0; $i -lt $apps.length; $i++) {
-    winget.exe install $apps[$i] $PARMS --exact --silent --accept-package-agreements --accept-source-agreements
+    winget.exe install $apps[$i] $PARMS --exact --silent --accept-package-agreements --accept-source-agreements --source msstore
 }

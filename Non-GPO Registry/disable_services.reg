@@ -16,7 +16,3 @@ Windows Registry Editor Version 5.00
 ; Connected User Experiences and Telemetry
 [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\DiagTrack]
 "Start"=dword:4
-
-; Delivery Optimization
-[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\DoSvc]
-"Start"=dword:4

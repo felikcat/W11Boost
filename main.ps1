@@ -1,199 +1,74 @@
-# Disables Sticky, Filter, and Toggle Keys.
-$avoid_key_annoyances = 1
-
-# File History:
-# - Is unreliable with creating snapshots of files.
-# - Use Restic or TrueNAS with Syncthing for backups instead.
-$file_history = 0
-
-# 0: Disables GPS services, which always run even if there's no GPS hardware installed.
-$geolocation = 1
-
-# 1: Ensures Windows' audio ducking/attenuation is disabled.
-$audio_reduction = 0
-
-# 0: Prevents random packet loss/drop-outs in exchange for a higher battery drain.
-$ethernet_power_saving = 0
-
-# Use NVIDIA ShadowPlay, AMD ReLive, or OBS Studio instead.
-$game_dvr = 0
-
-# Prevents time desync issues that were caused by using time.windows.com
-# NOTICE: If you are connected to your own local NTP server, don't use this.
-$optimal_online_ntp = 1
-
-# NOTICE: Some settings set might intersect with WiFi adapters, as tweaks are applied to all network interfaces.
-$recommended_ethernet_tweaks = 1
-
-# "Everything" can circumvent the performance impact of Windows Search Indexing while providing faster and more accurate results.
-$replace_windows_search = 1
-
-# Resets all network interfaces back to their manufacturer's default settings.
-# Recommended before applying our network tweaks, as it's a "clean slate".
-$reset_network_interface_settings = 1
-
-# 0 is recommended.
-# System Restore problems:
-# - Cannot restore backups from previous versions of Windows; can't revert Windows updates with System Restore.
-# - Will revert other personal files (program settings and installations).
-$system_restore = 0
-
-# 0 = disable Explorer's thumbnail (images/video previews) border shadows.
-# -> 0 is recommended if dark mode is used.
-$thumbnail_shadows = 0
-
-# Harden Windows with visual changes and security tweaks.
-$harden = 1
-
-if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
-	Write-Warning "ERROR: W11Boost -> Requires Administrator!"
-	Break
+if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]"Administrator"))
+{
+    Write-Warning "ERROR: TuneUp11 -> requires being run as Administrator!"
+    Break
 }
 
-$host.ui.rawui.windowtitle = "W11Boost by Felik @ https://github.com/nermur"
+$host.ui.rawui.windowtitle = "TuneUp11 by github.com/felikcat"
 
 # If these are disabled, Windows Update will break and so will this script.
 reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\AppXSvc" /v "Start" /t REG_DWORD /d 3 /f
 reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\ClipSVC" /v "Start" /t REG_DWORD /d 3 /f
 reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\TokenBroker" /v "Start" /t REG_DWORD /d 3 /f
-# StorSvc being disabled breaks the Windows Store.
+# Disabled StorSvc breaks the Windows Store.
 reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\StorSvc" /v "Start" /t REG_DWORD /d 3 /f
+# Disabled DoSvc (delivery optimization) breaks winget.
+reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\DoSvc" /v "Start" /t REG_DWORD /d 3 /f
 sc.exe start AppXSvc
 sc.exe start ClipSVC
 sc.exe start StorSvc
+sc.exe start DoSvc
 
 Clear-Host
-Write-Output "
-==== Current settings ====
-
-avoid_key_annoyances = $avoid_key_annoyances
-file_history = $file_history
-geolocation = $geolocation
-audio_reduction = $audio_reduction
-ethernet_power_saving = $ethernet_power_saving
-game_dvr = $game_dvr
-optimal_online_ntp = $optimal_online_ntp
-recommended_ethernet_tweaks = $recommended_ethernet_tweaks
-replace_windows_search = $replace_windows_search
-reset_network_interface_settings = $reset_network_interface_settings
-system_restore = $system_restore
-thumbnail_shadows = $thumbnail_shadows
-harden = $harden
-"
+Write-Output "Disable your anti-virus before continuing.
+If this is uncomfortable for you, close this program."
 Pause
 
 # == Initialize ==
 Push-Location $PSScriptRoot
-Start-Transcript -Path ([Environment]::GetFolderPath('MyDocuments') + "\W11Boost_LastRun.log")
+Start-Transcript -Path ([Environment]::GetFolderPath('MyDocuments') + "\TuneUp11_LastRun.log")
 . ".\imports.ps1"
 New-PSDrive -PSProvider registry -Root HKEY_CLASSES_ROOT -Name HKCR
-
 # ====
 
 # "Fast startup" causes stability issues, and increases disk wear from excessive I/O usage.
 reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Power" /V "HiberbootEnabled" /T REG_DWORD /D 0 /F
 attrib +R %WinDir%\System32\SleepStudy\UserNotPresentSession.etl
 
-if ($avoid_key_annoyances) {
-	reg.exe import ".\Non-GPO Registry\avoid_key_annoyances.reg"
-}
-
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\OS Policies.reg"
 
-if ($file_history) {
-	Set-ItemProperty -Path "HKCR:\SOFTWARE\Policies\Microsoft\Windows\FileHistory" -Name "Disabled" -Type DWord -Value 0 -Force
-	Set-ItemProperty -Path "HKCR:\SYSTEM\CurrentControlSet\Services\fhsvc" -Name "Start" -Type DWord -Value 3 -Force
-	Enable-ScheduledTask -TaskName "\Microsoft\Windows\FileHistory\File History (maintenance mode)"
-}
-elseif (!$file_history) { 
-	Set-ItemProperty -Path "HKCR:\SOFTWARE\Policies\Microsoft\Windows\FileHistory" -Name "Disabled" -Type DWord -Value 1 -Force
-	Set-ItemProperty -Path "HKCR:\SYSTEM\CurrentControlSet\Services\fhsvc" -Name "Start" -Type DWord -Value 4 -Force
-	Disable-ScheduledTask -TaskName "\Microsoft\Windows\FileHistory\File History (maintenance mode)"
-}
 
-if ($geolocation) {
-	reg.exe import ".\Non-GPO Registry\Geolocation\Enable.reg"
-	Enable-ScheduledTask -TaskName "\Microsoft\Windows\Location\Notifications"
-	Enable-ScheduledTask -TaskName "\Microsoft\Windows\Location\WindowsActionDialog"
-}
-elseif (!$geolocation) {
-	reg.exe import ".\Non-GPO Registry\Geolocation\Disable.reg"
-	sc.exe stop lfsvc
-	Disable-ScheduledTask -TaskName "\Microsoft\Windows\Location\Notifications"
-	Disable-ScheduledTask -TaskName "\Microsoft\Windows\Location\WindowsActionDialog"
-}
+# == Use optimal online NTP servers for more accurate system time. ==
+net.exe stop w32time
+# Make a clean slate for the time sync settings.
+w32tm.exe /unregister
+w32tm.exe /register
 
-if ($audio_reduction) {
-	reg.exe delete "HKEY_CURRENT_USER\SOFTWARE\Microsoft\Multimedia\Audio\UserDuckingPreference" /f
-}
-if (!$audio_reduction) {
-	reg.exe add "HKEY_CURRENT_USER\SOFTWARE\Microsoft\Multimedia\Audio" /v "UserDuckingPreference" /t REG_DWORD /d "3" /f
-	reg.exe delete "HKEY_CURRENT_USER\SOFTWARE\Microsoft\Internet Explorer\LowRegistry\Audio\PolicyConfig\PropertyStore" /f
-}
+w32tm.exe /config /syncfromflags:manual /manualpeerlist:"time.cloudflare.com ntppool1.time.nl ntppool2.time.nl"
+net.exe start w32time
+w32tm.exe /resync
+# ====
 
-if (!$game_dvr) {
-	reg.exe import ".\Non-GPO Registry\No Game DVR.reg"
-}
+Set-Recommended-Ethernet-Tweaks
 
-# Do this before resetting network interfaces!
-if ($optimal_online_ntp) {
-	net.exe stop w32time
-	# Make a clean slate for the time sync settings.
-	w32tm.exe /unregister
-	w32tm.exe /register
-	# Tier 1 ASNs like NTT are preferred since they are critical to routing functioning correctly for ISPs around the world.
-	w32tm.exe /config /syncfromflags:manual /manualpeerlist:"x.ns.gin.ntt.net,y.ns.gin.ntt.net,ntp.ripe.net,time.nist.gov"
-	net.exe start w32time
-	w32tm.exe /resync
-}
+# == Replacing the Windows Search Index. Indexing file contents is pointless if you're organized.  ==
+sc.exe stop WSearch
+reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\WSearch" /v "Start" /t REG_DWORD /d 4 /f
+reg.exe add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v "IsDeviceSearchHistoryEnabled" /t REG_DWORD /d 0 /f
+# --source winget prevents error 0x8a150044 if the Windows Store isn't reachable.
+.\NSudoLC.exe -U:E -P:E -M:S powershell.exe -Command "winget.exe install voidtools.Everything -eh --accept-package-agreements --accept-source-agreements --source winget"
+# ====
 
-if ($reset_network_interface_settings) {
-	Reset-NetAdapterAdvancedProperty -Name '*' -DisplayName '*'
-}
+# Replaces Windows built-in thumbnailing for many file formats.
+.\NSudoLC.exe -U:E -P:E -M:S powershell.exe -Command "winget.exe install Xanashi.Icaros -eh --accept-package-agreements --accept-source-agreements --source winget"
 
-if (!$ethernet_power_saving) {
-	Disable-Ethernet-Power-Saving
-}
-
-if ($recommended_ethernet_tweaks) {
-	Set-Recommended-Ethernet-Tweaks
-}
-
-if ($replace_windows_search) {
-	sc.exe stop WSearch
-	reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\WSearch" /v "Start" /t REG_DWORD /d 4 /f
-	reg.exe add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\SearchSettings" /v "IsDeviceSearchHistoryEnabled" /t REG_DWORD /d 0 /f
-	.\NSudoLC.exe -U:E -P:E -M:S powershell.exe -Command "winget.exe install voidtools.Everything -eh --accept-package-agreements --accept-source-agreements"
-}
-
-if (!$system_restore) {
-	reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\System Restore.reg"
-	# Delete all restore points.
-	vssadmin.exe delete shadows /all /quiet
-
-	Disable-ScheduledTask -TaskName "\Microsoft\Windows\SystemRestore\SR"
-}
-
-if ($thumbnail_shadows) {
-	Set-ItemProperty -Path "HKCR:\SystemFileAssociations\image" -Name "Treatment" -Type DWord -Value 0 -Force
-}
-elseif (!$thumbnail_shadows) {
-	Set-ItemProperty -Path "HKCR:\SystemFileAssociations\image" -Name "Treatment" -Type DWord -Value 2 -Force
-}
-
-if ($harden) {
-	sc.exe stop Spooler
-	reg.exe import ".\Non-GPO Registry\Harden.reg"
-}
-
+# Skip to the sign-on screen.
+reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\Personalization" /v "NoLockScreen" /t REG_DWORD /d 1 /f
 # Disable the acrylic blur at sign-in screen to improve performance at that screen.
 reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\System" /v "DisableAcrylicBackgroundOnLogon" /t REG_DWORD /d 1 /f
 
 # https://www.intel.com/content/www/us/en/developer/articles/troubleshooting/openssl-sha-crash-bug-requires-application-update.html
 [Environment]::SetEnvironmentVariable("OPENSSL_ia32cap", "~0x200000200000000", "Machine")
-
-# Skip to the sign-on screen.
-reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\Personalization" /v "NoLockScreen" /t REG_DWORD /d 1 /f
 
 # Show what's slowing down bootups and shutdowns.
 reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v "verbosestatus" /t REG_DWORD /d 1 /f
@@ -255,7 +130,7 @@ Disable-ScheduledTask -TaskName "\Microsoft\Windows\Flighting\FeatureConfig\Usag
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Flighting\FeatureConfig\UsageDataReporting"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Flighting\OneSettings\RefreshCache"
 
-# Disables various compatibility assistants and engines; it's assumed a W11Boost user is going to manually set compatibility when needed.
+# Disables various compatibility assistants and engines; it's assumed a TuneUp11 user is going to manually set compatibility when needed.
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Application Compatibility.reg"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Application Experience\Microsoft Compatibility Appraiser"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Application Experience\ProgramDataUpdater"
@@ -289,11 +164,8 @@ reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windo
 
 # == Disable SmartScreen; delays program launches and is better done by other anti-malware programs. ==
 reg.exe import ".\Registry\Computer Configuration\Windows Components\Windows Defender SmartScreen.reg"
-
 reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer" /v "SmartScreenEnabled" /t REG_SZ /d "Off" /f
-
 reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\AppHost" /v "EnableWebContentEvaluation" /t REG_DWORD /d 0 /f
-# ====
 
 
 # Automated file cleanup without user interaction is a bad idea, even if Storage Sense only runs on low-disk space events.
@@ -401,7 +273,7 @@ fsutil.exe behavior set disablelastaccess 3
 reg.exe add "HKEY_LOCAL_MACHINE\Software\Microsoft\FTH" /v "Enabled" /t REG_DWORD /d 0 /f
 
 # == Correct mistakes by others ==
-reg.exe import ".\Non-GPO Registry\mistake_corrections.reg"
+reg.exe import ".\Non-GPO Registry\Mistake Corrections.reg"
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\Power Management.reg"
 
 # Use sane defaults for these sensitive timer related settings.
@@ -421,19 +293,17 @@ reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\iphlpsvc" /v "
 reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\IpxlatCfgSvc" /v "Start" /t REG_DWORD /d 3 /f
 Set-NetAdapterBinding -Name '*' -DisplayName 'Internet Protocol Version 6 (TCP/IPv6)' -Enabled 1
 
-# MemoryCompression: Slightly increase CPU load to reduce I/O load, and handle Out Of Memory situations smoothly; akin to Linux's zRAM.
-$options = @("-ApplicationLaunchPrefetching", "-ApplicationPreLaunch", "-MemoryCompression")
-for ($i = 0; $i -lt $options.length; $i++) {
-    Enable-MMAgent $options[$i]
-}
+# MemoryCompression: While enabled; increases CPU load to reduce I/O load and handle Out Of Memory situations more smoothly; akin to Linux's zRAM.
+# -> Its downside is worsened stuttering in video games.
+# PageCombining: While enabled; reduces memory usage but increases CPU load.
+Enable-MMAgent -ApplicationLaunchPrefetching
+Enable-MMAgent -ApplicationPreLaunch
+
 
 # Programs that rely on 8.3 filenames from the DOS-era will break if this is disabled.
 fsutil.exe behavior set disable8dot3 2
 # ====
 
-
-# Higher memory usage for less CPU load.
-Disable-MMAgent -PageCombining
 
 # Ask to enter recovery options after 3 failed boots instead of forcing it.
 # NOTE: Does not disable the Windows Recovery Environment.
@@ -448,9 +318,9 @@ reg.exe import ".\Non-GPO Registry\disable_services.reg"
 reg.exe import ".\Non-GPO Registry\disable_typing_insights.reg"
 reg.exe import ".\Non-GPO Registry\performance_options.reg"
 reg.exe import ".\Non-GPO Registry\UAC.reg"
-reg.exe import ".\Non-GPO Registry\Deny Screenshots By Apps.reg"
 reg.exe import ".\Non-GPO Registry\Unsorted.reg"
 reg.exe import ".\Non-GPO Registry\No Edge Autorun.reg"
+reg.exe import  ".\Non-GPO Registry\Disable Delivery Optimization.reg"
 
 reg.exe import ".\Non-GPO Registry\HiDPI Blurry Font Fix.reg"
 
@@ -466,15 +336,9 @@ reg.exe import ".\Registry\User Configuration\Administrative Templates\Desktop.r
 Disable-ScheduledTask -TaskName "\Microsoft\VisualStudio\Updates\BackgroundDownload"
 reg.exe import ".\Non-GPO Registry\Visual Studio 2022.reg"
 
-sc.exe stop "Razer Synapse Service"
-sc.exe stop "Razer Game Manager Service"
-sc.exe stop RzActionSvc
-reg.exe import ".\Non-GPO Registry\Disable Razer Synapse.reg"
-
 Clear-Host
 Write-Warning "
-Your PC will restart after a key is pressed!
-It's required to fully apply changes.
+A reboot is required to finish applying changes, press any key to continue.
 "
 Pause
 shutdown.exe /r /t 00
