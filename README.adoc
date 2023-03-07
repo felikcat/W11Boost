@@ -28,23 +28,25 @@ TuneUp11 speeds up your Windows 11 PC with no catches.
 == Requirements
 . Windows has to be activated; use a license key or run link://github.com/massgravel/Microsoft-Activation-Scripts[massgravel's MAS].
 
-. Windows Package Manager is installed and functional.
-** For Windows 11, open PowerShell and run `winget`; if it's working:
-*** Open the Microsoft Store, then update "App Installer" through it.
+. Windows Package Manager is installed and functional. Test by opening PowerShell then run `winget`.
 
-** For Windows 10 LTSC 2019 or 2022, run in Command Prompt as Administrator to install `winget`:
-*** `wsreset -i`
-*** If the Microsoft store doesn't show up after this command is complete, reboot.
-*** Open the Microsoft Store, then install "App Installer" through it.
+.Fixing `winget` if it doesn't work.
+[%collapsible]
+====
+* For Windows 11, open the Microsoft Store, then update "App Installer" through it.
+
+* For Windows 10 LTSC 2019 or 2022, run in Command Prompt as Administrator to install `winget`:
+** `wsreset -i`
+** If the Microsoft store doesn't show up after this command is complete, reboot.
+** Open the Microsoft Store, then install "App Installer" through it.
+
+====
 
 
 == Instructions
 . Download the link:https://github.com/felikcat/TuneUp11/releases[latest TuneUp11] and extract it.
 . Run `Backup_Registry.bat` as Administrator a single time; only redo this after an update to a new major OS version (such as 21H2 -> 22H2).
 . Run `TuneUp11.bat` as Administrator.
-. After prompted to reboot, run 'Icaros'; located at: `"C:\Program Files\Icaros\IcarosConfig.exe"`
-. Use the following settings:
-image:IcarosConfig.png[]
 
 
 == Extras
@@ -60,6 +62,10 @@ image:IcarosConfig.png[]
 - Installs only what's required to use Xbox Controllers (interface not included, get it link://www.microsoft.com/store/productId/9NBLGGH30XJ3[here]), Game Pass, and specific games like Forza Horizon 4 & 5.
 ** To also get the Game Bar, install the following link://www.microsoft.com/store/productId/9NZKPSTSNW4P[here] and link://www.microsoft.com/store/productId/9NBLGGH537C2[here].
 ====
+
+. `Advanced.bat`
+** Additional changes TuneUp11 can apply.
+** Its settings can be changed in `Advanced.ps1`.
 
 
 == Recommendations for advanced/power users
@@ -123,11 +129,11 @@ This contains a long but important list. Be sure to check it if you're not sure.
 . link://www.speedguide.net/downloads.php[SG TCP Optimizer]
 * Gets higher speeds and reduces link:https://www.bing.com/search?q=what+is+bufferbloat[bufferbloat] for your network connection.
 
-. link://winaerotweaker.com/[Winaero Tweaker]
-* Extensive number of usability and visual tweaks.
+. link://winaerotweaker.com/[Winaero Tweaker] has an extensive number of usability and visual tweaks.
 
-. link:https://github.com/henrypp/simplewall/releases[Simplewall]
-* An interactive firewall to block Windows telemetry and auto-updates even further.
+. link:https://github.com/henrypp/simplewall/releases[Simplewall] is an interactive firewall to block Windows telemetry and auto-updates even further.
+
+. link:https://github.com/jbara2002/edge-remover[Edge Remover] entirely removes Microsoft Edge, but keeps the WebView2 Runtime intact to not break some programs.
 
 == Appendices
 
@@ -156,7 +162,7 @@ TIP: Example gpedit.msc registry translation: +
 `HKCU\Software\Microsoft\Windows\CurrentVersion\Group Policy Objects\{2F5A9005-4CB6-4314-B846-8C3EB66C9C24}Machine\Software\Policies\Microsoft\Windows` *->* `HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\CloudContent`
 
 * Drivers currently loaded by Windows can be seen with link:https://processhacker.sourceforge.io/nightly.php[Process Hacker] via:
-. The "System" proccess -> Properties (right-click or press Enter with "System" selected) -> Modules
+. The "System" process -> Properties (right-click or press Enter with "System" selected) -> Modules
 
 ====
 

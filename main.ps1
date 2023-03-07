@@ -293,9 +293,6 @@ reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\iphlpsvc" /v "
 reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\IpxlatCfgSvc" /v "Start" /t REG_DWORD /d 3 /f
 Set-NetAdapterBinding -Name '*' -DisplayName 'Internet Protocol Version 6 (TCP/IPv6)' -Enabled 1
 
-# MemoryCompression: While enabled; increases CPU load to reduce I/O load and handle Out Of Memory situations more smoothly; akin to Linux's zRAM.
-# -> Its downside is worsened stuttering in video games.
-# PageCombining: While enabled; reduces memory usage but increases CPU load.
 Enable-MMAgent -ApplicationLaunchPrefetching
 Enable-MMAgent -ApplicationPreLaunch
 
@@ -320,7 +317,8 @@ reg.exe import ".\Non-GPO Registry\performance_options.reg"
 reg.exe import ".\Non-GPO Registry\UAC.reg"
 reg.exe import ".\Non-GPO Registry\Unsorted.reg"
 reg.exe import ".\Non-GPO Registry\No Edge Autorun.reg"
-reg.exe import  ".\Non-GPO Registry\Disable Delivery Optimization.reg"
+reg.exe import ".\Non-GPO Registry\Disable Delivery Optimization.reg"
+reg.exe import ".\Non-GPO Registry\Disable Cloud Search.reg"
 
 reg.exe import ".\Non-GPO Registry\HiDPI Blurry Font Fix.reg"
 

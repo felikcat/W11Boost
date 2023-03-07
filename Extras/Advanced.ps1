@@ -2,10 +2,10 @@
 $avoid_key_annoyances = 1
 
 # 1: Ensures Windows' audio ducking/attenuation is disabled.
-$audio_reduction = 0
+$no_audio_reduction = 0
 
 # If NVIDIA ShadowPlay, AMD ReLive, or OBS Studio is used instead.
-$game_dvr = 0
+$no_game_dvr = 1
 
 # NOTICE: Some settings set might intersect with WiFi adapters, as tweaks are applied to all network interfaces.
 $recommended_ethernet_tweaks = 1
@@ -20,15 +20,15 @@ $reset_network_interface_settings = 1
 # Harden Windows with visual changes and security tweaks.
 $harden = 1
 
-# 0 = disable Explorer's thumbnail (images/video previews) border shadows.
-# -> 0 is recommended if dark mode is used.
-$thumbnail_shadows = 0
+# 1 = disable Explorer's thumbnail (images/video previews) border shadows.
+# -> 1 is recommended if dark mode is used.
+$no_thumbnail_shadows = 1
 
-# 0 is recommended.
+# 1 is recommended.
 # System Restore problems:
 # - Cannot restore backups from previous versions of Windows; can't revert Windows updates with System Restore.
 # - Will revert other personal files (program settings and installations).
-$system_restore = 0
+$no_system_restore = 0
 
 # File History:
 # - Is unreliable with creating snapshots of files.
@@ -41,6 +41,9 @@ $geolocation = 1
 # Lowers CPU load and prevents stuttering at high RAM usage, but increases RAM usage drastically.
 # 32GB of RAM or more is recommended.
 $less_game_stuttering = 1
+
+# 1: Prevents random packet loss/drop-outs in exchange for a higher battery drain.
+$no_ethernet_power_saving = 1
 
 # == Initialize ==
 if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]"Administrator"))
@@ -57,31 +60,31 @@ New-PSDrive -PSProvider registry -Root HKEY_CLASSES_ROOT -Name HKCR
 Write-Output "
 ==== Current settings ====
 
+no_audio_reduction = $no_audio_reduction
 avoid_key_annoyances = $avoid_key_annoyances
+ethernet_power_saving = $ethernet_power_saving
 file_history = $file_history
 geolocation = $geolocation
-audio_reduction = $audio_reduction
-ethernet_power_saving = $ethernet_power_saving
-game_dvr = $game_dvr
-optimal_online_ntp = $optimal_online_ntp
-recommended_ethernet_tweaks = $recommended_ethernet_tweaks
-replace_windows_search = $replace_windows_search
-system_restore = $system_restore
+less_game_stuttering = $less_game_stuttering
+no_game_dvr = $no_game_dvr
+no_thumbnail_shadows = $no_thumbnail_shadows
+no_system_restore = $no_system_restore
+no_ethernet_power_saving = $no_ethernet_power_saving
 
 "
 
-if (disable_ethernet_power_saving)
+if ($disable_ethernet_power_saving)
 {
     Disable-Ethernet-Power-Saving
 }
 
-if ($thumbnail_shadows)
-{
-    Set-ItemProperty -Path "HKCR:\SystemFileAssociations\image" -Name "Treatment" -Type DWord -Value 0 -Force
-}
-elseif (!$thumbnail_shadows)
+if ($no_thumbnail_shadows)
 {
     Set-ItemProperty -Path "HKCR:\SystemFileAssociations\image" -Name "Treatment" -Type DWord -Value 2 -Force
+}
+elseif (!$no_thumbnail_shadows)
+{
+    Set-ItemProperty -Path "HKCR:\SystemFileAssociations\image" -Name "Treatment" -Type DWord -Value 0 -Force
 }
 
 if ($file_history)
@@ -102,32 +105,31 @@ if ($avoid_key_annoyances)
     reg.exe import ".\Non-GPO Registry\avoid_key_annoyances.reg"
 }
 
-
-if ($geolocation)
-{
-    reg.exe import ".\Non-GPO Registry\Geolocation\Enable.reg"
-    Enable-ScheduledTask -TaskName "\Microsoft\Windows\Location\Notifications"
-    Enable-ScheduledTask -TaskName "\Microsoft\Windows\Location\WindowsActionDialog"
-}
-elseif (!$geolocation)
+if ($no_geolocation)
 {
     reg.exe import ".\Non-GPO Registry\Geolocation\Disable.reg"
     sc.exe stop lfsvc
     Disable-ScheduledTask -TaskName "\Microsoft\Windows\Location\Notifications"
     Disable-ScheduledTask -TaskName "\Microsoft\Windows\Location\WindowsActionDialog"
 }
-
-if ($audio_reduction)
+elseif (!$no_geolocation)
 {
-    reg.exe delete "HKEY_CURRENT_USER\SOFTWARE\Microsoft\Multimedia\Audio\UserDuckingPreference" /f
+    reg.exe import ".\Non-GPO Registry\Geolocation\Enable.reg"
+    Enable-ScheduledTask -TaskName "\Microsoft\Windows\Location\Notifications"
+    Enable-ScheduledTask -TaskName "\Microsoft\Windows\Location\WindowsActionDialog"
 }
-if (!$audio_reduction)
+
+if ($no_audio_reduction)
 {
     reg.exe add "HKEY_CURRENT_USER\SOFTWARE\Microsoft\Multimedia\Audio" /v "UserDuckingPreference" /t REG_DWORD /d "3" /f
     reg.exe delete "HKEY_CURRENT_USER\SOFTWARE\Microsoft\Internet Explorer\LowRegistry\Audio\PolicyConfig\PropertyStore" /f
 }
+if (!$no_audio_reduction)
+{
+    reg.exe delete "HKEY_CURRENT_USER\SOFTWARE\Microsoft\Multimedia\Audio\UserDuckingPreference" /f
+}
 
-if (!$game_dvr)
+if ($no_game_dvr)
 {
     reg.exe import ".\Non-GPO Registry\No Game DVR.reg"
 }
@@ -137,7 +139,7 @@ if ($reset_network_interface_settings)
     Reset-NetAdapterAdvancedProperty -Name '*' -DisplayName '*'
 }
 
-if (!$system_restore)
+if ($no_system_restore)
 {
     reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\System Restore.reg"
     # Delete all restore points.
@@ -148,12 +150,14 @@ if (!$system_restore)
 
 if ($harden)
 {
-    sc.exe stop Spooler
     reg.exe import ".\Non-GPO Registry\Harden.reg"
 }
 
 if ($less_game_stuttering)
 {
+    # MemoryCompression: While enabled; increases CPU load to reduce I/O load and handle Out Of Memory situations more smoothly; akin to Linux's zRAM.
+    # -> Its downside is worsened stuttering in video games.
+    # PageCombining: While enabled; reduces memory usage but increases CPU load.
     Disable-MMAgent -MemoryCompression
     Disable-MMAgent -PageCombining
 }
