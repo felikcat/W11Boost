@@ -237,6 +237,12 @@ Disable-ScheduledTask -TaskName "\Microsoft\Windows\Work Folders\Work Folders Ma
 
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\WS\WSTask"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\WwanSvc\OobeDiscovery"
+
+# Microsoft's Malicious Removal Tool task can pop up out of nowhere if Windows Update is still allowed to connect.
+# MRT will remove "malicious" files that other anti-virus software like Kaspersky purposefully exclude.
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\RemovalTools\MRT_HB"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\RemovalTools\MRT_ERROR_HB"
+reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\MRT" /v "DontOfferThroughWUAU" /t REG_DWORD /d 1 /f
 # ====
 
 Disable-ScheduledTask -TaskName "\NvTmRep_CrashReport1_{B2FE1952-0186-46C3-BAEC-A80AA35AC5B8}"

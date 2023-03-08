@@ -1,0 +1,4 @@
+
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\kernel]
+; Video games that fail to request a higher timer frequency will benefit from this old timer resolution behavior.
+"GlobalTimerResolutionRequests"=dword:1

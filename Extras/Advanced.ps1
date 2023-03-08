@@ -10,9 +10,6 @@ $no_game_dvr = 1
 # NOTICE: Some settings set might intersect with WiFi adapters, as tweaks are applied to all network interfaces.
 $recommended_ethernet_tweaks = 1
 
-# "Everything" can circumvent the performance impact of Windows Search Indexing while providing faster and more accurate results.
-$replace_windows_search = 1
-
 # Resets all network interfaces back to their manufacturer's default settings.
 # Recommended before applying our network tweaks, as it's a "clean slate".
 $reset_network_interface_settings = 1
@@ -28,7 +25,7 @@ $no_thumbnail_shadows = 1
 # System Restore problems:
 # - Cannot restore backups from previous versions of Windows; can't revert Windows updates with System Restore.
 # - Will revert other personal files (program settings and installations).
-$no_system_restore = 0
+$no_system_restore = 1
 
 # File History:
 # - Is unreliable with creating snapshots of files.
@@ -45,6 +42,10 @@ $less_game_stuttering = 1
 # 1: Prevents random packet loss/drop-outs in exchange for a higher battery drain.
 $no_ethernet_power_saving = 1
 
+# In games like Hogwarts Legacy this really helps reduce stuttering, but lowers Windows' overall security.
+# You must replace Windows Defender with Kaspersky Free or a different anti-virus that has its own separate virtualization security.
+$reduce_mitigations = 0
+
 # == Initialize ==
 if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]"Administrator"))
 {
@@ -53,10 +54,11 @@ if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
 }
 Push-Location $PSScriptRoot
 Start-Transcript -Path ([Environment]::GetFolderPath('MyDocuments') + "\TuneUp11_Advanced_LastRun.log")
-. ".\imports.ps1"
+. ".\..\imports.ps1"
 New-PSDrive -PSProvider registry -Root HKEY_CLASSES_ROOT -Name HKCR
 # ====
 
+Clear
 Write-Output "
 ==== Current settings ====
 
@@ -70,8 +72,10 @@ no_game_dvr = $no_game_dvr
 no_thumbnail_shadows = $no_thumbnail_shadows
 no_system_restore = $no_system_restore
 no_ethernet_power_saving = $no_ethernet_power_saving
+reduce_mitigations = $reduce_mitigations
 
 "
+Pause
 
 if ($disable_ethernet_power_saving)
 {
@@ -160,4 +164,37 @@ if ($less_game_stuttering)
     # PageCombining: While enabled; reduces memory usage but increases CPU load.
     Disable-MMAgent -MemoryCompression
     Disable-MMAgent -PageCombining
+}
+
+if ($reduce_mitigations)
+{
+    reg.exe import ".\Non-GPO Registry\Reduce Mitigations.reg"
+    # Unnecessary considering the previous registry entries imported, but do it anyway!
+    bcdedit.exe /set hypervisorlaunchtype off
+
+    Remove-All-ProcessMitigations
+    # DEP is required for effectively all updated game anti-cheats.
+    Set-ProcessMitigation -System -Enable DEP
+    # CFG is required for Valorant, but also likely ESEA and FACEIT anti-cheats.
+    Set-ProcessMitigation -System -Enable CFG
+
+    # Data Execution Prevention (DEP).
+    # -> EmulateAtlThunks
+
+    # Address Space Layout Randomization (ASLR).
+    # -> RequireInfo, ForceRelocateImages, BottomUp, HighEntropy
+
+    # ControlFlowGuard (CFG).
+    # -> SuppressExports, StrictCFG
+
+    # Validate exception chains (SEHOP).
+    # -> SEHOP, SEHOPTelemetry, AuditSEHOP
+
+    # Heap integrity.
+    # -> TerminateOnError
+    Set-ProcessMitigation -System -Disable EmulateAtlThunks, RequireInfo, ForceRelocateImages, BottomUp, HighEntropy, SuppressExports, StrictCFG, SEHOP, SEHOPTelemetry, AuditSEHOP, TerminateOnError
+
+    # Ensure "Data Execution Prevention" (DEP) only applies to operating system components, along with kernel-mode drivers.
+    # Applying DEP to user-mode programs will slow down and break some, such as the original Deus Ex.
+    bcdedit.exe /set nx Optin
 }
