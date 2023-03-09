@@ -7,15 +7,9 @@ $no_audio_reduction = 0
 # If NVIDIA ShadowPlay, AMD ReLive, or OBS Studio is used instead.
 $no_game_dvr = 1
 
-# NOTICE: Some settings set might intersect with WiFi adapters, as tweaks are applied to all network interfaces.
-$recommended_ethernet_tweaks = 1
-
 # Resets all network interfaces back to their manufacturer's default settings.
 # Recommended before applying our network tweaks, as it's a "clean slate".
 $reset_network_interface_settings = 1
-
-# Harden Windows with visual changes and security tweaks.
-$harden = 1
 
 # 1 = disable Explorer's thumbnail (images/video previews) border shadows.
 # -> 1 is recommended if dark mode is used.
@@ -27,7 +21,7 @@ $no_thumbnail_shadows = 1
 # - Will revert other personal files (program settings and installations).
 $no_system_restore = 1
 
-# File History:
+# Windows' File History:
 # - Is unreliable with creating snapshots of files.
 # - Use Restic or TrueNAS with Syncthing for backups instead.
 $file_history = 0
@@ -35,15 +29,17 @@ $file_history = 0
 # 0: Disables GPS services, which always run even if there's no GPS hardware installed.
 $geolocation = 1
 
-# Lowers CPU load and prevents stuttering at high RAM usage, but increases RAM usage drastically.
-# 32GB of RAM or more is recommended.
+# Breaks NVIDIA Control Panel purposefully; use https://github.com/Orbmu2k/nvidiaProfileInspector/releases
 $less_game_stuttering = 1
 
 # 1: Prevents random packet loss/drop-outs in exchange for a higher battery drain.
 $no_ethernet_power_saving = 1
 
-# In games like Hogwarts Legacy this really helps reduce stuttering, but lowers Windows' overall security.
-# You must replace Windows Defender with Kaspersky Free or a different anti-virus that has its own separate virtualization security.
+# Very high level of security, but likely to break lots of older (pre-2019) PCs.
+$excessive_hardening = 0
+
+# 1: In Hogwarts Legacy this really helps reduce stuttering, but lowers Windows' overall security;
+# You must replace Windows Defender with Kaspersky Free which has its own separate virtualization security.
 $reduce_mitigations = 0
 
 # == Initialize ==
@@ -58,7 +54,7 @@ Start-Transcript -Path ([Environment]::GetFolderPath('MyDocuments') + "\TuneUp11
 New-PSDrive -PSProvider registry -Root HKEY_CLASSES_ROOT -Name HKCR
 # ====
 
-Clear
+Clear-Host
 Write-Output "
 ==== Current settings ====
 
@@ -148,13 +144,20 @@ if ($no_system_restore)
     reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\System Restore.reg"
     # Delete all restore points.
     vssadmin.exe delete shadows /all /quiet
-
     Disable-ScheduledTask -TaskName "\Microsoft\Windows\SystemRestore\SR"
 }
 
-if ($harden)
+if ($excessive_hardening)
 {
-    reg.exe import ".\Non-GPO Registry\Harden.reg"
+    reg.exe import ".\Non-GPO Registry\Excessive Hardening.reg"
+    # Solves STIGs: V-253275 (High), V-253285 (Medium)
+    Disable-WindowsOptionalFeature -NoRestart -Online -Remove -FeatureName SMB1Protocol, IIS-WebServerRole, MicrosoftWindowsPowerShellV2Root, MicrosoftWindowsPowerShellV2
+    Set-ProcessMitigation -System -Enable DEP, EmulateAtlThunks, RequireInfo, BottomUp, HighEntropy, CFG, SuppressExports, SEHOP, SEHOPTelemetry, AuditSEHOP, TerminateOnError
+    # StrictCFG breaks far too many programs, and even NVIDIA's GPU drivers.
+    # ForceRelocateImages (Mandatory ASLR) breaks a few programs, such as Hogwarts Legacy.
+    Set-ProcessMitigation -System -Disable StrictCFG ForceRelocateImages
+    bcdedit.exe /set hypervisorlaunchtype auto
+    bcdedit.exe /set nx OptOut
 }
 
 if ($less_game_stuttering)

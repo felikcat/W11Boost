@@ -1,0 +1,110 @@
+Windows Registry Editor Version 5.00
+
+; Disable Autorun & Autoplay on all disk types and MTP/non-volume devices.
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer]
+"NoDriveTypeAutoRun"=dword:255
+"NoAutoplayfornonVolume"=dword:1
+"NoAutorun"=dword:1
+; Disable Autoplay before even checking the disk type.
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers]
+"DisableAutoplay"=dword:1
+
+; Block solicited Windows Remote Assistance.
+; https://www.stigviewer.com/stig/microsoft_windows_11/2022-08-31/finding/V-253382
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services]
+"fAllowToGetHelp"=dword:0
+
+; Deny program installers from automatically elevating permissions.
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\Installer]
+"AlwaysInstallElevated"=dword:0
+
+; Disables the Print Spooler, which breaks printing queues.
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Spooler]
+"Start"=dword:4
+
+; The Secondary Logon service provides a means for entering alternate credentials, typically used to run commands with elevated privileges.
+; Using privileged credentials in a standard user session can expose those credentials to theft.
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\seclogon]
+"Start"=dword:4
+
+; Some hardening is still applied for this, just in case this is re-enabled by the user.
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\LanmanServer]
+"Start"=dword:4
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\DeviceGuard]
+"EnableVirtualizationBasedSecurity"=dword:1
+"RequirePlatformSecurityFeatures"=dword:3
+"HypervisorEnforcedCodeIntegrity"=dword:1
+"HVCIMATRequired"=dword:1
+"LsaCfgFlags"=dword:1
+"ConfigureSystemGuardLaunch"=dword:1
+"ConfigureKernelShadowStacksLaunch"=dword:1
+
+
+; Enumeration policy for external devices incompatible with Kernel DMA Protection:
+; - Only while logged in (default).
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\Kernel DMA Protection]
+"DeviceEnumerationPolicy"=dword:1
+
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\DeviceGuard]
+"RequireMicrosoftSignedBootChain"=dword:1
+"EnableVirtualizationBasedSecurity"=dword:1
+"RequirePlatformSecurityFeatures"=dword:3
+"Locked"=dword:1
+
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios]
+
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\CredentialGuard]
+"Enabled"=dword:0
+
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\SystemGuard]
+"Enabled"=dword:1
+"Managed"=dword:1
+
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity]
+"Enabled"=dword:1
+"EnabledBootId"=dword:0
+"HVCIMATRequired"=dword:1
+"Locked"=dword:1
+
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks]
+"Enabled"=dword:1
+"WasEnabledBy"=dword:4
+
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\CI\Config]
+"VulnerableDriverBlocklistEnable"=dword:1
+
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\CI\Config\Default]
+
+; NoLmHash=1: https://www.stigviewer.com/stig/windows_10/2020-06-15/finding/V-63797
+; LmCompatibilityLevel=5: https://www.stigviewer.com/stig/windows_10/2020-06-15/finding/V-63801
+; RestrictAnonymousSAM=1: https://www.stigviewer.com/stig/microsoft_windows_11/2022-08-31/finding/V-253453
+; LimitBlankPasswordUse=1: https://www.stigviewer.com/stig/microsoft_windows_11/2022-08-31/finding/V-253434
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa]
+"LsaCfgFlags"=dword:1
+"NoLmHash"=dword:1
+"LmCompatibilityLevel"=dword:5
+"RestrictAnonymousSAM"=dword:1
+"LimitBlankPasswordUse"=dword:1
+
+; Enables Verify SEHOP; https://www.stigviewer.com/stig/microsoft_windows_11/2022-08-31/finding/V-253284
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\kernel]
+"DisableExceptionChainValidation"=dword:0
+
+; LUA File Virtualization Filter Driver; required for UAC to work.
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\luafv]
+"Start"=dword:2
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System]
+"PromptOnSecureDesktop"=dword:1
+"ConsentPromptBehaviorAdmin"=dword:2
+"EnableLUA"=dword:1
+"EnableVirtualization"=dword:1
+
+; https://www.stigviewer.com/stig/microsoft_windows_11/2022-08-31/finding/V-253396
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\Explorer]
+"NoDataExecutionPrevention"=dword:0
+
+; STIG: V-253440
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters]
+"SignSecureChannel"=dword:1

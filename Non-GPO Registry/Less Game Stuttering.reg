@@ -1,4 +1,8 @@
+Windows Registry Editor Version 5.00
 
 [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\kernel]
 ; Video games that fail to request a higher timer frequency will benefit from this old timer resolution behavior.
 "GlobalTimerResolutionRequests"=dword:1
+
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\NVDisplay.ContainerLocalSystem]
+"Start"=dword:4

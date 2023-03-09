@@ -164,6 +164,9 @@ TIP: Example gpedit.msc registry translation: +
 * Drivers currently loaded by Windows can be seen with link:https://processhacker.sourceforge.io/nightly.php[Process Hacker] via:
 . The "System" process -> Properties (right-click or press Enter with "System" selected) -> Modules
 
+* List all Optional Windows Features, and their status:
+. `(Get-WindowsOptionalFeature -Online -FeatureName '*') | Format-Table -Autosize`
+
 ====
 
 .Learning material used

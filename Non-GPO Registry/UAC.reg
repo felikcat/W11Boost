@@ -1,6 +1,6 @@
 Windows Registry Editor Version 5.00
 
-; LUA File Virtualization Filter Driver
+; LUA File Virtualization Filter Driver; required for UAC to work.
 [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\luafv]
 "Start"=dword:2
 
