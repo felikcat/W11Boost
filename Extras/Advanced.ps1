@@ -29,9 +29,8 @@ $file_history = 0
 # 0: Disables GPS services, which always run even if there's no GPS hardware installed.
 $geolocation = 1
 
-# Breaks NVIDIA Control Panel purposefully; re-enable the "NVIDIA Display Container LS" service --
-# when you need to configure settings, then disable after you're done, or use:
-# https://github.com/Orbmu2k/nvidiaProfileInspector/releases
+# Breaks NVIDIA Control Panel purposefully; re-enable the "NVIDIA Display Container LS" service when you need to configure settings, then disable after you're done.
+# Also useful: https://github.com/Orbmu2k/nvidiaProfileInspector/releases
 $less_game_stuttering = 1
 
 # 1: Prevents random packet loss/drop-outs in exchange for a higher battery drain.
@@ -40,9 +39,16 @@ $no_ethernet_power_saving = 1
 # Very high level of security, but likely to break lots of older (pre-2019) PCs.
 $excessive_mitigations = 0
 
-# 1: Reduces stuttering a lot In Hogwarts Legacy, but lowers Windows' overall security;
-# You must replace Windows Defender with Kaspersky Free which has its own separate virtualization security.
-$reduce_mitigations = 1
+# 1: Relevant to disable smartscreen if you use an alternative antivirus.
+$no_smartscreen = 0
+
+# 1: Reduces stuttering in Hogwarts Legacy, but lowers Windows' overall security;
+# -> You must replace Windows Defender with Kaspersky Free which has its own separate virtualization security.
+# -> The Vanguard, ESEA, and Faceit anti-cheats will complain about "CFG" being off; enable that yourself if needed.
+$reduce_mitigations = 0
+
+
+$no_family_safety = 1
 
 # If all displays are the same resolution and scaling factor, set $improved_hidpi to 1.
 $improved_hidpi = 1
@@ -65,7 +71,7 @@ Write-Output "
 
 no_audio_reduction = $no_audio_reduction
 avoid_key_annoyances = $avoid_key_annoyances
-ethernet_power_saving = $ethernet_power_saving
+no_ethernet_power_saving = $no_ethernet_power_saving
 file_history = $file_history
 geolocation = $geolocation
 less_game_stuttering = $less_game_stuttering
@@ -76,11 +82,12 @@ excessive_mitigations = $excessive_mitigations
 no_ethernet_power_saving = $no_ethernet_power_saving
 reduce_mitigations = $reduce_mitigations
 improved_hidpi = $improved_hidpi
+no_smartscreen = $no_smartscreen
 
 "
 Pause
 
-if ($disable_ethernet_power_saving)
+if ($no_ethernet_power_saving)
 {
     Disable-Ethernet-Power-Saving
 }
@@ -178,6 +185,8 @@ if ($less_game_stuttering)
 
 if ($reduce_mitigations)
 {
+    Disable-WindowsOptionalFeature -NoRestart -Online -Remove -FeatureName VirtualMachinePlatform
+
     reg.exe import ".\Non-GPO Registry\Reduce Mitigations.reg"
     # Unnecessary considering the previous registry entries imported, but do it anyway!
     bcdedit.exe /set hypervisorlaunchtype off
@@ -187,8 +196,6 @@ if ($reduce_mitigations)
 
     # DEP is required for effectively all updated game anti-cheats.
     Set-ProcessMitigation -System -Enable DEP
-    # CFG is required for Valorant, but also likely ESEA and FACEIT anti-cheats.
-    Set-ProcessMitigation -System -Enable CFG
 
     # Data Execution Prevention (DEP).
     # -> EmulateAtlThunks
@@ -204,7 +211,7 @@ if ($reduce_mitigations)
 
     # Heap integrity.
     # -> TerminateOnError
-    Set-ProcessMitigation -System -Disable EmulateAtlThunks, RequireInfo, ForceRelocateImages, BottomUp, HighEntropy, SuppressExports, StrictCFG, SEHOP, SEHOPTelemetry, AuditSEHOP, TerminateOnError
+    Set-ProcessMitigation -System -Disable EmulateAtlThunks, RequireInfo, ForceRelocateImages, BottomUp, HighEntropy, CFG, SuppressExports, StrictCFG, SEHOP, SEHOPTelemetry, AuditSEHOP, TerminateOnError
 
     # Ensure "Data Execution Prevention" (DEP) only applies to operating system components, along with kernel-mode drivers.
     # Applying DEP to user-mode programs will slow or break them down, such as the original Deus Ex.
@@ -214,4 +221,16 @@ if ($reduce_mitigations)
 if ($improved_hidpi)
 {
     reg.exe import ".\Non-GPO Registry\HiDPI Blurry Font Fix.reg"
+}
+
+if ($no_smartscreen)
+{
+    reg.exe import ".\Non-GPO Registry\Disable SmartScreen.reg"
+    Disable-ScheduledTask -TaskName "\Microsoft\Windows\AppID\SmartScreenSpecific"
+}
+
+if ($no_family_safety)
+{
+    Disable-ScheduledTask -TaskName "\Microsoft\Windows\Shell\FamilySafetyMonitor"
+    Disable-ScheduledTask -TaskName "\Microsoft\Windows\Shell\FamilySafetyRefreshTask"
 }

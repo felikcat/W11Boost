@@ -1,6 +1,6 @@
 Windows Registry Editor Version 5.00
 
-; Prefer IPv6 whenever possible; avoids NAT, and handles fragmentation locally instead of on the router.
+; Prefer IPv6 whenever possible; avoids NAT and handles fragmentation locally instead of on the router.
 ; https://docs.microsoft.com/en-US/troubleshoot/windows-server/networking/configure-ipv6-in-windows#use-registry-key-to-configure-ipv6
 [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters]
 "DisabledComponents"=dword:0
@@ -36,9 +36,17 @@ Windows Registry Editor Version 5.00
 ; - Increase the amount of random I/O reads and writes; much slower than RAM.
 [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\SysMain]
 "Start"=dword:2
+
 [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management]
-; These both should regenerate based on the disk type. SSD or NVMe = keys don't exist.
+; These keys will regenerate if Windows is installed to an HDD.
+; These keys don't exist for an SSD or NVMe Windows installation by default.
 "EnablePrefetcher"=-
 "EnableSuperfetch"=-
+
 [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\PrefetchParameters]
 "EnablePrefetcher"=dword:3
+
+; Explains MPO well and still pertains to Windows in principle:
+; https://kernel.org/doc/html/next/gpu/amdgpu/display/mpo-overview.html
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\Dwm]
+"OverlayTestMode"=-

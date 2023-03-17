@@ -5,14 +5,29 @@ Windows Registry Editor Version 5.00
 "FeatureSettingsOverride"=dword:3
 "FeatureSettingsOverrideMask"=dword:3
 
-[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\CredentialGuard]
-"Enabled"=dword:0
-
 [HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\Kernel DMA Protection]
 "DeviceEnumerationPolicy"=dword:2
 
 [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa]
 "LsaCfgFlags"=dword:0
+"LsaCfgFlagsDefault"=dword:0
+
+; Allow Intel TSX.
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Kernel]
+"DisableTsx"=dword:0
+
+; !!
+[-HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\DeviceGuard]
+
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\DeviceGuard]
+"CachedDrtmAuthIndex"=dword:0
+"EnableVirtualizationBasedSecurity"=dword:0
+"Locked"=dword:0
+"RequireMicrosoftSignedBootChain"=dword:0
+"RequirePlatformSecurityFeatures"=dword:0
+
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\CredentialGuard]
+"Enabled"=dword:0
 
 [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity]
 "Enabled"=dword:0
@@ -27,21 +42,18 @@ Windows Registry Editor Version 5.00
 "Enabled"=dword:0
 "WasEnabledBy"=dword:4
 
+; !!
 [-HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\DeviceGuard]
 
+; LsaCfgFlags is not a duplicate entry, it's required here too to keep Credential Guard disabled.
 [HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\DeviceGuard]
 "EnableVirtualizationBasedSecurity"=dword:0
 "HVCIMATRequired"=dword:0
+"LsaCfgFlags"=dword:0
 
-[-HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\DeviceGuard]
+; !!
+[-HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\SystemGuard]
 
-[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\DeviceGuard]
-"CachedDrtmAuthIndex"=dword:0
-"EnableVirtualizationBasedSecurity"=dword:0
-"Locked"=dword:0
-"RequireMicrosoftSignedBootChain"=dword:0
-"RequirePlatformSecurityFeatures"=dword:0
-
-; Allow Intel TSX.
-[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Kernel]
-"DisableTsx"=dword:0
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\SystemGuard]
+"Enabled"=dword:0
+"Managed"=dword:1
