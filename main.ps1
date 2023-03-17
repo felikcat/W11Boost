@@ -275,7 +275,7 @@ fsutil.exe behavior set disablelastaccess 3
 
 # Can severely degrade a program's performance if it got marked for "crashing" too often, such is the case for Assetto Corsa.
 # https://docs.microsoft.com/en-us/windows/desktop/win7appqual/fault-tolerant-heap
-reg.exe add "HKEY_LOCAL_MACHINE\Software\Microsoft\FTH" /v "Enabled" /t REG_DWORD /d 0 /f
+reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\FTH" /v "Enabled" /t REG_DWORD /d 0 /f
 
 # == Correct mistakes by others ==
 reg.exe import ".\Non-GPO Registry\Mistake Corrections.reg"
@@ -322,6 +322,14 @@ bcdedit.exe /set recoveryenabled no
 # Don't log events without warnings or errors.
 auditpol.exe /set /category:* /Success:disable
 
+reg.exe import ".\Non-GPO Registry\No Edge Autorun.reg"
+reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Microsoft Edge.reg"
+Disable-ScheduledTask -TaskName "\MicrosoftEdgeUpdateTaskMachineCore"
+Disable-ScheduledTask -TaskName "\MicrosoftEdgeUpdateTaskMachineUA"
+
+# Disables Windows Widgets.
+reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Widgets.reg"
+
 # == Other registry tweaks ==
 reg.exe import ".\Non-GPO Registry\Shutdown.reg"
 reg.exe import ".\Non-GPO Registry\disable_services.reg"
@@ -329,15 +337,11 @@ reg.exe import ".\Non-GPO Registry\disable_typing_insights.reg"
 reg.exe import ".\Non-GPO Registry\performance_options.reg"
 reg.exe import ".\Non-GPO Registry\UAC.reg"
 reg.exe import ".\Non-GPO Registry\Unsorted.reg"
-reg.exe import ".\Non-GPO Registry\No Edge Autorun.reg"
 reg.exe import ".\Non-GPO Registry\Disable Delivery Optimization.reg"
 reg.exe import ".\Non-GPO Registry\Disable Cloud Search.reg"
 
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\Group Policy.reg"
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\App Package Deployment.reg"
-reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Microsoft Edge.reg"
-# Disables Windows Widgets.
-reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Widgets.reg
 
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Windows Security.reg"
 

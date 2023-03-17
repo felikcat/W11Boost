@@ -65,7 +65,7 @@ Write-Output "
 
 no_audio_reduction = $no_audio_reduction
 avoid_key_annoyances = $avoid_key_annoyances
-ethernet_power_saving = $ethernet_power_saving
+no_ethernet_power_saving = $no_ethernet_power_saving
 file_history = $file_history
 geolocation = $geolocation
 less_game_stuttering = $less_game_stuttering
@@ -80,7 +80,7 @@ improved_hidpi = $improved_hidpi
 "
 Pause
 
-if ($disable_ethernet_power_saving)
+if ($no_ethernet_power_saving)
 {
     Disable-Ethernet-Power-Saving
 }
