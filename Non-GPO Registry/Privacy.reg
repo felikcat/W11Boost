@@ -4,3 +4,10 @@ Windows Registry Editor Version 5.00
 ; If online speech recognition is enabled, Microsoft will use your voice data to help improve the speech service.
 [HKEY_CURRENT_USER\Software\Microsoft\Speech_OneCore\Settings\OnlineSpeechPrivacy]
 "HasAccepted"=dword:0
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection]
+"AllowTelemetry"=dword:0
+"MaxTelemetryAllowed"=dword:0
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\DataCollection]
+"LimitDiagnosticLogCollection"=dword:1

@@ -126,9 +126,6 @@ This contains a long but important list. Be sure to check it if you're not sure.
 
 === Other recommended programs
 
-. link://www.speedguide.net/downloads.php[SG TCP Optimizer]
-* Gets higher speeds and reduces link:https://www.bing.com/search?q=what+is+bufferbloat[bufferbloat] for your network connection.
-
 . link://winaerotweaker.com/[Winaero Tweaker] has an extensive number of usability and visual tweaks.
 
 . link:https://github.com/henrypp/simplewall/releases[Simplewall] is an interactive firewall to block Windows telemetry and auto-updates even further.
@@ -140,6 +137,12 @@ This contains a long but important list. Be sure to check it if you're not sure.
 .Developer notes
 [%collapsible]
 ====
+
+* Required software:
+. `winget install Microsoft.WindowsADK -eh`
+. `scoop install git; scoop bucket add sysinternals; scoop install procmon`
+
+__
 
 * `reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\EXAMPLE" /v "Start" /t REG_DWORD /d 4 /f` is preferred over using `sc.exe config EXAMPLE start=disabled` since Windows rejects this request depending on the service.
 

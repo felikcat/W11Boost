@@ -29,18 +29,23 @@ $file_history = 0
 # 0: Disables GPS services, which always run even if there's no GPS hardware installed.
 $geolocation = 1
 
-# Breaks NVIDIA Control Panel purposefully; use https://github.com/Orbmu2k/nvidiaProfileInspector/releases
+# Breaks NVIDIA Control Panel purposefully; re-enable the "NVIDIA Display Container LS" service --
+# when you need to configure settings, then disable after you're done, or use:
+# https://github.com/Orbmu2k/nvidiaProfileInspector/releases
 $less_game_stuttering = 1
 
 # 1: Prevents random packet loss/drop-outs in exchange for a higher battery drain.
 $no_ethernet_power_saving = 1
 
 # Very high level of security, but likely to break lots of older (pre-2019) PCs.
-$excessive_hardening = 0
+$excessive_mitigations = 0
 
-# 1: In Hogwarts Legacy this really helps reduce stuttering, but lowers Windows' overall security;
+# 1: Reduces stuttering a lot In Hogwarts Legacy, but lowers Windows' overall security;
 # You must replace Windows Defender with Kaspersky Free which has its own separate virtualization security.
-$reduce_mitigations = 0
+$reduce_mitigations = 1
+
+# If all displays are the same resolution and scaling factor, set $improved_hidpi to 1.
+$improved_hidpi = 1
 
 # == Initialize ==
 if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]"Administrator"))
@@ -67,8 +72,10 @@ less_game_stuttering = $less_game_stuttering
 no_game_dvr = $no_game_dvr
 no_thumbnail_shadows = $no_thumbnail_shadows
 no_system_restore = $no_system_restore
+excessive_mitigations = $excessive_mitigations
 no_ethernet_power_saving = $no_ethernet_power_saving
 reduce_mitigations = $reduce_mitigations
+improved_hidpi = $improved_hidpi
 
 "
 Pause
@@ -147,9 +154,9 @@ if ($no_system_restore)
     Disable-ScheduledTask -TaskName "\Microsoft\Windows\SystemRestore\SR"
 }
 
-if ($excessive_hardening)
+if ($excessive_mitigations)
 {
-    reg.exe import ".\Non-GPO Registry\Excessive Hardening.reg"
+    reg.exe import ".\Non-GPO Registry\Excessive Mitigations.reg"
     # Solves STIGs: V-253275 (High), V-253285 (Medium)
     Disable-WindowsOptionalFeature -NoRestart -Online -Remove -FeatureName SMB1Protocol, IIS-WebServerRole, MicrosoftWindowsPowerShellV2Root, MicrosoftWindowsPowerShellV2
     Set-ProcessMitigation -System -Enable DEP, EmulateAtlThunks, RequireInfo, BottomUp, HighEntropy, CFG, SuppressExports, SEHOP, SEHOPTelemetry, AuditSEHOP, TerminateOnError
@@ -175,7 +182,9 @@ if ($reduce_mitigations)
     # Unnecessary considering the previous registry entries imported, but do it anyway!
     bcdedit.exe /set hypervisorlaunchtype off
 
+    # System != Process.
     Remove-All-ProcessMitigations
+
     # DEP is required for effectively all updated game anti-cheats.
     Set-ProcessMitigation -System -Enable DEP
     # CFG is required for Valorant, but also likely ESEA and FACEIT anti-cheats.
@@ -198,6 +207,11 @@ if ($reduce_mitigations)
     Set-ProcessMitigation -System -Disable EmulateAtlThunks, RequireInfo, ForceRelocateImages, BottomUp, HighEntropy, SuppressExports, StrictCFG, SEHOP, SEHOPTelemetry, AuditSEHOP, TerminateOnError
 
     # Ensure "Data Execution Prevention" (DEP) only applies to operating system components, along with kernel-mode drivers.
-    # Applying DEP to user-mode programs will slow down and break some, such as the original Deus Ex.
+    # Applying DEP to user-mode programs will slow or break them down, such as the original Deus Ex.
     bcdedit.exe /set nx Optin
+}
+
+if ($improved_hidpi)
+{
+    reg.exe import ".\Non-GPO Registry\HiDPI Blurry Font Fix.reg"
 }

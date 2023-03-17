@@ -8,6 +8,9 @@ Windows Registry Editor Version 5.00
 ; Disable Autoplay before even checking the disk type.
 [HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers]
 "DisableAutoplay"=dword:1
+; Notifications for AutoPlay events are useless now, disable them.
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\ShellHWDetection]
+"Start"=dword:4
 
 ; Block solicited Windows Remote Assistance.
 ; https://www.stigviewer.com/stig/microsoft_windows_11/2022-08-31/finding/V-253382
@@ -29,6 +32,13 @@ Windows Registry Editor Version 5.00
 
 ; Some hardening is still applied for this, just in case this is re-enabled by the user.
 [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\LanmanServer]
+"Start"=dword:4
+
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\SSDPSRV]
+"Start"=dword:4
+
+; Geolocation service.
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\lfsvc]
 "Start"=dword:4
 
 [HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\DeviceGuard]

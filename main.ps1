@@ -93,7 +93,6 @@ reg.exe add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Setting
 reg.exe add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Privacy" /v "TailoredExperiencesWithDiagnosticDataEnabled" /t REG_DWORD /d 0 /f
 reg.exe add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo" /v "Enabled" /t REG_DWORD /d 0 /f
 reg.exe add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "ShowSyncProviderNotifications" /t REG_DWORD /d 0 /f
-reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v "LimitDiagnosticLogCollection" /t REG_DWORD /d 1 /f
 
 # Don't automatically search the web; annoying when trying to search to access a program quickly from the keyboard.
 reg.exe add "HKEY_CURRENT_USER\Software\Policies\Microsoft\Windows\Explorer" /v "DisableSearchBoxSuggestions" /t REG_DWORD /d 1 /f
@@ -299,6 +298,14 @@ reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\iphlpsvc" /v "
 reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\IpxlatCfgSvc" /v "Start" /t REG_DWORD /d 3 /f
 Set-NetAdapterBinding -Name '*' -DisplayName 'Internet Protocol Version 6 (TCP/IPv6)' -Enabled 1
 
+# Use the BBRv2 TCP congestion control algorithm; the differences:
+# https://web.archive.org/web/20220313173158/http://web.archive.org/screenshot/https://docs.google.com/spreadsheets/d/1I1NcVVbuC7aq4nGalYxMNz9pgS9OLKcFHssIBlj9xXI
+netsh.exe int tcp set supplemental Template=Internet CongestionProvider=bbr2
+netsh.exe int tcp set supplemental Template=Datacenter CongestionProvider=bbr2
+netsh.exe int tcp set supplemental Template=Compat CongestionProvider=bbr2
+netsh.exe int tcp set supplemental Template=DatacenterCustom CongestionProvider=bbr2
+netsh.exe int tcp set supplemental Template=InternetCustom CongestionProvider=bbr2
+
 Enable-MMAgent -ApplicationLaunchPrefetching
 Enable-MMAgent -ApplicationPreLaunch
 
@@ -326,11 +333,11 @@ reg.exe import ".\Non-GPO Registry\No Edge Autorun.reg"
 reg.exe import ".\Non-GPO Registry\Disable Delivery Optimization.reg"
 reg.exe import ".\Non-GPO Registry\Disable Cloud Search.reg"
 
-reg.exe import ".\Non-GPO Registry\HiDPI Blurry Font Fix.reg"
-
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\Group Policy.reg"
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\App Package Deployment.reg"
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Microsoft Edge.reg"
+# Disables Windows Widgets.
+reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Widgets.reg
 
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Windows Security.reg"
 
