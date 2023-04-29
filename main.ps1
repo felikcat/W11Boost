@@ -260,7 +260,15 @@ reg.exe import ".\Non-GPO Registry\No Blocked Files.reg"
 reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Perflib" /v "Disable Performance Counters" /t REG_DWORD /d 1 /f
 
 # == NTFS tweaks ==
-reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\Filesystem.reg"
+# Enabling long paths (260 character limit) prevents issues in Scoop and other programs.
+Set-PolicyFileEntry -Path $preg_machine -Key 'SYSTEM\CurrentControlSet\Control\FileSystem' -ValueName 'LongPathsEnabled' -Data '1' -Type 'Dword'
+
+# Ensure "Virtual Memory Pagefile Encryption" is disabled; by default it's not configured (off).
+Set-PolicyFileEntry -Path $preg_machine -Key 'SYSTEM\CurrentControlSet\Policies' -ValueName 'NtfsEncryptPagingFile' -Data '0' -Type 'Dword'
+
+# Reducing page-faults and stack usage is beneficial to lowering DPC latency.
+Set-PolicyFileEntry -Path $preg_machine -Key 'SYSTEM\CurrentControlSet\Policies' -ValueName 'NtfsForceNonPagedPoolAllocation' -Data '1' -Type 'Dword'
+
 # Don't use NTFS' "Last Access Time Stamp Updates" by default; a program can still explicitly update them for itself.
 fsutil.exe behavior set disablelastaccess 3
 # ====
