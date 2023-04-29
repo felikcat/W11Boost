@@ -1,5 +1,5 @@
-$preg_user = "$env:windir\System32\GroupPolicy\User\registry.pol"
-$preg_machine = "$env:windir\System32\GroupPolicy\Machine\registry.pol"
+$PREG_USER = "$env:windir\System32\GroupPolicy\User\registry.pol"
+$PREG_MACHINE = "$env:windir\System32\GroupPolicy\Machine\registry.pol"
 
 function Set-Recommended-Ethernet-Tweaks {
     # Can reduce time taken to establish a connection, and prevent drop-outs.

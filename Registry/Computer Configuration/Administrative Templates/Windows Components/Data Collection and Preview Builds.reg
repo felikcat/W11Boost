@@ -1,9 +1,0 @@
-Windows Registry Editor Version 5.00
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\DataCollection]
-"AllowDeviceNameInTelemetry"=-
-"AllowTelemetry"=dword:0
-"DisableTelemetryOptInChangeNotification"=dword:1
-"DoNotShowFeedbackNotifications"=dword:1
-; OneSettings is undocumented.
-"DisableOneSettingsDownloads"=dword:1

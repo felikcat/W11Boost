@@ -16,23 +16,33 @@ for ($i = 0; $i -lt $services.length; $i++) {
     sc.exe start $services[$i]
 }
 
-#== Initialize
+
+##+=+= Initialize
 Push-Location $PSScriptRoot
 Start-Transcript -Path ([Environment]::GetFolderPath('MyDocuments') + "\TuneUp11_LastRun.log")
 . ".\imports.ps1"
 Import-Module .\PolicyFileEditor\PolicyFileEditor.psm1
 New-PSDrive -PSProvider registry -Root HKEY_CLASSES_ROOT -Name HKCR
-#====
+##+=+=
 
-#== "Fast startup" causes stability issues, and increases disk wear from excessive I/O usage.
-Set-PolicyFileEntry -Path $preg_machine -Key 'SYSTEM\CurrentControlSet\Control\Session Manager\Power' -ValueName 'HiberbootEnabled' -Data '0' -Type 'Dword'
+
+##+=+= "Fast startup" causes stability issues, and increases disk wear from excessive I/O usage.
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SYSTEM\CurrentControlSet\Control\Session Manager\Power' -ValueName 'HiberbootEnabled' -Data '0' -Type 'Dword'
 
 attrib +R "$env:windir\System32\SleepStudy\UserNotPresentSession.etl"
+##+=+=
 
-reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\OS Policies.reg"
-#====
 
-#== Use optimal online NTP servers for more accurate system time. ==
+##+=+=
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\System' -ValueName 'EnableActivityFeed' -Data '0' -Type 'Dword'
+
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\System' -ValueName 'PublishUserActivities' -Data '0' -Type 'Dword'
+
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\System' -ValueName 'UploadUserActivities' -Data '0' -Type 'Dword'
+##+=+=
+
+
+##+=+= Use optimal online NTP servers for more accurate system time.
 net.exe stop w32time
 # Make a clean slate for the time sync settings.
 w32tm.exe /unregister
@@ -41,117 +51,173 @@ w32tm.exe /register
 w32tm.exe /config /syncfromflags:manual /manualpeerlist:"time.cloudflare.com ntppool1.time.nl ntppool2.time.nl"
 net.exe start w32time
 w32tm.exe /resync
-#====
+##+=+=
+
 
 Set-Recommended-Ethernet-Tweaks
 
-# == Replacing the Windows Search Index. Indexing file contents is pointless if you're organized.  ==
+
+##+=+= Replacing the Windows Search Index. Indexing file contents is pointless if you're organized.
 sc.exe stop WSearch
 reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\WSearch" /v "Start" /t REG_DWORD /d 4 /f
 
-Set-PolicyFileEntry -Path $preg_user -Key 'Software\Microsoft\Windows\CurrentVersion\SearchSettings' -ValueName 'IsDeviceSearchHistoryEnabled' -Data '0' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\SearchSettings' -ValueName 'IsDeviceSearchHistoryEnabled' -Data '0' -Type 'Dword'
 
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Shell\IndexerAutomaticMaintenance"
 
 # --source winget prevents error 0x8a150044 if the Windows Store isn't reachable.
 .\NSudoLC.exe -U:E -P:E -M:S powershell.exe -Command "winget.exe install voidtools.Everything -eh --accept-package-agreements --accept-source-agreements --source winget"
-# ====
+##+=+=
+
 
 # Replaces Windows built-in thumbnailing for many file formats.
 .\NSudoLC.exe -U:E -P:E -M:S powershell.exe -Command "winget.exe install Xanashi.Icaros -eh --accept-package-agreements --accept-source-agreements --source winget"
 
 # Skip to the sign-on screen.
-reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\Personalization" /v "NoLockScreen" /t REG_DWORD /d 1 /f
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\Personalization' -ValueName 'NoLockScreen' -Data '1' -Type 'Dword'
+
 # Disable the acrylic blur at sign-in screen to improve performance at that screen.
-reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\System" /v "DisableAcrylicBackgroundOnLogon" /t REG_DWORD /d 1 /f
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\System' -ValueName 'DisableAcrylicBackgroundOnLogon' -Data '1' -Type 'Dword'
 
 # https://www.intel.com/content/www/us/en/developer/articles/troubleshooting/openssl-sha-crash-bug-requires-application-update.html
 [Environment]::SetEnvironmentVariable("OPENSSL_ia32cap", "~0x200000200000000", "Machine")
 
 # Show what's slowing down bootups and shutdowns.
-Set-PolicyFileEntry -Path $preg_machine -Key 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -ValueName 'verbosestatus' -Data '1' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -ValueName 'verbosestatus' -Data '1' -Type 'Dword'
 
 # Disable optional driver updates; tends to be very outdated.
-Set-PolicyFileEntry -Path $preg_machine -Key 'SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate' -ValueName 'ExcludeWUDriversInQualityUpdate' -Data '1' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate' -ValueName 'ExcludeWUDriversInQualityUpdate' -Data '1' -Type 'Dword'
 
-#==== Disable feedback reminders
-Set-PolicyFileEntry -Path $preg_user -Key 'Software\Microsoft\Siuf\Rules' -ValueName 'NumberOfSIUFInPeriod' -Data '1' -Type 'Dword'
-Set-PolicyFileEntry -Path $preg_user -Key 'Software\Microsoft\Siuf\Rules' -ValueName 'PeriodInNanoSeconds' -Data '0' -Type 'Dword'
-#====
+
+##+=+= Disable feedback reminders
+Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Siuf\Rules' -ValueName 'NumberOfSIUFInPeriod' -Data '1' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Siuf\Rules' -ValueName 'PeriodInNanoSeconds' -Data '0' -Type 'Dword'
+##+=+=
+
+# Disable advertising ID for apps.
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\AdvertisingInfo' -ValueName 'DisabledByGroupPolicy' -Data '1' -Type 'Dword'
 
 # Don't automatically update speech recognition and speech synthesis modules.
-Set-PolicyFileEntry -Path $preg_machine -Key 'SOFTWARE\Policies\Microsoft\Speech' -ValueName 'AllowSpeechModelUpdate' -Data '0' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Speech' -ValueName 'AllowSpeechModelUpdate' -Data '0' -Type 'Dword'
 
 # Don't block downloaded files in Explorer, also fixes File History not working for downloaded files.
-Set-PolicyFileEntry -Path $preg_user -Key 'Software\Microsoft\Windows\CurrentVersion\Policies\Attachments' -ValueName 'SaveZoneInformation' -Data '1' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\Policies\Attachments' -ValueName 'SaveZoneInformation' -Data '1' -Type 'Dword'
 
 # If logged into a Microsoft account: Don't sync anything.
-Set-PolicyFileEntry -Path $preg_user -Key 'Software\Microsoft\Windows\CurrentVersion\SettingSync' -ValueName 'SyncPolicy' -Data '5' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\SettingSync' -ValueName 'SyncPolicy' -Data '5' -Type 'Dword'
 
-Set-PolicyFileEntry -Path $preg_user -Key 'Software\Microsoft\Windows\CurrentVersion\Privacy' -ValueName 'TailoredExperiencesWithDiagnosticDataEnabled' -Data '0' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\Privacy' -ValueName 'TailoredExperiencesWithDiagnosticDataEnabled' -Data '0' -Type 'Dword'
 
-Set-PolicyFileEntry -Path $preg_user -Key 'Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo' -ValueName 'Enabled' -Data '0' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo' -ValueName 'Enabled' -Data '0' -Type 'Dword'
 
-Set-PolicyFileEntry -Path $preg_user -Key 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -ValueName 'ShowSyncProviderNotifications' -Data '0' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -ValueName 'ShowSyncProviderNotifications' -Data '0' -Type 'Dword'
 
 # Disable tracking of application startups.
-Set-PolicyFileEntry -Path $preg_user -Key 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -ValueName 'Start_TrackProgs' -Data '0' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -ValueName 'Start_TrackProgs' -Data '0' -Type 'Dword'
 
 # Don't automatically search the web; annoying when trying to search to access a program quickly from the keyboard.
-Set-PolicyFileEntry -Path $preg_user -Key 'Software\Policies\Microsoft\Windows\Explorer' -ValueName 'DisableSearchBoxSuggestions' -Data '1' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Policies\Microsoft\Windows\Explorer' -ValueName 'DisableSearchBoxSuggestions' -Data '1' -Type 'Dword'
 
-Set-PolicyFileEntry -Path $preg_user -Key 'Software\Microsoft\Windows\CurrentVersion\Policies\Explorer' -ValueName 'NoLowDiskSpaceChecks' -Data '1' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\Policies\Explorer' -ValueName 'NoLowDiskSpaceChecks' -Data '1' -Type 'Dword'
 
-Set-PolicyFileEntry -Path $preg_user -Key 'Software\Microsoft\Windows\CurrentVersion\Policies\Explorer' -ValueName 'LinkResolveIgnoreLinkInfo' -Data '1' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\Policies\Explorer' -ValueName 'LinkResolveIgnoreLinkInfo' -Data '1' -Type 'Dword'
 
 # Don't search disks to attempt fixing a missing shortcut.
-Set-PolicyFileEntry -Path $preg_user -Key 'Software\Microsoft\Windows\CurrentVersion\Policies\Explorer' -ValueName 'NoResolveSearch' -Data '1' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\Policies\Explorer' -ValueName 'NoResolveSearch' -Data '1' -Type 'Dword'
 
 # Don't search all paths related to the missing shortcut.
-Set-PolicyFileEntry -Path $preg_user -Key 'Software\Microsoft\Windows\CurrentVersion\Policies\Explorer' -ValueName 'NoResolveTrack' -Data '1' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\Policies\Explorer' -ValueName 'NoResolveTrack' -Data '1' -Type 'Dword'
 
 # Depend on the user clearing out thumbnail caches manually if they get corrupted.
-Set-PolicyFileEntry -Path $preg_machine -Key 'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VolumeCaches\Thumbnail Cache' -ValueName 'Autorun' -Data '0' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VolumeCaches\Thumbnail Cache' -ValueName 'Autorun' -Data '0' -Type 'Dword'
 
 # Don't check for an active connection through Microsoft's servers.
-Set-PolicyFileEntry -Path $preg_machine -Key 'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VolumeCaches\Thumbnail Cache' -ValueName 'Autorun' -Data '0' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VolumeCaches\Thumbnail Cache' -ValueName 'Autorun' -Data '0' -Type 'Dword'
 
 # Old versions of the Intel PROSet/Wireless driver set this to 0, breaking Windows' internet connectivity check.
-Set-PolicyFileEntry -Path $preg_machine -Key 'SYSTEM\CurrentControlSet\Services\NlaSvc\Parameters\Internet' -ValueName 'EnableActiveProbing' -Data '1' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SYSTEM\CurrentControlSet\Services\NlaSvc\Parameters\Internet' -ValueName 'EnableActiveProbing' -Data '1' -Type 'Dword'
 
-#== Disallow automatic: program updates, security scanning, and system diagnostics.
-Set-PolicyFileEntry -Path $preg_machine -Key 'SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\Maintenance' -ValueName 'MaintenanceDisabled' -Data '1' -Type 'Dword'
+
+##+=+= Disallow automatic: program updates, security scanning, and system diagnostics.
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\Maintenance' -ValueName 'MaintenanceDisabled' -Data '1' -Type 'Dword'
 
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Diagnosis\Scheduled"
 
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Diagnosis\RecommendedTroubleshootingScanner"
-#====
+##+=+=
+
+
+# Disable "Look for an app in the Microsoft Store" or "Browse apps in the Microsoft Store".
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\Explorer' -ValueName 'NoUseStoreOpenWith' -Data '1' -Type 'Dword'
 
 # Ask OneDrive to only generate network traffic if signed in to OneDrive.
-reg.exe import ".\Registry\Computer Configuration\Windows Components\OneDrive.reg"
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\OneDrive' -ValueName 'PreventNetworkTrafficPreUserSignIn' -Data '1' -Type 'Dword'
 
-#== Ask to stop sending diagnostic data to Microsoft.
-reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Data Collection and Preview Builds.reg"
+
+##+=+= Ask to stop sending diagnostic data to Microsoft.
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\DataCollection' -ValueName 'AllowDeviceNameInTelemetry' -Data '0' -Type 'Dword'
+
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\DataCollection' -ValueName 'AllowTelemetry' -Data '0' -Type 'Dword'
+
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\DataCollection' -ValueName 'DisableTelemetryOptInChangeNotification' -Data '1' -Type 'Dword'
+
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\DataCollection' -ValueName 'DoNotShowFeedbackNotifications' -Data '1' -Type 'Dword'
+
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\DataCollection' -ValueName 'DisableOneSettingsDownloads' -Data '1' -Type 'Dword'
+
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Feedback\Siuf\DmClient"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Feedback\Siuf\DmClientOnScenarioDownload"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Flighting\FeatureConfig\ReconcileFeatures"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Flighting\FeatureConfig\UsageDataFlushing"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Flighting\FeatureConfig\UsageDataReporting"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Flighting\OneSettings\RefreshCache"
-#====
+##+=+=
 
-# Disables various compatibility assistants and engines.
+
+##+=+= Disables various compatibility assistants and engines.
+# Disable "Program Compatibility Assistant".
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -ValueName 'DisablePCA' -Data '1' -Type 'Dword'
+
+# Disable "Application Compatibility Engine".
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -ValueName 'DisableEngine' -Data '1' -Type 'Dword'
+
+# Disable "SwitchBack Compatibility Engine".
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -ValueName 'SbEnable' -Data '0' -Type 'Dword'
+
+# Disable user Steps Recorder.
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -ValueName 'DisableUAR' -Data '1' -Type 'Dword'
+
+# Disable "Remove Program Compatibility Property Page".
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -ValueName 'DisablePropPage' -Data '0' -Type 'Dword'
+
+# Disable "Inventory Collector".
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -ValueName 'DisableInventory' -Data '1' -Type 'Dword'
+
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Application Compatibility.reg"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Application Experience\Microsoft Compatibility Appraiser"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Application Experience\ProgramDataUpdater"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Application Experience\PcaPatchDbTask"
+##+=+=
 
-# Disable "Customer Experience Improvement Program"; also implies turning off the Inventory Collector.
-reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\App-V.reg"
-reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\Internet Communication Management.reg"
+
+##+=+= Disable "Customer Experience Improvement Program"; also implies turning off the Inventory Collector.
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\AppV\CEIP' -ValueName 'CEIPEnable' -Data '0' -Type 'Dword'
+
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\SQMClient\Windows' -ValueName 'CEIPEnable' -Data '0' -Type 'Dword'
+
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\Windows\Windows Error Reporting' -ValueName 'Disabled' -Data '1' -Type 'Dword'
+
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Messenger\Client' -ValueName 'CEIP' -Data '2' -Type 'Dword'
+
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Customer Experience Improvement Program\Consolidator"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Customer Experience Improvement Program\KernelCeipTask"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Customer Experience Improvement Program\UsbCeip"
+##+=+=
+
+
+# Disable telemetry for Tablet PC's handwriting recognition.
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\TabletPC' -ValueName 'PreventHandwritingDataSharing' -Data '1' -Type 'Dword'
+
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Autochk\Proxy"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\DiskDiagnostic\Microsoft-Windows-DiskDiagnosticDataCollector"
 
@@ -160,24 +226,45 @@ reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windo
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Windows Error Reporting\QueueReporting"
 
 # Ask to not allow execution of experiments by Microsoft.
-reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\PolicyManager\current\device\System" /v "AllowExperimentation" /t REG_DWORD /d 0 /f
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\PolicyManager\current\device\System' -ValueName 'AllowExperimentation' -Data '0' -Type 'Dword'
 
 # Restore the classic Windows 10 context menu; more performant and easier to use.
 reg.exe import ".\Non-GPO Registry\Old Context Menus.reg"
 
-# Disables Cloud Content features; stops automatic installation of advertised ("suggested") apps among others.
-# Called "Content Delivery Manager" in Windows 10.
-reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Cloud Content.reg"
+
+##+=+= Disables Cloud Content features; stops automatic installation of advertised ("suggested") apps among others; called "Content Delivery Manager" in Windows 10.
+
+# Disable Consumer Experience:
+# - In the start menu, programs that aren't installed ("suggestions") are gone.
+# - Microsoft account notifications are gone.
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\CloudContent' -ValueName 'DisableConsumerAccountStateContent' -Data '1' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\CloudContent' -ValueName 'DisableCloudOptimizedContent' -Data '1' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\CloudContent' -ValueName 'DisableWindowsConsumerFeatures' -Data '1' -Type 'Dword'
+##+=+=
 
 
-# Automated file cleanup without user interaction is a bad idea, even if Storage Sense only runs on low-disk space events.
-reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\Storage Sense.reg"
+# Do not show Windows tips.
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\CloudContent' -ValueName 'DisableSoftLanding' -Data '1' -Type 'Dword'
+
+
+##+=+= Automated file cleanup without user interaction is a bad idea, even if its ran only on low-disk space events.
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\Appx' -ValueName 'AllowStorageSenseGlobal' -Data '0' -Type 'Dword'
 reg.exe delete "HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\StorageSense" /f
+
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\DiskFootprint\Diagnostics"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\DiskFootprint\StorageSense"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\DiskCleanup\SilentCleanup"
+##+=+=
 
-# == Disable these scheduler tasks to keep performance and bandwidth usage more consistent. ==
+
+# Disable "Title bar window shake", previously called "Aero shake".
+Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Policies\Microsoft\Windows\Explorer' -ValueName 'NoWindowMinimizingShortcuts' -Data '1' -Type 'Dword'
+
+# If allowed (1): unused apps would be uninstalled with their user data left intact, then reinstalled if launched afterwards at any point in time.
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\Appx' -ValueName 'AllowAutomaticAppArchiving' -Data '0' -Type 'Dword'
+
+
+##+=+= Disable these scheduler tasks to keep performance and bandwidth usage more consistent.
 Disable-ScheduledTask -TaskName "\Microsoft\Office\OfficeTelemetryAgentFallBack"
 Disable-ScheduledTask -TaskName "\Microsoft\Office\OfficeTelemetryAgentLogOn"
 
@@ -232,17 +319,19 @@ Disable-ScheduledTask -TaskName "\Microsoft\Windows\WwanSvc\OobeDiscovery"
 
 # Microsoft's Malicious Removal Tool task can pop up out of nowhere if Windows Update is still allowed to connect.
 # MRT will remove "malicious" (false positives) files that other anti-virus software like Kaspersky purposefully exclude.
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\MRT' -ValueName 'DontOfferThroughWUAU' -Data '1' -Type 'Dword'
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\RemovalTools\MRT_HB"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\RemovalTools\MRT_ERROR_HB"
-reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\MRT" /v "DontOfferThroughWUAU" /t REG_DWORD /d 1 /f
-# ====
+##+=+=
+
 
 Disable-ScheduledTask -TaskName "\NvTmRep_CrashReport1_{B2FE1952-0186-46C3-BAEC-A80AA35AC5B8}"
 Disable-ScheduledTask -TaskName "\NvTmRep_CrashReport2_{B2FE1952-0186-46C3-BAEC-A80AA35AC5B8}"
 Disable-ScheduledTask -TaskName "\NvTmRep_CrashReport3_{B2FE1952-0186-46C3-BAEC-A80AA35AC5B8}"
 Disable-ScheduledTask -TaskName "\NvTmRep_CrashReport4_{B2FE1952-0186-46C3-BAEC-A80AA35AC5B8}"
 
-# == Prevent Windows Update obstructions and other annoyances. ==
+
+##+=+= Prevent Windows Update obstructions and other annoyances.
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Windows Update.reg"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\InstallService\ScanForUpdates"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\InstallService\ScanForUpdatesAsUser"
@@ -252,35 +341,43 @@ Disable-ScheduledTask -TaskName "\Microsoft\Windows\UpdateOrchestrator\UpdateMod
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\UpdateOrchestrator\USO_UxBroker"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\WindowsUpdate\Scheduled Start"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\WindowsUpdate\sih"
-# ====
+##+=+=
 
-reg.exe import ".\Non-GPO Registry\No Blocked Files.reg"
+
+# SaveZoneInformation 1 = disables blocking downloaded files.
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments' -ValueName 'SaveZoneInformation' -Data '1' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\Policies\Attachments' -ValueName 'SaveZoneInformation' -Data '1' -Type 'Dword'
 
 # Don't analyze programs' execution time data.
-reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Perflib" /v "Disable Performance Counters" /t REG_DWORD /d 1 /f
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\Windows NT\CurrentVersion\Perflib' -ValueName 'Disable Performance Counters' -Data '1' -Type 'Dword'
 
-# == NTFS tweaks ==
+
+##+=+= NTFS tweaks
 # Enabling long paths (260 character limit) prevents issues in Scoop and other programs.
-Set-PolicyFileEntry -Path $preg_machine -Key 'SYSTEM\CurrentControlSet\Control\FileSystem' -ValueName 'LongPathsEnabled' -Data '1' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SYSTEM\CurrentControlSet\Control\FileSystem' -ValueName 'LongPathsEnabled' -Data '1' -Type 'Dword'
 
 # Ensure "Virtual Memory Pagefile Encryption" is disabled; by default it's not configured (off).
-Set-PolicyFileEntry -Path $preg_machine -Key 'SYSTEM\CurrentControlSet\Policies' -ValueName 'NtfsEncryptPagingFile' -Data '0' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SYSTEM\CurrentControlSet\Policies' -ValueName 'NtfsEncryptPagingFile' -Data '0' -Type 'Dword'
 
 # Reducing page-faults and stack usage is beneficial to lowering DPC latency.
-Set-PolicyFileEntry -Path $preg_machine -Key 'SYSTEM\CurrentControlSet\Policies' -ValueName 'NtfsForceNonPagedPoolAllocation' -Data '1' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SYSTEM\CurrentControlSet\Policies' -ValueName 'NtfsForceNonPagedPoolAllocation' -Data '1' -Type 'Dword'
 
 # Don't use NTFS' "Last Access Time Stamp Updates" by default; a program can still explicitly update them for itself.
 fsutil.exe behavior set disablelastaccess 3
-# ====
+##+=+=
 
 
 # Can severely degrade a program's performance if it got marked for "crashing" too often, such is the case for Assetto Corsa.
 # https://docs.microsoft.com/en-us/windows/desktop/win7appqual/fault-tolerant-heap
-reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\FTH" /v "Enabled" /t REG_DWORD /d 0 /f
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\FTH' -ValueName 'Enabled' -Data '0' -Type 'Dword'
 
-# == START: Correct mistakes by others ==
+
+##+=+= START: Correct mistakes by others
 reg.exe import ".\Non-GPO Registry\Mistake Corrections.reg"
-reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\Power Management.reg"
+
+# Process Lasso or manually setting a non-battery saving power profile is preferred instead.
+# Don't make the power saving profiles less helpful.
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SYSTEM\CurrentControlSet\Control\Power\PowerThrottling' -ValueName 'PowerThrottlingOff' -Data '0' -Type 'Dword'
 
 # Use sane defaults for these sensitive timer related settings.
 bcdedit.exe /deletevalue tscsyncpolicy
@@ -312,7 +409,7 @@ netsh.exe int tcp set supplemental Template=InternetCustom CongestionProvider=bb
 
 # Programs that rely on 8.3 filenames from the DOS-era will break if this is disabled.
 fsutil.exe behavior set disable8dot3 2
-# == END: Correct mistakes by others ==
+##+=+=
 
 
 # Ask to enter recovery options after 3 failed boots instead of forcing it.
@@ -327,13 +424,14 @@ reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windo
 Disable-ScheduledTask -TaskName "\MicrosoftEdgeUpdateTaskMachineCore"
 Disable-ScheduledTask -TaskName "\MicrosoftEdgeUpdateTaskMachineUA"
 
-# Disables Windows Widgets.
-reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Widgets.reg"
+# Stops Windows Widgets from running, unless you use a Widget you added.
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Dsh' -ValueName 'AllowNewsAndInterests' -Data '0' -Type 'Dword'
 
 Disable-ScheduledTask -TaskName "\Microsoft\VisualStudio\Updates\BackgroundDownload"
 reg.exe import ".\Non-GPO Registry\Visual Studio 2022.reg"
 
-# == Other registry tweaks ==
+
+##+=+= Other registry tweaks
 reg.exe import ".\Non-GPO Registry\Shutdown.reg"
 reg.exe import ".\Non-GPO Registry\Disable Services.reg"
 reg.exe import ".\Non-GPO Registry\disable_typing_insights.reg"
@@ -343,13 +441,14 @@ reg.exe import ".\Non-GPO Registry\Unsorted.reg"
 reg.exe import ".\Non-GPO Registry\Disable Delivery Optimization.reg"
 reg.exe import ".\Non-GPO Registry\Disable Cloud Search.reg"
 
-reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\Group Policy.reg"
+# Allow Phone -> PC linking on this device.
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\System' -ValueName 'EnableMmx' -Data '1' -Type 'Dword'
+
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\App Package Deployment.reg"
 
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Windows Security.reg"
+##+=+=
 
-reg.exe import ".\Registry\User Configuration\Administrative Templates\Desktop.reg"
-# ====
 
 gpupdate.exe /force
 #shutdown.exe /r /t 00

@@ -1,5 +1,0 @@
-Windows Registry Editor Version 5.00
-
-; Allow widgets: Disabled
-[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Dsh]
-"AllowNewsAndInterests"=dword:0

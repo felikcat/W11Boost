@@ -155,10 +155,11 @@ if ($reset_network_interface_settings)
 
 if ($no_system_restore)
 {
-    reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\System Restore.reg"
+    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows NT\SystemRestore' -ValueName 'DisableSR' -Data '1' -Type 'Dword'
+    Disable-ScheduledTask -TaskName "\Microsoft\Windows\SystemRestore\SR"
+
     # Delete all restore points.
     vssadmin.exe delete shadows /all /quiet
-    Disable-ScheduledTask -TaskName "\Microsoft\Windows\SystemRestore\SR"
 }
 
 if ($excessive_mitigations)
