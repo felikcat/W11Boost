@@ -351,6 +351,9 @@ Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVer
 # Don't analyze programs' execution time data.
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\Windows NT\CurrentVersion\Perflib' -ValueName 'Disable Performance Counters' -Data '1' -Type 'Dword'
 
+# [ctfmon.exe] Don't send Microsoft inking and typing data.
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\TextInput' -ValueName 'AllowLinguisticDataCollection' -Data '0' -Type 'Dword'
+
 
 ##+=+= NTFS tweaks
 # Enabling long paths (260 character limit) prevents issues in Scoop and other programs.
@@ -419,10 +422,21 @@ bcdedit.exe /set recoveryenabled no
 # Don't log events without warnings or errors.
 auditpol.exe /set /category:* /Success:disable
 
-reg.exe import ".\Non-GPO Registry\No Edge Autorun.reg"
-reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Microsoft Edge.reg"
+
+##+=+= Stop Microsoft Edge from wasting CPU cycles and bandwidth.
+
+# Disable opening Edge on Windows startup: for the Chromium version.
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Edge' -ValueName 'StartupBoostEnabled' -Data '0' -Type 'Dword'
+
+# Disable opening Edge on Windows startup: for the legacy version.
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\MicrosoftEdge\Main' -ValueName 'AllowPrelaunch' -Data '0' -Type 'Dword'
+
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\MicrosoftEdge\TabPreloader' -ValueName 'AllowTabPreloading' -Data '0' -Type 'Dword'
+
 Disable-ScheduledTask -TaskName "\MicrosoftEdgeUpdateTaskMachineCore"
 Disable-ScheduledTask -TaskName "\MicrosoftEdgeUpdateTaskMachineUA"
+##+=+=
+
 
 # Stops Windows Widgets from running, unless you use a Widget you added.
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Dsh' -ValueName 'AllowNewsAndInterests' -Data '0' -Type 'Dword'

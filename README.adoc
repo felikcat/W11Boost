@@ -32,6 +32,8 @@ endif::[]
 
 . Finding text inside files through Windows Search no longer works.
 
+. Microsoft Edge is assumed to not be the default browser; it will not automatically update (auto-updates still work if Edge is open).
+
 == Requirements
 . Windows has to be activated; use a license key or run link://github.com/massgravel/Microsoft-Activation-Scripts[massgravel's MAS].
 
