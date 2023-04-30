@@ -18,20 +18,14 @@ for ($i = 0; $i -lt $services.length; $i++) {
 
 
 ##+=+= Initialize
-
-# A failsafe for gpedit.msc never being ran.
-ni -i Directory "$env:windir\System32\GroupPolicy\User", "$env:windir\System32\GroupPolicy\Machine"
-ni -i File "$env:windir\System32\GroupPolicy\gpt.ini" -Value "[General]
-" # Newline
-attrib.exe +H "$env:windir\System32\GroupPolicy"
-
 Push-Location $PSScriptRoot
+Start-Transcript -Path ([Environment]::GetFolderPath('MyDocuments') + "\TuneUp11_LastRun.log")
 
-# Import PolicyFileEditor while still bypassing PowerShell script execution being disabled.
+# 'Import-Module example.psm1' fails if PowerShell script execution is disabled; do it manually.
+Unblock-File -Path ".\PolicyFileEditor\PolFileEditor.dll"
 Add-Type -Path ".\PolicyFileEditor\PolFileEditor.dll" -ErrorAction Stop
 . ".\PolicyFileEditor\Commands.ps1"
 
-Start-Transcript -Path ([Environment]::GetFolderPath('MyDocuments') + "\TuneUp11_LastRun.log")
 . ".\imports.ps1"
 New-PSDrive -PSProvider registry -Root HKEY_CLASSES_ROOT -Name HKCR
 ##+=+=
@@ -511,5 +505,6 @@ reg.exe import ".\Non-GPO Registry\Disable Cloud Search.reg"
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\App Package Deployment.reg"
 ##+=+=
 
-
+# If this directory was non-existent before running TuneUp11, then add the "Hidden" attribute to line up with default behavior.
+attrib.exe +H "$env:windir\System32\GroupPolicy"
 gpupdate.exe /force

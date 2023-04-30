@@ -10,21 +10,18 @@ ifdef::env-github[]
 endif::[]
 
 == About
-
-NOTE: The alternatives: O&O ShutUp10, W10Privacy, BloatyNosy, Wintoys, ChrisTitusTech's winutil, Pointstone AntiTrack, Debotnet, Debloat Windows 10, Atlas OS, Spybot Anti-Beacon, and Winrice.
+NOTE: *The alternatives:* O&O ShutUp10, W10Privacy, BloatyNosy, Wintoys, ChrisTitusTech's winutil, Pointstone AntiTrack, Debotnet, Debloat Windows 10, Atlas OS, Spybot Anti-Beacon, and Winrice.
 
 - By default, TuneUp11 in comparison to alternatives:
 ** Breaks the least amount of programs or apps.
 ** Has not a single security compromise.
 ** Easiest to use.
-** Supports the first good version of Windows 10 (version 1607) up to the latest Windows 11. +
-Every edition including the problematic Home edition is fully supported.
-** Fully open-source except for 'PolicyFileEditor', but its closed-source DLL can easily be reversed, has been around for a long time, and no antivirus flags it as malicious.
+** Robust, therefore supports all Windows 10 and 11 editions (including Home) from October 2017 (Windows 10 v1709/Redstone 3) up until now.
+** Fully open-source except for 'PolicyFileEditor'; a closed-source DLL that's easily reversed, has been around for a long time, and no antivirus flags it as malicious.
 
 ** Changes are tunneled through the Group Policy Editor, which has many advantages:
 *** Windows Update does not revert any of TuneUp11's changes.
-*** Elevating to TrustedInstaller is no longer needed, which removes the need for NSudo.
-*** Antivirus software do not detect and quarantine TuneUp11.
+*** Elevating to TrustedInstaller is no longer needed, removing the need for NSudo.
 
 
 == The catches
