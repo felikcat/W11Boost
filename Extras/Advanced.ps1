@@ -58,6 +58,10 @@ $improved_hidpi = 1
 # 1: Only log events with warnings or errors will be recorded.
 $change_event_viewer_behavior = 1
 
+# https://www.intel.com/content/www/us/en/developer/articles/troubleshooting/openssl-sha-crash-bug-requires-application-update.html
+# Potentially reduces OpenSSL's security to increase compatibility with older OpenSSL on 10th gen Intel CPUs and newer.
+$fix_openssl_sha_crash = 1
+
 ##+=+= Initialize
 if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]"Administrator"))
 {
@@ -90,6 +94,7 @@ improved_hidpi = $improved_hidpi
 no_smartscreen = $no_smartscreen
 no_windows_security_systray = $no_windows_security_systray
 change_event_viewer_behavior = $change_event_viewer_behavior
+fix_openssl_sha_crash = $fix_openssl_sha_crash
 "
 Pause
 
@@ -122,7 +127,12 @@ elseif (!$file_history)
 
 if ($avoid_key_annoyances)
 {
-    reg.exe import ".\Non-GPO Registry\avoid_key_annoyances.reg"
+    # Filter keys.
+    Set-PolicyFileEntry -Path $PREG_USER -Key 'Control Panel\Accessibility\Keyboard Response' -ValueName 'Flags' -Data '98' -Type 'String'
+
+    Set-PolicyFileEntry -Path $PREG_USER -Key 'Control Panel\Accessibility\StickyKeys' -ValueName 'Flags' -Data '482' -Type 'String'
+
+    Set-PolicyFileEntry -Path $PREG_USER -Key 'Control Panel\Accessibility\ToggleKeys' -ValueName 'Flags' -Data '38' -Type 'String'
 }
 
 if ($no_geolocation)
@@ -256,4 +266,9 @@ if ($change_event_viewer_behavior)
 {
     # Don't log events without warnings or errors.
     auditpol.exe /set /category:* /Success:disable
+}
+
+if ($fix_openssl_sha_crash)
+{
+    [Environment]::SetEnvironmentVariable("OPENSSL_ia32cap", "~0x200000200000000", "Machine")
 }

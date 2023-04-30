@@ -14,17 +14,21 @@ NOTE: *The alternatives:* O&O ShutUp10, W10Privacy, BloatyNosy, Wintoys, ChrisTi
 
 - By default, TuneUp11 in comparison to alternatives:
 ** Breaks the least amount of programs or apps.
-** Has not a single security compromise.
+** No security compromises.
 ** Easiest to use.
-** Robust, therefore supports all Windows 10 and 11 editions (including Home) from October 2017 (Windows 10 v1709/Redstone 3) up until now.
+** Supports Windows 10 from v1709 up to the latest stable Windows 11.
 ** Fully open-source except for 'PolicyFileEditor'; a closed-source DLL that's easily reversed, has been around for a long time, and no antivirus flags it as malicious.
 
 ** Changes are tunneled through the Group Policy Editor, which has many advantages:
 *** Windows Update does not revert any of TuneUp11's changes.
 *** Elevating to TrustedInstaller is no longer needed, removing the need for NSudo.
+*** Changes by TuneUp11 can be viewed from a graphical interface via `rsop.msc`. +
+image:RSOP.png[]
 
 
 == The catches
+. Windows Home editions are not supported; see link:https://github.com/Fleex255/PolicyPlus#special-considerations-for-use-on-home-editions[this excerpt] from PolicyPlus on why.
+
 . You have to do the following manually:
 - Set a relevant compatibility mode for old programs requiring say, Windows XP mode.
 - Clear thumbnail cache if it ever corrupts.
@@ -61,7 +65,6 @@ NOTE: *The alternatives:* O&O ShutUp10, W10Privacy, BloatyNosy, Wintoys, ChrisTi
 . Run `TuneUp11_Launcher.bat` as Administrator.
 
 . Reboot after TuneUp11 is finished to see its changes in action.
-
 
 == Extras
 . `W11_LTSC_2022.bat`
@@ -117,25 +120,33 @@ Auto-detect and install link://www.intel.com/content/www/us/en/support/detect.ht
 This contains a long but important list. Be sure to check it if you're not sure.
 [%collapsible]
 ====
-. Use link:https://www.revouninstaller.com/products/revo-uninstaller-pro/[Revo Uninstaller] (moderate scan mode) to remove these programs that cause BSODs and anti-cheat problems, along with slower performance:
-* Any RGB programs except OpenRGB or Windows' built-in RGB, such as:
-- ASUS Armoury Crate
-- CORSAIR iCUE
-- ASRock Polychrome RGB
-- Gigabyte RGBFusion
-- TT RGB Plus
-- Razer Synapse
-- Sapphire TriXX
-- MSI Dragon Center
-- HyperX NGENUITY
-- Logitech G HUB
+TIP: Use link:https://www.revouninstaller.com/products/revo-uninstaller-pro/[Revo Uninstaller] (moderate scan mode) to remove these programs. +
+Why? Slower performance and can potentially cause BSODs/crashes and anti-cheat problems:
+
+. Problematic RGB software
+* ASUS Armoury Crate
+* CORSAIR iCUE
+* ASRock Polychrome RGB
+* Gigabyte RGBFusion
+* TT RGB Plus
+* Razer Synapse
+* Sapphire TriXX
+* MSI Dragon Center
+* HyperX NGENUITY
+* Logitech G HUB
 ** Do not remove G HUB if using a Logitech steering wheel!
-- NZXT CAM
-* Any keyboard programs, such as Ducky RGB.
+* NZXT CAM
+* Ducky RGB and other keyboard RGB control software.
+
+. Problematic virtual machine software:
+- VMWare Workstation
+- VirtualBox
 
 . Alternatives:
-* link:https://openrgb.org/[OpenRGB] for RGB configuration.
-* link:https://www.msi.com/Landing/afterburner/graphics-cards[MSI Afterburner] for general GPU management and overclocking.
+* RGB configuration: link:https://openrgb.org/[OpenRGB]
+* GPU overclocking & fan control: link:https://www.msi.com/Landing/afterburner/graphics-cards[MSI Afterburner]
+
+
 
 ====
 
@@ -172,7 +183,7 @@ image:Procmon64_2.png[]
 TIP: Example gpedit.msc registry translation: +
 `HKCU\Software\Microsoft\Windows\CurrentVersion\Group Policy Objects\{2F5A9005-4CB6-4314-B846-8C3EB66C9C24}Machine\Software\Policies\Microsoft\Windows` *->* `HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\CloudContent`
 
-* Drivers currently loaded by Windows can be seen with link:https://processhacker.sourceforge.io/nightly.php[Process Hacker] via:
+* Drivers currently loaded by Windows can be seen with link:https://systeminformer.sourceforge.io/downloads.php[System Informer] via:
 . The "System" process -> Properties (right-click or press Enter with "System" selected) -> Modules
 
 * List all from "Turn Windows features on or off" and their status:

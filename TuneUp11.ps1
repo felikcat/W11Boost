@@ -27,7 +27,6 @@ Add-Type -Path ".\PolicyFileEditor\PolFileEditor.dll" -ErrorAction Stop
 . ".\PolicyFileEditor\Commands.ps1"
 
 . ".\imports.ps1"
-New-PSDrive -PSProvider registry -Root HKEY_CLASSES_ROOT -Name HKCR
 ##+=+=
 
 
@@ -84,9 +83,6 @@ Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Window
 # Disable the acrylic blur at sign-in screen to improve performance at that screen.
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\System' -ValueName 'DisableAcrylicBackgroundOnLogon' -Data '1' -Type 'Dword'
 
-# https://www.intel.com/content/www/us/en/developer/articles/troubleshooting/openssl-sha-crash-bug-requires-application-update.html
-[Environment]::SetEnvironmentVariable("OPENSSL_ia32cap", "~0x200000200000000", "Machine")
-
 # Show what's slowing down bootups and shutdowns.
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -ValueName 'verbosestatus' -Data '1' -Type 'Dword'
 
@@ -119,9 +115,6 @@ Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVer
 
 # Disable tracking of application startups.
 Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -ValueName 'Start_TrackProgs' -Data '0' -Type 'Dword'
-
-# Don't automatically search the web; annoying when trying to search to access a program quickly from the keyboard.
-Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Policies\Microsoft\Windows\Explorer' -ValueName 'DisableSearchBoxSuggestions' -Data '1' -Type 'Dword'
 
 Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\Policies\Explorer' -ValueName 'NoLowDiskSpaceChecks' -Data '1' -Type 'Dword'
 
@@ -491,18 +484,39 @@ Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Dsh' -
 Disable-ScheduledTask -TaskName "\Microsoft\VisualStudio\Updates\BackgroundDownload"
 reg.exe import ".\Non-GPO Registry\Visual Studio 2022.reg"
 
+##+=+= Disable cloud/web usage in the start menu.
+Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\SearchSettings' -ValueName 'IsAADCloudSearchEnabled' -Data '0' -Type 'Dword'
+
+Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\SearchSettings' -ValueName 'IsDeviceSearchHistoryEnabled' -Data '0' -Type 'Dword'
+
+# Search highlights.
+Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\SearchSettings' -ValueName 'IsDynamicSearchBoxEnabled' -Data '0' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\Windows Search' -ValueName 'EnableDynamicContentInWSB' -Data '0' -Type 'Dword'
+
+Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\SearchSettings' -ValueName 'IsMSACloudSearchEnabled' -Data '0' -Type 'Dword'
+
+# Web suggestions that occur while typing.
+Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Policies\Microsoft\Windows\Explorer' -ValueName 'DisableSearchBoxSuggestions' -Data '1' -Type 'Dword'
+##+=+=
+
+##+=+= Enable UAC (User Account Control).
+# UAC requires the 'LUA File Virtualization Filter Driver'.
+reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\luafv" /v "Start" /t REG_DWORD /d 2 /f
+
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -ValueName 'PromptOnSecureDesktop' -Data '1' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -ValueName 'ConsentPromptBehaviorAdmin' -Data '5' -Type 'Dword'
+# UAC being disabled can break programs, such as Eddie-UI.
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -ValueName 'EnableLUA' -Data '1' -Type 'Dword'
+##+=+=
+
 
 ##+=+= Other registry tweaks
 reg.exe import ".\Non-GPO Registry\Shutdown.reg"
 reg.exe import ".\Non-GPO Registry\Disable Services.reg"
 reg.exe import ".\Non-GPO Registry\disable_typing_insights.reg"
 reg.exe import ".\Non-GPO Registry\performance_options.reg"
-reg.exe import ".\Non-GPO Registry\Enable UAC.reg"
 reg.exe import ".\Non-GPO Registry\Unsorted.reg"
 reg.exe import ".\Non-GPO Registry\Disable Delivery Optimization.reg"
-reg.exe import ".\Non-GPO Registry\Disable Cloud Search.reg"
-
-reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\App Package Deployment.reg"
 ##+=+=
 
 # If this directory was non-existent before running TuneUp11, then add the "Hidden" attribute to line up with default behavior.
