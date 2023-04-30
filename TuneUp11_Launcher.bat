@@ -9,5 +9,5 @@ if not %errorLevel% == 0 (
 
 cd %~dp0
 
-REM A bypass for Windows blocking PowerShell scripts by default.
-& {Start-Process powershell.exe -ArgumentList '-NoProfile -ExecutionPolicy Bypass -File "".\TuneUp11.ps1""' -Verb RunAs}
+REM A bypass for Windows' default of disabling PowerShell script execution.
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "& {Start-Process powershell.exe -ArgumentList '-NoProfile -ExecutionPolicy Bypass -File "".\TuneUp11.ps1""' -Verb RunAs}"

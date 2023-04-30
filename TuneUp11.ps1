@@ -18,10 +18,21 @@ for ($i = 0; $i -lt $services.length; $i++) {
 
 
 ##+=+= Initialize
+
+# A failsafe for gpedit.msc never being ran.
+ni -i Directory "$env:windir\System32\GroupPolicy\User", "$env:windir\System32\GroupPolicy\Machine"
+ni -i File "$env:windir\System32\GroupPolicy\gpt.ini" -Value "[General]
+" # Newline
+attrib.exe +H "$env:windir\System32\GroupPolicy"
+
 Push-Location $PSScriptRoot
+
+# Import PolicyFileEditor while still bypassing PowerShell script execution being disabled.
+Add-Type -Path ".\PolicyFileEditor\PolFileEditor.dll" -ErrorAction Stop
+. ".\PolicyFileEditor\Commands.ps1"
+
 Start-Transcript -Path ([Environment]::GetFolderPath('MyDocuments') + "\TuneUp11_LastRun.log")
 . ".\imports.ps1"
-Import-Module .\PolicyFileEditor\PolicyFileEditor.psm1
 New-PSDrive -PSProvider registry -Root HKEY_CLASSES_ROOT -Name HKCR
 ##+=+=
 
@@ -29,7 +40,7 @@ New-PSDrive -PSProvider registry -Root HKEY_CLASSES_ROOT -Name HKCR
 ##+=+= "Fast startup" causes stability issues, and increases disk wear from excessive I/O usage.
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SYSTEM\CurrentControlSet\Control\Session Manager\Power' -ValueName 'HiberbootEnabled' -Data '0' -Type 'Dword'
 
-attrib +R "$env:windir\System32\SleepStudy\UserNotPresentSession.etl"
+attrib.exe +R "$env:windir\System32\SleepStudy\UserNotPresentSession.etl"
 ##+=+=
 
 
