@@ -57,7 +57,7 @@ w32tm.exe /resync
 Set-Recommended-Ethernet-Tweaks
 
 
-##+=+= Replacing the Windows Search Index. Indexing file contents is pointless if you're organized.
+##+=+= Replacing the Windows Search Index, as it's prone to causing sudden declines in performance.
 sc.exe stop WSearch
 reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\WSearch" /v "Start" /t REG_DWORD /d 4 /f
 
@@ -66,12 +66,12 @@ Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVer
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Shell\IndexerAutomaticMaintenance"
 
 # --source winget prevents error 0x8a150044 if the Windows Store isn't reachable.
-.\NSudoLC.exe -U:E -P:E -M:S powershell.exe -Command "winget.exe install voidtools.Everything -eh --accept-package-agreements --accept-source-agreements --source winget"
+winget.exe install voidtools.Everything -eh --accept-package-agreements --accept-source-agreements --source winget
 ##+=+=
 
 
 # Replaces Windows built-in thumbnailing for many file formats.
-.\NSudoLC.exe -U:E -P:E -M:S powershell.exe -Command "winget.exe install Xanashi.Icaros -eh --accept-package-agreements --accept-source-agreements --source winget"
+winget.exe install Xanashi.Icaros -eh --accept-package-agreements --accept-source-agreements --source winget
 
 # Skip to the sign-on screen.
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\Personalization' -ValueName 'NoLockScreen' -Data '1' -Type 'Dword'
@@ -331,8 +331,23 @@ Disable-ScheduledTask -TaskName "\NvTmRep_CrashReport3_{B2FE1952-0186-46C3-BAEC-
 Disable-ScheduledTask -TaskName "\NvTmRep_CrashReport4_{B2FE1952-0186-46C3-BAEC-A80AA35AC5B8}"
 
 
-##+=+= Prevent Windows Update obstructions and other annoyances.
+##+=+= Make automatic Windows updates tolerable.
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Windows Update.reg"
+
+# Hold back updates if Microsoft is aware they cause compatibility issues.
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate' -ValueName 'DisableWUfBSafeguards' -Data '0' -Type 'Dword'
+
+# Notify for downloading and installing Windows updates.
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU' -ValueName 'AUOptions' -Data '2' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate' -ValueName 'AllowAutoWindowsUpdateDownloadOverMeteredNetwork' -Data '0' -Type 'Dword'
+
+# Make restarts never forced.
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU' -ValueName 'NoAutoUpdate' -Data '0' -Type 'Dword'
+
+# Prompt to install updates every Sunday at 03:00/3:00AM.
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU' -ValueName 'ScheduledInstallDay' -Data '1' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU' -ValueName 'ScheduledInstallTime' -Data '3' -Type 'Dword'
+
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\InstallService\ScanForUpdates"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\InstallService\ScanForUpdatesAsUser"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\UpdateOrchestrator\Schedule Scan Static Task"
@@ -375,8 +390,11 @@ fsutil.exe behavior set disablelastaccess 3
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\FTH' -ValueName 'Enabled' -Data '0' -Type 'Dword'
 
 
-##+=+= START: Correct mistakes by others
+##+=+= Some of our Windows repairs, whether to correct from other optimizer's mistakes, or a prior malware infection.
 reg.exe import ".\Non-GPO Registry\Mistake Corrections.reg"
+
+# Allow Phone -> PC linking on this device.
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\System' -ValueName 'EnableMmx' -Data '1' -Type 'Dword'
 
 # Process Lasso or manually setting a non-battery saving power profile is preferred instead.
 # Don't make the power saving profiles less helpful.
@@ -402,6 +420,39 @@ reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\iphlpsvc" /v "
 reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\IpxlatCfgSvc" /v "Start" /t REG_DWORD /d 3 /f
 Set-NetAdapterBinding -Name '*' -DisplayName 'Internet Protocol Version 6 (TCP/IPv6)' -Enabled 1
 
+# Programs that rely on 8.3 filenames from the DOS-era will break if this is disabled.
+fsutil.exe behavior set disable8dot3 2
+##+=+=
+
+
+##+=+= Various Windows Error Reporting tweaks.
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\Windows\Windows Error Reporting' -ValueName 'AutoApproveOSDumps' -Data '0' -Type 'Dword'
+
+# 1 = Minimum level; "Always ask before sending data: Windows prompts users for consent to send reports."
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\Windows\Windows Error Reporting' -ValueName 'DefaultConsent' -Data '1' -Type 'Dword'
+# Don't ignore our custom consent settings.
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\Windows\Windows Error Reporting' -ValueName 'DefaultOverrideBehavior' -Data '0' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\Windows\Windows Error Reporting' -ValueName 'DontSendAdditionalData' -Data '1' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\Windows\Windows Error Reporting' -ValueName 'LoggingDisabled' -Data '1' -Type 'Dword'
+
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting' -ValueName 'AllOrNone' -Data '0' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting' -ValueName 'IncludeKernelFaults' -Data '0' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting' -ValueName 'IncludeMicrosoftApps' -Data '0' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting' -ValueName 'IncludeShutdownErrs' -Data '0' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting' -ValueName 'IncludeWindowsApps' -Data '0' -Type 'Dword'
+
+reg.exe delete "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting\InclusionList" /f
+
+reg.exe delete "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\Windows Error Reporting\Consent" /f
+
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting\ExclusionList' -ValueName '*' -Data '*' -Type 'String'
+
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\Windows Error Reporting\ExcludedApplications' -ValueName '*' -Data '*' -Type 'String'
+
+
+##+=+=
+
+
 # Use the BBRv2 TCP congestion control algorithm; the differences:
 # https://web.archive.org/web/20220313173158/http://web.archive.org/screenshot/https://docs.google.com/spreadsheets/d/1I1NcVVbuC7aq4nGalYxMNz9pgS9OLKcFHssIBlj9xXI
 netsh.exe int tcp set supplemental Template=Internet CongestionProvider=bbr2
@@ -410,21 +461,12 @@ netsh.exe int tcp set supplemental Template=Compat CongestionProvider=bbr2
 netsh.exe int tcp set supplemental Template=DatacenterCustom CongestionProvider=bbr2
 netsh.exe int tcp set supplemental Template=InternetCustom CongestionProvider=bbr2
 
-# Programs that rely on 8.3 filenames from the DOS-era will break if this is disabled.
-fsutil.exe behavior set disable8dot3 2
-##+=+=
-
-
 # Ask to enter recovery options after 3 failed boots instead of forcing it.
-# NOTE: Does not disable the Windows Recovery Environment.
+# NOTE: Thankfully, this does not disable the Windows Recovery Environment.
 bcdedit.exe /set recoveryenabled no
-
-# Don't log events without warnings or errors.
-auditpol.exe /set /category:* /Success:disable
 
 
 ##+=+= Stop Microsoft Edge from wasting CPU cycles and bandwidth.
-
 # Disable opening Edge on Windows startup: for the Chromium version.
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Edge' -ValueName 'StartupBoostEnabled' -Data '0' -Type 'Dword'
 
@@ -455,14 +497,8 @@ reg.exe import ".\Non-GPO Registry\Unsorted.reg"
 reg.exe import ".\Non-GPO Registry\Disable Delivery Optimization.reg"
 reg.exe import ".\Non-GPO Registry\Disable Cloud Search.reg"
 
-# Allow Phone -> PC linking on this device.
-Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\System' -ValueName 'EnableMmx' -Data '1' -Type 'Dword'
-
 reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\App Package Deployment.reg"
-
-reg.exe import ".\Registry\Computer Configuration\Administrative Templates\Windows Components\Windows Security.reg"
 ##+=+=
 
 
 gpupdate.exe /force
-#shutdown.exe /r /t 00

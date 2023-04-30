@@ -11,19 +11,21 @@ endif::[]
 
 == About
 
-* TuneUp11 compared to: O&O ShutUp10, W10Privacy, BloatyNosy, Wintoys, ChrisTitusTech's winutil, Pointstone AntiTrack, Debotnet, Debloat Windows 10, Atlas OS, Spybot Anti-Beacon, and Winrice.
+NOTE: The alternatives: O&O ShutUp10, W10Privacy, BloatyNosy, Wintoys, ChrisTitusTech's winutil, Pointstone AntiTrack, Debotnet, Debloat Windows 10, Atlas OS, Spybot Anti-Beacon, and Winrice.
 
-- Easier to use.
+- By default, TuneUp11 in comparison to alternatives:
+** Breaks the least amount of programs or apps.
+** Has not a single security compromise.
+** Easiest to use.
+** Supports the first good version of Windows 10 (version 1607) up to the latest Windows 11. +
+Every edition including the problematic Home edition is fully supported.
+** Fully open-source except for 'PolicyFileEditor', but its closed-source DLL can easily be reversed, has been around for a long time, and no antivirus flags it as malicious.
 
-- No programs or apps break after using TuneUp11.
+** Changes are tunneled through the Group Policy Editor, which has many advantages:
+*** Windows Update does not revert any of TuneUp11's changes.
+*** Elevating to TrustedInstaller is no longer needed, which removes the need for NSudo.
+*** Antivirus software do not detect and quarantine TuneUp11.
 
-- Doesn't reduce security.
-
-- Fully open-source.
-
-- Minimalist with clearly defined intentions inside the source files.
-
-- Edits are done through the Group Policy Editor to block the reverting of TuneUp11 after any Windows Updates.
 
 == The catches
 . You have to do the following manually:
@@ -57,10 +59,11 @@ endif::[]
 
 . Download the link:https://github.com/felikcat/TuneUp11/releases[latest TuneUp11] and extract it.
 
-. Run `Backup_Registry.bat` as Administrator a single time; only redo this after an update to a new major OS version (such as 21H2 -> 22H2).
+. Disable any third-party firewalls such as Simplewall.
 
-. Disable your antivirus and third-party firewalls (Simplewall), save your files (TuneUp11 forces a restart), then run `TuneUp11.bat` as Administrator.
-- What triggers an antivirus: TuneUp11 does a massive amount of registry edits in sensitive areas.
+. Run `TuneUp11_Launcher.bat` as Administrator.
+
+. Reboot after TuneUp11 is finished to see its changes in action.
 
 
 == Extras
@@ -79,8 +82,8 @@ endif::[]
 ====
 
 . `Advanced.bat`
-** Additional changes TuneUp11 can apply.
-** Its settings can be changed in `Advanced.ps1`.
+** Contains a lot of extra features for those that know what they're doing.
+** You must open `Advanced.ps1` in a text editor or IDE of your choosing to see its options.
 
 
 == Recommendations for advanced/power users
@@ -118,18 +121,19 @@ This contains a long but important list. Be sure to check it if you're not sure.
 [%collapsible]
 ====
 . Use link:https://www.revouninstaller.com/products/revo-uninstaller-pro/[Revo Uninstaller] (moderate scan mode) to remove these programs that cause BSODs and anti-cheat problems, along with slower performance:
-* ASUS Armoury Crate
-* CORSAIR iCUE
-* ASRock Polychrome RGB
-* Gigabyte RGBFusion
-* TT RGB Plus
-* Razer Synapse
-* Sapphire TriXX
-* MSI Dragon Center
-* HyperX NGENUITY
-* Logitech G HUB
-** Don't remove if using a Logitech steering wheel, it's required.
-* NZXT CAM
+* Any RGB programs except OpenRGB or Windows' built-in RGB, such as:
+- ASUS Armoury Crate
+- CORSAIR iCUE
+- ASRock Polychrome RGB
+- Gigabyte RGBFusion
+- TT RGB Plus
+- Razer Synapse
+- Sapphire TriXX
+- MSI Dragon Center
+- HyperX NGENUITY
+- Logitech G HUB
+** Do not remove G HUB if using a Logitech steering wheel!
+- NZXT CAM
 * Any keyboard programs, such as Ducky RGB.
 
 . Alternatives:

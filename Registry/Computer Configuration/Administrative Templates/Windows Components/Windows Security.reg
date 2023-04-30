@@ -1,5 +1,0 @@
-Windows Registry Editor Version 5.00
-
-; SecurityHealthSystray.exe is redundant if an alternative anti-malware program is installed.
-[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\Systray]
-"HideSystray"=dword:1
