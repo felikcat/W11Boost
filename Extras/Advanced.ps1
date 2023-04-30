@@ -36,7 +36,7 @@ $less_game_stuttering = 1
 # 1: Prevents random packet loss/drop-outs in exchange for a higher battery drain.
 $no_ethernet_power_saving = 1
 
-# Very high level of security, but likely to break lots of older (pre-2019) PCs.
+# Requires Intel 11th gen / AMD Zen 3 or newer CPUs; not compatible with 'reduce_mitigations = 1'.
 $excessive_mitigations = 0
 
 # 1: Relevant to disable smartscreen if you use an alternative antivirus.
@@ -47,13 +47,22 @@ $no_smartscreen = 0
 # -> The Vanguard, ESEA, and Faceit anti-cheats will complain about "CFG" being off; enable that yourself if needed.
 $reduce_mitigations = 0
 
+# SecurityHealthSystray.exe is redundant if Windows Defender isn't used.
+$no_windows_security_systray = 1
 
 $no_family_safety = 1
 
 # If all displays are the same resolution and scaling factor, set $improved_hidpi to 1.
 $improved_hidpi = 1
 
-# == Initialize ==
+# 1: Only log events with warnings or errors will be recorded.
+$change_event_viewer_behavior = 1
+
+# https://www.intel.com/content/www/us/en/developer/articles/troubleshooting/openssl-sha-crash-bug-requires-application-update.html
+# Potentially reduces OpenSSL's security to increase compatibility with older OpenSSL on 10th gen Intel CPUs and newer.
+$fix_openssl_sha_crash = 1
+
+##+=+= Initialize
 if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]"Administrator"))
 {
     Write-Warning "ERROR: Advanced.ps1 -> Requires Administrator!"
@@ -63,7 +72,7 @@ Push-Location $PSScriptRoot
 Start-Transcript -Path ([Environment]::GetFolderPath('MyDocuments') + "\TuneUp11_Advanced_LastRun.log")
 . ".\..\imports.ps1"
 New-PSDrive -PSProvider registry -Root HKEY_CLASSES_ROOT -Name HKCR
-# ====
+##+=+=
 
 Clear-Host
 Write-Output "
@@ -83,7 +92,9 @@ no_ethernet_power_saving = $no_ethernet_power_saving
 reduce_mitigations = $reduce_mitigations
 improved_hidpi = $improved_hidpi
 no_smartscreen = $no_smartscreen
-
+no_windows_security_systray = $no_windows_security_systray
+change_event_viewer_behavior = $change_event_viewer_behavior
+fix_openssl_sha_crash = $fix_openssl_sha_crash
 "
 Pause
 
@@ -116,7 +127,12 @@ elseif (!$file_history)
 
 if ($avoid_key_annoyances)
 {
-    reg.exe import ".\Non-GPO Registry\avoid_key_annoyances.reg"
+    # Filter keys.
+    Set-PolicyFileEntry -Path $PREG_USER -Key 'Control Panel\Accessibility\Keyboard Response' -ValueName 'Flags' -Data '98' -Type 'String'
+
+    Set-PolicyFileEntry -Path $PREG_USER -Key 'Control Panel\Accessibility\StickyKeys' -ValueName 'Flags' -Data '482' -Type 'String'
+
+    Set-PolicyFileEntry -Path $PREG_USER -Key 'Control Panel\Accessibility\ToggleKeys' -ValueName 'Flags' -Data '38' -Type 'String'
 }
 
 if ($no_geolocation)
@@ -155,10 +171,11 @@ if ($reset_network_interface_settings)
 
 if ($no_system_restore)
 {
-    reg.exe import ".\Registry\Computer Configuration\Administrative Templates\System\System Restore.reg"
+    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows NT\SystemRestore' -ValueName 'DisableSR' -Data '1' -Type 'Dword'
+    Disable-ScheduledTask -TaskName "\Microsoft\Windows\SystemRestore\SR"
+
     # Delete all restore points.
     vssadmin.exe delete shadows /all /quiet
-    Disable-ScheduledTask -TaskName "\Microsoft\Windows\SystemRestore\SR"
 }
 
 if ($excessive_mitigations)
@@ -225,7 +242,12 @@ if ($improved_hidpi)
 
 if ($no_smartscreen)
 {
-    reg.exe import ".\Non-GPO Registry\Disable SmartScreen.reg"
+    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\System' -ValueName 'EnableSmartScreen' -Data '0' -Type 'Dword'
+
+    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer' -ValueName 'SmartScreenEnabled' -Data 'Off' -Type 'String'
+
+    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\Windows\CurrentVersion\AppHost' -ValueName 'EnableWebContentEvaluation' -Data '0' -Type 'Dword'
+
     Disable-ScheduledTask -TaskName "\Microsoft\Windows\AppID\SmartScreenSpecific"
 }
 
@@ -233,4 +255,20 @@ if ($no_family_safety)
 {
     Disable-ScheduledTask -TaskName "\Microsoft\Windows\Shell\FamilySafetyMonitor"
     Disable-ScheduledTask -TaskName "\Microsoft\Windows\Shell\FamilySafetyRefreshTask"
+}
+
+if ($no_windows_security_systray)
+{
+    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows Defender Security Center\Systray' -ValueName 'HideSystray' -Data '1' -Type 'Dword'
+}
+
+if ($change_event_viewer_behavior)
+{
+    # Don't log events without warnings or errors.
+    auditpol.exe /set /category:* /Success:disable
+}
+
+if ($fix_openssl_sha_crash)
+{
+    [Environment]::SetEnvironmentVariable("OPENSSL_ia32cap", "~0x200000200000000", "Machine")
 }

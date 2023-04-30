@@ -1,8 +1,0 @@
-Windows Registry Editor Version 5.00
-
-; 1 here = disabled.
-[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Policies\Attachments]
-"SaveZoneInformation"=dword:1
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments]
-"SaveZoneInformation"=dword:1
