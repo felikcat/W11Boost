@@ -107,7 +107,6 @@ no_game_dvr = $no_game_dvr
 no_hidden_files = $no_hidden_files
 no_smartscreen = $no_smartscreen
 no_system_restore = $no_system_restore
-no_thumbnail_shadows = $no_thumbnail_shadows
 no_windows_security_systray = $no_windows_security_systray
 reduce_mitigations = $reduce_mitigations
 no_windows_search_indexing = $no_windows_search_indexing
@@ -152,15 +151,6 @@ if ($no_blocked_files)
 if ($no_ethernet_power_saving)
 {
     Disable-Ethernet-Power-Saving
-}
-
-if ($no_thumbnail_shadows)
-{
-    Set-ItemProperty -Path "HKCR:\SystemFileAssociations\image" -Name "Treatment" -Type DWord -Value 2 -Force
-}
-elseif (!$no_thumbnail_shadows)
-{
-    Set-ItemProperty -Path "HKCR:\SystemFileAssociations\image" -Name "Treatment" -Type DWord -Value 0 -Force
 }
 
 if ($file_history)

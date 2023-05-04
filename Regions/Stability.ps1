@@ -1,3 +1,5 @@
+New-PSDrive -PSProvider registry -Root HKEY_CLASSES_ROOT -Name HKCR
+
 # Don't automatically update speech recognition and speech synthesis modules.
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Speech' -ValueName 'AllowSpeechModelUpdate' -Data '0' -Type 'Dword'
 
@@ -8,6 +10,10 @@ Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVer
 
 # Don't search all paths related to the missing shortcut.
 Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\Policies\Explorer' -ValueName 'NoResolveTrack' -Data '1' -Type 'Dword'
+
+# Disable Explorer's thumbnail shadows (image/video preview's border shadows) to make folders with many photos and/or videos smoother to navigate.
+# Visually unnoticeable if the dark theme is used.
+Set-ItemProperty -Path "HKCR:\SystemFileAssociations\image" -Name "Treatment" -Type DWord -Value 2 -Force
 
 # Can severely degrade a program's performance if it got marked for "crashing" too often, such is the case for Assetto Corsa.
 # https://docs.microsoft.com/en-us/windows/desktop/win7appqual/fault-tolerant-heap

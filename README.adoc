@@ -19,7 +19,8 @@ NOTE: *Known alternatives:* O&O ShutUp10, W10Privacy, BloatyNosy, Wintoys, Chris
 ** Breaks the least amount of programs or apps.
 ** No security compromises.
 ** Easiest to use.
-** Supports Windows 10 from v1709 up to the latest stable Windows 11.
+** Meant for the latest stable Windows 11, but technically supports Windows 10 v1709 and newer.
+*** Expect odd issues if not using the latest Windows 11. TuneUp11 enables features that are beneficial overall, yet problematic in earlier versions of Windows.
 ** Fully open-source except for 'https://www.virustotal.com/gui/file/f4a33deebc499ae70e479ba75b6161cae9e1626d852af7a40b96c7d69207e607?nocache=1[PolFileEditor.dll]' and 'https://www.virustotal.com/gui/file/3d5b4d790ffe6d8f0c16b4ddc4dc1b1ed93388c1cb1526083ad2d367309d805f[SetTimerResolution.exe]'.
 
 ** Changes are tunneled through the Group Policy Editor, which has many advantages:
