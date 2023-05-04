@@ -10,14 +10,17 @@ ifdef::env-github[]
 endif::[]
 
 == About
-NOTE: *The alternatives:* O&O ShutUp10, W10Privacy, BloatyNosy, Wintoys, ChrisTitusTech's winutil, Pointstone AntiTrack, Debotnet, Debloat Windows 10, Atlas OS, Spybot Anti-Beacon, and Winrice.
+
+[%collapsible]
+====
+NOTE: *Known alternatives:* O&O ShutUp10, W10Privacy, BloatyNosy, Wintoys, ChrisTitusTech's winutil, Pointstone AntiTrack, Debotnet, Debloat Windows 10, Atlas OS, Spybot Anti-Beacon, and Winrice.
 
 - By default, TuneUp11 in comparison to alternatives:
 ** Breaks the least amount of programs or apps.
 ** No security compromises.
 ** Easiest to use.
 ** Supports Windows 10 from v1709 up to the latest stable Windows 11.
-** Fully open-source except for 'PolicyFileEditor'; a closed-source DLL that's easily reversed, has been around for a long time, and no antivirus flags it as malicious.
+** Fully open-source except for 'https://www.virustotal.com/gui/file/f4a33deebc499ae70e479ba75b6161cae9e1626d852af7a40b96c7d69207e607?nocache=1[PolFileEditor.dll]' and 'https://www.virustotal.com/gui/file/3d5b4d790ffe6d8f0c16b4ddc4dc1b1ed93388c1cb1526083ad2d367309d805f[SetTimerResolution.exe]'.
 
 ** Changes are tunneled through the Group Policy Editor, which has many advantages:
 *** Windows Update does not revert any of TuneUp11's changes.
@@ -25,9 +28,10 @@ NOTE: *The alternatives:* O&O ShutUp10, W10Privacy, BloatyNosy, Wintoys, ChrisTi
 *** Changes by TuneUp11 can be viewed from a graphical interface via `rsop.msc`. +
 image:RSOP.png[]
 
+====
 
 == The catches
-. Windows Home editions are not supported; see link:https://github.com/Fleex255/PolicyPlus#special-considerations-for-use-on-home-editions[this excerpt] from PolicyPlus on why.
+. Windows Home editions are not supported; see https://github.com/Fleex255/PolicyPlus#special-considerations-for-use-on-home-editions[this excerpt] from PolicyPlus on why.
 
 . You have to do the following manually:
 - Set a relevant compatibility mode for old programs requiring say, Windows XP mode.
@@ -37,8 +41,10 @@ image:RSOP.png[]
 
 . Microsoft Edge is assumed to not be the default browser; it will not automatically update (auto-updates still work if Edge is open).
 
+. Memory/RAM usage will be higher to reduce CPU usage and potential hitches/stuttering in video playback and games.
+
 == Requirements
-. Windows has to be activated; use a license key or run link://github.com/massgravel/Microsoft-Activation-Scripts[massgravel's MAS].
+. Windows has to be activated; use a license key or run https://github.com/massgravel/Microsoft-Activation-Scripts[massgravel's MAS].
 
 . Windows Package Manager is installed and functional.
 - Test by opening PowerShell then run `winget`.
@@ -58,9 +64,7 @@ image:RSOP.png[]
 
 == Instructions
 
-. Download the link:https://github.com/felikcat/TuneUp11/releases[latest TuneUp11] and extract it.
-
-. Disable any third-party firewalls such as Simplewall.
+. Download the https://github.com/felikcat/TuneUp11/releases[latest TuneUp11] and extract it.
 
 . Run `TuneUp11_Launcher.bat` as Administrator.
 
@@ -69,21 +73,24 @@ image:RSOP.png[]
 == Extras
 . `W11_LTSC_2022.bat`
 ** Uninstalls a lot of default apps to replicate what Windows 10 LTSC 2022 includes by default.
-*** Exceptions: App Installer, Store Experience Host, Windows Store, Windows Terminal, Xbox Game Speech Window.
+*** *Exceptions*: App Installer, Store Experience Host, Windows Store, Windows Terminal, Xbox Game Speech Window.
 
-.If `W11_LTSC_2022.bat` was used
-[%collapsible]
-====
-. `Install_Xbox_Minimal.bat`
-- *Login to the Microsoft Store before using this script, otherwise it will not work.*
-- Installs only what's required to use Xbox Controllers (interface not included, get it link://www.microsoft.com/store/productId/9NBLGGH30XJ3[here]), Game Pass, and specific games like Forza Horizon 4 & 5.
-
-** To also get the Game Bar, install the following link://www.microsoft.com/store/productId/9NZKPSTSNW4P[here] and link://www.microsoft.com/store/productId/9NBLGGH537C2[here].
-====
-
-. `Advanced.bat`
+. `Advanced.ps1`
 ** Contains a lot of extra features for those that know what they're doing.
-** You must open `Advanced.ps1` in a text editor or IDE of your choosing to see its options.
+
+** How to use:
+- Disable any third-party firewalls such as Simplewall.
+- Open `Advanced.ps1` in a text editor or IDE of your choosing to configure its options.
+- Run `Advanced.ps1` as Administrator.
+
+. `Install_Xbox_Minimal.bat`
+- *Only relevant if `W11_LTSC_2022.bat` was used*.
+
+- Login to the Microsoft Store before using this script, otherwise it will not work.
+
+*** Installs only what's required to use Xbox Controllers (interface not included, get it link://www.microsoft.com/store/productId/9NBLGGH30XJ3[here]), Game Pass, and specific games like Forza Horizon 4 & 5.
+
+- To also get the Game Bar, install the following link://www.microsoft.com/store/productId/9NZKPSTSNW4P[here] and link://www.microsoft.com/store/productId/9NBLGGH537C2[here].
 
 
 == Recommendations for advanced/power users
@@ -145,8 +152,6 @@ Why? Slower performance and can potentially cause BSODs/crashes and anti-cheat p
 . Alternatives:
 * RGB configuration: link:https://openrgb.org/[OpenRGB]
 * GPU overclocking & fan control: link:https://www.msi.com/Landing/afterburner/graphics-cards[MSI Afterburner]
-
-
 
 ====
 

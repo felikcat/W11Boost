@@ -29,8 +29,10 @@ $file_history = 0
 # 0: Disables GPS services, which always run even if there's no GPS hardware installed.
 $geolocation = 1
 
-# Breaks NVIDIA Control Panel purposefully; re-enable the "NVIDIA Display Container LS" service when you need to configure settings, then disable after you're done.
-# Also useful: https://github.com/Orbmu2k/nvidiaProfileInspector/releases
+# Breaks NVIDIA Control Panel and CPU usage in the Task Manager purposefully;
+# Re-enable the "NVIDIA Display Container LS" service when you need to configure settings, then disable after you're done.
+# Configure hidden NVIDIA options: https://github.com/Orbmu2k/nvidiaProfileInspector/releases
+# See real CPU usage: https://systeminformer.sourceforge.io/
 $less_game_stuttering = 1
 
 # 1: Prevents random packet loss/drop-outs in exchange for a higher battery drain.
@@ -40,7 +42,7 @@ $no_ethernet_power_saving = 1
 $excessive_mitigations = 0
 
 # 1: Relevant to disable smartscreen if you use an alternative antivirus.
-$no_smartscreen = 0
+$no_smartscreen = 1
 
 # 1: Reduces stuttering in Hogwarts Legacy, but lowers Windows' overall security;
 # -> You must replace Windows Defender with Kaspersky Free which has its own separate virtualization security.
@@ -53,7 +55,7 @@ $no_windows_security_systray = 1
 $no_family_safety = 1
 
 # If all displays are the same resolution and scaling factor, set $improved_hidpi to 1.
-$improved_hidpi = 1
+$improved_hidpi = 0
 
 # 1: Only log events with warnings or errors will be recorded.
 $change_event_viewer_behavior = 1
@@ -61,6 +63,15 @@ $change_event_viewer_behavior = 1
 # https://www.intel.com/content/www/us/en/developer/articles/troubleshooting/openssl-sha-crash-bug-requires-application-update.html
 # Potentially reduces OpenSSL's security to increase compatibility with older OpenSSL on 10th gen Intel CPUs and newer.
 $fix_openssl_sha_crash = 1
+
+# If having to manually unblock files you download is intolerable, use $no_blocked_files 1.
+$no_blocked_files = 0
+
+# Helps with not getting tricked into opening malware and makes Windows less annoying for a power user.
+$no_hidden_files = 1
+
+$no_windows_search_indexing = 1
+
 
 ##+=+= Initialize
 if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]"Administrator"))
@@ -71,6 +82,9 @@ if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
 Push-Location $PSScriptRoot
 Start-Transcript -Path ([Environment]::GetFolderPath('MyDocuments') + "\TuneUp11_Advanced_LastRun.log")
 . ".\..\imports.ps1"
+Unblock-File -Path ".\Third-party\PolicyFileEditor\PolFileEditor.dll"
+Add-Type -Path ".\Third-party\PolicyFileEditor\PolFileEditor.dll" -ErrorAction Stop
+. ".\Third-party\PolicyFileEditor\Commands.ps1"
 New-PSDrive -PSProvider registry -Root HKEY_CLASSES_ROOT -Name HKCR
 ##+=+=
 
@@ -78,25 +92,62 @@ Clear-Host
 Write-Output "
 ==== Current settings ====
 
-no_audio_reduction = $no_audio_reduction
 avoid_key_annoyances = $avoid_key_annoyances
-no_ethernet_power_saving = $no_ethernet_power_saving
-file_history = $file_history
-geolocation = $geolocation
-less_game_stuttering = $less_game_stuttering
-no_game_dvr = $no_game_dvr
-no_thumbnail_shadows = $no_thumbnail_shadows
-no_system_restore = $no_system_restore
-excessive_mitigations = $excessive_mitigations
-no_ethernet_power_saving = $no_ethernet_power_saving
-reduce_mitigations = $reduce_mitigations
-improved_hidpi = $improved_hidpi
-no_smartscreen = $no_smartscreen
-no_windows_security_systray = $no_windows_security_systray
 change_event_viewer_behavior = $change_event_viewer_behavior
+excessive_mitigations = $excessive_mitigations
+file_history = $file_history
 fix_openssl_sha_crash = $fix_openssl_sha_crash
+geolocation = $geolocation
+improved_hidpi = $improved_hidpi
+less_game_stuttering = $less_game_stuttering
+no_audio_reduction = $no_audio_reduction
+no_blocked_files = $no_blocked_files
+no_ethernet_power_saving = $no_ethernet_power_saving
+no_game_dvr = $no_game_dvr
+no_hidden_files = $no_hidden_files
+no_smartscreen = $no_smartscreen
+no_system_restore = $no_system_restore
+no_thumbnail_shadows = $no_thumbnail_shadows
+no_windows_security_systray = $no_windows_security_systray
+reduce_mitigations = $reduce_mitigations
+no_windows_search_indexing = $no_windows_search_indexing
 "
 Pause
+
+# Replacing the Windows Search Index, as it's prone to causing sudden declines in performance.
+if ($no_windows_search_indexing)
+{
+    sc.exe stop WSearch
+    reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\WSearch" /v "Start" /t REG_DWORD /d 4 /f
+
+    Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\SearchSettings' -ValueName 'IsDeviceSearchHistoryEnabled' -Data '0' -Type 'Dword'
+
+    Disable-ScheduledTask -TaskName "\Microsoft\Windows\Shell\IndexerAutomaticMaintenance"
+
+    # --source winget prevents error 0x8a150044 if the Windows Store isn't reachable.
+    winget.exe install voidtools.Everything -eh --accept-package-agreements --accept-source-agreements --source winget
+}
+
+if ($no_hidden_files)
+{
+    Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -ValueName 'DontPrettyPath' -Data '1' -Type 'Dword'
+
+    Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -ValueName 'Hidden' -Data '1' -Type 'Dword'
+
+    Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -ValueName 'HideFileExt' -Data '0' -Type 'Dword'
+
+    Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -ValueName 'ShowSuperHidden' -Data '1' -Type 'Dword'
+
+    Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\Explorer\CabinetState' -ValueName 'FullPath' -Data '1' -Type 'Dword'
+}
+
+if ($no_blocked_files)
+{
+    # SaveZoneInformation 1 = disables blocking downloaded files.
+    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments' -ValueName 'SaveZoneInformation' -Data '1' -Type 'Dword'
+    # Don't block downloaded files in Explorer, also fixes File History not working for downloaded files.
+    Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\Policies\Attachments' -ValueName 'SaveZoneInformation' -Data '1' -Type 'Dword'
+}
 
 if ($no_ethernet_power_saving)
 {
@@ -137,14 +188,14 @@ if ($avoid_key_annoyances)
 
 if ($no_geolocation)
 {
-    reg.exe import ".\Non-GPO Registry\Geolocation\Disable.reg"
+    reg.exe import ".\Registry\Geolocation\Disable.reg"
     sc.exe stop lfsvc
     Disable-ScheduledTask -TaskName "\Microsoft\Windows\Location\Notifications"
     Disable-ScheduledTask -TaskName "\Microsoft\Windows\Location\WindowsActionDialog"
 }
 elseif (!$no_geolocation)
 {
-    reg.exe import ".\Non-GPO Registry\Geolocation\Enable.reg"
+    reg.exe import ".\Registry\Geolocation\Enable.reg"
     Enable-ScheduledTask -TaskName "\Microsoft\Windows\Location\Notifications"
     Enable-ScheduledTask -TaskName "\Microsoft\Windows\Location\WindowsActionDialog"
 }
@@ -161,7 +212,20 @@ if (!$no_audio_reduction)
 
 if ($no_game_dvr)
 {
-    reg.exe import ".\Non-GPO Registry\No Game DVR.reg"
+    Set-PolicyFileEntry -Path $PREG_USER -Key 'System\GameConfigStore' -ValueName 'GameDVR_Enabled' -Data '0' -Type 'Dword'
+
+    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\GameDVR' -ValueName 'AllowGameDVR' -Data '0' -Type 'Dword'
+
+    Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\GameDVR' -ValueName 'AppCaptureEnabled' -Data '0' -Type 'Dword'
+    Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\GameDVR' -ValueName 'HistoricalCaptureEnabled' -Data '0' -Type 'Dword'
+
+    # Block Xbox controller's home button from opening the game bar.
+    Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\GameBar' -ValueName 'UseNexusForGameBarEnabled' -Data '0' -Type 'Dword'
+
+    Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\GameBar' -ValueName 'ShowStartupPanel' -Data '0' -Type 'Dword'
+
+    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SYSTEM\CurrentControlSet\Services\BcastDVRUserService' -ValueName 'Start' -Data '4' -Type 'Dword'
+
 }
 
 if ($reset_network_interface_settings)
@@ -180,7 +244,7 @@ if ($no_system_restore)
 
 if ($excessive_mitigations)
 {
-    reg.exe import ".\Non-GPO Registry\Excessive Mitigations.reg"
+    reg.exe import ".\Registry\Excessive Mitigations.reg"
     # Solves STIGs: V-253275 (High), V-253285 (Medium)
     Disable-WindowsOptionalFeature -NoRestart -Online -Remove -FeatureName SMB1Protocol, IIS-WebServerRole, MicrosoftWindowsPowerShellV2Root, MicrosoftWindowsPowerShellV2
     Set-ProcessMitigation -System -Enable DEP, EmulateAtlThunks, RequireInfo, BottomUp, HighEntropy, CFG, SuppressExports, SEHOP, SEHOPTelemetry, AuditSEHOP, TerminateOnError
@@ -193,18 +257,23 @@ if ($excessive_mitigations)
 
 if ($less_game_stuttering)
 {
-    # MemoryCompression: While enabled; increases CPU load to reduce I/O load and handle Out Of Memory situations more smoothly; akin to Linux's zRAM.
-    # -> Its downside is worsened stuttering in video games.
-    # PageCombining: While enabled; reduces memory usage but increases CPU load.
-    Disable-MMAgent -MemoryCompression
-    Disable-MMAgent -PageCombining
+    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SYSTEM\CurrentControlSet\Services\NVDisplay.ContainerLocalSystem' -ValueName 'Start' -Data '4' -Type 'Dword'
+
+    powercfg.exe -import "..\Third-party\Bitsum-Highest-Performance.pow"
+    $_p = Get-CimInstance -Name root\cimv2\power -Class win32_PowerPlan -Filter "ElementName = 'Bitsum Highest Performance'"
+    powercfg.exe /setactive ([string]$_p.InstanceID).Replace("Microsoft:PowerPlan\{","").Replace("}","")
+
+    # Will make CPU usage appear at constantly 100% in Windows' Task Manager.
+    # Makes CPU idle states never occur to reduce DPC latency and increase the speed of context switching.
+    powercfg.exe /setacvalueindex SCHEME_CURRENT SUB_PROCESSOR IdleDisable 1
+    powercfg.exe /setactive SCHEME_CURRENT
 }
 
 if ($reduce_mitigations)
 {
     Disable-WindowsOptionalFeature -NoRestart -Online -Remove -FeatureName VirtualMachinePlatform
 
-    reg.exe import ".\Non-GPO Registry\Reduce Mitigations.reg"
+    reg.exe import ".\Registry\Reduce Mitigations.reg"
     # Unnecessary considering the previous registry entries imported, but do it anyway!
     bcdedit.exe /set hypervisorlaunchtype off
 
@@ -237,7 +306,9 @@ if ($reduce_mitigations)
 
 if ($improved_hidpi)
 {
-    reg.exe import ".\Non-GPO Registry\HiDPI Blurry Font Fix.reg"
+    Set-PolicyFileEntry -Path $PREG_USER -Key 'Control Panel\Desktop' -ValueName 'EnablePerProcessSystemDPI' -Data '1' -Type 'Dword'
+
+    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\Control Panel\Desktop' -ValueName 'EnablePerProcessSystemDPI' -Data '1' -Type 'Dword'
 }
 
 if ($no_smartscreen)
