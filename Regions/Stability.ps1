@@ -13,6 +13,18 @@ Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVer
 # https://docs.microsoft.com/en-us/windows/desktop/win7appqual/fault-tolerant-heap
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\FTH' -ValueName 'Enabled' -Data '0' -Type 'Dword'
 
+
+# Sets Windows' default process priority; this is not the default for Windows Server.
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SYSTEM\CurrentControlSet\Control\PriorityControl' -ValueName 'Win32PrioritySeparation' -Data '2' -Type 'Dword'
+
+# Keeps FPS more stable in games; assumes the default process priority.
+# This only helps under specific situations, such as having OBS Studio recording gameplay.
+Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\GameBar' -ValueName 'AutoGameModeEnabled' -Data '1' -Type 'Dword'
+
+# Reduces input lag and marginally increases FPS, see:
+# https://learn.microsoft.com/en-us/windows/win32/direct3ddxgi/for-best-performance--use-dxgi-flip-model#directflip
+Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\DirectX\UserGpuPreferences' -ValueName 'DirectXUserGlobalSettings' -Data 'SwapEffectUpgradeEnable=1;' -Type 'String'
+
 # Video games that fail to request a higher timer frequency will benefit from Windows' old timer resolution behavior.
 # Requires 0.5ms timer resolution to be fully effective.
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SYSTEM\CurrentControlSet\Control\Session Manager\kernel' -ValueName 'GlobalTimerResolutionRequests' -Data '1' -Type 'Dword'

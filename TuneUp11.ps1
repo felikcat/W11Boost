@@ -42,15 +42,6 @@ Add-Type -Path ".\Third-party\PolicyFileEditor\PolFileEditor.dll" -ErrorAction S
 . ".\Regions\Stability.ps1"
 
 
-##+=+=
-Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\System' -ValueName 'EnableActivityFeed' -Data '0' -Type 'Dword'
-
-Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\System' -ValueName 'PublishUserActivities' -Data '0' -Type 'Dword'
-
-Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\System' -ValueName 'UploadUserActivities' -Data '0' -Type 'Dword'
-##+=+=
-
-
 ##+=+= Use optimal online NTP servers for more accurate system time.
 net.exe stop w32time
 # Make a clean slate for the time sync settings.

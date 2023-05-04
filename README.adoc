@@ -99,7 +99,8 @@ image:RSOP.png[]
 * Enable the following
 . I/O APIC (IOAPIC 24-119 Entries)
 . Above 4G Decoding
-. Resizable BAR
+. Resizable BAR.
+** On ASRock motherboards: C.A.M. (Clever Access Memory)
 ** This is incompatible with Windows installed on an MBR partition; if Windows can no longer boot, this setting caused it.
 . HPET (High Precision Event Timer)
 
