@@ -74,7 +74,8 @@ image:RSOP.png[]
 == Extras
 . `W11_LTSC_2022.bat`
 ** Uninstalls a lot of default apps to replicate what Windows 10 LTSC 2022 includes by default.
-*** *Exceptions*: App Installer, Store Experience Host, Windows Store, Windows Terminal, Xbox Game Speech Window.
+*** *Exceptions*: App Installer, Store Experience Host, Windows Store, Windows Terminal, Xbox Game Speech Window. +
+Microsoft Photos, Windows Clock, Snipping Tool.
 
 . `Advanced.ps1`
 ** Contains a lot of extra features for those that know what they're doing.
@@ -94,7 +95,9 @@ image:RSOP.png[]
 - To also get the Game Bar, install the following link://www.microsoft.com/store/productId/9NZKPSTSNW4P[here] and link://www.microsoft.com/store/productId/9NBLGGH537C2[here].
 
 
-== Recommendations for advanced/power users
+== Recommendations.
+
+. Do not replace built-in Windows programs.
 
 === BIOS
 * Enable the following

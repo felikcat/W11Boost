@@ -1,3 +1,5 @@
+Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Personalization\Settings' -ValueName 'AcceptedPrivacyPolicy' -Data '0' -Type 'Dword'
+
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\DataCollection' -ValueName 'LimitDiagnosticLogCollection' -Data '1' -Type 'Dword'
 
 Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo' -ValueName 'Enabled' -Data '0' -Type 'Dword'
@@ -32,8 +34,16 @@ Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\OneDrive' -Valu
 # Ask to not allow execution of experiments by Microsoft.
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\PolicyManager\current\device\System' -ValueName 'AllowExperimentation' -Data '0' -Type 'Dword'
 
-# [ctfmon.exe] Don't send Microsoft inking and typing data.
+
+##+=+= [ctfmon.exe] Don't send Microsoft inking and typing data.
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\TextInput' -ValueName 'AllowLinguisticDataCollection' -Data '0' -Type 'Dword'
+
+Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\InputPersonalization' -ValueName 'RestrictImplicitInkCollection' -Data '1' -Type 'Dword'
+
+Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\InputPersonalization' -ValueName 'RestrictImplicitTextCollection' -Data '1' -Type 'Dword'
+
+##+=+=
+
 
 Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\Privacy' -ValueName 'TailoredExperiencesWithDiagnosticDataEnabled' -Data '0' -Type 'Dword'
 
@@ -59,13 +69,15 @@ Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Window
 ##+=+= Disable cloud/web usage in the start menu.
 Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\SearchSettings' -ValueName 'IsAADCloudSearchEnabled' -Data '0' -Type 'Dword'
 
+Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\SearchSettings' -ValueName 'IsMSACloudSearchEnabled' -Data '0' -Type 'Dword'
+
 Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\SearchSettings' -ValueName 'IsDeviceSearchHistoryEnabled' -Data '0' -Type 'Dword'
+
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\Windows Search' -ValueName 'AllowCloudSearch' -Data '0' -Type 'Dword'
 
 # Search highlights.
 Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\SearchSettings' -ValueName 'IsDynamicSearchBoxEnabled' -Data '0' -Type 'Dword'
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\Windows Search' -ValueName 'EnableDynamicContentInWSB' -Data '0' -Type 'Dword'
-
-Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\SearchSettings' -ValueName 'IsMSACloudSearchEnabled' -Data '0' -Type 'Dword'
 
 # Web suggestions that occur while typing.
 Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Policies\Microsoft\Windows\Explorer' -ValueName 'DisableSearchBoxSuggestions' -Data '1' -Type 'Dword'
@@ -80,6 +92,9 @@ Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Policies\Microsoft\Windows\E
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\CloudContent' -ValueName 'DisableConsumerAccountStateContent' -Data '1' -Type 'Dword'
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\CloudContent' -ValueName 'DisableCloudOptimizedContent' -Data '1' -Type 'Dword'
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\CloudContent' -ValueName 'DisableWindowsConsumerFeatures' -Data '1' -Type 'Dword'
+
+# Specifically for Windows 10; no effect on Windows 11.
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' -ValueName 'SubscribedContent-338389Enabled' -Data '0' -Type 'Dword'
 ##+=+=
 
 

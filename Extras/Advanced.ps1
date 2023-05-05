@@ -11,10 +11,6 @@ $no_game_dvr = 1
 # Recommended before applying our network tweaks, as it's a "clean slate".
 $reset_network_interface_settings = 1
 
-# 1 = disable Explorer's thumbnail (images/video previews) border shadows.
-# -> 1 is recommended if dark mode is used.
-$no_thumbnail_shadows = 1
-
 # 1 is recommended.
 # System Restore problems:
 # - Cannot restore backups from previous versions of Windows; can't revert Windows updates with System Restore.
@@ -113,7 +109,7 @@ no_windows_search_indexing = $no_windows_search_indexing
 "
 Pause
 
-# Replacing the Windows Search Index, as it's prone to causing sudden declines in performance.
+# The Windows Search Index is prone to causing sudden declines in performance.
 if ($no_windows_search_indexing)
 {
     sc.exe stop WSearch
@@ -123,8 +119,8 @@ if ($no_windows_search_indexing)
 
     Disable-ScheduledTask -TaskName "\Microsoft\Windows\Shell\IndexerAutomaticMaintenance"
 
-    # --source winget prevents error 0x8a150044 if the Windows Store isn't reachable.
-    winget.exe install voidtools.Everything -eh --accept-package-agreements --accept-source-agreements --source winget
+    # Here for historical purposes, as replacing Windows Search Index was the original intention.
+    #winget.exe install voidtools.Everything -eh --accept-package-agreements --accept-source-agreements --source winget
 }
 
 if ($no_hidden_files)
@@ -226,6 +222,7 @@ if ($reset_network_interface_settings)
 if ($no_system_restore)
 {
     Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows NT\SystemRestore' -ValueName 'DisableSR' -Data '1' -Type 'Dword'
+
     Disable-ScheduledTask -TaskName "\Microsoft\Windows\SystemRestore\SR"
 
     # Delete all restore points.

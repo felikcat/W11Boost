@@ -1,3 +1,5 @@
+wmic.exe UserAccount set PasswordExpires=False
+
 # Disable "Title bar window shake", previously called "Aero shake".
 Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Policies\Microsoft\Windows\Explorer' -ValueName 'NoWindowMinimizingShortcuts' -Data '1' -Type 'Dword'
 
@@ -19,14 +21,23 @@ Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Window
 # Show what's slowing down bootups and shutdowns.
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -ValueName 'verbosestatus' -Data '1' -Type 'Dword'
 
+# Don't suggest ways to "finish setting up my device to get the most out of Windows".
+Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\UserProfileEngagement' -ValueName 'ScoobeSystemSettingEnabled' -Data '0' -Type 'Dword'
 
 # Disables the startup sound; why: https://youtu.be/UWUBjM2LNJU?t=772
-Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'Software\Microsoft\Windows\CurrentVersion\Authentication\LogonUI\BootAnimation' -ValueName 'DisableStartupSound' -Data '1' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\LogonUI\BootAnimation' -ValueName 'DisableStartupSound' -Data '1' -Type 'Dword'
+
+# Disable "Show recommendations for tips, shortcuts, new apps, and more".
+Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -ValueName 'Start_IrisRecommendations' -Data '0' -Type 'Dword'
 
 
 ##+=+= Make automatic Windows updates tolerable.
+
 # Hold back updates if Microsoft is aware they cause compatibility issues.
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate' -ValueName 'DisableWUfBSafeguards' -Data '0' -Type 'Dword'
+
+# Opt out out of "being the first to get the latest non-security updates".
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\WindowsUpdate\UX\Settings' -ValueName 'IsContinuousInnovationOptedIn' -Data '0' -Type 'Dword'
 
 # Notify for downloading and installing Windows updates.
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU' -ValueName 'AUOptions' -Data '2' -Type 'Dword'

@@ -15,10 +15,20 @@ Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVer
 # Visually unnoticeable if the dark theme is used.
 Set-ItemProperty -Path "HKCR:\SystemFileAssociations\image" -Name "Treatment" -Type DWord -Value 2 -Force
 
+# Separates the explorer.exe uses as the Windows Shell from the explorer.exe File Explorer.
+# The trade-off for increased stability and performance is more memory usage.
+Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -ValueName 'SeparateProcess' -Data '1' -Type 'Dword'
+
+Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\SearchSettings' -ValueName 'IsDeviceSearchHistoryEnabled' -Data '0' -Type 'Dword'
+
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\Shell\IndexerAutomaticMaintenance"
+
+# By default Windows doesn't automatically back-up the registry, but just in case they change this..
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SYSTEM\CurrentControlSet\Control\Session Manager\Configuration Manager' -ValueName 'EnablePeriodicBackup' -Data '0' -Type 'Dword'
+
 # Can severely degrade a program's performance if it got marked for "crashing" too often, such is the case for Assetto Corsa.
 # https://docs.microsoft.com/en-us/windows/desktop/win7appqual/fault-tolerant-heap
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\FTH' -ValueName 'Enabled' -Data '0' -Type 'Dword'
-
 
 # Sets Windows' default process priority; this is not the default for Windows Server.
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SYSTEM\CurrentControlSet\Control\PriorityControl' -ValueName 'Win32PrioritySeparation' -Data '2' -Type 'Dword'
@@ -30,6 +40,10 @@ Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\GameBar' -ValueNam
 # Reduces input lag and marginally increases FPS, see:
 # https://learn.microsoft.com/en-us/windows/win32/direct3ddxgi/for-best-performance--use-dxgi-flip-model#directflip
 Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\DirectX\UserGpuPreferences' -ValueName 'DirectXUserGlobalSettings' -Data 'SwapEffectUpgradeEnable=1;' -Type 'String'
+
+# Enables hardware-accelerated GPU scheduling except for blocked GPU VIDs listed in:
+# HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\GraphicsDrivers\BlockList\Kernel
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SYSTEM\CurrentControlSet\Control\GraphicsDrivers' -ValueName 'HwSchMode' -Data '2' -Type 'Dword'
 
 # Video games that fail to request a higher timer frequency will benefit from Windows' old timer resolution behavior.
 # Requires 0.5ms timer resolution to be fully effective.
