@@ -16,6 +16,11 @@ Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Window
 
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\DataCollection' -ValueName 'DoNotShowFeedbackNotifications' -Data '1' -Type 'Dword'
 
+# Fully disable the 'Screenshots access' permission to .appx packaged programs.
+Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\graphicsCaptureProgrammatic' -ValueName 'Value' -Data 'Deny' -Type 'String'
+Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\graphicsCaptureProgrammatic\NonPackaged' -ValueName 'Value' -Data 'Deny' -Type 'String'
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\graphicsCaptureProgrammatic' -ValueName 'Value' -Data 'Deny' -Type 'String'
+
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\DataCollection' -ValueName 'DisableOneSettingsDownloads' -Data '1' -Type 'Dword'
 
 # Disallow using your voice for dictation and to talk to Cortana and other apps using Windows' cloud-based speech recognition.
@@ -91,10 +96,13 @@ Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Policies\Microsoft\Windows\E
 # - Microsoft account notifications are gone.
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\CloudContent' -ValueName 'DisableConsumerAccountStateContent' -Data '1' -Type 'Dword'
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\CloudContent' -ValueName 'DisableCloudOptimizedContent' -Data '1' -Type 'Dword'
-Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\CloudContent' -ValueName 'DisableWindowsConsumerFeatures' -Data '1' -Type 'Dword'
 
-# Specifically for Windows 10; no effect on Windows 11.
+# Disables various suggested content.
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' -ValueName 'SubscribedContent-338389Enabled' -Data '0' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' -ValueName 'SubscribedContent-338393Enabled' -Data '0' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' -ValueName 'SubscribedContent-353694Enabled' -Data '0' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' -ValueName 'SubscribedContent-353696Enabled' -Data '0' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' -ValueName 'SubscribedContent-88000326Enabled' -Data '0' -Type 'Dword'
 ##+=+=
 
 

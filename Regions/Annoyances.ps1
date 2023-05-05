@@ -25,6 +25,7 @@ Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\Windows\Current
 Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\UserProfileEngagement' -ValueName 'ScoobeSystemSettingEnabled' -Data '0' -Type 'Dword'
 
 # Disables the startup sound; why: https://youtu.be/UWUBjM2LNJU?t=772
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\Windows\CurrentVersion\EditionOverrides' -ValueName 'UserSetting_DisableStartupSound' -Data '1' -Type 'Dword'
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\LogonUI\BootAnimation' -ValueName 'DisableStartupSound' -Data '1' -Type 'Dword'
 
 # Disable "Show recommendations for tips, shortcuts, new apps, and more".
@@ -62,5 +63,6 @@ Disable-ScheduledTask -TaskName "\Microsoft\Windows\UpdateOrchestrator\UpdateMod
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\UpdateOrchestrator\USO_UxBroker"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\WindowsUpdate\Scheduled Start"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\WindowsUpdate\sih"
+
 ##+=+=
 

@@ -42,6 +42,7 @@ Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SYSTEM\CurrentControlSet\Control\S
 
 # Allow Phone -> PC linking on this device.
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\System' -ValueName 'EnableMmx' -Data '1' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\CloudContent' -ValueName 'DisableWindowsConsumerFeatures' -Data '0' -Type 'Dword'
 
 # Process Lasso or manually setting a non-battery saving power profile is preferred instead.
 # Don't make the power saving profiles less helpful.

@@ -20,7 +20,6 @@ Set-ItemProperty -Path "HKCR:\SystemFileAssociations\image" -Name "Treatment" -T
 Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -ValueName 'SeparateProcess' -Data '1' -Type 'Dword'
 
 Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\SearchSettings' -ValueName 'IsDeviceSearchHistoryEnabled' -Data '0' -Type 'Dword'
-
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Shell\IndexerAutomaticMaintenance"
 
 # By default Windows doesn't automatically back-up the registry, but just in case they change this..
@@ -49,11 +48,19 @@ Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SYSTEM\CurrentControlSet\Control\G
 # Requires 0.5ms timer resolution to be fully effective.
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SYSTEM\CurrentControlSet\Control\Session Manager\kernel' -ValueName 'GlobalTimerResolutionRequests' -Data '1' -Type 'Dword'
 
-# Enforce 0.5ms (the minimum) timer resolution.
+
+##+=+= Enforce 0.5ms (the minimum) timer resolution.
+
+# --source winget prevents error 0x8a150044 if the Windows Store isn't reachable.
+winget.exe install Microsoft.VCRedist.2010.x86 -eh --accept-package-agreements --accept-source-agreements --source winget
+
 Disable-ScheduledTask "\Intelligent StandbyList Cleaner"
-Unblock-File -Path "..\Third-party\STR\SetTimerResolution.exe"
-Copy-Item "..\Third-party\STR" -Destination "$env:LOCALAPPDATA\Programs" -Recurse
+Unblock-File -Path ".\Third-party\STR\SetTimerResolution.exe"
+Copy-Item ".\Third-party\STR" -Destination "$env:LOCALAPPDATA\Programs" -Recurse
 Start-Process -WorkingDirectory "$env:LOCALAPPDATA\Programs\STR" -FilePath "SetTimerResolution.exe" -Args "-install"
+
+##+=+=
+
 
 # MemoryCompression: While enabled; increases CPU load to reduce I/O load and handle Out Of Memory situations more smoothly; akin to Linux's zRAM.
 # -> Its downside is worsened stuttering in video games.
@@ -73,7 +80,9 @@ Disable-ScheduledTask -TaskName "\Microsoft\Windows\Diagnosis\RecommendedTrouble
 
 ##+=+= Automated file cleanup without user interaction is a bad idea, even if its ran only on low-disk space events.
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\Appx' -ValueName 'AllowStorageSenseGlobal' -Data '0' -Type 'Dword'
-reg.exe delete "HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\StorageSense" /f
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\StorageSense' -ValueName 'AllowStorageSenseGlobal' -Data '0' -Type 'Dword'
+
+reg.exe delete "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\StorageSense" /f
 
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\DiskFootprint\Diagnostics"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\DiskFootprint\StorageSense"
