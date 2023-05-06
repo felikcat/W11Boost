@@ -81,6 +81,7 @@ Windows Registry Editor Version 5.00
 "Enabled"=dword:1
 "WasEnabledBy"=dword:4
 
+; Enable "Microsoft Vulnerable Driver Blocklist".
 [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\CI\Config]
 "VulnerableDriverBlocklistEnable"=dword:1
 
