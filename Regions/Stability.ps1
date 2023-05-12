@@ -52,7 +52,11 @@ Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SYSTEM\CurrentControlSet\Control\S
 ##+=+= Enforce 0.5ms (the minimum) timer resolution.
 
 # --source winget prevents error 0x8a150044 if the Windows Store isn't reachable.
-winget.exe install Microsoft.VCRedist.2010.x86 -eh --accept-package-agreements --accept-source-agreements --source winget
+$STR_Requirement = Start-Job {
+    winget.exe install Microsoft.VCRedist.2010.x86 -eh --accept-package-agreements --accept-source-agreements --source winget --force
+}
+Wait-Job $STR_Requirement
+Receive-Job $STR_Requirement
 
 Disable-ScheduledTask "\Intelligent StandbyList Cleaner"
 Unblock-File -Path ".\Third-party\STR\SetTimerResolution.exe"
