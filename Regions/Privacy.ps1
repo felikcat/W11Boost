@@ -89,20 +89,29 @@ Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Policies\Microsoft\Windows\E
 ##+=+=
 
 
-##+=+= Disables Cloud Content features; stops automatic installation of advertised ("suggested") apps among others; called "Content Delivery Manager" in Windows 10.
+##+=+= Disables Cloud Content & Consumer Experience features; stops automatic installation of "suggested" apps, and Microsoft account notifications.
 
-# Disable Consumer Experience:
-# - In the start menu, programs that aren't installed ("suggestions") are gone.
-# - Microsoft account notifications are gone.
-Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\CloudContent' -ValueName 'DisableConsumerAccountStateContent' -Data '1' -Type 'Dword'
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\CloudContent' -ValueName 'DisableCloudOptimizedContent' -Data '1' -Type 'Dword'
 
-# Disables various suggested content.
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\CloudContent' -ValueName 'DisableConsumerAccountStateContent' -Data '1' -Type 'Dword'
+
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' -ValueName 'ContentDeliveryAllowed' -Data '0' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' -ValueName 'OemPreInstalledAppsEnabled' -Data '0' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' -ValueName 'PreInstalledAppsEnabled' -Data '0' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' -ValueName 'PreInstalledAppsEverEnabled' -Data '0' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' -ValueName 'RotatingLockScreenEnabled' -Data '0' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' -ValueName 'RotatingLockScreenOverlayEnabled' -Data '0' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' -ValueName 'SilentInstalledAppsEnabled' -Data '0' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' -ValueName 'SoftLandingEnabled' -Data '0' -Type 'Dword'
+
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' -ValueName 'SubscribedContent-338389Enabled' -Data '0' -Type 'Dword'
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' -ValueName 'SubscribedContent-338393Enabled' -Data '0' -Type 'Dword'
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' -ValueName 'SubscribedContent-353694Enabled' -Data '0' -Type 'Dword'
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' -ValueName 'SubscribedContent-353696Enabled' -Data '0' -Type 'Dword'
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' -ValueName 'SubscribedContent-88000326Enabled' -Data '0' -Type 'Dword'
+
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' -ValueName 'SystemPaneSuggestionsEnabled' -Data '0' -Type 'Dword'
+
 ##+=+=
 
 
