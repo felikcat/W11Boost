@@ -38,17 +38,14 @@ image:RSOP.png[]
 - Set a relevant compatibility mode for old programs requiring say, Windows XP mode.
 - Clear thumbnail cache if it ever corrupts.
 
-. Finding text inside files through Windows Search no longer works.
-
 . Microsoft Edge is assumed to not be the default browser; it will not automatically update (auto-updates still work if Edge is open).
 
-. Memory/RAM usage will be higher to reduce CPU usage and potential hitches/stuttering in video playback and games.
+. Memory/RAM usage will be higher to reduce: CPU usage and potential hitches/stuttering in video playback and games.
 
-== Requirements
-. Windows has to be activated; use a license key or run https://github.com/massgravel/Microsoft-Activation-Scripts[massgravel's MAS].
 
-. Windows Package Manager is installed and functional.
-- Test by opening PowerShell then run `winget`.
+== Instructions
+
+* Check if the Windows Package Manager is functional by running `winget` in PowerShell.
 
 .Fixing `winget` if it doesn't work.
 [%collapsible]
@@ -61,9 +58,6 @@ image:RSOP.png[]
 ** Open the Microsoft Store, then install "App Installer" through it.
 
 ====
-
-
-== Instructions
 
 . Download the https://github.com/felikcat/TuneUp11/releases[latest TuneUp11] and extract it.
 
@@ -211,7 +205,7 @@ TIP: Example gpedit.msc registry translation: +
 ** link://github.com/zodiacon/WindowsInternals[Windows Internals, Part 1, 7th Edition (unofficial) Tools]
 
 . link://www.microsoftpressstore.com/store/windows-internals-part-2-9780135462409[Windows Internals, Part 2, 7th Edition]
-** This can be viewed for free from link://en.wikipedia.org/wiki/Z-Library[Z-Library].
+** This can be viewed for free from the link://en.wikipedia.org/wiki/Z-Library[Z-Library].
 
 . link://github.com/MicrosoftDocs/windows-driver-docs/tree/staging/windows-driver-docs-pr[Windows Driver Documentation]
 

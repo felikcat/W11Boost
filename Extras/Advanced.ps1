@@ -50,9 +50,6 @@ $no_windows_security_systray = 1
 
 $no_family_safety = 1
 
-# If all displays are the same resolution and scaling factor, set $improved_hidpi to 1.
-$improved_hidpi = 0
-
 # 1: Only log events with warnings or errors will be recorded.
 $change_event_viewer_behavior = 1
 
@@ -94,7 +91,6 @@ excessive_mitigations = $excessive_mitigations
 file_history = $file_history
 fix_openssl_sha_crash = $fix_openssl_sha_crash
 geolocation = $geolocation
-improved_hidpi = $improved_hidpi
 less_game_stuttering = $less_game_stuttering
 no_audio_reduction = $no_audio_reduction
 no_blocked_files = $no_blocked_files
@@ -289,13 +285,6 @@ if ($reduce_mitigations)
     # Ensure "Data Execution Prevention" (DEP) only applies to operating system components, along with kernel-mode drivers.
     # Applying DEP to user-mode programs will slow or break them down, such as the original Deus Ex.
     bcdedit.exe /set nx Optin
-}
-
-if ($improved_hidpi)
-{
-    Set-PolicyFileEntry -Path $PREG_USER -Key 'Control Panel\Desktop' -ValueName 'EnablePerProcessSystemDPI' -Data '1' -Type 'Dword'
-
-    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\Control Panel\Desktop' -ValueName 'EnablePerProcessSystemDPI' -Data '1' -Type 'Dword'
 }
 
 if ($no_smartscreen)

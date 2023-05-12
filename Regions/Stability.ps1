@@ -56,11 +56,15 @@ winget.exe install Microsoft.VCRedist.2010.x86 -eh --accept-package-agreements -
 
 Disable-ScheduledTask "\Intelligent StandbyList Cleaner"
 Unblock-File -Path ".\Third-party\STR\SetTimerResolution.exe"
-Copy-Item ".\Third-party\STR" -Destination "$env:LOCALAPPDATA\Programs" -Recurse
+Copy-Item ".\Third-party\STR" -Destination "$env:LOCALAPPDATA\Programs\STR" -Recurse
 Start-Process -WorkingDirectory "$env:LOCALAPPDATA\Programs\STR" -FilePath "SetTimerResolution.exe" -Args "-install"
 
 ##+=+=
 
+
+# Disallow Windows throttling network traffic; it's a dated method of lowering CPU usage by the networking driver.
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile' -ValueName 'NetworkThrottlingIndex' -Data 'ffffffff' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile' -ValueName 'SystemResponsiveness' -Data '0' -Type 'Dword'
 
 # MemoryCompression: While enabled; increases CPU load to reduce I/O load and handle Out Of Memory situations more smoothly; akin to Linux's zRAM.
 # -> Its downside is worsened stuttering in video games.

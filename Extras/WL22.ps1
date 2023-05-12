@@ -45,5 +45,5 @@ $apps = @("Clipchamp.Clipchamp_yxz26nhyzhsrt", "Microsoft.Paint_$ID",
 "Microsoft.WindowsNotepad_$ID")
 
 for ($i = 0; $i -lt $apps.length; $i++) {
-    winget.exe uninstall $apps[$i] --exact --silent --accept-source-agreements --force --disable-interactivity
+    winget.exe uninstall $apps[$i] --exact --silent --accept-source-agreements
 }
