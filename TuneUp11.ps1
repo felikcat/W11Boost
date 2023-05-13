@@ -254,11 +254,3 @@ reg.exe import ".\Registry\Old Context Menus.reg"
 # If this directory was non-existent before running TuneUp11, then add the "Hidden" attribute to line up with default behavior.
 attrib.exe +H "$env:windir\System32\GroupPolicy"
 gpupdate.exe /force
-
-Add-Type -AssemblyName PresentationCore,PresentationFramework
-[System.Windows.MessageBox]::Show(
-        (new-object System.Windows.Window -Property @{TopMost = $True}),
-        'Reboot Windows to fully apply changes.
-
-Pressing OK will only close this dialog.',
-        'TuneUp11 has finished.')
