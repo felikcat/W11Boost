@@ -11,6 +11,9 @@ endif::[]
 
 == About
 
+TuneUp11 was created out of disdain for custom Windows ISOs and the various different optimizing scripts breaking programs I used. +
+I also thought other optimizers were too complex for what they did, and had a hellish amount of lines of code.
+
 NOTE: *Known alternatives:* O&O ShutUp10, W10Privacy, BloatyNosy, Wintoys, ChrisTitusTech's winutil, Pointstone AntiTrack, Debotnet, Debloat Windows 10, Atlas OS, Spybot Anti-Beacon, and Winrice.
 
 - What TuneUp11 by default specializes in:
@@ -65,7 +68,7 @@ TIP: Login to the Microsoft Store before using `Install_Xbox_Minimal.bat`, other
 To also get the Game Bar, install the following link://www.microsoft.com/store/productId/9NZKPSTSNW4P[here] then link://www.microsoft.com/store/productId/9NBLGGH537C2[here].
 
 * `Install_Xbox_Minimal.bat`
-- Installs only what's required to use Xbox Controllers (GUI/interface not included, get it link://www.microsoft.com/store/productId/9NBLGGH30XJ3[here]), Microsoft's PC Game Pass, and specific games like Forza Horizon 4 & 5.
+- Installs only what's required to support Xbox Controllers (GUI/interface not included, get it link://www.microsoft.com/store/productId/9NBLGGH30XJ3[here]), Microsoft's PC Game Pass, and specific games such as Forza Horizon 4 & 5.
 
 
 * `Advanced.ps1`
