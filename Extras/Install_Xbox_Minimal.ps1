@@ -1,5 +1,5 @@
 if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
-	Write-Warning "ERROR: IXM.ps1 -> Requires Administrator!"
+	Write-Warning "ERROR: Install_Xbox_Minimal.ps1 -> Requires Administrator!"
 	Break
 }
 

@@ -34,35 +34,26 @@ Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVer
 
 ##+=+= Make automatic Windows updates tolerable.
 
-# Hold back updates if Microsoft is aware they cause compatibility issues.
+# Block updates that Microsoft deems as causing compatibility issues.
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate' -ValueName 'DisableWUfBSafeguards' -Data '0' -Type 'Dword'
 
 # Opt out out of "being the first to get the latest non-security updates".
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\WindowsUpdate\UX\Settings' -ValueName 'IsContinuousInnovationOptedIn' -Data '0' -Type 'Dword'
 
-# Notify for downloading and installing Windows updates.
+# Notify to download then install Windows updates; no automatic Windows updates.
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU' -ValueName 'AUOptions' -Data '2' -Type 'Dword'
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate' -ValueName 'AllowAutoWindowsUpdateDownloadOverMeteredNetwork' -Data '0' -Type 'Dword'
 
-# Make restarts never forced.
+# Never force restarts.
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU' -ValueName 'NoAutoUpdate' -Data '0' -Type 'Dword'
 
-# Disable feedback reminders
-Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Siuf\Rules' -ValueName 'NumberOfSIUFInPeriod' -Data '1' -Type 'Dword'
-Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Siuf\Rules' -ValueName 'PeriodInNanoSeconds' -Data '0' -Type 'Dword'
+# Disable feedback reminders.
+Set-PolicyFileEntry -Path $PREG_USER -Key 'SOFTWARE\Microsoft\Siuf\Rules' -ValueName 'NumberOfSIUFInPeriod' -Data '0' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_USER -Key 'SOFTWARE\Microsoft\Siuf\Rules' -ValueName 'PeriodInNanoSeconds' -Data '0' -Type 'Dword'
 
 # Prompt to install updates every Sunday at 03:00/3:00AM.
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU' -ValueName 'ScheduledInstallDay' -Data '1' -Type 'Dword'
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU' -ValueName 'ScheduledInstallTime' -Data '3' -Type 'Dword'
-
-Disable-ScheduledTask -TaskName "\Microsoft\Windows\InstallService\ScanForUpdates"
-Disable-ScheduledTask -TaskName "\Microsoft\Windows\InstallService\ScanForUpdatesAsUser"
-Disable-ScheduledTask -TaskName "\Microsoft\Windows\UpdateOrchestrator\Schedule Scan Static Task"
-Disable-ScheduledTask -TaskName "\Microsoft\Windows\UpdateOrchestrator\Schedule Scan"
-Disable-ScheduledTask -TaskName "\Microsoft\Windows\UpdateOrchestrator\UpdateModelTask"
-Disable-ScheduledTask -TaskName "\Microsoft\Windows\UpdateOrchestrator\USO_UxBroker"
-Disable-ScheduledTask -TaskName "\Microsoft\Windows\WindowsUpdate\Scheduled Start"
-Disable-ScheduledTask -TaskName "\Microsoft\Windows\WindowsUpdate\sih"
 
 ##+=+=
 

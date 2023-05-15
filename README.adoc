@@ -11,36 +11,31 @@ endif::[]
 
 == About
 
-[%collapsible]
-====
 NOTE: *Known alternatives:* O&O ShutUp10, W10Privacy, BloatyNosy, Wintoys, ChrisTitusTech's winutil, Pointstone AntiTrack, Debotnet, Debloat Windows 10, Atlas OS, Spybot Anti-Beacon, and Winrice.
 
-- By default, TuneUp11 in comparison to alternatives:
-** Breaks the least amount of programs or apps.
-** No security compromises.
-** Easiest to use.
-** Meant for the latest stable Windows 11, but technically supports Windows 10 v1709 and newer.
-*** Expect odd issues if not using the latest Windows 11. TuneUp11 enables features that are beneficial overall, yet problematic in earlier versions of Windows.
-** Fully open-source except for 'https://www.virustotal.com/gui/file/f4a33deebc499ae70e479ba75b6161cae9e1626d852af7a40b96c7d69207e607?nocache=1[PolFileEditor.dll]' and 'https://www.virustotal.com/gui/file/3d5b4d790ffe6d8f0c16b4ddc4dc1b1ed93388c1cb1526083ad2d367309d805f[SetTimerResolution.exe]'.
+- What TuneUp11 by default specializes in:
+** No breaking programs or apps.
+** Increases security instead of compromising on it.
+** Increased privacy and consistency of game or real-time program performance.
+** Fully open-source.
+*** Exceptions: 'https://www.virustotal.com/gui/file/f4a33deebc499ae70e479ba75b6161cae9e1626d852af7a40b96c7d69207e607?nocache=1[PolFileEditor.dll]' and 'https://www.virustotal.com/gui/file/3d5b4d790ffe6d8f0c16b4ddc4dc1b1ed93388c1cb1526083ad2d367309d805f[SetTimerResolution.exe]'.
 
-** Changes are tunneled through the Group Policy Editor, which has many advantages:
-*** Windows Update does not revert any of TuneUp11's changes.
-*** Elevating to TrustedInstaller is no longer needed, removing the need for NSudo.
-*** Changes by TuneUp11 can be viewed from a graphical interface via `rsop.msc`. +
+** Changes are tunneled through the Group Policy Editor, therefore:
+*** Windows Update does not revert TuneUp11's changes.
+*** TuneUp11's changes can be viewed from a graphical interface via `rsop.msc`. +
 image:RSOP.png[]
 
-====
 
 == The catches
 . Windows Home editions are not supported; see https://github.com/Fleex255/PolicyPlus#special-considerations-for-use-on-home-editions[this excerpt] from PolicyPlus on why.
 
-. You have to do the following manually:
-- Set a relevant compatibility mode for old programs requiring say, Windows XP mode.
-- Clear thumbnail cache if it ever corrupts.
-
 . Microsoft Edge is assumed to not be the default browser; it will not automatically update (auto-updates still work if Edge is open).
 
 . Memory/RAM usage will be higher to reduce: CPU usage and potential hitches/stuttering in video playback and games.
+
+. You have to do the following manually:
+- Set a relevant compatibility mode for old programs requiring say, Windows XP mode.
+- Clear thumbnail cache if it ever corrupts.
 
 
 == Instructions
@@ -52,7 +47,7 @@ image:RSOP.png[]
 ====
 * For Windows 11, open the Microsoft Store, then update "App Installer" through it.
 
-* For Windows 10 LTSC 2019 or 2022, run in Command Prompt as Administrator to install `winget`:
+* For Windows 10 LTSC 2019/2021, run in Command Prompt as Administrator to install `winget`:
 ** `wsreset -i`
 ** If the Microsoft store doesn't show up after this command is complete, reboot.
 ** Open the Microsoft Store, then install "App Installer" through it.
@@ -66,12 +61,13 @@ image:RSOP.png[]
 . Reboot after TuneUp11 is finished to see its changes in action.
 
 == Extras
-. `W11_LTSC_2022.bat`
-** Uninstalls a lot of default apps to replicate what Windows 10 LTSC 2022 includes by default.
-*** *Exceptions*: App Installer, Store Experience Host, Windows Store, Windows Terminal, Xbox Game Speech Window. +
-Microsoft Photos, Windows Clock, Snipping Tool.
+* `Install_Xbox_Minimal.bat`
+- Installs only what's required to use Xbox Controllers (GUI/interface not included, get it link://www.microsoft.com/store/productId/9NBLGGH30XJ3[here]), Microsoft's PC Game Pass, and specific games like Forza Horizon 4 & 5.
 
-. `Advanced.ps1`
+TIP: Login to the Microsoft Store before using this script, otherwise it will not work. +
+To also get the Game Bar, install the following link://www.microsoft.com/store/productId/9NZKPSTSNW4P[here] then link://www.microsoft.com/store/productId/9NBLGGH537C2[here].
+
+* `Advanced.ps1`
 ** Contains a lot of extra features for those that know what they're doing.
 
 ** How to use:
@@ -79,30 +75,18 @@ Microsoft Photos, Windows Clock, Snipping Tool.
 - Open `Advanced.ps1` in a text editor or IDE of your choosing to configure its options.
 - Run `Advanced.ps1` as Administrator.
 
-. `Install_Xbox_Minimal.bat`
-- *Only relevant if `W11_LTSC_2022.bat` was used*.
 
-- Login to the Microsoft Store before using this script, otherwise it will not work.
-
-*** Installs only what's required to use Xbox Controllers (interface not included, get it link://www.microsoft.com/store/productId/9NBLGGH30XJ3[here]), Game Pass, and specific games like Forza Horizon 4 & 5.
-
-- To also get the Game Bar, install the following link://www.microsoft.com/store/productId/9NZKPSTSNW4P[here] and link://www.microsoft.com/store/productId/9NBLGGH537C2[here].
-
-
-== Recommendations.
-
-. Do not replace built-in Windows programs.
+== Recommendations
 
 === BIOS
-* Enable the following
+* *Enable the following:*
 . I/O APIC (IOAPIC 24-119 Entries)
-. Above 4G Decoding
-. Resizable BAR.
+. Above 4G Decoding and Resizable BAR.
 ** On ASRock motherboards: C.A.M. (Clever Access Memory)
 ** This is incompatible with Windows installed on an MBR partition; if Windows can no longer boot, this setting caused it.
 . HPET (High Precision Event Timer)
 
-* Disable the following options in your motherboard's BIOS:
+* *Disable the following:*
 . XHCI Hands Off
 . USB Legacy
 ** link://techcommunity.microsoft.com/t5/microsoft-usb-blog/reasons-to-avoid-companion-controllers/ba-p/270710[Why disable these two?] +
@@ -111,48 +95,20 @@ Note: if a USB is no longer bootable after these two changes, temporarily turn t
 
 === Windows
 
-. Windows Settings -> Gaming -> Enable `Game Mode`
-. Windows Settings -> Graphics -> Change default graphics settings -> Enable `Hardware-accelerated GPU scheduling`, and `Optimizations for windowed games`.
-
-. Install all optional updates through Windows Update; it can include device drivers.
+. Windows Settings:
+- -> Gaming -> Enable `Game Mode`
+- -> Graphics -> Change default graphics settings -> Enable `Hardware-accelerated GPU scheduling`, and `Optimizations for windowed games`.
 
 . Auto-detect and install link://www.amd.com/en/support[AMD drivers]. +
 Auto-detect and install link://www.intel.com/content/www/us/en/support/detect.html[Intel's drivers].
 * This will utilize their drivers instead of the generic drivers Microsoft provides, meaning better performance and lower DPC latency.
 
+. Install all optional updates through Windows Update; it can include device drivers.
 
-=== Replace problematic programs
+. Remove every program you installed and work your way up to see what programs you really need.
+- Use what Windows already includes instead of third-party programs. Keep it simple to reduce being impacted by https://www.bleepingcomputer.com/news/security/hackers-compromise-3cx-desktop-app-in-a-supply-chain-attack/[supply chain attacks] and to prevent causing Windows additional issues.
 
-This contains a long but important list. Be sure to check it if you're not sure.
-[%collapsible]
-====
-TIP: Use link:https://www.revouninstaller.com/products/revo-uninstaller-pro/[Revo Uninstaller] (moderate scan mode) to remove these programs. +
-Why? Slower performance and can potentially cause BSODs/crashes and anti-cheat problems:
-
-. Problematic RGB software
-* ASUS Armoury Crate
-* CORSAIR iCUE
-* ASRock Polychrome RGB
-* Gigabyte RGBFusion
-* TT RGB Plus
-* Razer Synapse
-* Sapphire TriXX
-* MSI Dragon Center
-* HyperX NGENUITY
-* Logitech G HUB
-** Do not remove G HUB if using a Logitech steering wheel!
-* NZXT CAM
-* Ducky RGB and other keyboard RGB control software.
-
-. Problematic virtual machine software:
-- VMWare Workstation
-- VirtualBox
-
-. Alternatives:
-* RGB configuration: link:https://openrgb.org/[OpenRGB]
-* GPU overclocking & fan control: link:https://www.msi.com/Landing/afterburner/graphics-cards[MSI Afterburner]
-
-====
+. Check if there's enterprise versions of manufacturer software, such as replacing Lenovo Vantage with Lenovo Commercial Vantage.
 
 
 == Appendices
@@ -168,8 +124,6 @@ Why? Slower performance and can potentially cause BSODs/crashes and anti-cheat p
 __
 
 * `reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\EXAMPLE" /v "Start" /t REG_DWORD /d 4 /f` is preferred over using `sc.exe config EXAMPLE start=disabled` since Windows rejects this request depending on the service.
-
-* MMCSS (Multimedia Class Scheduler) doesn't exist in Windows 10 LTSC 2022 and newer.
 
 * Non-volatile registry keys usually do not self-regenerate themselves if their key doesn't exist.
 ** If the purpose is to revert back to defaults, manually set the default value instead.
