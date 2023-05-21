@@ -31,7 +31,7 @@ image:RSOP.png[]
 == The catches
 . Memory/RAM usage is higher to reduce CPU usage and potential hitches/stuttering in video playback and games.
 
-. Thumbnail cache is never cleared. Corruption is rare; run the `Disk Cleanup` program if this happens.
+. Thumbnail cache is never cleared. Thumbnail corruption is rare; run the `Disk Cleanup` program if this happens.
 
 
 == Instructions
