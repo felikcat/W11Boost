@@ -41,12 +41,17 @@ reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\SysMain" /v "S
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management' -ValueName 'LargeSystemCache' -Data '0' -Type 'Dword'
 
 # Allow Phone -> PC linking on this device.
+# NOTE 1: Allows advertised apps in the start menu on Windows 11; StartAllBack is used to side-step this problem.
+# NOTE 2: 'DisableWindowsConsumerFeatures' = 1 only applies to Enterprise and Education editions of Windows.
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\System' -ValueName 'EnableMmx' -Data '1' -Type 'Dword'
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\CloudContent' -ValueName 'DisableWindowsConsumerFeatures' -Data '0' -Type 'Dword'
 
 # Process Lasso or manually setting a non-battery saving power profile is preferred instead.
 # Don't make the power saving profiles less helpful.
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SYSTEM\CurrentControlSet\Control\Power\PowerThrottling' -ValueName 'PowerThrottlingOff' -Data '0' -Type 'Dword'
+
+# Old versions of the Intel PROSet software set this to 0, breaking Windows' internet connectivity check.
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SYSTEM\CurrentControlSet\Services\NlaSvc\Parameters\Internet' -ValueName 'EnableActiveProbing' -Data '1' -Type 'Dword'
 
 # Use sane defaults for these sensitive timer related settings.
 bcdedit.exe /deletevalue tscsyncpolicy
@@ -70,3 +75,14 @@ Set-NetAdapterBinding -Name '*' -DisplayName 'Internet Protocol Version 6 (TCP/I
 
 # Programs that rely on 8.3 filenames from the DOS-era will break if this is disabled.
 fsutil.exe behavior set disable8dot3 2
+
+# Windows' default shutdown time-out for programs; OS asks then waits 5000ms for programs to gracefully exit.
+reg.exe delete "HKEY_CURRENT_USER\Control Panel\Desktop\WaitToKillAppTimeOut" /f
+reg.exe delete "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\HungAppTimeout" /f
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SYSTEM\CurrentControlSet\Control' -ValueName 'WaitToKillServiceTimeout' -Data '5000' -Type 'String'
+
+# https://www.intel.com/content/www/us/en/developer/articles/troubleshooting/openssl-sha-crash-bug-requires-application-update.html
+# Crash fix for programs using OpenSSL 1.0.2k (Jan 2017) or older; only relevant to 10th gen and newer Intel CPUs.
+if ($env:PROCESSOR_IDENTIFIER -match 'GenuineIntel') {
+    [Environment]::SetEnvironmentVariable("OPENSSL_ia32cap", "~0x200000200000000", "Machine")
+}

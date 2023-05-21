@@ -51,9 +51,8 @@ Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SYSTEM\CurrentControlSet\Control\S
 
 ##+=+= Enforce 0.5ms (the minimum) timer resolution.
 
-# --source winget prevents error 0x8a150044 if the Windows Store isn't reachable.
 $STR_Requirement = Start-Job {
-    winget.exe install Microsoft.VCRedist.2010.x86 -eh --accept-package-agreements --accept-source-agreements --source winget --force
+    winget.exe install Microsoft.VCRedist.2010.x86 -s winget -eh --accept-package-agreements --accept-source-agreements --force
 }
 Wait-Job $STR_Requirement
 Receive-Job $STR_Requirement
@@ -62,16 +61,7 @@ Disable-ScheduledTask "\Intelligent StandbyList Cleaner"
 Unblock-File -Path ".\Third-party\STR\SetTimerResolution.exe"
 Copy-Item ".\Third-party\STR" -Destination "$env:LOCALAPPDATA\Programs\STR" -Recurse
 Start-Process -WorkingDirectory "$env:LOCALAPPDATA\Programs\STR" -FilePath "SetTimerResolution.exe" -Args "-install"
-
 ##+=+=
-
-
-# Lowers RAM usage and gets rid of advertised apps in the start menu.
-$Better_Shell = Start-Job {
-    winget.exe install StartIsBack.StartAllBack -eh --accept-package-agreements --accept-source-agreements --source winget --force
-}
-Wait-Job $Better_Shell
-Receive-Job $Better_Shell
 
 
 # Disallow Windows throttling network traffic; it's a dated method of lowering CPU usage by the networking driver.

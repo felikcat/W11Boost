@@ -1,24 +1,6 @@
 $PREG_USER = "$env:windir\System32\GroupPolicy\User\registry.pol"
 $PREG_MACHINE = "$env:windir\System32\GroupPolicy\Machine\registry.pol"
-
-function Set-Recommended-Ethernet-Tweaks {
-    # Can reduce time taken to establish a connection, and prevent drop-outs.
-    # Drop-outs were the case with Intel I225-V revision 1 to 2, but not 3.
-    Set-NetAdapterAdvancedProperty -Name '*' -DisplayName 'Wait for Link' -RegistryValue 0
-
-    # TCP is to be reliable under bad network conditions, unlike UDP. Don't make it more-so like UDP.
-    Set-NetTCPSetting -SettingName InternetCustom -Timestamps Enabled
-}
-
-function Disable-Ethernet-Power-Saving {
-    $properties = @("Advanced EEE", "Auto Disable Gigabit", "Energy Efficient Ethernet",
-        "Gigabit Lite", "Green Ethernet", "Power Saving Mode",
-        "Selective Suspend", "ULP", "Ultra Low Power Mode")
-    # Disable features that can cause random packet loss/drop-outs.
-    for ($i = 0; $i -lt $properties.length; $i++) {
-        Set-NetAdapterAdvancedProperty -Name '*' -DisplayName $properties[$i] -RegistryValue 0
-    }
-}
+$WIN32_BUILDNUMBER = (Get-WmiObject Win32_OperatingSystem).BuildNumber
 
 # Delete ExploitGuard ProcessMitigations for a given key in the registry;
 # if no other settings exist under the specified key, the key is deleted as well.

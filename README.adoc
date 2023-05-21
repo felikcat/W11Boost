@@ -11,15 +11,14 @@ endif::[]
 
 == About
 
-TuneUp11 was created out of disdain for custom Windows ISOs and the various different optimizing scripts breaking programs I used. +
-I also thought other optimizers were too complex for what they did, and had a hellish amount of lines of code.
+TuneUp11 was created out of disdain for custom Windows ISOs and the various different optimizing scripts breaking programs I used.
 
 NOTE: *Known alternatives:* O&O ShutUp10, W10Privacy, BloatyNosy, Wintoys, ChrisTitusTech's winutil, Pointstone AntiTrack, Debotnet, Debloat Windows 10, Atlas OS, Spybot Anti-Beacon, and Winrice.
 
-- What TuneUp11 by default specializes in:
+- What TuneUp11 specializes in:
 ** No breaking programs or apps.
-** Increases security instead of compromising on it.
 ** Increased privacy and consistency of game or real-time program performance.
+** Increases security instead of compromising on it.
 ** Fully open-source.
 *** Exceptions: 'https://www.virustotal.com/gui/file/f4a33deebc499ae70e479ba75b6161cae9e1626d852af7a40b96c7d69207e607?nocache=1[PolFileEditor.dll]' and 'https://www.virustotal.com/gui/file/3d5b4d790ffe6d8f0c16b4ddc4dc1b1ed93388c1cb1526083ad2d367309d805f[SetTimerResolution.exe]'.
 
@@ -30,15 +29,9 @@ image:RSOP.png[]
 
 
 == The catches
-. Windows Home editions are not supported; see https://github.com/Fleex255/PolicyPlus#special-considerations-for-use-on-home-editions[this excerpt] from PolicyPlus on why.
+. Memory/RAM usage is higher to reduce CPU usage and potential hitches/stuttering in video playback and games.
 
-. Microsoft Edge is assumed to not be the default browser; it will not automatically update (auto-updates still work if Edge is open).
-
-. Memory/RAM usage will be higher to reduce: CPU usage and potential hitches/stuttering in video playback and games.
-
-. You have to do the following manually:
-- Set a relevant compatibility mode for old programs requiring say, Windows XP mode.
-- Clear thumbnail cache if it ever corrupts.
+. Thumbnail cache is never cleared. Corruption is rare; run the `Disk Cleanup` program if this happens.
 
 
 == Instructions
@@ -98,19 +91,10 @@ Note: if a USB is no longer bootable after these two changes, temporarily turn t
 
 
 === Windows
-
-. Windows Settings:
-- -> Gaming -> Enable `Game Mode`
-- -> Graphics -> Change default graphics settings -> Enable `Hardware-accelerated GPU scheduling`, and `Optimizations for windowed games`.
-
-. Auto-detect and install link://www.amd.com/en/support[AMD drivers]. +
-Auto-detect and install link://www.intel.com/content/www/us/en/support/detect.html[Intel's drivers].
-* This will utilize their drivers instead of the generic drivers Microsoft provides, meaning better performance and lower DPC latency.
-
-. Install all optional updates through Windows Update; it can include device drivers.
-
 . Remove every program you installed and work your way up to see what programs you really need.
 - Use what Windows already includes instead of third-party programs. Keep it simple to reduce being impacted by https://www.bleepingcomputer.com/news/security/hackers-compromise-3cx-desktop-app-in-a-supply-chain-attack/[supply chain attacks] and to prevent causing Windows additional issues.
+
+. Install all optional updates through Windows Update; it can include device drivers.
 
 . Check if there's enterprise versions of manufacturer software, such as replacing Lenovo Vantage with Lenovo Commercial Vantage.
 
@@ -121,11 +105,10 @@ Auto-detect and install link://www.intel.com/content/www/us/en/support/detect.ht
 [%collapsible]
 ====
 
-* Required software:
+* *Required software:*
 . `winget install Microsoft.WindowsADK -eh`
 . `scoop install git; scoop bucket add sysinternals; scoop install procmon`
 
-__
 
 * `reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\EXAMPLE" /v "Start" /t REG_DWORD /d 4 /f` is preferred over using `sc.exe config EXAMPLE start=disabled` since Windows rejects this request depending on the service.
 
@@ -152,6 +135,12 @@ TIP: Example gpedit.msc registry translation: +
 . `(Get-WindowsOptionalFeature -Online -FeatureName '*') | Format-Table -Autosize`
 - List all from "Settings > Apps > Optional features"/"Add an optional feature":
 . `(Get-WindowsCapability -Online -Name '*') | Format-Table -Autosize`
+
+
+* https://learn.microsoft.com/en-us/windows/package-manager/winget/install#options[`winget install` command line switches/options].
+- https://learn.microsoft.com/en-us/windows/package-manager/winget/uninstall#options[The same but for `winget uninstall`].
+
+* `-s winget` prevents Error 0x8a150044 if the Windows Store isn't currently reachable.
 
 ====
 

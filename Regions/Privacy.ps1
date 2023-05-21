@@ -134,9 +134,10 @@ Disable-ScheduledTask -TaskName "\Microsoft\Windows\Customer Experience Improvem
 
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\Windows\Windows Error Reporting' -ValueName 'AutoApproveOSDumps' -Data '0' -Type 'Dword'
 
-# 1 = Minimum level; "Always ask before sending data: Windows prompts users for consent to send reports."
+# 1 = Minimum consent level; "Always ask before sending data: Windows prompts users for consent to send reports."
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\Windows\Windows Error Reporting' -ValueName 'DefaultConsent' -Data '1' -Type 'Dword'
-# Don't ignore our custom consent settings.
+
+# Don't allow fully ignoring our custom consent settings.
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\Windows\Windows Error Reporting' -ValueName 'DefaultOverrideBehavior' -Data '0' -Type 'Dword'
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\Windows\Windows Error Reporting' -ValueName 'DontSendAdditionalData' -Data '1' -Type 'Dword'
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\Windows\Windows Error Reporting' -ValueName 'LoggingDisabled' -Data '1' -Type 'Dword'
@@ -156,15 +157,18 @@ Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\PCHeal
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\Windows Error Reporting\ExcludedApplications' -ValueName '*' -Data '*' -Type 'String'
 
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Windows Error Reporting\QueueReporting"
+
+# Disable 'Windows Error Reporting' service
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SYSTEM\CurrentControlSet\Services\WerSvc' -ValueName 'Start' -Data '4' -Type 'Dword'
 ##+=+=
 
-# Windows Error Reporting
-reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\WerSvc" /v "Start" /t REG_DWORD /d 4 /f
-# Connected User Experiences and Telemetry
-reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\DiagTrack" /v "Start" /t REG_DWORD /d 4 /f
-# Diagnostic Policy Service
-# Logs tons of information to be sent off and analyzed by Microsoft, and in some cases caused noticeable performance slowdown.
-reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\DPS" /v "Start" /t REG_DWORD /d 4 /f
+
+# Disable 'Connected User Experiences and Telemetry' service
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SYSTEM\CurrentControlSet\Services\DiagTrack' -ValueName 'Start' -Data '4' -Type 'Dword'
+
+# Disable 'Diagnostic Policy Service'
+# -> Logs tons of information to be sent off and analyzed by Microsoft, and in some cases caused noticeable performance slowdown.
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SYSTEM\CurrentControlSet\Services\DPS' -ValueName 'Start' -Data '4' -Type 'Dword'
 
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Feedback\Siuf\DmClient"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Feedback\Siuf\DmClientOnScenarioDownload"

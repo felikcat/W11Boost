@@ -1,28 +1,27 @@
 # Disables Sticky, Filter, and Toggle Keys.
 $avoid_key_annoyances = 1
 
-# 1: Ensures Windows' audio ducking/attenuation is disabled.
-$no_audio_reduction = 0
+# 0: If NVIDIA ShadowPlay, AMD ReLive, or OBS Studio is used instead.
+$game_dvr = 0
 
-# If NVIDIA ShadowPlay, AMD ReLive, or OBS Studio is used instead.
-$no_game_dvr = 1
+# 0: Disables Biometric services meant for fingerprint readers, which runs even if there's no Biometric devices.
+$biometrics = 1
 
 # Resets all network interfaces back to their manufacturer's default settings.
 # Recommended before applying our network tweaks, as it's a "clean slate".
 $reset_network_interface_settings = 1
 
-# 1 is recommended.
 # System Restore problems:
-# - Cannot restore backups from previous versions of Windows; can't revert Windows updates with System Restore.
+# - Cannot restore backups from previous versions of Windows.
+# - Cannot revert Windows updates.
 # - Will revert other personal files (program settings and installations).
-$no_system_restore = 1
+$allow_system_restore = 1
 
-# Windows' File History:
-# - Is unreliable with creating snapshots of files.
-# - Use Restic or TrueNAS with Syncthing for backups instead.
+# File History will fail you when it's needed.
+# - Alternative: Syncthing on this PC and a PC running either TrueNAS or Unraid.
 $file_history = 0
 
-# 0: Disables GPS services, which always run even if there's no GPS hardware installed.
+# 0: Disables GPS services, which run even if a GPS isn't installed.
 $geolocation = 1
 
 # Breaks NVIDIA Control Panel and CPU usage in the Task Manager purposefully;
@@ -31,42 +30,46 @@ $geolocation = 1
 # See real CPU usage: https://systeminformer.sourceforge.io/
 $less_game_stuttering = 1
 
-# 1: Prevents random packet loss/drop-outs in exchange for a higher battery drain.
-$no_ethernet_power_saving = 1
+# 0: Prevents random packet loss/drop-outs in exchange for higher battery drain.
+$ethernet_power_saving = 0
 
-# Requires Intel 11th gen / AMD Zen 3 or newer CPUs; not compatible with 'reduce_mitigations = 1'.
-$excessive_mitigations = 0
+# 0: Relevant to disable smartscreen if you use an alternative antivirus.
+$defender_smartscreen = 1
 
-# 1: Relevant to disable smartscreen if you use an alternative antivirus.
-$no_smartscreen = 1
-
-# 1: Reduces stuttering in Hogwarts Legacy, but lowers Windows' overall security;
-# -> You must replace Windows Defender with Kaspersky Free which has its own separate virtualization security.
+# 1: Reduces stuttering in some games (Hogwarts Legacy), but lowers Windows' overall security;
+# -> You must replace Windows Defender with Kaspersky Free; Kaspersky has its own separate virtualization security.
 # -> The Vanguard, ESEA, and Faceit anti-cheats will complain about "CFG" being off; enable that yourself if needed.
 $reduce_mitigations = 0
 
-# SecurityHealthSystray.exe is redundant if Windows Defender isn't used.
-$no_windows_security_systray = 1
+# 0: Recommended if Windows Defender isn't used.
+$windows_security_systray = 1
 
-$no_family_safety = 1
+# 0: Disables parental controls, which seemingly can't be used without a Microsoft account.
+$family_safety = 0
 
 # 1: Only log events with warnings or errors will be recorded.
 $change_event_viewer_behavior = 1
-
-# https://www.intel.com/content/www/us/en/developer/articles/troubleshooting/openssl-sha-crash-bug-requires-application-update.html
-# Potentially reduces OpenSSL's security to increase compatibility with older OpenSSL on 10th gen Intel CPUs and newer.
-$fix_openssl_sha_crash = 1
 
 # If having to manually unblock files you download is intolerable, use $no_blocked_files 1.
 $no_blocked_files = 0
 
 # Helps with not getting tricked into opening malware and makes Windows less annoying for a power user.
-$no_hidden_files = 1
+$show_hidden_files = 1
 
-$no_windows_search_indexing = 1
+# 0: 'Everything' will be installed to be used as the alternative search indexer.
+# -> The Windows Search Index is prone to causing sudden declines in performance, especially on slow hard drives (HDDs).
+$windows_search_indexing = 0
+
+# Stops Microsoft Edge from wasting CPU cycles and bandwidth while closed.
+$automatic_microsoft_edge_updates = 1
+
+# 0: Manually set compatibility modes for programs requiring say Windows XP mode.
+# Potential performance and reliability benefits from forcing this to be manual (compatibility modes enabled by you only).
+$automated_compatibility = 0
 
 
-##+=+= Initialize
+
+##+=+= END OF OPTIONS ||-> Initialize
 if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]"Administrator"))
 {
     Write-Warning "ERROR: Advanced.ps1 -> Requires Administrator!"
@@ -85,28 +88,83 @@ Clear-Host
 Write-Output "
 ==== Current settings ====
 
+allow_system_restore = $allow_system_restore
+automated_compatibility = $automated_compatibility
+automatic_microsoft_edge_updates = $automatic_microsoft_edge_updates
 avoid_key_annoyances = $avoid_key_annoyances
+biometrics = $biometrics
 change_event_viewer_behavior = $change_event_viewer_behavior
-excessive_mitigations = $excessive_mitigations
+defender_smartscreen = $defender_smartscreen
+ethernet_power_saving = $ethernet_power_saving
 file_history = $file_history
-fix_openssl_sha_crash = $fix_openssl_sha_crash
+game_dvr = $game_dvr
 geolocation = $geolocation
 less_game_stuttering = $less_game_stuttering
-no_audio_reduction = $no_audio_reduction
 no_blocked_files = $no_blocked_files
-no_ethernet_power_saving = $no_ethernet_power_saving
-no_game_dvr = $no_game_dvr
-no_hidden_files = $no_hidden_files
-no_smartscreen = $no_smartscreen
-no_system_restore = $no_system_restore
-no_windows_security_systray = $no_windows_security_systray
 reduce_mitigations = $reduce_mitigations
-no_windows_search_indexing = $no_windows_search_indexing
+show_hidden_files = $show_hidden_files
+windows_search_indexing = $windows_search_indexing
+windows_security_systray = $windows_security_systray
 "
 Pause
 
-# The Windows Search Index is prone to causing sudden declines in performance.
-if ($no_windows_search_indexing)
+if (!$biometrics)
+{
+    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Biometrics' -ValueName 'Enabled' -Data '0' -Type 'Dword'
+    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SYSTEM\CurrentControlSet\Services\WbioSrvc' -ValueName 'Start' -Data '4' -Type 'Dword'
+}
+
+if (!$automated_compatibility)
+{
+    # Disable "Program Compatibility Assistant".
+    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -ValueName 'DisablePCA' -Data '1' -Type 'Dword'
+
+    # Disable "Application Compatibility Engine".
+    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -ValueName 'DisableEngine' -Data '1' -Type 'Dword'
+
+    # Disable "SwitchBack Compatibility Engine".
+    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -ValueName 'SbEnable' -Data '0' -Type 'Dword'
+
+    # Disable user Steps Recorder.
+    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -ValueName 'DisableUAR' -Data '1' -Type 'Dword'
+
+    # Disable "Remove Program Compatibility Property Page".
+    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -ValueName 'DisablePropPage' -Data '0' -Type 'Dword'
+
+    # Disable "Inventory Collector".
+    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -ValueName 'DisableInventory' -Data '1' -Type 'Dword'
+
+    # Disable 'Program Compatibility Assistant' service
+    reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\PcaSvc" /v "Start" /t REG_DWORD /d 4 /f
+
+    Disable-ScheduledTask -TaskName "\Microsoft\Windows\Application Experience\Microsoft Compatibility Appraiser"
+    Disable-ScheduledTask -TaskName "\Microsoft\Windows\Application Experience\PcaPatchDbTask"
+    Disable-ScheduledTask -TaskName "\Microsoft\Windows\Application Experience\ProgramDataUpdater"
+}
+
+if (!$automatic_microsoft_edge_updates)
+{
+    # Disable opening Edge on Windows startup: for the Chromium version.
+    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Edge' -ValueName 'StartupBoostEnabled' -Data '0' -Type 'Dword'
+
+    # Disable opening Edge on Windows startup: for the legacy version.
+    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\MicrosoftEdge\Main' -ValueName 'AllowPrelaunch' -Data '0' -Type 'Dword'
+
+    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\MicrosoftEdge\TabPreloader' -ValueName 'AllowTabPreloading' -Data '0' -Type 'Dword'
+
+    # Do not auto-update Microsoft Edge while it's closed.
+    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SYSTEM\CurrentControlSet\Services\MicrosoftEdgeElevationService' -ValueName 'Start' -Data '4' -Type 'Dword'
+    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SYSTEM\CurrentControlSet\Services\edgeupdate' -ValueName 'Start' -Data '4' -Type 'Dword'
+    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SYSTEM\CurrentControlSet\Services\edgeupdatem' -ValueName 'Start' -Data '4' -Type 'Dword'
+
+    Disable-ScheduledTask -TaskName "\MicrosoftEdgeUpdateTaskMachineCore"
+    Disable-ScheduledTask -TaskName "\MicrosoftEdgeUpdateTaskMachineUA"
+
+    reg.exe delete "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tree\MicrosoftEdgeUpdateTaskMachineCore" /f
+    reg.exe delete "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tree\MicrosoftEdgeUpdateTaskMachineUA" /f
+}
+
+if (!$windows_search_indexing)
 {
     sc.exe stop WSearch
     reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\WSearch" /v "Start" /t REG_DWORD /d 4 /f
@@ -115,11 +173,10 @@ if ($no_windows_search_indexing)
 
     Disable-ScheduledTask -TaskName "\Microsoft\Windows\Shell\IndexerAutomaticMaintenance"
 
-    # Here for historical purposes, as replacing Windows Search Index was the original intention.
-    #winget.exe install voidtools.Everything -eh --accept-package-agreements --accept-source-agreements --source winget
+    winget.exe install voidtools.Everything -s winget -eh --accept-package-agreements --accept-source-agreements
 }
 
-if ($no_hidden_files)
+if ($show_hidden_files)
 {
     Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -ValueName 'DontPrettyPath' -Data '1' -Type 'Dword'
 
@@ -140,18 +197,18 @@ if ($no_blocked_files)
     Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\Policies\Attachments' -ValueName 'SaveZoneInformation' -Data '1' -Type 'Dword'
 }
 
-if ($no_ethernet_power_saving)
+if (!$ethernet_power_saving)
 {
-    Disable-Ethernet-Power-Saving
+    $properties = @("Advanced EEE", "Auto Disable Gigabit", "Energy Efficient Ethernet",
+    "Gigabit Lite", "Green Ethernet", "Power Saving Mode",
+    "Selective Suspend", "ULP", "Ultra Low Power Mode")
+    for ($i = 0; $i -lt $properties.length; $i++) {
+        # Disable features that can cause random packet loss/drop-outs.
+        Set-NetAdapterAdvancedProperty -Name '*' -DisplayName $properties[$i] -RegistryValue 0
+    }
 }
 
-if ($file_history)
-{
-    Set-ItemProperty -Path "HKCR:\SOFTWARE\Policies\Microsoft\Windows\FileHistory" -Name "Disabled" -Type DWord -Value 0 -Force
-    Set-ItemProperty -Path "HKCR:\SYSTEM\CurrentControlSet\Services\fhsvc" -Name "Start" -Type DWord -Value 3 -Force
-    Enable-ScheduledTask -TaskName "\Microsoft\Windows\FileHistory\File History (maintenance mode)"
-}
-elseif (!$file_history)
+if (!$file_history)
 {
     Set-ItemProperty -Path "HKCR:\SOFTWARE\Policies\Microsoft\Windows\FileHistory" -Name "Disabled" -Type DWord -Value 1 -Force
     Set-ItemProperty -Path "HKCR:\SYSTEM\CurrentControlSet\Services\fhsvc" -Name "Start" -Type DWord -Value 4 -Force
@@ -168,31 +225,22 @@ if ($avoid_key_annoyances)
     Set-PolicyFileEntry -Path $PREG_USER -Key 'Control Panel\Accessibility\ToggleKeys' -ValueName 'Flags' -Data '38' -Type 'String'
 }
 
-if ($no_geolocation)
+if (!$geolocation)
 {
-    reg.exe import ".\Registry\Geolocation\Disable.reg"
+    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors' -ValueName 'DisableLocation' -Data '1' -Type 'Dword'
+
+    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors' -ValueName 'DisableLocationScripting' -Data '1' -Type 'Dword'
+
+    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors' -ValueName 'DisableWindowsLocationProvider' -Data '1' -Type 'Dword'
+
+    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SYSTEM\CurrentControlSet\Services\lfsvc' -ValueName 'Start' -Data '4' -Type 'Dword'
+
     sc.exe stop lfsvc
     Disable-ScheduledTask -TaskName "\Microsoft\Windows\Location\Notifications"
     Disable-ScheduledTask -TaskName "\Microsoft\Windows\Location\WindowsActionDialog"
 }
-elseif (!$no_geolocation)
-{
-    reg.exe import ".\Registry\Geolocation\Enable.reg"
-    Enable-ScheduledTask -TaskName "\Microsoft\Windows\Location\Notifications"
-    Enable-ScheduledTask -TaskName "\Microsoft\Windows\Location\WindowsActionDialog"
-}
 
-if ($no_audio_reduction)
-{
-    reg.exe add "HKEY_CURRENT_USER\SOFTWARE\Microsoft\Multimedia\Audio" /v "UserDuckingPreference" /t REG_DWORD /d "3" /f
-    reg.exe delete "HKEY_CURRENT_USER\SOFTWARE\Microsoft\Internet Explorer\LowRegistry\Audio\PolicyConfig\PropertyStore" /f
-}
-if (!$no_audio_reduction)
-{
-    reg.exe delete "HKEY_CURRENT_USER\SOFTWARE\Microsoft\Multimedia\Audio\UserDuckingPreference" /f
-}
-
-if ($no_game_dvr)
+if (!$game_dvr)
 {
     Set-PolicyFileEntry -Path $PREG_USER -Key 'System\GameConfigStore' -ValueName 'GameDVR_Enabled' -Data '0' -Type 'Dword'
 
@@ -207,7 +255,6 @@ if ($no_game_dvr)
     Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\GameBar' -ValueName 'ShowStartupPanel' -Data '0' -Type 'Dword'
 
     Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SYSTEM\CurrentControlSet\Services\BcastDVRUserService' -ValueName 'Start' -Data '4' -Type 'Dword'
-
 }
 
 if ($reset_network_interface_settings)
@@ -215,7 +262,7 @@ if ($reset_network_interface_settings)
     Reset-NetAdapterAdvancedProperty -Name '*' -DisplayName '*'
 }
 
-if ($no_system_restore)
+if (!$allow_system_restore)
 {
     Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows NT\SystemRestore' -ValueName 'DisableSR' -Data '1' -Type 'Dword'
 
@@ -223,19 +270,6 @@ if ($no_system_restore)
 
     # Delete all restore points.
     vssadmin.exe delete shadows /all /quiet
-}
-
-if ($excessive_mitigations)
-{
-    reg.exe import ".\Registry\Excessive Mitigations.reg"
-    # Solves STIGs: V-253275 (High), V-253285 (Medium)
-    Disable-WindowsOptionalFeature -NoRestart -Online -Remove -FeatureName SMB1Protocol, IIS-WebServerRole, MicrosoftWindowsPowerShellV2Root, MicrosoftWindowsPowerShellV2
-    Set-ProcessMitigation -System -Enable DEP, EmulateAtlThunks, RequireInfo, BottomUp, HighEntropy, CFG, SuppressExports, SEHOP, SEHOPTelemetry, AuditSEHOP, TerminateOnError
-    # StrictCFG breaks far too many programs, and even NVIDIA's GPU drivers.
-    # ForceRelocateImages (Mandatory ASLR) breaks a few programs, such as Hogwarts Legacy.
-    Set-ProcessMitigation -System -Disable StrictCFG ForceRelocateImages
-    bcdedit.exe /set hypervisorlaunchtype auto
-    bcdedit.exe /set nx OptOut
 }
 
 if ($less_game_stuttering)
@@ -263,7 +297,11 @@ if ($reduce_mitigations)
     # System != Process.
     Remove-All-ProcessMitigations
 
-    # DEP is required for effectively all updated game anti-cheats.
+    # DEP is required for effectively all maintained game anti-cheats.
+    # Notes:
+    # - VAC requires both the client and server DLLs to be signed with a certificate to detect cheaters; see:
+    # - https://github.com/ValveSoftware/source-sdk-2013/issues/76#issuecomment-21562961
+    # - This means disabling DEP works for some VAC "enabled" games, but you can't play CS:GO or TF2 for an hour straight without VAC errors.
     Set-ProcessMitigation -System -Enable DEP
 
     # Data Execution Prevention (DEP).
@@ -280,14 +318,15 @@ if ($reduce_mitigations)
 
     # Heap integrity.
     # -> TerminateOnError
+
     Set-ProcessMitigation -System -Disable EmulateAtlThunks, RequireInfo, ForceRelocateImages, BottomUp, HighEntropy, CFG, SuppressExports, StrictCFG, SEHOP, SEHOPTelemetry, AuditSEHOP, TerminateOnError
 
-    # Ensure "Data Execution Prevention" (DEP) only applies to operating system components, along with kernel-mode drivers.
-    # Applying DEP to user-mode programs will slow or break them down, such as the original Deus Ex.
+    # Ensure "Data Execution Prevention" (DEP) only applies to operating system components and all kernel-mode drivers.
+    # Applying DEP to user-mode programs will slow or break them down, such as the Deus Ex (2000) video game.
     bcdedit.exe /set nx Optin
 }
 
-if ($no_smartscreen)
+if (!$defender_smartscreen)
 {
     Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\System' -ValueName 'EnableSmartScreen' -Data '0' -Type 'Dword'
 
@@ -298,13 +337,13 @@ if ($no_smartscreen)
     Disable-ScheduledTask -TaskName "\Microsoft\Windows\AppID\SmartScreenSpecific"
 }
 
-if ($no_family_safety)
+if (!$family_safety)
 {
     Disable-ScheduledTask -TaskName "\Microsoft\Windows\Shell\FamilySafetyMonitor"
     Disable-ScheduledTask -TaskName "\Microsoft\Windows\Shell\FamilySafetyRefreshTask"
 }
 
-if ($no_windows_security_systray)
+if (!$windows_security_systray)
 {
     Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows Defender Security Center\Systray' -ValueName 'HideSystray' -Data '1' -Type 'Dword'
 }
@@ -313,9 +352,4 @@ if ($change_event_viewer_behavior)
 {
     # Don't log events without warnings or errors.
     auditpol.exe /set /category:* /Success:disable
-}
-
-if ($fix_openssl_sha_crash)
-{
-    [Environment]::SetEnvironmentVariable("OPENSSL_ia32cap", "~0x200000200000000", "Machine")
 }
