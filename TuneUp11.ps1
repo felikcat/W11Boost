@@ -4,33 +4,8 @@ if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
     Break
 }
 
-$host.ui.rawui.windowtitle = "TuneUp11 by github.com/felikcat"
-
-$WINDOWS_EDITION = Get-ItemPropertyValue 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' -Name EditionID
-
-if ($WINDOWS_EDITION -like '*Home*')
-{
-    Start-Process "https://github.com/massgravel/Microsoft-Activation-Scripts"
-    Clear-Host
-    Write-Warning "
-Home editions of Windows are not supported.
-Upgrade to a Pro edition using: https://github.com/massgravel/Microsoft-Activation-Scripts
-"
-    Break
-}
-
-# If these are disabled, Windows Update will break and so will this script.
-# Disabled StorSvc breaks the Windows Store.
-# Disabled DoSvc (delivery optimization) breaks winget.
-$services = @("AppXSvc", "ClipSVC", "TokenBroker", "StorSvc", "DoSvc")
-
-for ($i = 0; $i -lt $services.length; $i++)
-{
-    reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\$services[$i]" /v "Start" /t REG_DWORD /d 3 /f
-    sc.exe start $services[$i]
-}
-
 ##+=+= Initialize
+$host.ui.rawui.windowtitle = "TuneUp11 by github.com/felikcat"
 Push-Location $PSScriptRoot
 Start-Transcript -Path ([Environment]::GetFolderPath('MyDocuments') + "\TuneUp11_LastRun.log")
 
@@ -42,6 +17,36 @@ Add-Type -Path ".\Third-party\PolicyFileEditor\PolFileEditor.dll" -ErrorAction S
 . ".\imports.ps1"
 ##+=+=
 
+if ($WINDOWS_EDITION -notlike '*Enterprise*')
+{
+    Clear-Host
+    Write-Warning "
+Only Enterprise editions of Windows are supported.
+
+Upgrade to an Enterprise edition for free (without reinstalling Windows) using: https://github.com/massgravel/Microsoft-Activation-Scripts
+"
+    Write-Host "
+Tutorial:
+1. Use 'Method 2 - Traditional' to run MAS.
+
+2. After MAS is open, press 6 on the keyboard for 'Extras', then 1 for 'Change Windows Edition'.
+
+3. Select an Enterprise edition and wait.
+-> If you're on Home: Professional -> Enterprise.
+-> If you're on Pro, you can already upgrade to Enterprise.
+
+4. Attempt to use TuneUp11 again after the switch to Enterprise is completed.
+
+"
+    Break
+}
+
+# Required for: Windows Updates, Windows Store (StorSvc), winget (DoSvc/delivery optimization).
+$services = @("AppXSvc", "ClipSVC", "TokenBroker", "StorSvc", "DoSvc")
+for ($i = 0; $i -lt $services.length; $i++) {
+    reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\$services[$i]" /v "Start" /t REG_DWORD /d 3 /f
+    sc.exe start $services[$i]
+}
 
 # Stops various annoyances, one being Windows Update restarting your PC without your consent.
 . ".\Regions\Annoyances.ps1"
@@ -92,9 +97,6 @@ Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Window
 
 # Disable the acrylic blur at sign-in screen to improve performance at that screen.
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\System' -ValueName 'DisableAcrylicBackgroundOnLogon' -Data '1' -Type 'Dword'
-
-# Depend on the user clearing out thumbnail caches manually if they get corrupted.
-Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VolumeCaches\Thumbnail Cache' -ValueName 'Autorun' -Data '0' -Type 'Dword'
 
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Autochk\Proxy"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\DiskDiagnostic\Microsoft-Windows-DiskDiagnosticDataCollector"
@@ -195,7 +197,8 @@ Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\VisualStudio\Telem
 # System Properties -> Advanced -> Performance
 reg.exe import ".\Registry\Performance Options.reg"
 
-reg.exe import ".\Registry\Disable Delivery Optimization.reg"
+# Disable Delivery Optimization's "Allow downloads from other PCs".
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization' -ValueName 'DODownloadMode' -Data '0' -Type 'Dword'
 
 # Windows 11 only changes.
 if ($WIN32_BUILDNUMBER -ge 21327)
@@ -204,7 +207,6 @@ if ($WIN32_BUILDNUMBER -ge 21327)
     $Better_Shell = Start-Job {
         winget.exe install StartIsBack.StartAllBack -eh --accept-package-agreements --accept-source-agreements --source winget --force
     }
-
     # Use the BBRv2 TCP congestion control algorithm; the differences:
     # -> https://web.archive.org/web/20220313173158/http://web.archive.org/screenshot/https://docs.google.com/spreadsheets/d/1I1NcVVbuC7aq4nGalYxMNz9pgS9OLKcFHssIBlj9xXI
     # "Template=" applies globally (to all network interface templates).

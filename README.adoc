@@ -19,19 +19,13 @@ NOTE: *Known alternatives:* O&O ShutUp10, W10Privacy, BloatyNosy, Wintoys, Chris
 ** No breaking programs or apps.
 ** Increased privacy and consistency of game or real-time program performance.
 ** Increases security instead of compromising on it.
-** Fully open-source.
-*** Exceptions: 'https://www.virustotal.com/gui/file/f4a33deebc499ae70e479ba75b6161cae9e1626d852af7a40b96c7d69207e607?nocache=1[PolFileEditor.dll]' and 'https://www.virustotal.com/gui/file/3d5b4d790ffe6d8f0c16b4ddc4dc1b1ed93388c1cb1526083ad2d367309d805f[SetTimerResolution.exe]'.
+** TuneUp11 and a third-party script it pulls in (https://github.com/beatcracker/toptout[toptout]) is fully open-source.
+*** Closed-source exceptions: 'https://www.virustotal.com/gui/file/f4a33deebc499ae70e479ba75b6161cae9e1626d852af7a40b96c7d69207e607?nocache=1[PolFileEditor.dll]' and 'https://www.virustotal.com/gui/file/3d5b4d790ffe6d8f0c16b4ddc4dc1b1ed93388c1cb1526083ad2d367309d805f[SetTimerResolution.exe]'.
 
 ** Changes are tunneled through the Group Policy Editor, therefore:
 *** Windows Update does not revert TuneUp11's changes.
 *** TuneUp11's changes can be viewed from a graphical interface via `rsop.msc`. +
 image:RSOP.png[]
-
-
-== The catches
-. Memory/RAM usage is higher to reduce CPU usage and potential hitches/stuttering in video playback and games.
-
-. Thumbnail cache is never cleared. Thumbnail corruption is rare; run the `Disk Cleanup` program if this happens.
 
 
 == Instructions
@@ -161,10 +155,6 @@ TIP: Example gpedit.msc registry translation: +
 . link:https://bromiley.medium.com/windows-wednesday-shim-cache-1997ba8b13e7[Matt B's blog post on Application Compatibility Cache]
 
 
----
+'''
 
-* These projects helped TuneUp11 improve at a more rapid pace:
-. https://github.com/Atlas-OS/Atlas
-. https://github.com/beatcracker/toptout
-. https://github.com/M2Team/NSudo
 ====

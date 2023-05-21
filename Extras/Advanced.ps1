@@ -65,9 +65,14 @@ $automatic_microsoft_edge_updates = 1
 
 # 0: Manually set compatibility modes for programs requiring say Windows XP mode.
 # Potential performance and reliability benefits from forcing this to be manual (compatibility modes enabled by you only).
-$automated_compatibility = 0
+$automatic_compatibility = 0
 
+# 0: Apps installed from the Windows Store don't automatically update.
+# -> It's recommended to occasionally open PowerShell as administrator, then through PowerShell run `winget upgrade --all`.
+$automatic_windows_store_app_updates = 0
 
+# 0: Thumbnail corruption is rare; run the 'Disk Cleanup' program if it happens.
+$automatic_thumbnail_clearing = 0
 
 ##+=+= END OF OPTIONS ||-> Initialize
 if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]"Administrator"))
@@ -89,8 +94,10 @@ Write-Output "
 ==== Current settings ====
 
 allow_system_restore = $allow_system_restore
-automated_compatibility = $automated_compatibility
+automatic_compatibility = $automatic_compatibility
 automatic_microsoft_edge_updates = $automatic_microsoft_edge_updates
+automatic_thumbnail_clearing = $automatic_thumbnail_clearing
+automatic_windows_store_app_updates = $automatic_windows_store_app_updates
 avoid_key_annoyances = $avoid_key_annoyances
 biometrics = $biometrics
 change_event_viewer_behavior = $change_event_viewer_behavior
@@ -108,13 +115,24 @@ windows_security_systray = $windows_security_systray
 "
 Pause
 
+if (!$automatic_windows_store_app_updates)
+{
+    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\WindowsStore' -ValueName 'AutoDownload' -Data '2' -Type 'Dword'
+}
+
+if (!$automatic_thumbnail_clearing)
+{
+    # Depend on the user clearing out thumbnail caches manually if they get corrupted.
+    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VolumeCaches\Thumbnail Cache' -ValueName 'Autorun' -Data '0' -Type 'Dword'
+}
+
 if (!$biometrics)
 {
     Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Biometrics' -ValueName 'Enabled' -Data '0' -Type 'Dword'
     Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SYSTEM\CurrentControlSet\Services\WbioSrvc' -ValueName 'Start' -Data '4' -Type 'Dword'
 }
 
-if (!$automated_compatibility)
+if (!$automatic_compatibility)
 {
     # Disable "Program Compatibility Assistant".
     Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -ValueName 'DisablePCA' -Data '1' -Type 'Dword'
@@ -235,6 +253,8 @@ if (!$geolocation)
 
     Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SYSTEM\CurrentControlSet\Services\lfsvc' -ValueName 'Start' -Data '4' -Type 'Dword'
 
+    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\Settings\FindMyDevice' -ValueName 'LocationSyncEnabled' -Data '0' -Type 'Dword'
+
     sc.exe stop lfsvc
     Disable-ScheduledTask -TaskName "\Microsoft\Windows\Location\Notifications"
     Disable-ScheduledTask -TaskName "\Microsoft\Windows\Location\WindowsActionDialog"
@@ -247,7 +267,13 @@ if (!$game_dvr)
     Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\GameDVR' -ValueName 'AllowGameDVR' -Data '0' -Type 'Dword'
 
     Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\GameDVR' -ValueName 'AppCaptureEnabled' -Data '0' -Type 'Dword'
+    Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\GameDVR' -ValueName 'CursorCaptureEnabled' -Data '0' -Type 'Dword'
     Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\GameDVR' -ValueName 'HistoricalCaptureEnabled' -Data '0' -Type 'Dword'
+
+    Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\AppBroadcast\GlobalSettings' -ValueName 'AudioCaptureEnabled' -Data '0' -Type 'Dword'
+    Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\AppBroadcast\GlobalSettings' -ValueName 'MicrophoneCaptureEnabledByDefault' -Data '0' -Type 'Dword'
+    Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\AppBroadcast\GlobalSettings' -ValueName 'CursorCaptureEnabled' -Data '0' -Type 'Dword'
+    Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\AppBroadcast\GlobalSettings' -ValueName 'CameraCaptureEnabledByDefault' -Data '0' -Type 'Dword'
 
     # Block Xbox controller's home button from opening the game bar.
     Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\GameBar' -ValueName 'UseNexusForGameBarEnabled' -Data '0' -Type 'Dword'

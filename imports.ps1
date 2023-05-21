@@ -1,6 +1,7 @@
 $PREG_USER = "$env:windir\System32\GroupPolicy\User\registry.pol"
 $PREG_MACHINE = "$env:windir\System32\GroupPolicy\Machine\registry.pol"
 $WIN32_BUILDNUMBER = (Get-WmiObject Win32_OperatingSystem).BuildNumber
+$WINDOWS_EDITION = Get-ItemPropertyValue 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' -Name ProductName
 
 # Delete ExploitGuard ProcessMitigations for a given key in the registry;
 # if no other settings exist under the specified key, the key is deleted as well.

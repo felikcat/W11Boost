@@ -17,9 +17,9 @@ Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Window
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\DataCollection' -ValueName 'DoNotShowFeedbackNotifications' -Data '1' -Type 'Dword'
 
 # Fully disable the 'Screenshots access' permission to .appx packaged programs.
+Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\graphicsCaptureProgrammatic' -ValueName 'Value' -Data 'Deny' -Type 'String'
 Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\graphicsCaptureProgrammatic' -ValueName 'Value' -Data 'Deny' -Type 'String'
 Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\graphicsCaptureProgrammatic\NonPackaged' -ValueName 'Value' -Data 'Deny' -Type 'String'
-Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\graphicsCaptureProgrammatic' -ValueName 'Value' -Data 'Deny' -Type 'String'
 
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\DataCollection' -ValueName 'DisableOneSettingsDownloads' -Data '1' -Type 'Dword'
 
@@ -72,6 +72,10 @@ Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Window
 
 
 ##+=+= Disable cloud/web usage in the start menu.
+Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\Search' -ValueName 'BingSearchEnabled' -Data '0' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\Search' -ValueName 'CortanaConsent' -Data '0' -Type 'Dword'
+Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\Search' -ValueName 'CortanaEnabled' -Data '0' -Type 'Dword'
+
 Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\SearchSettings' -ValueName 'IsAADCloudSearchEnabled' -Data '0' -Type 'Dword'
 
 Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\SearchSettings' -ValueName 'IsMSACloudSearchEnabled' -Data '0' -Type 'Dword'
@@ -95,23 +99,10 @@ Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Window
 
 Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\CloudContent' -ValueName 'DisableConsumerAccountStateContent' -Data '1' -Type 'Dword'
 
-Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' -ValueName 'ContentDeliveryAllowed' -Data '0' -Type 'Dword'
-Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' -ValueName 'OemPreInstalledAppsEnabled' -Data '0' -Type 'Dword'
-Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' -ValueName 'PreInstalledAppsEnabled' -Data '0' -Type 'Dword'
-Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' -ValueName 'PreInstalledAppsEverEnabled' -Data '0' -Type 'Dword'
-Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' -ValueName 'RotatingLockScreenEnabled' -Data '0' -Type 'Dword'
-Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' -ValueName 'RotatingLockScreenOverlayEnabled' -Data '0' -Type 'Dword'
-Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' -ValueName 'SilentInstalledAppsEnabled' -Data '0' -Type 'Dword'
-Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' -ValueName 'SoftLandingEnabled' -Data '0' -Type 'Dword'
-
-Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' -ValueName 'SubscribedContent-338389Enabled' -Data '0' -Type 'Dword'
-Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' -ValueName 'SubscribedContent-338393Enabled' -Data '0' -Type 'Dword'
-Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' -ValueName 'SubscribedContent-353694Enabled' -Data '0' -Type 'Dword'
-Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' -ValueName 'SubscribedContent-353696Enabled' -Data '0' -Type 'Dword'
-Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' -ValueName 'SubscribedContent-88000326Enabled' -Data '0' -Type 'Dword'
-
-Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' -ValueName 'SystemPaneSuggestionsEnabled' -Data '0' -Type 'Dword'
-
+$cdm_regs = @("ContentDeliveryAllowed", "OemPreInstalledAppsEnabled", "PreInstalledAppsEnabled", "PreInstalledAppsEverEnabled", "RotatingLockScreenEnabled", "RotatingLockScreenOverlayEnabled", "SilentInstalledAppsEnabled", "SoftLandingEnabled", "SystemPaneSuggestionsEnabled", "SubscribedContent-338389Enabled", "SubscribedContent-338393Enabled", "SubscribedContent-338394Enabled", "SubscribedContent-338396Enabled", "SubscribedContent-353694Enabled", "SubscribedContent-353696Enabled", "SubscribedContent-88000326Enabled")
+for ($i = 0; $i -lt $cdm_regs.length; $i++) {
+    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' -ValueName $cdm_regs[$i] -Data '0' -Type 'Dword'
+}
 ##+=+=
 
 
@@ -176,3 +167,8 @@ Disable-ScheduledTask -TaskName "\Microsoft\Windows\Flighting\FeatureConfig\Reco
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Flighting\FeatureConfig\UsageDataFlushing"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Flighting\FeatureConfig\UsageDataReporting"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Flighting\OneSettings\RefreshCache"
+
+Start-BitsTransfer -Source 'https://raw.githubusercontent.com/beatcracker/toptout/master/examples/toptout_pwsh.ps1' -Destination ./ -MaxDownloadTime 120  -RetryInterval 60 -RetryTimeout 300 -TransferPolicy Unrestricted
+
+# Third-party script that tells various programs and apps to disable or minimize their telemetry.
+. ".\toptout_pwsh.ps1" -Env -Exec -ShowLog
