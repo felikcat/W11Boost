@@ -1,15 +1,13 @@
-# Disables Sticky, Filter, and Toggle Keys.
-$avoid_key_annoyances = 1
+#Requires -Version 5
 
-# 0: If NVIDIA ShadowPlay, AMD ReLive, or OBS Studio is used instead.
-$game_dvr = 0
+# 0: If real-time programs (Digital Audio Workstations, Virtual Machines, etc.) must run more consistently.
+# -> Increases power usage drastically!
+# -> Task Manager will report the wrong CPU usage, use: https://systeminformer.sourceforge.io/
+$allow_cpu_idle_state = 1
 
-# 0: Disables Biometric services meant for fingerprint readers, which runs even if there's no Biometric devices.
-$biometrics = 1
-
-# Resets all network interfaces back to their manufacturer's default settings.
-# Recommended before applying our network tweaks, as it's a "clean slate".
-$reset_network_interface_settings = 1
+# 0: Breaks NVIDIA Control Panel and CPU usage in the Task Manager purposefully;
+# -> Re-enable the "NVIDIA Display Container LS" service when you need to configure settings, then disable after you're done.
+$allow_nvidia_control_panel = 1
 
 # System Restore problems:
 # - Cannot restore backups from previous versions of Windows.
@@ -17,68 +15,77 @@ $reset_network_interface_settings = 1
 # - Will revert other personal files (program settings and installations).
 $allow_system_restore = 1
 
-# File History will fail you when it's needed.
-# - Alternative: Syncthing on this PC and a PC running either TrueNAS or Unraid.
-$file_history = 0
 
-# 0: Disables GPS services, which run even if a GPS isn't installed.
-$geolocation = 1
+# 0: Manually set compatibility modes for programs requiring say Windows XP mode.
+# Potential performance and reliability benefits from forcing this to be manual (compatibility modes enabled by you only).
+$automatic_compatibility = 0
 
-# Breaks NVIDIA Control Panel and CPU usage in the Task Manager purposefully;
-# Re-enable the "NVIDIA Display Container LS" service when you need to configure settings, then disable after you're done.
-# Configure hidden NVIDIA options: https://github.com/Orbmu2k/nvidiaProfileInspector/releases
-# See real CPU usage: https://systeminformer.sourceforge.io/
-$less_game_stuttering = 1
+# 0: Stops Microsoft Edge from wasting CPU cycles and bandwidth while closed.
+# 0 is not recommended if you use Microsoft Edge often, it will make its updates tedious.
+$automatic_microsoft_edge_updates = 0
+
+# 0: Assumption that thumbnail corruption is rare; run the 'Disk Cleanup' program if it happens.
+$automatic_thumbnail_clearing = 0
+
+# 0: Apps installed from the Windows Store don't automatically update.
+# -> It's recommended to occasionally open PowerShell as administrator, then through PowerShell run `winget upgrade --all`.
+$automatic_windows_store_app_updates = 0
+
+
+# Disables Sticky, Filter, and Toggle Keys.
+$avoid_key_annoyances = 1
+
+# 0: Disables Biometric services meant for fingerprint readers, which runs even if there's no Biometric devices.
+$biometrics = 1
+
+# 1: Only log events with warnings or errors will be recorded.
+$change_event_viewer_behavior = 1
+
+# 0: Relevant to disable smartscreen if you use an alternative antivirus.
+$defender_smartscreen = 1
 
 # 0: Prevents random packet loss/drop-outs in exchange for higher battery drain.
 $ethernet_power_saving = 0
 
-# 0: Relevant to disable smartscreen if you use an alternative antivirus.
-$defender_smartscreen = 1
+# 0: Disables parental controls, which seemingly can't be used without a Microsoft account.
+$family_safety = 0
+
+# File History will fail you when it's needed.
+# - Alternative: Syncthing on this PC and a PC running either TrueNAS or Unraid.
+$file_history = 0
+
+# 0: If NVIDIA ShadowPlay, AMD ReLive, or OBS Studio is used instead.
+$game_dvr = 0
+
+# 0: Disables GPS services, which run even if a GPS isn't installed.
+$geolocation = 0
+
+# 1: If having to manually unblock files you download is intolerable.
+$no_blocked_files = 0
 
 # 1: Reduces stuttering in some games (Hogwarts Legacy), but lowers Windows' overall security;
 # -> You must replace Windows Defender with Kaspersky Free; Kaspersky has its own separate virtualization security.
 # -> The Vanguard, ESEA, and Faceit anti-cheats will complain about "CFG" being off; enable that yourself if needed.
 $reduce_mitigations = 0
 
-# 0: Recommended if Windows Defender isn't used.
-$windows_security_systray = 1
-
-# 0: Disables parental controls, which seemingly can't be used without a Microsoft account.
-$family_safety = 0
-
-# 1: Only log events with warnings or errors will be recorded.
-$change_event_viewer_behavior = 1
-
-# If having to manually unblock files you download is intolerable, use $no_blocked_files 1.
-$no_blocked_files = 0
-
 # Helps with not getting tricked into opening malware and makes Windows less annoying for a power user.
 $show_hidden_files = 1
+
 
 # 0: 'Everything' will be installed to be used as the alternative search indexer.
 # -> The Windows Search Index is prone to causing sudden declines in performance, especially on slow hard drives (HDDs).
 $windows_search_indexing = 0
 
-# Stops Microsoft Edge from wasting CPU cycles and bandwidth while closed.
-$automatic_microsoft_edge_updates = 1
+# 0: Recommended if Windows Defender isn't used.
+$windows_security_systray = 1
 
-# 0: Manually set compatibility modes for programs requiring say Windows XP mode.
-# Potential performance and reliability benefits from forcing this to be manual (compatibility modes enabled by you only).
-$automatic_compatibility = 0
 
-# 0: Apps installed from the Windows Store don't automatically update.
-# -> It's recommended to occasionally open PowerShell as administrator, then through PowerShell run `winget upgrade --all`.
-$automatic_windows_store_app_updates = 0
-
-# 0: Thumbnail corruption is rare; run the 'Disk Cleanup' program if it happens.
-$automatic_thumbnail_clearing = 0
 
 ##+=+= END OF OPTIONS ||-> Initialize
 if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]"Administrator"))
 {
     Write-Warning "ERROR: Advanced.ps1 -> Requires Administrator!"
-    Break
+    Pause
 }
 Push-Location $PSScriptRoot
 Start-Transcript -Path ([Environment]::GetFolderPath('MyDocuments') + "\TuneUp11_Advanced_LastRun.log")
@@ -93,67 +100,84 @@ Clear-Host
 Write-Output "
 ==== Current settings ====
 
+allow_cpu_idle_state = $allow_cpu_idle_state
+allow_nvidia_control_panel = $allow_nvidia_control_panel
 allow_system_restore = $allow_system_restore
+
 automatic_compatibility = $automatic_compatibility
 automatic_microsoft_edge_updates = $automatic_microsoft_edge_updates
 automatic_thumbnail_clearing = $automatic_thumbnail_clearing
 automatic_windows_store_app_updates = $automatic_windows_store_app_updates
+
 avoid_key_annoyances = $avoid_key_annoyances
 biometrics = $biometrics
 change_event_viewer_behavior = $change_event_viewer_behavior
 defender_smartscreen = $defender_smartscreen
 ethernet_power_saving = $ethernet_power_saving
+family_safety = $family_safety
 file_history = $file_history
 game_dvr = $game_dvr
 geolocation = $geolocation
-less_game_stuttering = $less_game_stuttering
 no_blocked_files = $no_blocked_files
 reduce_mitigations = $reduce_mitigations
 show_hidden_files = $show_hidden_files
+
 windows_search_indexing = $windows_search_indexing
 windows_security_systray = $windows_security_systray
 "
 Pause
 
+if (!$allow_cpu_idle_state)
+{
+    powercfg.exe -import "..\Third-party\Bitsum-Highest-Performance.pow"
+    $_pwr = Get-CimInstance -Name root\cimv2\power -Class win32_PowerPlan -Filter "ElementName = 'Bitsum Highest Performance'"
+    powercfg.exe /setactive ([string]$_pwr.InstanceID).Replace("Microsoft:PowerPlan\{","").Replace("}","")
+
+    # Makes CPU idle states never occur to increase the speed of context switching.
+    # Side-effect: Makes CPU usage appear constantly at 100% in Windows' Task Manager.
+    powercfg.exe /setacvalueindex SCHEME_CURRENT SUB_PROCESSOR IdleDisable 1
+    powercfg.exe /setactive SCHEME_CURRENT
+}
+
 if (!$automatic_windows_store_app_updates)
 {
-    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\WindowsStore' -ValueName 'AutoDownload' -Data '2' -Type 'Dword'
+    PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\WindowsStore' -ValueName 'AutoDownload' -Data '2' -Type 'Dword'
 }
 
 if (!$automatic_thumbnail_clearing)
 {
     # Depend on the user clearing out thumbnail caches manually if they get corrupted.
-    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VolumeCaches\Thumbnail Cache' -ValueName 'Autorun' -Data '0' -Type 'Dword'
+    PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VolumeCaches\Thumbnail Cache' -ValueName 'Autorun' -Data '0' -Type 'Dword'
 }
 
 if (!$biometrics)
 {
-    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Biometrics' -ValueName 'Enabled' -Data '0' -Type 'Dword'
-    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SYSTEM\CurrentControlSet\Services\WbioSrvc' -ValueName 'Start' -Data '4' -Type 'Dword'
+    PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Biometrics' -ValueName 'Enabled' -Data '0' -Type 'Dword'
+    PolEdit_HKLM 'SYSTEM\CurrentControlSet\Services\WbioSrvc' -ValueName 'Start' -Data '4' -Type 'Dword'
 }
 
 if (!$automatic_compatibility)
 {
     # Disable "Program Compatibility Assistant".
-    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -ValueName 'DisablePCA' -Data '1' -Type 'Dword'
+    PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -ValueName 'DisablePCA' -Data '1' -Type 'Dword'
 
     # Disable "Application Compatibility Engine".
-    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -ValueName 'DisableEngine' -Data '1' -Type 'Dword'
+    PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -ValueName 'DisableEngine' -Data '1' -Type 'Dword'
 
     # Disable "SwitchBack Compatibility Engine".
-    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -ValueName 'SbEnable' -Data '0' -Type 'Dword'
+    PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -ValueName 'SbEnable' -Data '0' -Type 'Dword'
 
     # Disable user Steps Recorder.
-    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -ValueName 'DisableUAR' -Data '1' -Type 'Dword'
+    PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -ValueName 'DisableUAR' -Data '1' -Type 'Dword'
 
     # Disable "Remove Program Compatibility Property Page".
-    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -ValueName 'DisablePropPage' -Data '0' -Type 'Dword'
+    PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -ValueName 'DisablePropPage' -Data '0' -Type 'Dword'
 
     # Disable "Inventory Collector".
-    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -ValueName 'DisableInventory' -Data '1' -Type 'Dword'
+    PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -ValueName 'DisableInventory' -Data '1' -Type 'Dword'
 
     # Disable 'Program Compatibility Assistant' service
-    reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\PcaSvc" /v "Start" /t REG_DWORD /d 4 /f
+    PolEdit_HKLM 'SYSTEM\CurrentControlSet\Services' -ValueName 'PcaSvc' -Data '4' -Type 'Dword'
 
     Disable-ScheduledTask -TaskName "\Microsoft\Windows\Application Experience\Microsoft Compatibility Appraiser"
     Disable-ScheduledTask -TaskName "\Microsoft\Windows\Application Experience\PcaPatchDbTask"
@@ -163,31 +187,31 @@ if (!$automatic_compatibility)
 if (!$automatic_microsoft_edge_updates)
 {
     # Disable opening Edge on Windows startup: for the Chromium version.
-    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Edge' -ValueName 'StartupBoostEnabled' -Data '0' -Type 'Dword'
+    PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Edge' -ValueName 'StartupBoostEnabled' -Data '0' -Type 'Dword'
 
     # Disable opening Edge on Windows startup: for the legacy version.
-    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\MicrosoftEdge\Main' -ValueName 'AllowPrelaunch' -Data '0' -Type 'Dword'
+    PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\MicrosoftEdge\Main' -ValueName 'AllowPrelaunch' -Data '0' -Type 'Dword'
 
-    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\MicrosoftEdge\TabPreloader' -ValueName 'AllowTabPreloading' -Data '0' -Type 'Dword'
+    PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\MicrosoftEdge\TabPreloader' -ValueName 'AllowTabPreloading' -Data '0' -Type 'Dword'
 
     # Do not auto-update Microsoft Edge while it's closed.
-    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SYSTEM\CurrentControlSet\Services\MicrosoftEdgeElevationService' -ValueName 'Start' -Data '4' -Type 'Dword'
-    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SYSTEM\CurrentControlSet\Services\edgeupdate' -ValueName 'Start' -Data '4' -Type 'Dword'
-    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SYSTEM\CurrentControlSet\Services\edgeupdatem' -ValueName 'Start' -Data '4' -Type 'Dword'
+    PolEdit_HKLM 'SYSTEM\CurrentControlSet\Services\MicrosoftEdgeElevationService' -ValueName 'Start' -Data '4' -Type 'Dword'
+    PolEdit_HKLM 'SYSTEM\CurrentControlSet\Services\edgeupdate' -ValueName 'Start' -Data '4' -Type 'Dword'
+    PolEdit_HKLM 'SYSTEM\CurrentControlSet\Services\edgeupdatem' -ValueName 'Start' -Data '4' -Type 'Dword'
 
     Disable-ScheduledTask -TaskName "\MicrosoftEdgeUpdateTaskMachineCore"
     Disable-ScheduledTask -TaskName "\MicrosoftEdgeUpdateTaskMachineUA"
 
-    reg.exe delete "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tree\MicrosoftEdgeUpdateTaskMachineCore" /f
-    reg.exe delete "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tree\MicrosoftEdgeUpdateTaskMachineUA" /f
+    Remove-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tree\MicrosoftEdgeUpdateTaskMachineCore" -Recurse -Force
+    Remove-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tree\MicrosoftEdgeUpdateTaskMachineUA" -Recurse -Force
 }
 
 if (!$windows_search_indexing)
 {
-    sc.exe stop WSearch
-    reg.exe add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\WSearch" /v "Start" /t REG_DWORD /d 4 /f
+    Stop-Service WSearch
+    Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\WSearch" -Name "Start" -Type DWord -Value 4 -Force
 
-    Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\SearchSettings' -ValueName 'IsDeviceSearchHistoryEnabled' -Data '0' -Type 'Dword'
+    PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\SearchSettings' -ValueName 'IsDeviceSearchHistoryEnabled' -Data '0' -Type 'Dword'
 
     Disable-ScheduledTask -TaskName "\Microsoft\Windows\Shell\IndexerAutomaticMaintenance"
 
@@ -196,34 +220,32 @@ if (!$windows_search_indexing)
 
 if ($show_hidden_files)
 {
-    Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -ValueName 'DontPrettyPath' -Data '1' -Type 'Dword'
+    PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -ValueName 'DontPrettyPath' -Data '1' -Type 'Dword'
 
-    Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -ValueName 'Hidden' -Data '1' -Type 'Dword'
+    PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -ValueName 'Hidden' -Data '1' -Type 'Dword'
 
-    Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -ValueName 'HideFileExt' -Data '0' -Type 'Dword'
+    PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -ValueName 'HideFileExt' -Data '0' -Type 'Dword'
 
-    Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -ValueName 'ShowSuperHidden' -Data '1' -Type 'Dword'
+    PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -ValueName 'ShowSuperHidden' -Data '1' -Type 'Dword'
 
-    Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\Explorer\CabinetState' -ValueName 'FullPath' -Data '1' -Type 'Dword'
+    PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\CabinetState' -ValueName 'FullPath' -Data '1' -Type 'Dword'
 }
 
 if ($no_blocked_files)
 {
     # SaveZoneInformation 1 = disables blocking downloaded files.
-    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments' -ValueName 'SaveZoneInformation' -Data '1' -Type 'Dword'
+    PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments' -ValueName 'SaveZoneInformation' -Data '1' -Type 'Dword'
     # Don't block downloaded files in Explorer, also fixes File History not working for downloaded files.
-    Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\Policies\Attachments' -ValueName 'SaveZoneInformation' -Data '1' -Type 'Dword'
+    PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\Policies\Attachments' -ValueName 'SaveZoneInformation' -Data '1' -Type 'Dword'
 }
 
 if (!$ethernet_power_saving)
 {
-    $properties = @("Advanced EEE", "Auto Disable Gigabit", "Energy Efficient Ethernet",
+    $_properties = @("Advanced EEE", "Auto Disable Gigabit", "Energy Efficient Ethernet",
     "Gigabit Lite", "Green Ethernet", "Power Saving Mode",
     "Selective Suspend", "ULP", "Ultra Low Power Mode")
-    for ($i = 0; $i -lt $properties.length; $i++) {
-        # Disable features that can cause random packet loss/drop-outs.
-        Set-NetAdapterAdvancedProperty -Name '*' -DisplayName $properties[$i] -RegistryValue 0
-    }
+    # Disable features that can cause random packet loss/drop-outs.
+    $_properties.ForEach({Set-NetAdapterAdvancedProperty -Name '*' -DisplayName $_ -RegistryValue 0})
 }
 
 if (!$file_history)
@@ -236,61 +258,56 @@ if (!$file_history)
 if ($avoid_key_annoyances)
 {
     # Filter keys.
-    Set-PolicyFileEntry -Path $PREG_USER -Key 'Control Panel\Accessibility\Keyboard Response' -ValueName 'Flags' -Data '98' -Type 'String'
+    PolEdit_HKCU 'Control Panel\Accessibility\Keyboard Response' -ValueName 'Flags' -Data '98' -Type 'String'
 
-    Set-PolicyFileEntry -Path $PREG_USER -Key 'Control Panel\Accessibility\StickyKeys' -ValueName 'Flags' -Data '482' -Type 'String'
+    PolEdit_HKCU 'Control Panel\Accessibility\StickyKeys' -ValueName 'Flags' -Data '482' -Type 'String'
 
-    Set-PolicyFileEntry -Path $PREG_USER -Key 'Control Panel\Accessibility\ToggleKeys' -ValueName 'Flags' -Data '38' -Type 'String'
+    PolEdit_HKCU 'Control Panel\Accessibility\ToggleKeys' -ValueName 'Flags' -Data '38' -Type 'String'
 }
 
 if (!$geolocation)
 {
-    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors' -ValueName 'DisableLocation' -Data '1' -Type 'Dword'
+    PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors' -ValueName 'DisableLocation' -Data '1' -Type 'Dword'
 
-    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors' -ValueName 'DisableLocationScripting' -Data '1' -Type 'Dword'
+    PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors' -ValueName 'DisableLocationScripting' -Data '1' -Type 'Dword'
 
-    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors' -ValueName 'DisableWindowsLocationProvider' -Data '1' -Type 'Dword'
+    PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors' -ValueName 'DisableWindowsLocationProvider' -Data '1' -Type 'Dword'
 
-    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SYSTEM\CurrentControlSet\Services\lfsvc' -ValueName 'Start' -Data '4' -Type 'Dword'
+    PolEdit_HKLM 'SYSTEM\CurrentControlSet\Services\lfsvc' -ValueName 'Start' -Data '4' -Type 'Dword'
 
-    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\Settings\FindMyDevice' -ValueName 'LocationSyncEnabled' -Data '0' -Type 'Dword'
+    PolEdit_HKLM 'SOFTWARE\Microsoft\Settings\FindMyDevice' -ValueName 'LocationSyncEnabled' -Data '0' -Type 'Dword'
 
-    sc.exe stop lfsvc
+    Stop-Service lfsvc
     Disable-ScheduledTask -TaskName "\Microsoft\Windows\Location\Notifications"
     Disable-ScheduledTask -TaskName "\Microsoft\Windows\Location\WindowsActionDialog"
 }
 
 if (!$game_dvr)
 {
-    Set-PolicyFileEntry -Path $PREG_USER -Key 'System\GameConfigStore' -ValueName 'GameDVR_Enabled' -Data '0' -Type 'Dword'
+    PolEdit_HKCU 'System\GameConfigStore' -ValueName 'GameDVR_Enabled' -Data '0' -Type 'Dword'
 
-    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\GameDVR' -ValueName 'AllowGameDVR' -Data '0' -Type 'Dword'
+    PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\GameDVR' -ValueName 'AllowGameDVR' -Data '0' -Type 'Dword'
 
-    Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\GameDVR' -ValueName 'AppCaptureEnabled' -Data '0' -Type 'Dword'
-    Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\GameDVR' -ValueName 'CursorCaptureEnabled' -Data '0' -Type 'Dword'
-    Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\GameDVR' -ValueName 'HistoricalCaptureEnabled' -Data '0' -Type 'Dword'
+    PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\GameDVR' -ValueName 'AppCaptureEnabled' -Data '0' -Type 'Dword'
+    PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\GameDVR' -ValueName 'CursorCaptureEnabled' -Data '0' -Type 'Dword'
+    PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\GameDVR' -ValueName 'HistoricalCaptureEnabled' -Data '0' -Type 'Dword'
 
-    Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\AppBroadcast\GlobalSettings' -ValueName 'AudioCaptureEnabled' -Data '0' -Type 'Dword'
-    Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\AppBroadcast\GlobalSettings' -ValueName 'MicrophoneCaptureEnabledByDefault' -Data '0' -Type 'Dword'
-    Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\AppBroadcast\GlobalSettings' -ValueName 'CursorCaptureEnabled' -Data '0' -Type 'Dword'
-    Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\Windows\CurrentVersion\AppBroadcast\GlobalSettings' -ValueName 'CameraCaptureEnabledByDefault' -Data '0' -Type 'Dword'
+    PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\AppBroadcast\GlobalSettings' -ValueName 'AudioCaptureEnabled' -Data '0' -Type 'Dword'
+    PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\AppBroadcast\GlobalSettings' -ValueName 'MicrophoneCaptureEnabledByDefault' -Data '0' -Type 'Dword'
+    PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\AppBroadcast\GlobalSettings' -ValueName 'CursorCaptureEnabled' -Data '0' -Type 'Dword'
+    PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\AppBroadcast\GlobalSettings' -ValueName 'CameraCaptureEnabledByDefault' -Data '0' -Type 'Dword'
 
     # Block Xbox controller's home button from opening the game bar.
-    Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\GameBar' -ValueName 'UseNexusForGameBarEnabled' -Data '0' -Type 'Dword'
+    PolEdit_HKCU 'Software\Microsoft\GameBar' -ValueName 'UseNexusForGameBarEnabled' -Data '0' -Type 'Dword'
 
-    Set-PolicyFileEntry -Path $PREG_USER -Key 'Software\Microsoft\GameBar' -ValueName 'ShowStartupPanel' -Data '0' -Type 'Dword'
+    PolEdit_HKCU 'Software\Microsoft\GameBar' -ValueName 'ShowStartupPanel' -Data '0' -Type 'Dword'
 
-    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SYSTEM\CurrentControlSet\Services\BcastDVRUserService' -ValueName 'Start' -Data '4' -Type 'Dword'
-}
-
-if ($reset_network_interface_settings)
-{
-    Reset-NetAdapterAdvancedProperty -Name '*' -DisplayName '*'
+    PolEdit_HKLM 'SYSTEM\CurrentControlSet\Services\BcastDVRUserService' -ValueName 'Start' -Data '4' -Type 'Dword'
 }
 
 if (!$allow_system_restore)
 {
-    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows NT\SystemRestore' -ValueName 'DisableSR' -Data '1' -Type 'Dword'
+    PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows NT\SystemRestore' -ValueName 'DisableSR' -Data '1' -Type 'Dword'
 
     Disable-ScheduledTask -TaskName "\Microsoft\Windows\SystemRestore\SR"
 
@@ -298,18 +315,9 @@ if (!$allow_system_restore)
     vssadmin.exe delete shadows /all /quiet
 }
 
-if ($less_game_stuttering)
+if (!$allow_nvidia_control_panel)
 {
-    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SYSTEM\CurrentControlSet\Services\NVDisplay.ContainerLocalSystem' -ValueName 'Start' -Data '4' -Type 'Dword'
-
-    powercfg.exe -import "..\Third-party\Bitsum-Highest-Performance.pow"
-    $_p = Get-CimInstance -Name root\cimv2\power -Class win32_PowerPlan -Filter "ElementName = 'Bitsum Highest Performance'"
-    powercfg.exe /setactive ([string]$_p.InstanceID).Replace("Microsoft:PowerPlan\{","").Replace("}","")
-
-    # Will make CPU usage appear at constantly 100% in Windows' Task Manager.
-    # Makes CPU idle states never occur to reduce DPC latency and increase the speed of context switching.
-    powercfg.exe /setacvalueindex SCHEME_CURRENT SUB_PROCESSOR IdleDisable 1
-    powercfg.exe /setactive SCHEME_CURRENT
+    PolEdit_HKLM 'SYSTEM\CurrentControlSet\Services\NVDisplay.ContainerLocalSystem' -ValueName 'Start' -Data '4' -Type 'Dword'
 }
 
 if ($reduce_mitigations)
@@ -320,14 +328,19 @@ if ($reduce_mitigations)
     # Unnecessary considering the previous registry entries imported, but do it anyway!
     bcdedit.exe /set hypervisorlaunchtype off
 
-    # System != Process.
-    Remove-All-ProcessMitigations
+    # Source code is in example_real.ps1
+    Start-BitsTransfer -Source 'https://raw.githubusercontent.com/felikcat/modules/master/example.ps1' -Destination ./ $_BITS_ARGS
+
+    . ".\example.ps1"
+
+    # Remove all ExploitGuard ProcessMitigations; ProcessMitigations override SystemMitigations.
+    DolethiaBas
 
     # DEP is required for effectively all maintained game anti-cheats.
     # Notes:
     # - VAC requires both the client and server DLLs to be signed with a certificate to detect cheaters; see:
     # - https://github.com/ValveSoftware/source-sdk-2013/issues/76#issuecomment-21562961
-    # - This means disabling DEP works for some VAC "enabled" games, but you can't play CS:GO or TF2 for an hour straight without VAC errors.
+    # -> Disabling DEP works for some VAC "enabled" games, but you can't play CS:GO or TF2 for an hour straight without VAC errors.
     Set-ProcessMitigation -System -Enable DEP
 
     # Data Execution Prevention (DEP).
@@ -354,11 +367,11 @@ if ($reduce_mitigations)
 
 if (!$defender_smartscreen)
 {
-    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows\System' -ValueName 'EnableSmartScreen' -Data '0' -Type 'Dword'
+    PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\System' -ValueName 'EnableSmartScreen' -Data '0' -Type 'Dword'
 
-    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer' -ValueName 'SmartScreenEnabled' -Data 'Off' -Type 'String'
+    PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer' -ValueName 'SmartScreenEnabled' -Data 'Off' -Type 'String'
 
-    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Microsoft\Windows\CurrentVersion\AppHost' -ValueName 'EnableWebContentEvaluation' -Data '0' -Type 'Dword'
+    PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\AppHost' -ValueName 'EnableWebContentEvaluation' -Data '0' -Type 'Dword'
 
     Disable-ScheduledTask -TaskName "\Microsoft\Windows\AppID\SmartScreenSpecific"
 }
@@ -371,7 +384,7 @@ if (!$family_safety)
 
 if (!$windows_security_systray)
 {
-    Set-PolicyFileEntry -Path $PREG_MACHINE -Key 'SOFTWARE\Policies\Microsoft\Windows Defender Security Center\Systray' -ValueName 'HideSystray' -Data '1' -Type 'Dword'
+    PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows Defender Security Center\Systray' -ValueName 'HideSystray' -Data '1' -Type 'Dword'
 }
 
 if ($change_event_viewer_behavior)
