@@ -9,4 +9,4 @@ if not %errorLevel% == 0 (
 
 cd %~dp0
 
-powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "& {Start-Process powershell.exe -ArgumentList '-NoProfile -ExecutionPolicy Bypass -File "".\Advanced.ps1""' -Verb RunAs}"
+.\..\Third-party\MinSudo.exe --NoLogo --Privileged powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "& {Start-Process powershell.exe -ArgumentList '-NoProfile -ExecutionPolicy Bypass -File "".\Advanced.ps1""' -Verb RunAs}"

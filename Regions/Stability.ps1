@@ -1,4 +1,4 @@
-#Requires -Version 5
+#Requires -Version 5 -RunAsAdministrator
 
 New-PSDrive -PSProvider registry -Root HKEY_CLASSES_ROOT -Name HKCR
 

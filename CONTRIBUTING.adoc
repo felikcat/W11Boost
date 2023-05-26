@@ -1,0 +1,2 @@
+=== These features will not be accepted
+. Disabling CPU idle states entirely, whether through a Windows power plan or other methods.

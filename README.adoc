@@ -11,32 +11,24 @@ endif::[]
 
 == About
 
-.Roughly a back-story
-[%collapsible]
-====
-TuneUp11 was originally created out of disdain for broken programs & apps as a result of custom Windows ISOs and various different optimizing scripts I tried.
-
-I also used to make custom Windows 7 and 10 ISOs in the paid version of NTLite, an approach prone to breaking something in a way that isn't noticed until it's suddenly important. TuneUp11 is a seemingly dependable response to many of my prior failures over the years to have a fully stable Windows with what I perceived as removing its junk.
-
-====
-
 NOTE: *Known alternatives:* O&O ShutUp10, W10Privacy, BloatyNosy, Wintoys, ChrisTitusTech's winutil, Pointstone AntiTrack, Debotnet, Debloat Windows 10, Atlas OS, Spybot Anti-Beacon, and Winrice.
 
 - What TuneUp11 specializes in:
-** No breaking programs or apps.
-** Increased privacy and consistency of game or real-time program performance.
-** Increases security instead of compromising on it.
-** TuneUp11 and a third-party script it pulls in (https://github.com/beatcracker/toptout[toptout]) is fully open-source.
-*** Closed-source exceptions: 'https://www.virustotal.com/gui/file/f4a33deebc499ae70e479ba75b6161cae9e1626d852af7a40b96c7d69207e607?nocache=1[PolFileEditor.dll]'.
+** By default, TuneUp11 doesn't impede the usage of Windows for the technically impaired.
+*** One of the use cases of TuneUp11 is to lessen my "tech support" role for family members in comparison to stock Windows 11.
+
+** Increased privacy and consistency of video game or real-time program performance.
 
 ** Changes are tunneled through the Group Policy Editor, therefore:
 *** Windows Update does not revert TuneUp11's changes.
 *** TuneUp11's changes can be viewed from a graphical interface via `rsop.msc`. +
 image:RSOP.png[]
-*** TuneUp11 can *mostly* be reverted/uninstalled with two commands:
-. `Remove-Item -Path "$env:windir\System32\GroupPolicy" -Recurse`
+*** TuneUp11 can *mostly* be reverted/uninstalled with two commands using PowerShell:
+. `Remove-Item -Path "$env:windir\System32\GroupPolicy" -Recurse -Force`
 . `gpupdate.exe /force`
 
+** TuneUp11 and a third-party script it pulls in (https://github.com/beatcracker/toptout[toptout]) are fully open-source. Meaning you can read through the code, the comments, and some documentation provided.
+*** Closed-source exceptions: 'https://www.virustotal.com/gui/file/f4a33deebc499ae70e479ba75b6161cae9e1626d852af7a40b96c7d69207e607?nocache=1[PolFileEditor.dll]'.
 
 == Instructions
 
@@ -56,27 +48,178 @@ image:RSOP.png[]
 
 . Download the https://github.com/felikcat/TuneUp11/releases[latest TuneUp11] and extract it.
 
-. Do not disable your antivirus, as TuneUp11 should be compatible.
+. Disable your antivirus temporarily.
 
 . Run `TuneUp11_Launcher.bat` as Administrator.
 
-. Reboot after TuneUp11 is finished to see its changes fully in action.
+. Continue onto the *Extras*, or if satisfied you can reboot now to fully apply its changes.
+- The `TuneUp11_LastRun.log` file is located in your Documents folder; same applies for `TuneUp11_Advanced_LastRun.log` if you use Extra's `Advanced.ps1`.
 
 == Extras
+
 TIP: Login to the Microsoft Store before using `Install_Xbox_Minimal.bat`, otherwise it will not work. +
 To also get the Game Bar, install the following link://www.microsoft.com/store/productId/9NZKPSTSNW4P[here] then link://www.microsoft.com/store/productId/9NBLGGH537C2[here].
 
-* `Install_Xbox_Minimal.bat`
-- Installs only what's required to support Xbox Controllers (GUI/interface not included, get it link://www.microsoft.com/store/productId/9NBLGGH30XJ3[here]), Microsoft's PC Game Pass, and specific games such as Forza Horizon 4 & 5.
+. `W11_LTSC_Replica.bat`
+* De-bloats Windows 11 enough to replicate what Windows 10 Enterprise LTSC 2021 includes by default, which is known to only include what's important.
+*** *Exceptions* to prevent breaking apps or programs: App Installer, Store Experience Host, Windows Store, Xbox Game Speech Window.
 
+. `Install_Xbox_Minimal.bat`
+- Installs only what's required to support Xbox Controllers (GUI/interface not included, get it link://www.microsoft.com/store/productId/9NBLGGH30XJ3[here]), Microsoft's PC Game Pass, and specific games such as Forza Horizon 4 & 5.
+- This is made specifically for LTSC or if `W11_LTSC_Replica.bat` was used.
+
+'''
 
 * `Advanced.ps1`
-** Contains a lot of extra features for those that know what they're doing.
+** Contains a lot of extra features for those that know what's desired. Not meant for usage on PCs you don't personally use.
 
 ** How to use:
 . Configuration is required. +
 -> Open `Advanced.ps1` in a text editor or IDE of your choosing.
 . Run `Advanced.ps1` as Administrator.
+
+.`Advanced.ps1 -> $MINIMUM_SERVICES=1`
+[%collapsible]
+====
+
+'''
+
+*Services not disabled by default.*
+
+. Microsoft Account Sign-in Assistant
+- Enables user sign-in through Microsoft account identity services. If this service is stopped, users will not be able to logon to the computer with their Microsoft account.
+- Disable this service: `Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\wlidsvc" -Name "Start" -Type DWord -Value 4 -Force`
+
+. Microsoft Storage Spaces SMP
+- Breaks:
+** Storage Spaces arrays.
+** Microsoft's storage management APIs, such as: `Get-WmiObject -class MSFT_Disk -Namespace Root\Microsoft\Windows\Storage`
+- Disable this service: `Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\smphost" -Name "Start" -Type DWord -Value 4 -Force`
+
+'''
+
+TIP: You can make your own PowerShell script that enables the services you need. +
+Automatic (Delayed Start) = 2 & `Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\EXAMPLE" -Name "DelayedAutoStart" -Type DWord -Value 1 -Force` +
+Automatic = 2 +
+Manual = 3 +
+Disabled = 4
+
+
+.List of services disabled
+[cols="1,2,4"]
+|===
+|Service |Full name |Background info
+
+| AxInstSV | ActiveX Installer | Required to install ActiveX extensions for Internet Explorer / Microsoft Edge's IE11 Mode, which many IP cameras still use for a video feed -- but not as a requirement due to ONVIF support.
+
+| AJRouter | AllJoyn Router Service | AllJoyn is an open source, cross-platform, DCOM-like framework, and protocol for making remotable method calls, remotely reading or writing properties, and sending one-way "signals" between applications (called "nodes") on a distributed bus. It is intended to be used primarily for Internet of Things scenarios such as turning on/off lights or reading temperatures.
+
+| bthserv | Bluetooth Support Service | To enable full Bluetooth support, run the following: +
+1. `Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\bthserv" -Name "Start" -Type DWord -Value 3 -Force` +
+2. Radio Management and Airplane Mode Service: `Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\RmSvc" -Name "Start" -Type DWord -Value 3 -Force` +
+-> Wi-Fi also relies on the RmSvc service to function. +
+3. Bluetooth Audio Gateway Service: +
+`Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\BTAGService" -Name "Start" -Type DWord -Value 3 -Force`
+
+| CDPSvc & CDPUserSvc | Connected Devices Platform Service | https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-cdp/da780a95-4b15-4300-8bb9-5da11b9514ab[Provides a way for devices such as PC's and smartphones to discover and send messages between each other.]
+
+| PimIndexMaintenanceSvc | ContactData | Only relevant if the Windows Search service is enabled: Indexes contact data for fast contact searching, and prevents contacts from being missing in search results.
+
+| DusmSvc | Data Usage | Shows network data usage and allows for: data limiting, restricting background data, and metered networks support.
+
+| dmwappushservice | Device Management Wireless Application | Used on client PCs for Intune, MDM, and Unified Write Filter.
+
+| MapsBroker | Downloaded Maps Manager | Windows service for application access to downloaded maps. This service is started on-demand by application accessing downloaded maps. Disabling this service will prevent apps from accessing maps.
+
+| EapHost | Extensible Authentication Protocol | Required for: some enterprise VPNs? +
+The Extensible Authentication Protocol (EAP) service provides network authentication in such scenarios as 802.1x wired and wireless, VPN, and Network Access Protection (NAP). EAP also provides application programming interfaces (APIs) that are used by network access clients, including wireless and VPN clients, during the authentication process. If you disable this service, this computer is prevented from accessing networks that require EAP authentication.
+
+| lfsvc | Geolocation Service | This service monitors the current location of the system and manages geofences (a geographical location with associated events). If you turn off this service, applications will be unable to use or receive notifications for geolocation or geofences.
+
+| SharedAccess | Internet Connection Sharing | Provides network address translation, addressing, name resolution and/or intrusion prevention services for a home or small office network.
+
+| lltdsvc | Link-Layer Topology Discovery Mapper | Creates a Network Map, consisting of PC and device topology (connectivity) information, and metadata describing each PC and device. If this service is disabled, the Network Map will not function properly.
+
+| NgcSvc | Microsoft Passport | Provides process isolation for cryptographic keys used to authenticate to a user's associated identity providers. If this service is disabled, all uses and management of these keys will not be available, which includes machine logon and single-sign on for apps and websites.
+
+| NgcCtnrSvc | Microsoft Passport Container | Manages local user identity keys used to authenticate user to identity providers as well as TPM virtual smart cards. If this service is disabled, local user identity keys and TPM virtual smart cards will not be accessible.
+
+| NetTcpPortSharing | Net.Tcp Port Sharing Service | Provides ability to share TCP ports over the net.tcp protocol.
+
+| NcbService | Network Connection Broker | Brokers connections that allow Microsoft Store Apps to receive notifications from the internet.
+
+| CscService | Offline Files | The Offline Files service performs maintenance activities on the Offline Files cache, responds to user logon and logoff events
+
+| PhoneSvc | Phone Service | Manages the telephony state on the device
+
+| Spooler | Print Spooler | This service spools print jobs and handles interaction with the printer. If you turn off this service, you won't be able to print or see your printers.
+
+| PrintNotify | Printer Extensions and Notifications | This service opens custom printer dialog boxes and handles notifications from a remote print server or a printer.
+
+| PrintWorkflowUserSvc | PrintWorkflow | Provides support for Print Workflow applications. If you turn off this service, you may not be able to print successfully.
+
+| PcaSvc | Program Compatibility Assistant Service | This service provides support for the Program Compatibility Assistant (PCA). PCA monitors programs installed and run by the user and detects known compatibility problems.
+
+| QWAVE | Quality Windows Audio Video Experience | Required for Discord, WhatsApp, and likely other communication programs. +
+Quality Windows Audio Video Experience (qWave) is a networking platform for Audio Video (AV) streaming applications on IP home networks.
+
+| RmSvc | Radio Management Service | Radio Management and Airplane Mode Service
+
+| RemoteAccess | Routing and Remote Access | Offers routing services to businesses in local area and wide area network environments.
+
+| SensorDataService | Sensor Data Service | Delivers data from a variety of sensors
+
+| SensrSvc | Sensor Monitoring Service | Monitors various sensors in order to expose data and adapt to system and user state. If this service is stopped or disabled, the display brightness will not adapt to lighting conditions.
+
+| SensorService | Sensor Service | A service for sensors that manages the functionality of different sensors. Manages Simple Device Orientation (SDO) and History for sensors. Loads the SDO sensor that reports device orientation changes. If this service is stopped or disabled, the SDO sensor will not be loaded and so autorotation will not occur. History collection from Sensors will also be stopped.
+
+| ShellHWDetection | Shell Hardware Detection | Provides notifications for AutoPlay hardware events.
+
+| SCardSvr | Smart Card | Manages access to smart cards read by this computer.
+
+| ScDeviceEnum | Smart Card Device Enumeration Service | Creates software device nodes for all smart card readers accessible to a given session.
+
+| SSDPSRV | SSDP Discovery | Discovers networked devices and services that use the SSDP discovery protocol, such as UPnP devices.
+
+| WiaRpc | Still Image Acquisition Events | Launches applications associated with still image acquisition events.
+
+| OneSyncSvc | Sync Host | This service synchronizes mail, contacts, calendar and various other user data.
+
+| lmhosts | TCP/IP NetBIOS Helper | Provides support for the NetBIOS over TCP/IP (NetBT) service and NetBIOS name resolution for clients on the network, therefore enabling users to share files, print, and log on to the network. If this service is stopped, these functions might be unavailable. If this service is disabled, any services that explicitly depend on it will fail to start.
+
+| TapiSrv | Telephony | Provides Telephony API (TAPI) support for programs that control telephony devices on the local computer and, through the LAN, on servers that are also running the service.
+
+| TabletInputService | Touch Keyboard and Handwriting Panel Service | Enables Touch Keyboard and Handwriting Panel pen and ink functionality
+
+| upnphost | UPnP Device Host | Allows UPnP devices to be hosted on this computer. If this service is stopped, any hosted UPnP devices will stop functioning and no additional hosted devices can be added.
+
+| UserDataSvc | User Data Access | Provides apps access to structured user data, including contact info, calendars, messages, and other content.
+
+| UevAgentService | User Experience Virtualization Service | Provides support for application and OS settings roaming
+
+| WalletService | WalletService | Hosts objects used by clients of the wallet
+
+| FrameServer | Windows Camera Frame Server | Enables multiple clients to access video frames from camera devices.
+
+| stisvc | Windows Image Acquisition | Provides image acquisition services for scanners and cameras.
+
+| wisvc | Windows Insider Service | Allows enrollment in Insider builds.
+
+| icssvc | Windows Mobile Hotspot Service | Provides the ability to share a cellular data connection with another device.
+
+| WpnService | Windows Push Notifications System Service | This service runs in session 0 and hosts the notification platform and connection provider which handles the connection between the device and WNS server.
+
+| WpnUserService | Windows Push Notifications User Service | This service hosts Windows notification platform which provides support for local and push notifications. Supported notifications are tile, toast and raw.
+
+| WSearch | Windows Search | Provides content indexing, property caching, and search results for files, e-mail, and other content.
+
+| XblAuthManager | Xbox Live Auth Manager | Provides authentication and authorization services for interacting with Xbox Live. If this service is stopped, some applications may not operate correctly.
+
+| XblGameSave | Xbox Live Game Save | This service syncs save data for Xbox Live save enabled games. If this service is stopped, game save data will not upload to or download from Xbox Live.
+
+|===
+
+====
 
 
 == Recommendations

@@ -1,10 +1,4 @@
-#Requires -Version 5
-
-if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]"Administrator"))
-{
-    Write-Warning "ERROR: Run TuneUp11 as Administrator!"
-    Break
-}
+#Requires -Version 5 -RunAsAdministrator
 
 ##+=+= Initialize
 $host.ui.rawui.windowtitle = "TuneUp11 by github.com/felikcat"
@@ -40,7 +34,8 @@ Tutorial:
 4. Attempt to use TuneUp11 again after the switch to Enterprise is completed.
 
 "
-    Break
+    Pause
+    exit 1
 }
 
 # Required for: Windows Updates, Windows Store (StorSvc), winget (DoSvc).
@@ -197,7 +192,8 @@ if ($_WIN32_BUILDNUMBER -ge 21327)
 {
     # Less RAM usage, no advertised apps, and restores the classic context menu.
     $Better_Shell = Start-Job {
-        winget.exe install StartIsBack.StartAllBack -eh --accept-package-agreements --accept-source-agreements --source winget --force
+
+    .\Third-party\MinSudo.exe --NoLogo powershell.exe -Command "winget.exe install StartIsBack.StartAllBack -eh --accept-package-agreements --accept-source-agreements --source winget --force"
     }
     # Use the BBRv2 TCP congestion control algorithm; the differences:
     # -> https://web.archive.org/web/20220313173158/http://web.archive.org/screenshot/https://docs.google.com/spreadsheets/d/1I1NcVVbuC7aq4nGalYxMNz9pgS9OLKcFHssIBlj9xXI
@@ -212,7 +208,10 @@ gpupdate.exe /force
 # A race condition while grabbing the output of this job is possible, but it doesn't matter.
 Receive-Job $Better_Shell
 
+Stop-Transcript
+Clear-Host
 Write-Host "
 == TuneUp11 has completed. ==
 -> Restart to fully apply its changes!
 "
+Pause

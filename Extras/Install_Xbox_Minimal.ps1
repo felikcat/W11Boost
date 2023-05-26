@@ -1,9 +1,4 @@
-#Requires -Version 5
-
-if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
-	Write-Warning "ERROR: Install_Xbox_Minimal.ps1 -> Requires Administrator!"
-	Pause
-}
+#Requires -Version 5 -RunAsAdministrator
 
 # Installations are within order of dependence. Gaming Services requires Xbox Identity Provider, and so on.
 # https://apps.microsoft.com/store/detail/xbox-identity-provider/9WZDNCRD1HKW

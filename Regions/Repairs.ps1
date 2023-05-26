@@ -1,4 +1,4 @@
-#Requires -Version 5
+#Requires -Version 5 -RunAsAdministrator
 
 # Prefer IPv6 whenever possible; avoids NAT and handles fragmentation locally instead of on the router.
 # https://docs.microsoft.com/en-US/troubleshoot/windows-server/networking/configure-ipv6-in-windows#use-registry-key-to-configure-ipv6

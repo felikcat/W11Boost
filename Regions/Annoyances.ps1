@@ -1,4 +1,4 @@
-#Requires -Version 5
+#Requires -Version 5 -RunAsAdministrator
 
 wmic.exe UserAccount set PasswordExpires=False
 

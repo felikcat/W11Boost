@@ -1,4 +1,4 @@
-#Requires -Version 5
+#Requires -Version 5 -RunAsAdministrator
 
 $_WIN32_BUILDNUMBER = (Get-WmiObject Win32_OperatingSystem).BuildNumber
 # You can bypass this check without any noticeable issues.

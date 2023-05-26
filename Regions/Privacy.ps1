@@ -1,4 +1,4 @@
-#Requires -Version 5
+#Requires -Version 5 -RunAsAdministrator
 
 PolEdit_HKCU 'Software\Microsoft\Personalization\Settings' -ValueName 'AcceptedPrivacyPolicy' -Data '0' -Type 'Dword'
 

@@ -1,9 +1,12 @@
-#Requires -Version 5
+#Requires -Version 5 -RunAsAdministrator
+
+# 1: Disables as many Windows services as possible so you can work your way up by enabling what you need.
+$MINIMUM_SERVICES = 0
 
 # 0: If real-time programs (Digital Audio Workstations, Virtual Machines, etc.) must run more consistently.
 # -> Increases power usage drastically!
 # -> Task Manager will report the wrong CPU usage, use: https://systeminformer.sourceforge.io/
-$allow_cpu_idle_state = 1
+$allow_cpu_idle_state = 0
 
 # 0: Breaks NVIDIA Control Panel and CPU usage in the Task Manager purposefully;
 # -> Re-enable the "NVIDIA Display Container LS" service when you need to configure settings, then disable after you're done.
@@ -13,7 +16,7 @@ $allow_nvidia_control_panel = 1
 # - Cannot restore backups from previous versions of Windows.
 # - Cannot revert Windows updates.
 # - Will revert other personal files (program settings and installations).
-$allow_system_restore = 1
+$allow_system_restore = 0
 
 
 # 0: Manually set compatibility modes for programs requiring say Windows XP mode.
@@ -58,7 +61,7 @@ $file_history = 0
 $game_dvr = 0
 
 # 0: Disables GPS services, which run even if a GPS isn't installed.
-$geolocation = 0
+$geolocation = 1
 
 # 1: If having to manually unblock files you download is intolerable.
 $no_blocked_files = 0
@@ -80,25 +83,23 @@ $windows_search_indexing = 0
 $windows_security_systray = 1
 
 
-
 ##+=+= END OF OPTIONS ||-> Initialize
-if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]"Administrator"))
-{
-    Write-Warning "ERROR: Advanced.ps1 -> Requires Administrator!"
-    Pause
-}
 Push-Location $PSScriptRoot
 Start-Transcript -Path ([Environment]::GetFolderPath('MyDocuments') + "\TuneUp11_Advanced_LastRun.log")
+
+Unblock-File -Path ".\..\Third-party\PolicyFileEditor\PolFileEditor.dll"
+Add-Type -Path ".\..\Third-party\PolicyFileEditor\PolFileEditor.dll" -ErrorAction Stop
+. ".\..\Third-party\PolicyFileEditor\Commands.ps1"
+
 . ".\..\imports.ps1"
-Unblock-File -Path ".\Third-party\PolicyFileEditor\PolFileEditor.dll"
-Add-Type -Path ".\Third-party\PolicyFileEditor\PolFileEditor.dll" -ErrorAction Stop
-. ".\Third-party\PolicyFileEditor\Commands.ps1"
+
 New-PSDrive -PSProvider registry -Root HKEY_CLASSES_ROOT -Name HKCR
 ##+=+=
 
 Clear-Host
 Write-Output "
 ==== Current settings ====
+MINIMUM_SERVICES = $MINIMUM_SERVICES
 
 allow_cpu_idle_state = $allow_cpu_idle_state
 allow_nvidia_control_panel = $allow_nvidia_control_panel
@@ -127,16 +128,29 @@ windows_security_systray = $windows_security_systray
 "
 Pause
 
-if (!$allow_cpu_idle_state)
+if ($MINIMUM_SERVICES)
 {
-    powercfg.exe -import "..\Third-party\Bitsum-Highest-Performance.pow"
-    $_pwr = Get-CimInstance -Name root\cimv2\power -Class win32_PowerPlan -Filter "ElementName = 'Bitsum Highest Performance'"
-    powercfg.exe /setactive ([string]$_pwr.InstanceID).Replace("Microsoft:PowerPlan\{","").Replace("}","")
+    $automatic_compatibility = 0
+    $automatic_microsoft_edge_updates = 0
+    $biometrics = 0
+    $family_safety = 0
+    $file_history = 0
+    $geolocation = 0
+    $windows_search_indexing = 0
+    $windows_security_systray = 0
 
-    # Makes CPU idle states never occur to increase the speed of context switching.
-    # Side-effect: Makes CPU usage appear constantly at 100% in Windows' Task Manager.
-    powercfg.exe /setacvalueindex SCHEME_CURRENT SUB_PROCESSOR IdleDisable 1
-    powercfg.exe /setactive SCHEME_CURRENT
+    PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\TabletPC' -ValueName 'TurnOffTouchInput' -Data '1' -Type 'Dword'
+    netsh.exe advfirewall set allprofiles state off
+
+    # Sorted in services.msc's default ordering
+    # https://learn.microsoft.com/en-us/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server
+    # NgcSvc & NgcCtnrSvc = likely to break YubiKey 5 SmartCard functionality; testing TODO.
+    # AVOID DISABLING:
+    # 1. mpssvc (Windows Defender Firewall) -> will break 'Start-BitsTransfer'.
+    $_regs = @("AxInstSV", "AJRouter", "BTAGService" ,"bthserv", "CDPSvc", "CDPUserSvc", "PimIndexMaintenanceSvc", "DusmSvc", "dmwappushservice", "MapsBroker", "EapHost", "Fax", "lfsvc", "fdPHost", "BcastDVRUserService", "SharedAccess", "PolicyAgent", "lltdsvc", "NgcSvc", "NgcCtnrSvc", "NcbService", "Netman", "PhoneSvc", "Spooler", "PrintNotify", "PrintWorkflowUserSvc", "PcaSvc", "QWAVE", "TroubleshootingSvc", "TermService", "RemoteRegistry", "SensorDataService", "SensrSvc", "SensorService", "LanmanServer", "ShellHWDetection", "SCardSvr", "ScDeviceEnum", "SNMPTRAP", "SSDPSRV", "WiaRpc", "OneSyncSvc", "lmhosts", "TapiSrv", "Themes", "WalletService", "Audiosrv", "AudioEndpointBuilder", "FrameServer", "WEPHOSTSVC", "WerSvc", "stisvc", "icssvc", "spectrum", "perceptionsimulation", "WpnService", "WpnUserService", "WinRM", "WlanSvc", "LanmanWorkstation")
+    $_regs.ForEach({
+        Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\$_" -Name "Start" -Type DWord -Value 4 -Force
+    })
 }
 
 if (!$automatic_windows_store_app_updates)
@@ -215,7 +229,7 @@ if (!$windows_search_indexing)
 
     Disable-ScheduledTask -TaskName "\Microsoft\Windows\Shell\IndexerAutomaticMaintenance"
 
-    winget.exe install voidtools.Everything -s winget -eh --accept-package-agreements --accept-source-agreements
+    .\..\Third-party\MinSudo.exe --NoLogo powershell.exe -Command "winget.exe install voidtools.Everything -s winget -eh --accept-package-agreements --accept-source-agreements"
 }
 
 if ($show_hidden_files)
@@ -250,8 +264,8 @@ if (!$ethernet_power_saving)
 
 if (!$file_history)
 {
-    Set-ItemProperty -Path "HKCR:\SOFTWARE\Policies\Microsoft\Windows\FileHistory" -Name "Disabled" -Type DWord -Value 1 -Force
-    Set-ItemProperty -Path "HKCR:\SYSTEM\CurrentControlSet\Services\fhsvc" -Name "Start" -Type DWord -Value 4 -Force
+    PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\FileHistory' -ValueName 'Disabled' -Data '1' -Type 'Dword'
+    Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\fhsvc" -Name "Start" -Type DWord -Value 4 -Force
     Disable-ScheduledTask -TaskName "\Microsoft\Windows\FileHistory\File History (maintenance mode)"
 }
 
