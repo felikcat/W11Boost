@@ -1,12 +1,5 @@
 @echo off
 
-fltmc.exe >nul
-if not %errorLevel% == 0 (
-	echo ERROR: TuneUp11_Launcher.bat: Right click on this file and select 'Run as administrator'
-	Pause
-	exit 1
-)
-
 cd %~dp0
 
 REM 1. Using above -U:E "Current User (Elevated)" as of 18 Sept 2022 breaks winget.exe

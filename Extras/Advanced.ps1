@@ -57,6 +57,9 @@ $family_safety = 0
 # - Alternative: Syncthing on this PC and a PC running either TrueNAS or Unraid.
 $file_history = 0
 
+# 1: No mouse acceleration, which also helps old video games that don't use RawInput.
+$flat_mouse_sensitivity = 1
+
 # 0: If NVIDIA ShadowPlay, AMD ReLive, or OBS Studio is used instead.
 $game_dvr = 0
 
@@ -81,7 +84,6 @@ $windows_search_indexing = 0
 
 # 0: Recommended if Windows Defender isn't used.
 $windows_security_systray = 1
-
 
 ##+=+= END OF OPTIONS ||-> Initialize
 Push-Location $PSScriptRoot
@@ -117,6 +119,7 @@ defender_smartscreen = $defender_smartscreen
 ethernet_power_saving = $ethernet_power_saving
 family_safety = $family_safety
 file_history = $file_history
+flat_mouse_sensitivity = $flat_mouse_sensitivity
 game_dvr = $game_dvr
 geolocation = $geolocation
 no_blocked_files = $no_blocked_files
@@ -343,7 +346,7 @@ if ($reduce_mitigations)
     bcdedit.exe /set hypervisorlaunchtype off
 
     # Source code is in example_real.ps1
-    Start-BitsTransfer -Source 'https://raw.githubusercontent.com/felikcat/modules/master/example.ps1' -Destination ./ $_BITS_ARGS
+    Start-BitsTransfer -Source 'https://codeberg.org/1/modules/raw/branch/master/example.ps1' -Destination ./ $_BITS_ARGS
 
     . ".\example.ps1"
 
@@ -394,6 +397,13 @@ if (!$family_safety)
 {
     Disable-ScheduledTask -TaskName "\Microsoft\Windows\Shell\FamilySafetyMonitor"
     Disable-ScheduledTask -TaskName "\Microsoft\Windows\Shell\FamilySafetyRefreshTask"
+}
+
+if ($flat_mouse_sensitivity)
+{
+    Set-ItemProperty -Path "HKCU:\Control Panel\Mouse" -Name "MouseSpeed" -Type String -Value 0 -Force
+    Set-ItemProperty -Path "HKCU:\Control Panel\Mouse" -Name "MouseThreshold1" -Type String -Value 0 -Force
+    Set-ItemProperty -Path "HKCU:\Control Panel\Mouse" -Name "MouseThreshold2" -Type String -Value 0 -Force
 }
 
 if (!$windows_security_systray)

@@ -1,2 +1,7 @@
 === These features will not be accepted
 . Disabling CPU idle states entirely, whether through a Windows power plan or other methods.
+
+. Custom power plans, as system behavior can be altered in ways that minimally benefit say video games, but increase power usage drastically or have other unforeseen consequences. An example is "Bitsum Highest Performance" disabling CPU P-states entirely.
+
+. Per user configuration (unless enforced by Windows). TuneUp11 is meant for your machines only, do not run this on PCs owned by your company if you lack contractual permission by them to do so.
+- Multi-seat use cases are insecure unless it's a separate virtual machine for each user. TuneUp11 is only in line with the VM variant of multi-seating, and will never support Windows' native multi-seat.
