@@ -1,7 +1,62 @@
-=== These features will not be accepted
+== Learning material used
+
+. link://archive.org/details/windows-internals-part1-7th/mode/2up[Windows Internals, Part 1, 7th Edition]
+** link://github.com/zodiacon/WindowsInternals[Windows Internals, Part 1, 7th Edition (unofficial) Tools]
+
+. link://www.microsoftpressstore.com/store/windows-internals-part-2-9780135462409[Windows Internals, Part 2, 7th Edition]
+** This can be viewed for free from the link://en.wikipedia.org/wiki/Z-Library[Z-Library].
+
+. link://github.com/MicrosoftDocs/windows-driver-docs/tree/staging/windows-driver-docs-pr[Windows Driver Documentation]
+
+. link://therealmjp.github.io/posts/breaking-down-barriers-part-1-whats-a-barrier/[TheRealMJP's blog posts on how GPU synchronization and preemption work]
+
+. link:https://bromiley.medium.com/windows-wednesday-shim-cache-1997ba8b13e7[Matt B's blog post on Application Compatibility Cache]
+
+
+== Developer notes
+
+* *Required software:*
+. `winget install Microsoft.WindowsADK -eh`
+. `scoop install git; scoop bucket add sysinternals; scoop install procmon`
+
+* `Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\EXAMPLE" -Name "Start" -Type DWord -Value 4 -Force` is preferred over using `sc.exe config EXAMPLE start=disabled` since Windows rejects this request depending on the service.
+
+* Non-volatile registry keys usually do not self-regenerate themselves if their key doesn't exist.
+** If the purpose is to revert back to defaults, manually set the default value instead.
+
+* The registry changes Group Policy edits do can be traced with link://docs.microsoft.com/en-us/sysinternals/downloads/procmon[Sysinternals Process Monitor].
+** Filter to the process containing gpedit.msc: +
+image:Procmon64_1.png[]
+** Filter to registry changes only: +
+image:Procmon64_2.png[]
+*** Translate the traced registry edits to their non-group policy places, and there's your registry key edit.
+**** Other processes of interest: +
+`SystemPropertiesPerformance.exe`, `SystemSettings.exe`, `DllHost.exe` +
+`SecurityHealthService.exe`
+
+TIP: Example gpedit.msc registry translation: +
+`HKCU\Software\Microsoft\Windows\CurrentVersion\Group Policy Objects\{2F5A9005-4CB6-4314-B846-8C3EB66C9C24}Machine\Software\Policies\Microsoft\Windows` *->* `HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\CloudContent`
+
+* Drivers currently loaded by Windows can be seen with link:https://systeminformer.sourceforge.io/downloads.php[System Informer] via:
+. The "System" process -> Properties (right-click or press Enter with "System" selected) -> Modules
+
+* List all from "Turn Windows features on or off" and their status:
+. `(Get-WindowsOptionalFeature -Online -FeatureName '*') | Format-Table -Autosize`
+- List all from "Settings > Apps > Optional features"/"Add an optional feature":
+. `(Get-WindowsCapability -Online -Name '*') | Format-Table -Autosize`
+
+
+* https://learn.microsoft.com/en-us/windows/package-manager/winget/install#options[`winget install` command line switches/options].
+- https://learn.microsoft.com/en-us/windows/package-manager/winget/uninstall#options[The same but for `winget uninstall`].
+
+* `-s winget` prevents Error 0x8a150044 if the Windows Store isn't currently reachable.
+
+
+== These features will not be accepted
 . Disabling CPU idle states entirely, whether through a Windows power plan or other methods.
+- Causes a 12700k CPU to go from 190W total system draw on idle to 300W.
 
 . Custom power plans, as system behavior can be altered in ways that minimally benefit say video games, but increase power usage drastically or have other unforeseen consequences. An example is "Bitsum Highest Performance" disabling CPU P-states entirely.
 
-. Per user configuration (unless enforced by Windows). TuneUp11 is meant for your machines only, do not run this on PCs owned by your company if you lack contractual permission by them to do so.
-- Multi-seat use cases are insecure unless it's a separate virtual machine for each user. TuneUp11 is only in line with the VM variant of multi-seating, and will never support Windows' native multi-seat.
+. Per user configuration (unless enforced by Windows). W11Boost is meant for your machines only, do not run this on PCs owned by your company if you lack contractual permission by them to do so.
+- Multi-seat use cases are insecure unless it's a separate virtual machine for each user. W11Boost is only in line with the VM variant of multi-seating, and will never support Windows' native multi-seat.

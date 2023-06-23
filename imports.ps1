@@ -4,7 +4,11 @@ $_WIN32_BUILDNUMBER = (Get-WmiObject Win32_OperatingSystem).BuildNumber
 # You can bypass this check without any noticeable issues.
 # Downside: Group Policy doesn't have full power on non-Enterprise editions, mainly specific to Windows' Telemetry.
 $_WINDOWS_EDITION = Get-ItemPropertyValue 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' -Name ProductName
-$_BITS_ARGS = "-MaxDownloadTime 120 -RetryInterval 60 -RetryTimeout 300 -TransferPolicy Unrestricted"
+
+function Download_File
+{
+    Start-BitsTransfer -MaxDownloadTime 120 -RetryInterval 60 -RetryTimeout 300 -TransferPolicy Unrestricted -Source @args
+}
 
 function PolEdit_HKCU
 {

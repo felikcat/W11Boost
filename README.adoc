@@ -9,51 +9,45 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
-== About
+W11Boost speeds up Windows 10 & 11, keeps FPS and ping in games consistent, brings back privacy without breaking any apps or programs, and if needed permanently activates Windows.
 
-NOTE: *Known alternatives:* O&O ShutUp10, W10Privacy, BloatyNosy, Wintoys, ChrisTitusTech's winutil, Pointstone AntiTrack, Debotnet, Debloat Windows 10, Atlas OS, Spybot Anti-Beacon, and Winrice.
 
-- What TuneUp11 specializes in:
-** By default, TuneUp11 doesn't impede the usage of Windows for the technically impaired.
-*** One of the use cases of TuneUp11 is to lessen my "tech support" role for family members in comparison to stock Windows 11.
+[%collapsible]
+.Be specific about what W11Boost does.
 
-** Increased privacy and consistency of video game or real-time program performance.
+====
+
+This section is lazily done; see the code starting from `W11Boost.ps1` as the documentation is there.
 
 ** Changes are tunneled through the Group Policy Editor, therefore:
-*** Windows Update does not revert TuneUp11's changes.
-*** TuneUp11's changes can be viewed from a graphical interface via `rsop.msc`. +
+*** Windows Update does not revert W11Boost's changes.
+*** W11Boost's changes can be viewed from a graphical interface via `rsop.msc`. +
 image:RSOP.png[]
-*** TuneUp11 can *mostly* be reverted/uninstalled with two commands using PowerShell:
+*** W11Boost can *mostly* be reverted/uninstalled with two commands using PowerShell:
 . `Remove-Item -Path "$env:windir\System32\GroupPolicy" -Recurse -Force`
 . `gpupdate.exe /force`
 
-** TuneUp11 and a third-party script it pulls in (https://github.com/beatcracker/toptout[toptout]) are fully open-source. Meaning you can read through the code, the comments, and some documentation provided.
+** W11Boost and a third-party script it pulls in (https://github.com/beatcracker/toptout[toptout]) are fully open-source. Meaning you can read through the code, the comments, and some documentation provided.
 *** Closed-source exceptions: 'https://www.virustotal.com/gui/file/f4a33deebc499ae70e479ba75b6161cae9e1626d852af7a40b96c7d69207e607?nocache=1[PolFileEditor.dll]'.
 
-== Instructions
-
-* Check if the Windows Package Manager is functional by running `winget` in PowerShell.
-
-.Fixing `winget` if it doesn't work.
-[%collapsible]
-====
-* For Windows 11, open the Microsoft Store, then update "App Installer" through it.
-
-* For Windows 10 LTSC 2019 & 2021, run in Command Prompt as Administrator to install `winget`:
-** `wsreset -i`
-** If the Microsoft store doesn't show up after this command is complete, reboot.
-** Open the Microsoft Store, then install "App Installer" through it.
+'''
 
 ====
 
-. Download the https://github.com/felikcat/TuneUp11/releases[latest TuneUp11] and extract it.
+. Download the https://github.com/felikcat/W11Boost/archive/refs/heads/master.zip[latest W11Boost] and extract it.
 
 . Disable your antivirus temporarily.
 
-. Run `TuneUp11_Launcher.bat` as Administrator.
+. Run `W11Boost_Launcher.bat` as Administrator.
 
-. Continue onto the *Extras*, or if satisfied you can reboot now to fully apply its changes.
-- The `TuneUp11_LastRun.log` file is located in your Documents folder; same applies for `TuneUp11_Advanced_LastRun.log` if you use Extra's `Advanced.ps1`.
+. Wait for the automatic reboot then enjoy.
+** Optionally, continue onto the *Extras*.
+
+
+// O&O ShutUp10, W10Privacy, BloatyNosy, Wintoys, ChrisTitusTech's winutil, Pointstone AntiTrack, Debotnet, Debloat Windows 10, Atlas OS, Spybot Anti-Beacon, Winrice.
+
+
+'''
 
 == Extras
 
@@ -68,158 +62,11 @@ To also get the Game Bar, install the following link://www.microsoft.com/store/p
 - Installs only what's required to support Xbox Controllers (GUI/interface not included, get it link://www.microsoft.com/store/productId/9NBLGGH30XJ3[here]), Microsoft's PC Game Pass, and specific games such as Forza Horizon 4 & 5.
 - This is made specifically for LTSC or if `W11_LTSC_Replica.bat` was used.
 
-'''
-
-* `Advanced.ps1`
+. `Advanced.bat`
 ** Contains a lot of extra features for those that know what's desired. Not meant for usage on PCs you don't personally use.
-
-** How to use:
-. Configuration is required. +
--> Open `Advanced.ps1` in a text editor or IDE of your choosing.
-. Run `Advanced.ps1` as Administrator.
-
-.`Advanced.ps1 -> $MINIMUM_SERVICES=1`
-[%collapsible]
-====
-
-'''
-
-*Services not disabled by default.*
-
-. Microsoft Account Sign-in Assistant
-- Enables user sign-in through Microsoft account identity services. If this service is stopped, users will not be able to logon to the computer with their Microsoft account.
-- Disable this service: `Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\wlidsvc" -Name "Start" -Type DWord -Value 4 -Force`
-
-. Microsoft Storage Spaces SMP
-- Breaks:
-** Storage Spaces arrays.
-** Microsoft's storage management APIs, such as: `Get-WmiObject -class MSFT_Disk -Namespace Root\Microsoft\Windows\Storage`
-- Disable this service: `Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\smphost" -Name "Start" -Type DWord -Value 4 -Force`
-
-'''
-
-TIP: You can make your own PowerShell script that enables the services you need. +
-Automatic (Delayed Start) = 2 & `Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\EXAMPLE" -Name "DelayedAutoStart" -Type DWord -Value 1 -Force` +
-Automatic = 2 +
-Manual = 3 +
-Disabled = 4
-
-
-.List of services disabled
-[cols="1,2,4"]
-|===
-|Service |Full name |Background info
-
-| AxInstSV | ActiveX Installer | Required to install ActiveX extensions for Internet Explorer / Microsoft Edge's IE11 Mode, which many IP cameras still use for a video feed -- but not as a requirement due to ONVIF support.
-
-| AJRouter | AllJoyn Router Service | AllJoyn is an open source, cross-platform, DCOM-like framework, and protocol for making remotable method calls, remotely reading or writing properties, and sending one-way "signals" between applications (called "nodes") on a distributed bus. It is intended to be used primarily for Internet of Things scenarios such as turning on/off lights or reading temperatures.
-
-| bthserv | Bluetooth Support Service | To enable full Bluetooth support, run the following: +
-1. `Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\bthserv" -Name "Start" -Type DWord -Value 3 -Force` +
-2. Radio Management and Airplane Mode Service: `Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\RmSvc" -Name "Start" -Type DWord -Value 3 -Force` +
--> Wi-Fi also relies on the RmSvc service to function. +
-3. Bluetooth Audio Gateway Service: +
-`Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\BTAGService" -Name "Start" -Type DWord -Value 3 -Force`
-
-| CDPSvc & CDPUserSvc | Connected Devices Platform Service | https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-cdp/da780a95-4b15-4300-8bb9-5da11b9514ab[Provides a way for devices such as PC's and smartphones to discover and send messages between each other.]
-
-| PimIndexMaintenanceSvc | ContactData | Only relevant if the Windows Search service is enabled: Indexes contact data for fast contact searching, and prevents contacts from being missing in search results.
-
-| DusmSvc | Data Usage | Shows network data usage and allows for: data limiting, restricting background data, and metered networks support.
-
-| dmwappushservice | Device Management Wireless Application | Used on client PCs for Intune, MDM, and Unified Write Filter.
-
-| MapsBroker | Downloaded Maps Manager | Windows service for application access to downloaded maps. This service is started on-demand by application accessing downloaded maps. Disabling this service will prevent apps from accessing maps.
-
-| EapHost | Extensible Authentication Protocol | Required for: some enterprise VPNs? +
-The Extensible Authentication Protocol (EAP) service provides network authentication in such scenarios as 802.1x wired and wireless, VPN, and Network Access Protection (NAP). EAP also provides application programming interfaces (APIs) that are used by network access clients, including wireless and VPN clients, during the authentication process. If you disable this service, this computer is prevented from accessing networks that require EAP authentication.
-
-| lfsvc | Geolocation Service | This service monitors the current location of the system and manages geofences (a geographical location with associated events). If you turn off this service, applications will be unable to use or receive notifications for geolocation or geofences.
-
-| SharedAccess | Internet Connection Sharing | Provides network address translation, addressing, name resolution and/or intrusion prevention services for a home or small office network.
-
-| lltdsvc | Link-Layer Topology Discovery Mapper | Creates a Network Map, consisting of PC and device topology (connectivity) information, and metadata describing each PC and device. If this service is disabled, the Network Map will not function properly.
-
-| NgcSvc | Microsoft Passport | Provides process isolation for cryptographic keys used to authenticate to a user's associated identity providers. If this service is disabled, all uses and management of these keys will not be available, which includes machine logon and single-sign on for apps and websites.
-
-| NgcCtnrSvc | Microsoft Passport Container | Manages local user identity keys used to authenticate user to identity providers as well as TPM virtual smart cards. If this service is disabled, local user identity keys and TPM virtual smart cards will not be accessible.
-
-| NetTcpPortSharing | Net.Tcp Port Sharing Service | Provides ability to share TCP ports over the net.tcp protocol.
-
-| NcbService | Network Connection Broker | Brokers connections that allow Microsoft Store Apps to receive notifications from the internet.
-
-| CscService | Offline Files | The Offline Files service performs maintenance activities on the Offline Files cache, responds to user logon and logoff events
-
-| PhoneSvc | Phone Service | Manages the telephony state on the device
-
-| Spooler | Print Spooler | This service spools print jobs and handles interaction with the printer. If you turn off this service, you won't be able to print or see your printers.
-
-| PrintNotify | Printer Extensions and Notifications | This service opens custom printer dialog boxes and handles notifications from a remote print server or a printer.
-
-| PrintWorkflowUserSvc | PrintWorkflow | Provides support for Print Workflow applications. If you turn off this service, you may not be able to print successfully.
-
-| PcaSvc | Program Compatibility Assistant Service | This service provides support for the Program Compatibility Assistant (PCA). PCA monitors programs installed and run by the user and detects known compatibility problems.
-
-| QWAVE | Quality Windows Audio Video Experience | Required for Discord, WhatsApp, and likely other communication programs. +
-Quality Windows Audio Video Experience (qWave) is a networking platform for Audio Video (AV) streaming applications on IP home networks.
-
-| RmSvc | Radio Management Service | Radio Management and Airplane Mode Service
-
-| RemoteAccess | Routing and Remote Access | Offers routing services to businesses in local area and wide area network environments.
-
-| SensorDataService | Sensor Data Service | Delivers data from a variety of sensors
-
-| SensrSvc | Sensor Monitoring Service | Monitors various sensors in order to expose data and adapt to system and user state. If this service is stopped or disabled, the display brightness will not adapt to lighting conditions.
-
-| SensorService | Sensor Service | A service for sensors that manages the functionality of different sensors. Manages Simple Device Orientation (SDO) and History for sensors. Loads the SDO sensor that reports device orientation changes. If this service is stopped or disabled, the SDO sensor will not be loaded and so autorotation will not occur. History collection from Sensors will also be stopped.
-
-| ShellHWDetection | Shell Hardware Detection | Provides notifications for AutoPlay hardware events.
-
-| SCardSvr | Smart Card | Manages access to smart cards read by this computer.
-
-| ScDeviceEnum | Smart Card Device Enumeration Service | Creates software device nodes for all smart card readers accessible to a given session.
-
-| SSDPSRV | SSDP Discovery | Discovers networked devices and services that use the SSDP discovery protocol, such as UPnP devices.
-
-| WiaRpc | Still Image Acquisition Events | Launches applications associated with still image acquisition events.
-
-| OneSyncSvc | Sync Host | This service synchronizes mail, contacts, calendar and various other user data.
-
-| lmhosts | TCP/IP NetBIOS Helper | Provides support for the NetBIOS over TCP/IP (NetBT) service and NetBIOS name resolution for clients on the network, therefore enabling users to share files, print, and log on to the network. If this service is stopped, these functions might be unavailable. If this service is disabled, any services that explicitly depend on it will fail to start.
-
-| TapiSrv | Telephony | Provides Telephony API (TAPI) support for programs that control telephony devices on the local computer and, through the LAN, on servers that are also running the service.
-
-| TabletInputService | Touch Keyboard and Handwriting Panel Service | Enables Touch Keyboard and Handwriting Panel pen and ink functionality
-
-| upnphost | UPnP Device Host | Allows UPnP devices to be hosted on this computer. If this service is stopped, any hosted UPnP devices will stop functioning and no additional hosted devices can be added.
-
-| UserDataSvc | User Data Access | Provides apps access to structured user data, including contact info, calendars, messages, and other content.
-
-| UevAgentService | User Experience Virtualization Service | Provides support for application and OS settings roaming
-
-| WalletService | WalletService | Hosts objects used by clients of the wallet
-
-| FrameServer | Windows Camera Frame Server | Enables multiple clients to access video frames from camera devices.
-
-| stisvc | Windows Image Acquisition | Provides image acquisition services for scanners and cameras.
-
-| wisvc | Windows Insider Service | Allows enrollment in Insider builds.
-
-| icssvc | Windows Mobile Hotspot Service | Provides the ability to share a cellular data connection with another device.
-
-| WpnService | Windows Push Notifications System Service | This service runs in session 0 and hosts the notification platform and connection provider which handles the connection between the device and WNS server.
-
-| WpnUserService | Windows Push Notifications User Service | This service hosts Windows notification platform which provides support for local and push notifications. Supported notifications are tile, toast and raw.
-
-| WSearch | Windows Search | Provides content indexing, property caching, and search results for files, e-mail, and other content.
-
-| XblAuthManager | Xbox Live Auth Manager | Provides authentication and authorization services for interacting with Xbox Live. If this service is stopped, some applications may not operate correctly.
-
-| XblGameSave | Xbox Live Game Save | This service syncs save data for Xbox Live save enabled games. If this service is stopped, game save data will not upload to or download from Xbox Live.
-
-|===
-
-====
+*** Configuring `Advanced.ps1` is required: +
+1. Open `Advanced.ps1` in a text editor or IDE of your choosing. +
+2. After finished, run `Advanced.bat` as Administrator.
 
 
 == Recommendations
@@ -236,79 +83,14 @@ Quality Windows Audio Video Experience (qWave) is a networking platform for Audi
 . XHCI Hands Off
 . USB Legacy
 ** link://techcommunity.microsoft.com/t5/microsoft-usb-blog/reasons-to-avoid-companion-controllers/ba-p/270710[Why disable these two?] +
-Note: if a USB is no longer bootable after these two changes, temporarily turn them both back on.
+Note: if a USB is no longer bootable after these two changes, turn them both back on.
 
 
 === Windows
-. Remove every program you installed and work your way up to see what programs you really need.
-- Use what Windows already includes instead of third-party programs. Keep it simple to reduce being impacted by https://www.bleepingcomputer.com/news/security/hackers-compromise-3cx-desktop-app-in-a-supply-chain-attack/[supply chain attacks] and to prevent causing Windows additional issues.
+. Keep the number of programs installed to a minimum. This reduces your chances of being impacted by https://www.bleepingcomputer.com/news/security/hackers-compromise-3cx-desktop-app-in-a-supply-chain-attack/[supply chain attacks] and to prevent causing Windows more issues.
 
 . Install all optional updates through Windows Update; it can include device drivers.
 
-. Check if there's enterprise versions of manufacturer software, such as replacing Lenovo Vantage with Lenovo Commercial Vantage.
+. Replace Consumer OEM programs with their Enterprise variant. Such as replacing Lenovo Vantage with Lenovo Commercial Vantage.
 
 
-== Appendices
-
-.Developer notes
-[%collapsible]
-====
-
-* *Required software:*
-. `winget install Microsoft.WindowsADK -eh`
-. `scoop install git; scoop bucket add sysinternals; scoop install procmon`
-
-* `Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\EXAMPLE" -Name "Start" -Type DWord -Value 4 -Force` is preferred over using `sc.exe config EXAMPLE start=disabled` since Windows rejects this request depending on the service.
-
-* Non-volatile registry keys usually do not self-regenerate themselves if their key doesn't exist.
-** If the purpose is to revert back to defaults, manually set the default value instead.
-
-* The registry changes Group Policy edits do can be traced with link://docs.microsoft.com/en-us/sysinternals/downloads/procmon[Sysinternals Process Monitor].
-** Filter to the process containing gpedit.msc: +
-image:Procmon64_1.png[]
-** Filter to registry changes only: +
-image:Procmon64_2.png[]
-*** Translate the traced registry edits to their non-group policy places, and there's your registry key edit.
-**** Other processes of interest: +
-`SystemPropertiesPerformance.exe`, `SystemSettings.exe`, `DllHost.exe` +
-`SecurityHealthService.exe`
-
-TIP: Example gpedit.msc registry translation: +
-`HKCU\Software\Microsoft\Windows\CurrentVersion\Group Policy Objects\{2F5A9005-4CB6-4314-B846-8C3EB66C9C24}Machine\Software\Policies\Microsoft\Windows` *->* `HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\CloudContent`
-
-* Drivers currently loaded by Windows can be seen with link:https://systeminformer.sourceforge.io/downloads.php[System Informer] via:
-. The "System" process -> Properties (right-click or press Enter with "System" selected) -> Modules
-
-* List all from "Turn Windows features on or off" and their status:
-. `(Get-WindowsOptionalFeature -Online -FeatureName '*') | Format-Table -Autosize`
-- List all from "Settings > Apps > Optional features"/"Add an optional feature":
-. `(Get-WindowsCapability -Online -Name '*') | Format-Table -Autosize`
-
-
-* https://learn.microsoft.com/en-us/windows/package-manager/winget/install#options[`winget install` command line switches/options].
-- https://learn.microsoft.com/en-us/windows/package-manager/winget/uninstall#options[The same but for `winget uninstall`].
-
-* `-s winget` prevents Error 0x8a150044 if the Windows Store isn't currently reachable.
-
-====
-
-.Learning material used
-[%collapsible]
-====
-
-. link://archive.org/details/windows-internals-part1-7th/mode/2up[Windows Internals, Part 1, 7th Edition]
-** link://github.com/zodiacon/WindowsInternals[Windows Internals, Part 1, 7th Edition (unofficial) Tools]
-
-. link://www.microsoftpressstore.com/store/windows-internals-part-2-9780135462409[Windows Internals, Part 2, 7th Edition]
-** This can be viewed for free from the link://en.wikipedia.org/wiki/Z-Library[Z-Library].
-
-. link://github.com/MicrosoftDocs/windows-driver-docs/tree/staging/windows-driver-docs-pr[Windows Driver Documentation]
-
-. link://therealmjp.github.io/posts/breaking-down-barriers-part-1-whats-a-barrier/[TheRealMJP's blog posts on how GPU synchronization and preemption work]
-
-. link:https://bromiley.medium.com/windows-wednesday-shim-cache-1997ba8b13e7[Matt B's blog post on Application Compatibility Cache]
-
-
-'''
-
-====

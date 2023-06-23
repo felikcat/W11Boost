@@ -101,3 +101,8 @@ $_regs.ForEach({
 if ($env:PROCESSOR_IDENTIFIER -match 'GenuineIntel') {
     [Environment]::SetEnvironmentVariable("OPENSSL_ia32cap", "~0x200000200000000", "Machine")
 }
+
+# Ensure default 2GB memory boundary for x86 programs.
+# Prevent bugs or crashes with x86 programs that aren't specifically tested for LargeAddressAware (3GB limit).
+# Manually patch programs with LAA instead if it's known to be beneficial, such as in GTA:SA.
+Remove-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "AllocationPreference" -Force

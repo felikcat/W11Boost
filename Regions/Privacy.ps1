@@ -169,7 +169,7 @@ Disable-ScheduledTask -TaskName "\Microsoft\Windows\Flighting\FeatureConfig\Usag
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Flighting\FeatureConfig\UsageDataReporting"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Flighting\OneSettings\RefreshCache"
 
-Start-BitsTransfer -Source 'https://raw.githubusercontent.com/beatcracker/toptout/master/examples/toptout_pwsh.ps1' -Destination ./ $_BITS_ARGS
+Download_File 'https://raw.githubusercontent.com/beatcracker/toptout/master/examples/toptout_pwsh.ps1' -Destination ./
 
 # Third-party script that tells various programs and apps to disable or minimize their telemetry.
 . ".\toptout_pwsh.ps1" -Env -Exec -ShowLog

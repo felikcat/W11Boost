@@ -1,9 +1,9 @@
 #Requires -Version 5 -RunAsAdministrator
 
 ##+=+= Initialize
-$host.ui.rawui.windowtitle = "TuneUp11 by github.com/felikcat"
+$host.ui.rawui.windowtitle = "W11Boost by github.com/felikcat"
 Push-Location $PSScriptRoot
-Start-Transcript -Path ([Environment]::GetFolderPath('MyDocuments') + "\TuneUp11_LastRun.log")
+Start-Transcript -Path ([Environment]::GetFolderPath('MyDocuments') + "\W11Boost_LastRun.log")
 
 # 'Import-Module example.psm1' fails if PowerShell script execution is disabled; do it manually.
 Unblock-File -Path ".\Third-party\PolicyFileEditor\PolFileEditor.dll"
@@ -12,6 +12,21 @@ Add-Type -Path ".\Third-party\PolicyFileEditor\PolFileEditor.dll" -ErrorAction S
 
 . ".\imports.ps1"
 ##+=+=
+
+
+$License_Check = Get-WMIObject -Query 'SELECT LicenseStatus FROM SoftwareLicensingProduct WHERE Name LIKE "%Windows%" AND PartialProductKey IS NOT NULL AND LicenseStatus !=1'
+if ([bool]::TryParse($a, [ref]$License_Check))
+{
+    & ([ScriptBlock]::Create((irm https://massgrave.dev/get))) /KMS38
+}
+
+# If winget doesn't exist, fix it!
+if (-Not (Get-Command -CommandType Application -Name winget -ErrorAction SilentlyContinue))
+{
+    # Out-Null used here to wait for the application (commandtype) to complete.
+    wsreset.exe -i | Out-Null
+
+}
 
 if ($_WINDOWS_EDITION -notlike '*Enterprise*')
 {
@@ -31,7 +46,7 @@ Tutorial:
 -> If you're on Home: Professional -> Enterprise.
 -> If you're on Pro, you can already upgrade to Enterprise.
 
-4. Attempt to use TuneUp11 again after the switch to Enterprise is completed.
+4. Attempt to use W11Boost again after the switch to Enterprise is completed.
 
 "
     Pause
@@ -60,6 +75,7 @@ $_regs.ForEach({
 
 ##+=+= Use optimal online NTP servers for more accurate system time.
 net.exe stop w32time
+
 # Make a clean slate for the time sync settings.
 w32tm.exe /unregister
 w32tm.exe /register
@@ -82,7 +98,7 @@ PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Valu
 PolEdit_HKCU 'Software\Policies\Microsoft\Windows\EdgeUI' -ValueName 'DisableMFUTracking' -Data '1' -Type 'Dword'
 PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\EdgeUI' -ValueName 'DisableMFUTracking' -Data '1' -Type 'Dword'
 
-# Disable the acrylic blur at sign-in screen to improve performance at that screen.
+# Disable the login screen's acrylic blur to improve its performance.
 PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\System' -ValueName 'DisableAcrylicBackgroundOnLogon' -Data '1' -Type 'Dword'
 
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Autochk\Proxy"
@@ -192,8 +208,7 @@ if ($_WIN32_BUILDNUMBER -ge 21327)
 {
     # Less RAM usage, no advertised apps, and restores the classic context menu.
     $Better_Shell = Start-Job {
-
-    .\Third-party\MinSudo.exe --NoLogo powershell.exe -Command "winget.exe install StartIsBack.StartAllBack -eh --accept-package-agreements --accept-source-agreements --source winget --force"
+        .\Third-party\MinSudo.exe --NoLogo powershell.exe -Command "winget.exe install StartIsBack.StartAllBack -eh --accept-package-agreements --accept-source-agreements --source winget --force"
     }
     # Use the BBRv2 TCP congestion control algorithm; the differences:
     # -> https://web.archive.org/web/20220313173158/http://web.archive.org/screenshot/https://docs.google.com/spreadsheets/d/1I1NcVVbuC7aq4nGalYxMNz9pgS9OLKcFHssIBlj9xXI
@@ -201,7 +216,7 @@ if ($_WIN32_BUILDNUMBER -ge 21327)
     netsh.exe int tcp set supplemental CongestionProvider=bbr2 Template=
 }
 
-# If this directory was non-existent before running TuneUp11, then add the "Hidden" attribute to line up with default behavior.
+# If this directory was non-existent before running W11Boost, then add the "Hidden" attribute to line up with default behavior.
 attrib.exe +H "$env:windir\System32\GroupPolicy"
 gpupdate.exe /force
 
@@ -211,7 +226,7 @@ Receive-Job $Better_Shell
 Stop-Transcript
 Clear-Host
 Write-Host "
-== TuneUp11 has completed. ==
+== W11Boost has completed. ==
 -> Restart to fully apply its changes!
 "
 Pause
