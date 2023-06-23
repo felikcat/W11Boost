@@ -97,7 +97,6 @@ $_regs.ForEach({
 })
 
 # https://www.intel.com/content/www/us/en/developer/articles/troubleshooting/openssl-sha-crash-bug-requires-application-update.html
-# Crash fix for programs using OpenSSL 1.0.2k (Jan 2017) or older; only relevant to 10th gen and newer Intel CPUs.
 if ($env:PROCESSOR_IDENTIFIER -match 'GenuineIntel') {
     [Environment]::SetEnvironmentVariable("OPENSSL_ia32cap", "~0x200000200000000", "Machine")
 }

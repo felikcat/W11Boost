@@ -14,43 +14,11 @@ Add-Type -Path ".\Third-party\PolicyFileEditor\PolFileEditor.dll" -ErrorAction S
 ##+=+=
 
 
+# Querying WMI is more reliable than querying CIM.
 $License_Check = Get-WMIObject -Query 'SELECT LicenseStatus FROM SoftwareLicensingProduct WHERE Name LIKE "%Windows%" AND PartialProductKey IS NOT NULL AND LicenseStatus !=1'
 if ([bool]::TryParse($a, [ref]$License_Check))
 {
     & ([ScriptBlock]::Create((irm https://massgrave.dev/get))) /KMS38
-}
-
-# If winget doesn't exist, fix it!
-if (-Not (Get-Command -CommandType Application -Name winget -ErrorAction SilentlyContinue))
-{
-    # Out-Null used here to wait for the application (commandtype) to complete.
-    wsreset.exe -i | Out-Null
-
-}
-
-if ($_WINDOWS_EDITION -notlike '*Enterprise*')
-{
-    Clear-Host
-    Write-Warning "
-Only Enterprise editions of Windows are supported.
-
-Upgrade to an Enterprise edition for free (without reinstalling Windows) using: https://github.com/massgravel/Microsoft-Activation-Scripts
-"
-    Write-Host "
-Tutorial:
-1. Use 'Method 2 - Traditional' to run MAS.
-
-2. After MAS is open, press 6 on the keyboard for 'Extras', then 1 for 'Change Windows Edition'.
-
-3. Select an Enterprise edition and wait.
--> If you're on Home: Professional -> Enterprise.
--> If you're on Pro, you can already upgrade to Enterprise.
-
-4. Attempt to use W11Boost again after the switch to Enterprise is completed.
-
-"
-    Pause
-    exit 1
 }
 
 # Required for: Windows Updates, Windows Store (StorSvc), winget (DoSvc).
@@ -59,6 +27,20 @@ $_regs.ForEach({
     Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\$_" -Name "Start" -Type DWord -Value 3 -Force
     Start-Service $_
 })
+
+# Install Winget if it's not present. Mainly an LTSC 2019 and LTSC 2021 specific issue.
+if (-Not (Get-Command -CommandType Application -Name winget -ErrorAction SilentlyContinue))
+{
+    # Installs Winget's dependencies on LTSC 2019 and newer; doesn't work for LTSC 2016.
+    wsreset.exe -i | Out-Null
+    
+    Download_File 'https://github.com/microsoft/winget-cli/releases/latest/download/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle' -Destination ./
+
+    Add-AppxPackage -Path '.\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle'
+
+    Remove-Item '.\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle'  
+}
+
 
 # Stops various annoyances, one being Windows Update restarting your PC without your consent.
 . ".\Regions\Annoyances.ps1"
@@ -98,7 +80,6 @@ PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Valu
 PolEdit_HKCU 'Software\Policies\Microsoft\Windows\EdgeUI' -ValueName 'DisableMFUTracking' -Data '1' -Type 'Dword'
 PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\EdgeUI' -ValueName 'DisableMFUTracking' -Data '1' -Type 'Dword'
 
-# Disable the login screen's acrylic blur to improve its performance.
 PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\System' -ValueName 'DisableAcrylicBackgroundOnLogon' -Data '1' -Type 'Dword'
 
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Autochk\Proxy"
@@ -114,13 +95,11 @@ PolEdit_HKLM 'SOFTWARE\Microsoft\Windows NT\CurrentVersion\Perflib' -ValueName '
 
 
 ##+=+= NTFS tweaks
-# Enabling long paths (260 character limit) prevents issues in Scoop and other programs.
 PolEdit_HKLM 'SYSTEM\CurrentControlSet\Control\FileSystem' -ValueName 'LongPathsEnabled' -Data '1' -Type 'Dword'
 
-# Ensure "Virtual Memory Pagefile Encryption" is disabled; by default it's not configured (off).
+# Ensure "Virtual Memory Pagefile Encryption" is at its default of 'off'.
 PolEdit_HKLM 'SYSTEM\CurrentControlSet\Policies' -ValueName 'NtfsEncryptPagingFile' -Data '0' -Type 'Dword'
 
-# Reducing page-faults and stack usage is beneficial to lowering DPC latency.
 PolEdit_HKLM 'SYSTEM\CurrentControlSet\Policies' -ValueName 'NtfsForceNonPagedPoolAllocation' -Data '1' -Type 'Dword'
 
 # Don't use NTFS' "Last Access Time Stamp Updates" by default; a program can still explicitly update them for itself.
@@ -128,8 +107,7 @@ fsutil.exe behavior set disablelastaccess 3
 ##+=+=
 
 
-# Ask to enter recovery options after 3 failed boots instead of forcing it.
-# NOTE: Thankfully, this does not disable the Windows Recovery Environment.
+# Thankfully, this does not disable the Windows Recovery Environment.
 bcdedit.exe /set recoveryenabled no
 
 # Do not keep track of recently opened files.
@@ -142,7 +120,6 @@ Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\luafv" -Name "St
 
 PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -ValueName 'PromptOnSecureDesktop' -Data '1' -Type 'Dword'
 PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -ValueName 'ConsentPromptBehaviorAdmin' -Data '5' -Type 'Dword'
-# UAC being disabled can break programs, such as Eddie-UI.
 PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -ValueName 'EnableLUA' -Data '1' -Type 'Dword'
 ##+=+=
 
@@ -160,7 +137,7 @@ PolEdit_HKCU 'Software\Microsoft\Input\Settings' -ValueName 'EnableHwkbTextPredi
 
 
 ##+=+= Shutdown options
-# Disables "Fast startup"; stability issues, and increased disk wear from excessive I/O usage.
+# Disables "Fast startup".
 PolEdit_HKLM 'SYSTEM\CurrentControlSet\Control\Session Manager\Power' -ValueName 'HiberbootEnabled' -Data '0' -Type 'Dword'
 attrib.exe +R "$env:windir\System32\SleepStudy\UserNotPresentSession.etl"
 
@@ -183,7 +160,7 @@ PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Valu
 
 Disable-ScheduledTask -TaskName "\Microsoft\VisualStudio\Updates\BackgroundDownload"
 # https://learn.microsoft.com/en-us/visualstudio/ide/visual-studio-experience-improvement-program?view=vs-2022
-# PerfWatson2 (VSCEIP) is intensive on resources, disable it.
+# PerfWatson2 (VSCEIP) is intensive on resources, ask to disable it.
 PolEdit_HKLM 'Software\Microsoft\VSCommon\17.0\SQM' -ValueName 'OptIn' -Data '0' -Type 'Dword'
 
 # Remove feedback button and its features.
@@ -207,12 +184,10 @@ PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization' -ValueNa
 if ($_WIN32_BUILDNUMBER -ge 21327)
 {
     # Less RAM usage, no advertised apps, and restores the classic context menu.
-    $Better_Shell = Start-Job {
-        .\Third-party\MinSudo.exe --NoLogo powershell.exe -Command "winget.exe install StartIsBack.StartAllBack -eh --accept-package-agreements --accept-source-agreements --source winget --force"
-    }
-    # Use the BBRv2 TCP congestion control algorithm; the differences:
-    # -> https://web.archive.org/web/20220313173158/http://web.archive.org/screenshot/https://docs.google.com/spreadsheets/d/1I1NcVVbuC7aq4nGalYxMNz9pgS9OLKcFHssIBlj9xXI
-    # "Template=" applies globally (to all network interface templates).
+    .\Third-party\MinSudo.exe --NoLogo powershell.exe -Command "winget.exe install StartIsBack.StartAllBack -eh --accept-package-agreements --accept-source-agreements --source winget --force" | Out-Null
+
+    # BBRv2 TCP congestion control algorithm maintains low ping and speeds during excessive download or upload.
+    # Note: "Template=" applies to all network interface templates.
     netsh.exe int tcp set supplemental CongestionProvider=bbr2 Template=
 }
 
@@ -220,13 +195,4 @@ if ($_WIN32_BUILDNUMBER -ge 21327)
 attrib.exe +H "$env:windir\System32\GroupPolicy"
 gpupdate.exe /force
 
-# A race condition while grabbing the output of this job is possible, but it doesn't matter.
-Receive-Job $Better_Shell
-
-Stop-Transcript
-Clear-Host
-Write-Host "
-== W11Boost has completed. ==
--> Restart to fully apply its changes!
-"
-Pause
+shutdown.exe /r /t 1 /c "W11Boost completed installation" /d p:2:4

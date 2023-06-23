@@ -9,36 +9,84 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
-W11Boost speeds up Windows 10 & 11, keeps FPS and ping in games consistent, brings back privacy without breaking any apps or programs, and if needed permanently activates Windows.
-
 
 [%collapsible]
 .Be specific about what W11Boost does.
 
 ====
 
-This section is lazily done; see the code starting from `W11Boost.ps1` as the documentation is there.
+TIP: RAM usage is higher with some of our performance tweaks, such as enabling NTFS non-paged pool usage.
 
-** Changes are tunneled through the Group Policy Editor, therefore:
-*** Windows Update does not revert W11Boost's changes.
-*** W11Boost's changes can be viewed from a graphical interface via `rsop.msc`. +
+.Performance
+. App or program startups are not tracked.
+
+. Login screen's acrylic blur is disabled.
+
+. Enabled NTFS non-paged pool usage; reduces page-faults and stack usage to lessen DPC latency spikes.
+
+. Enabled DXGI's DirectFlip with multi-plane overlay (MPO) enabled to lower input lag and reduce stuttering in games.
+
+. Disabled the following:
+1. Analyzing application execution time.
+
+2. NTFS Last Access Time Stamp Updates; if needed, an application can explicitly update its own access timestamps.
+
+3. Fault Tolerant Heap. FTH severely degrades an application's performance if it got marked for "crashing" too often, such is the case for Assetto Corsa.
+
+4. Explorer's thumbnail shadows. Makes folders with many photos or videos smoother to navigate.
+
+5. Searching disks to attempt fixing a missing shortcut.
+
+. Disabled various forms of telemetry:
+
+1. Visual Studio 2022's PerfWatson2 (VSCEIP).
+
+2. Windows Error Reporting, Connected User Experiences and Telemetry, Diagnostic Policy Service, Cloud Content & Consumer Experience.
+
+3. Advertising ID for apps (.appx packaged).
+4. Feedback notifications.
+
+
+.Reliability
+. NTP time sync servers are changed to `time.cloudflare.com ntppool1.time.nl ntppool2.time.nl` to reduce time sync failure.
+** Very important for Tor and 2auth/OTP codes from Bitwarden to remain working.
+. UAC is enabled for both security, and fixing applications that break from UAC being off, such as Eddie-UI.
+. Disabled Fast startup (also called: hybrid shutdown) due to stability issues, and excessive disk usage.
+
+. Disabled 'Wait For Link' on Ethernet adaptors. Can reduce time taken to establish a connection, and prevent drop-outs. Drop-outs were the case with Intel I225-V revision 1 and 2, but not 3.
+
+. Enabled separating explorer.exe, one for the Windows Shell, the other for the File Explorer.
+
+. Game Mode enabled to keep FPS consistent in games in certain situations, such as having OBS Studio recording your games.
+
+. Disabled Microsoft's Malicious Removal Tool, which also has an issue of removing "malicious" files that other anti-virus software like Kaspersky excluded.
+
+. Crash fix for programs using OpenSSL 1.0.2k (Jan 2017) or older; only applied if an Intel CPU is used.
+
+.Usability
+. Windows is activated using the KMS38 method if it wasn't activated prior. This also prevents deactivation after hardware changes.
+
+. Installs `winget` if missing or broken.
+
+. Enabled NTFS long paths to prevent issues with Scoop and other programs.
+
+. Ask to enter recovery options after 3 failed boots instead of forcing it.
+
+
+.Other
+. W11Boost's changes are tunneled through the Group Policy Editor, therefore:
+- Windows Update does not revert W11Boost's changes.
+- W11Boost's changes can be viewed from a graphical interface via `rsop.msc`. +
 image:RSOP.png[]
-*** W11Boost can *mostly* be reverted/uninstalled with two commands using PowerShell:
-. `Remove-Item -Path "$env:windir\System32\GroupPolicy" -Recurse -Force`
-. `gpupdate.exe /force`
-
-** W11Boost and a third-party script it pulls in (https://github.com/beatcracker/toptout[toptout]) are fully open-source. Meaning you can read through the code, the comments, and some documentation provided.
-*** Closed-source exceptions: 'https://www.virustotal.com/gui/file/f4a33deebc499ae70e479ba75b6161cae9e1626d852af7a40b96c7d69207e607?nocache=1[PolFileEditor.dll]'.
+- Registry changes are non-destructive, as they are easily revertable without relying on System Restore or registry backups.
 
 '''
 
 ====
 
-. Download the https://github.com/felikcat/W11Boost/archive/refs/heads/master.zip[latest W11Boost] and extract it.
+. https://github.com/felikcat/W11Boost/archive/refs/heads/master.zip[Download W11Boost] then extract it.
 
-. Disable your antivirus temporarily.
-
-. Run `W11Boost_Launcher.bat` as Administrator.
+. Disable your antivirus temporarily, then run `W11Boost_Launcher.bat` as Administrator.
 
 . Wait for the automatic reboot then enjoy.
 ** Optionally, continue onto the *Extras*.
@@ -63,10 +111,17 @@ To also get the Game Bar, install the following link://www.microsoft.com/store/p
 - This is made specifically for LTSC or if `W11_LTSC_Replica.bat` was used.
 
 . `Advanced.bat`
-** Contains a lot of extra features for those that know what's desired. Not meant for usage on PCs you don't personally use.
+** Not meant for usage on PCs you don't personally use.
+** Contains extra features, such as removal of Microsoft Edge.
 *** Configuring `Advanced.ps1` is required: +
 1. Open `Advanced.ps1` in a text editor or IDE of your choosing. +
 2. After finished, run `Advanced.bat` as Administrator.
+
+. `Undo_W11Boost.bat`
+** Uninstalls W11Boost.
+
+TIP: Star this GitHub repository if you like it, it helps with search engine rankings so more people stumble upon W11Boost. +
+I haven't self-promoted W11Boost on social media sites such as YouTube or Discord or TikTok.
 
 
 == Recommendations
@@ -92,5 +147,4 @@ Note: if a USB is no longer bootable after these two changes, turn them both bac
 . Install all optional updates through Windows Update; it can include device drivers.
 
 . Replace Consumer OEM programs with their Enterprise variant. Such as replacing Lenovo Vantage with Lenovo Commercial Vantage.
-
 
