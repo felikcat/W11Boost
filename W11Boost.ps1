@@ -11,22 +11,34 @@ Add-Type -Path ".\Third-party\PolicyFileEditor\PolFileEditor.dll" -ErrorAction S
 . ".\Third-party\PolicyFileEditor\Commands.ps1"
 
 . ".\imports.ps1"
-##+=+=
-
-
-# Querying WMI is more reliable than querying CIM.
-$License_Check = Get-WMIObject -Query 'SELECT LicenseStatus FROM SoftwareLicensingProduct WHERE Name LIKE "%Windows%" AND PartialProductKey IS NOT NULL AND LicenseStatus !=1'
-if ([bool]::TryParse($a, [ref]$License_Check))
-{
-    & ([ScriptBlock]::Create((irm https://massgrave.dev/get))) /KMS38
-}
 
 # Required for: Windows Updates, Windows Store (StorSvc), winget (DoSvc).
-$_regs = @("AppXSvc", "ClipSVC", "TokenBroker", "StorSvc", "DoSvc")
-$_regs.ForEach({
+$REGS = @("AppXSvc", "ClipSVC", "TokenBroker", "StorSvc", "DoSvc")
+$REGS.ForEach({
     Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\$_" -Name "Start" -Type DWord -Value 3 -Force
     Start-Service $_
 })
+##+=+=
+
+
+if ($WIN_EDITION -notmatch '.*Enterprise|.*Education|.*Server')
+{
+    # Education == Enterprise; in terms of what W11Boost expects.
+    # Education allows Home edition to directly upgrade, instead of having to do Home -> Pro -> Enterprise.
+    cscript.exe "$env:SystemRoot\system32\slmgr.vbs" /ipk NW6C2-QMPVW-D7KKK-3GKT6-VCFB2
+    $Skip_License_Check = 1
+}
+
+if ($Skip_License_Check -ne 1)
+{
+    # Querying WMI is more reliable than querying CIM.
+    $License_Check = Get-WMIObject -Query 'SELECT LicenseStatus FROM SoftwareLicensingProduct WHERE Name LIKE "%Windows%" AND PartialProductKey IS NOT NULL AND LicenseStatus !=1'
+    if ([bool]::TryParse($a, [ref]$License_Check))
+    {
+        & ([ScriptBlock]::Create((irm https://massgrave.dev/get))) /KMS38
+    }
+}
+
 
 # Install Winget if it's not present. Mainly an LTSC 2019 and LTSC 2021 specific issue.
 if (-Not (Get-Command -CommandType Application -Name winget -ErrorAction SilentlyContinue))
@@ -181,7 +193,7 @@ reg.exe import ".\Registry\Performance Options.reg"
 PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization' -ValueName 'DODownloadMode' -Data '0' -Type 'Dword'
 
 # Windows 11 only changes.
-if ($_WIN32_BUILDNUMBER -ge 21327)
+if ($WIN_BUILDNUMBER -ge 21327)
 {
     # Less RAM usage, no advertised apps, and restores the classic context menu.
     .\Third-party\MinSudo.exe --NoLogo powershell.exe -Command "winget.exe install StartIsBack.StartAllBack -eh --accept-package-agreements --accept-source-agreements --source winget --force" | Out-Null

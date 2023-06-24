@@ -69,7 +69,7 @@ bcdedit.exe /set disabledynamictick no
 # Deny global adjustment of timer resolution precision so poorly written programs can't fuck up the precision for other programs.
 # -> In detail: https://randomascii.wordpress.com/2020/10/04/windows-timer-resolution-the-great-rule-change/
 # -> A poorly written program anecdote: https://randomascii.wordpress.com/2020/10/04/windows-timer-resolution-the-great-rule-change/#comment-103111
-if ($_WIN32_BUILDNUMBER -ge 18836) # Windows 2004/20H1 first public preview build.
+if ($WIN_BUILDNUMBER -ge 18836) # Windows 2004/20H1 first public preview build.
 {
     PolEdit_HKLM 'SYSTEM\CurrentControlSet\Control\Session Manager\kernel' -ValueName 'GlobalTimerResolutionRequests' -Data '0' -Type 'Dword'
 }
@@ -90,8 +90,8 @@ Set-NetAdapterBinding -Name '*' -DisplayName 'Internet Protocol Version 6 (TCP/I
 fsutil.exe behavior set disable8dot3 2
 
 # Revert to Windows' default shutdown behavior regarding handling of apps and programs.
-$_regs = @("WaitToKillAppTimeOut", "HungAppTimeout", "WaitToKillServiceTimeout")
-$_regs.ForEach({
+$REGS = @("WaitToKillAppTimeOut", "HungAppTimeout", "WaitToKillServiceTimeout")
+$REGS.ForEach({
     Remove-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name $_ -Force
     Remove-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control" -Name $_ -Force
 })
