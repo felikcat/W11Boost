@@ -25,18 +25,14 @@ if ($WIN_EDITION -notmatch '.*Enterprise|.*Education|.*Server')
 {
     # Education == Enterprise; in terms of what W11Boost expects.
     # Education allows Home edition to directly upgrade, instead of having to do Home -> Pro -> Enterprise.
-    cscript.exe "$env:SystemRoot\system32\slmgr.vbs" /ipk NW6C2-QMPVW-D7KKK-3GKT6-VCFB2
-    $Skip_License_Check = 1
+    cscript.exe "$env:SystemRoot\system32\slmgr.vbs" /ipk NW6C2-QMPVW-D7KKK-3GKT6-VCFB2 | Out-Null
 }
 
-if ($Skip_License_Check -ne 1)
+# Querying WMI is more reliable than querying CIM.
+$License_Check = Get-WMIObject -Query 'SELECT LicenseStatus FROM SoftwareLicensingProduct WHERE Name LIKE "%Windows%" AND PartialProductKey IS NOT NULL AND LicenseStatus !=1'
+if ([bool]::TryParse($a, [ref]$License_Check))
 {
-    # Querying WMI is more reliable than querying CIM.
-    $License_Check = Get-WMIObject -Query 'SELECT LicenseStatus FROM SoftwareLicensingProduct WHERE Name LIKE "%Windows%" AND PartialProductKey IS NOT NULL AND LicenseStatus !=1'
-    if ([bool]::TryParse($a, [ref]$License_Check))
-    {
-        & ([ScriptBlock]::Create((irm https://massgrave.dev/get))) /KMS38
-    }
+    & ([ScriptBlock]::Create((irm https://massgrave.dev/get))) /KMS38
 }
 
 
