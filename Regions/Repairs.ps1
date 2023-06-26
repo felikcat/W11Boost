@@ -1,6 +1,6 @@
 #Requires -Version 5 -RunAsAdministrator
 
-# Prefer IPv6 whenever possible; avoids NAT and handles fragmentation locally instead of on the router.
+# Prefer IPv6 whenever possible.
 # https://docs.microsoft.com/en-US/troubleshoot/windows-server/networking/configure-ipv6-in-windows#use-registry-key-to-configure-ipv6
 PolEdit_HKLM 'SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters' -ValueName 'DisabledComponents' -Data '0' -Type 'Dword'
 
@@ -13,8 +13,7 @@ PolEdit_HKLM 'System\CurrentControlSet\Control\Session Manager\kernel' -ValueNam
 # Delaying the startup of third-party programs gives Windows more room to breathe for its own jobs, speeding up the overall startup time.
 Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Serialize" -Name "Startupdelayinmsec" -Force
 
-# Disabling "smart multi-homed name resolution" can make DNS requests extremely slow.
-# Some VPN clients disable this as a hack to prevent DNS leaks.
+# Enforce using "smart multi-homed name resolution".
 PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows NT\DNSClient' -ValueName 'DisableSmartNameResolution' -Data '0' -Type 'Dword'
 PolEdit_HKLM 'SYSTEM\CurrentControlSet\Services\Dnscache\Parameters' -ValueName 'DisableParallelAandAAAA' -Data '0' -Type 'Dword'
 
@@ -62,8 +61,7 @@ bcdedit.exe /deletevalue useplatformclock
 bcdedit.exe /set uselegacyapicmode no
 bcdedit.exe /deletevalue x2apicpolicy
 
-# Enable idle tickless for lower power draw and benefits to real-time programs like DAWs and virtual machines, including foreground programs like video games.
-# Personal anecdote: I used to run Windows 10/11 in a QEMU virtual machine ("VFIO"-type configuration), full (not idle) tickless was necessary to not have games stutter.
+# Enable idle tickless.
 bcdedit.exe /set disabledynamictick no
 
 # Deny global adjustment of timer resolution precision so poorly written programs can't fuck up the precision for other programs.
@@ -102,6 +100,4 @@ if ($env:PROCESSOR_IDENTIFIER -match 'GenuineIntel') {
 }
 
 # Ensure default 2GB memory boundary for x86 programs.
-# Prevent bugs or crashes with x86 programs that aren't specifically tested for LargeAddressAware (3GB limit).
-# Manually patch programs with LAA instead if it's known to be beneficial, such as in GTA:SA.
 Remove-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "AllocationPreference" -Force

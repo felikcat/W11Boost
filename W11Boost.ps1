@@ -71,7 +71,7 @@ w32tm.exe /unregister
 w32tm.exe /register
 
 w32tm.exe /config /syncfromflags:manual /manualpeerlist:"time.cloudflare.com ntppool1.time.nl ntppool2.time.nl"
-net.exe start w32time
+Start-Service w32time
 w32tm.exe /resync
 ##+=+=
 
@@ -115,7 +115,7 @@ fsutil.exe behavior set disablelastaccess 3
 ##+=+=
 
 
-# Thankfully, this does not disable the Windows Recovery Environment.
+# Thankfully this does not disable the Windows Recovery Environment.
 bcdedit.exe /set recoveryenabled no
 
 # Do not keep track of recently opened files.
@@ -147,7 +147,9 @@ PolEdit_HKCU 'Software\Microsoft\Input\Settings' -ValueName 'EnableHwkbTextPredi
 ##+=+= Shutdown options
 # Disables "Fast startup".
 PolEdit_HKLM 'SYSTEM\CurrentControlSet\Control\Session Manager\Power' -ValueName 'HiberbootEnabled' -Data '0' -Type 'Dword'
-attrib.exe +R "$env:windir\System32\SleepStudy\UserNotPresentSession.etl"
+(Get-Item "$env:windir\System32\SleepStudy\UserNotPresentSession.etl").Attributes = 'Archive', 'ReadOnly'
+
+
 
 # Use default shutdown behavior.
 Remove-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "AutoEndTasks" -Force
@@ -194,13 +196,12 @@ if ($WIN_BUILDNUMBER -ge 21327)
     # Less RAM usage, no advertised apps, and restores the classic context menu.
     .\Third-party\MinSudo.exe --NoLogo powershell.exe -Command "winget.exe install StartIsBack.StartAllBack -eh --accept-package-agreements --accept-source-agreements --source winget --force" | Out-Null
 
-    # BBRv2 TCP congestion control algorithm maintains low ping and speeds during excessive download or upload.
     # Note: "Template=" applies to all network interface templates.
     netsh.exe int tcp set supplemental CongestionProvider=bbr2 Template=
 }
 
 # If this directory was non-existent before running W11Boost, then add the "Hidden" attribute to line up with default behavior.
-attrib.exe +H "$env:windir\System32\GroupPolicy"
+(Get-Item "$env:windir\System32\GroupPolicy").Attributes = "Directory", "Hidden"
 gpupdate.exe /force
 
-shutdown.exe /r /t 1 /c "W11Boost completed installation" /d p:2:4
+Restart-Computer -Force

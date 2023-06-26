@@ -23,7 +23,7 @@ $ID="8wekyb3d8bbwe"
 # Movies & TV | Quick Assist
 # Microsoft Teams | Windows Web Experience Pack
 # Snipping Tool | Terminal
-$apps = @("Clipchamp.Clipchamp_yxz26nhyzhsrt", "Microsoft.Paint_$ID",
+$APPS = @("Clipchamp.Clipchamp_yxz26nhyzhsrt", "Microsoft.Paint_$ID",
 "Microsoft.549981C3F5F10_$ID", "Microsoft.BingNews_$ID",
 "Microsoft.BingWeather_$ID", "Microsoft.GamingApp_$ID",
 "Microsoft.GetHelp_$ID", "Microsoft.Getstarted_$ID",
@@ -41,6 +41,6 @@ $apps = @("Clipchamp.Clipchamp_yxz26nhyzhsrt", "Microsoft.Paint_$ID",
 "MicrosoftTeams_$ID", "MicrosoftWindows.Client.WebExperience_cw5n1h2txyewy",
 "Microsoft.ScreenSketch_$ID")
 
-$apps.ForEach({
+$APPS.ForEach({
     winget.exe uninstall $_ --exact --silent --accept-source-agreements
 })

@@ -1,6 +1,6 @@
 #Requires -Version 5 -RunAsAdministrator
 
-New-PSDrive -PSProvider registry -Root HKEY_CLASSES_ROOT -Name HKCR
+New-PSDrive -Name "HKCR" -PSProvider "Registry" -Root "HKEY_CLASSES_ROOT" 
 
 # Don't automatically update speech recognition and speech synthesis modules.
 PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Speech' -ValueName 'AllowSpeechModelUpdate' -Data '0' -Type 'Dword'
@@ -39,9 +39,6 @@ PolEdit_HKCU 'Software\Microsoft\DirectX\UserGpuPreferences' -ValueName 'DirectX
 # HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\GraphicsDrivers\BlockList\Kernel
 PolEdit_HKLM 'SYSTEM\CurrentControlSet\Control\GraphicsDrivers' -ValueName 'HwSchMode' -Data '2' -Type 'Dword'
 
-# MemoryCompression: While enabled; increases CPU load to reduce I/O load and handle Out Of Memory situations more smoothly; akin to Linux's zRAM.
-# -> Its downside is worsened stuttering in video games.
-# PageCombining: While enabled; reduces memory usage but increases CPU load.
 Disable-MMAgent -MemoryCompression
 Disable-MMAgent -PageCombining
 
@@ -60,8 +57,6 @@ Reset-NetAdapterAdvancedProperty -Name '*' -DisplayName '*'
 
 Set-NetAdapterAdvancedProperty -Name '*' -DisplayName 'Wait for Link' -RegistryValue 0
 
-
-# TCP is to be reliable under bad network conditions, so avoid moving closer to UDP's behavior.
 netsh.exe int tcp set global timestamps=enabled
 
 
@@ -135,4 +130,3 @@ PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\MRT' -ValueName 'DontOfferThroughWUAU'
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\RemovalTools\MRT_HB"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\RemovalTools\MRT_ERROR_HB"
 ##+=+=
-

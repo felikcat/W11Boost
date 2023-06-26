@@ -11,15 +11,11 @@ $allow_system_restore = 0
 # Potential performance and reliability benefits from forcing this to be manual (compatibility modes enabled by you only).
 $automatic_compatibility = 0
 
-# 0: Stops Microsoft Edge from wasting CPU cycles and bandwidth while closed.
-# 0 is not recommended if you use Microsoft Edge often, it will make its updates tedious.
-$automatic_microsoft_edge_updates = 0
-
 # 0: Assumption that thumbnail corruption is rare; run the 'Disk Cleanup' program if it happens.
 $automatic_thumbnail_clearing = 0
 
 # 0: Apps installed from the Windows Store don't automatically update.
-# -> It's recommended to occasionally open PowerShell as administrator, then through PowerShell run `winget upgrade --all`.
+# -> It's recommended to occasionally open PowerShell as administrator to then run `winget upgrade --all`.
 $automatic_windows_store_app_updates = 0
 
 
@@ -34,9 +30,6 @@ $defender_smartscreen = 1
 
 # 0: Prevents random packet loss/drop-outs in exchange for higher battery drain.
 $ethernet_power_saving = 0
-
-# 0: Disables parental controls, which seemingly can't be used without a Microsoft account.
-$family_safety = 0
 
 # File History will fail you when it's needed.
 # - Alternative: Syncthing on this PC and a PC running either TrueNAS or Unraid.
@@ -53,6 +46,9 @@ $geolocation = 1
 
 # 1: If having to manually unblock files you download is intolerable.
 $no_blocked_files = 0
+
+# 1: Gives Microsoft Edge a cleveland steamer.
+$nuke_microsoft_edge = 0
 
 # 1: Reduces stuttering in some games (Hogwarts Legacy), but lowers Windows' overall security;
 # -> You must replace Windows Defender with Kaspersky Free; Kaspersky has its own separate virtualization security.
@@ -79,8 +75,6 @@ Add-Type -Path ".\..\Third-party\PolicyFileEditor\PolFileEditor.dll" -ErrorActio
 . ".\..\Third-party\PolicyFileEditor\Commands.ps1"
 
 . ".\..\imports.ps1"
-
-New-PSDrive -PSProvider registry -Root HKEY_CLASSES_ROOT -Name HKCR
 ##+=+=
 
 Clear-Host
@@ -89,7 +83,6 @@ Write-Output "
 allow_system_restore = $allow_system_restore
 
 automatic_compatibility = $automatic_compatibility
-automatic_microsoft_edge_updates = $automatic_microsoft_edge_updates
 automatic_thumbnail_clearing = $automatic_thumbnail_clearing
 automatic_windows_store_app_updates = $automatic_windows_store_app_updates
 
@@ -97,12 +90,13 @@ avoid_key_annoyances = $avoid_key_annoyances
 change_event_viewer_behavior = $change_event_viewer_behavior
 defender_smartscreen = $defender_smartscreen
 ethernet_power_saving = $ethernet_power_saving
-family_safety = $family_safety
 file_history = $file_history
 flat_mouse_sensitivity = $flat_mouse_sensitivity
 game_dvr = $game_dvr
 geolocation = $geolocation
 no_blocked_files = $no_blocked_files
+nuke_microsoft_edge = $nuke_microsoft_edge
+
 reduce_mitigations = $reduce_mitigations
 show_hidden_files = $show_hidden_files
 
@@ -150,28 +144,6 @@ if (!$automatic_compatibility)
     Disable-ScheduledTask -TaskName "\Microsoft\Windows\Application Experience\ProgramDataUpdater"
 }
 
-if (!$automatic_microsoft_edge_updates)
-{
-    # Disable opening Edge on Windows startup: for the Chromium version.
-    PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Edge' -ValueName 'StartupBoostEnabled' -Data '0' -Type 'Dword'
-
-    # Disable opening Edge on Windows startup: for the legacy version.
-    PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\MicrosoftEdge\Main' -ValueName 'AllowPrelaunch' -Data '0' -Type 'Dword'
-
-    PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\MicrosoftEdge\TabPreloader' -ValueName 'AllowTabPreloading' -Data '0' -Type 'Dword'
-
-    # Do not auto-update Microsoft Edge while it's closed.
-    PolEdit_HKLM 'SYSTEM\CurrentControlSet\Services\MicrosoftEdgeElevationService' -ValueName 'Start' -Data '4' -Type 'Dword'
-    PolEdit_HKLM 'SYSTEM\CurrentControlSet\Services\edgeupdate' -ValueName 'Start' -Data '4' -Type 'Dword'
-    PolEdit_HKLM 'SYSTEM\CurrentControlSet\Services\edgeupdatem' -ValueName 'Start' -Data '4' -Type 'Dword'
-
-    Disable-ScheduledTask -TaskName "\MicrosoftEdgeUpdateTaskMachineCore"
-    Disable-ScheduledTask -TaskName "\MicrosoftEdgeUpdateTaskMachineUA"
-
-    Remove-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tree\MicrosoftEdgeUpdateTaskMachineCore" -Recurse -Force
-    Remove-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tree\MicrosoftEdgeUpdateTaskMachineUA" -Recurse -Force
-}
-
 if (!$windows_search_indexing)
 {
     Stop-Service WSearch
@@ -205,13 +177,19 @@ if ($no_blocked_files)
     PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\Policies\Attachments' -ValueName 'SaveZoneInformation' -Data '1' -Type 'Dword'
 }
 
+if ($nuke_microsoft_edge)
+{
+    Download_File "https://raw.githubusercontent.com/felikcat/nuke-microsoft-edge/master/Nuke_Microsoft_Edge.ps1" -Destination ./
+    . ".\Nuke_Microsoft_Edge.ps1"
+}
+
 if (!$ethernet_power_saving)
 {
-    $_properties = @("Advanced EEE", "Auto Disable Gigabit", "Energy Efficient Ethernet",
+    $PROPERTIES = @("Advanced EEE", "Auto Disable Gigabit", "Energy Efficient Ethernet",
     "Gigabit Lite", "Green Ethernet", "Power Saving Mode",
     "Selective Suspend", "ULP", "Ultra Low Power Mode")
     # Disable features that can cause random packet loss/drop-outs.
-    $_properties.ForEach({Set-NetAdapterAdvancedProperty -Name '*' -DisplayName $_ -RegistryValue 0})
+    $PROPERTIES.ForEach({Set-NetAdapterAdvancedProperty -Name '*' -DisplayName $_ -RegistryValue 0})
 }
 
 if (!$file_history)
@@ -290,20 +268,18 @@ if ($reduce_mitigations)
     bcdedit.exe /set hypervisorlaunchtype off
 
     # Source code is in example_real.ps1
-    Download_File 'https://codeberg.org/1/modules/raw/branch/master/example.ps1' -Destination ./
+    Download_File 'https://raw.githubusercontent.com/felikcat/remove-process-mitigations/master/Remove_Process_Mitigations.ps1' -Destination ./
 
-    . ".\example.ps1"
+    . ".\Remove_Process_Mitigations.ps1"
 
     # Remove all ExploitGuard ProcessMitigations; ProcessMitigations override SystemMitigations.
-    DolethiaBas
-    Remove-Item example.ps1
+    Remove-All-ProcessMitigations
 
-    # DEP is required for effectively all maintained game anti-cheats.
-    # Notes:
-    # - VAC requires both the client and server DLLs to be signed with a certificate to detect cheaters; see:
-    # - https://github.com/ValveSoftware/source-sdk-2013/issues/76#issuecomment-21562961
-    # -> Disabling DEP works for some VAC "enabled" games, but you can't play CS:GO or TF2 for an hour straight without VAC errors.
+    # Disabling DEP works for some VAC "enabled" games, but you can't play CS:GO or TF2 for an hour straight without VAC errors.
+    # -> Why: VAC requires both the client and server DLLs to be signed with a certificate to detect cheaters:
+    # -> https://github.com/ValveSoftware/source-sdk-2013/issues/76#issuecomment-21562961
     Set-ProcessMitigation -System -Enable DEP
+
     # Ensure "Data Execution Prevention" (DEP) only applies to operating system components and all kernel-mode drivers.
     # OptIn is Microsoft's default value for Windows 10 LTSC 2021.
     # Applying DEP to user-mode programs will slow or break them down, such as the Deus Ex (2000) video game.
@@ -336,12 +312,6 @@ if (!$defender_smartscreen)
     PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\AppHost' -ValueName 'EnableWebContentEvaluation' -Data '0' -Type 'Dword'
 
     Disable-ScheduledTask -TaskName "\Microsoft\Windows\AppID\SmartScreenSpecific"
-}
-
-if (!$family_safety)
-{
-    Disable-ScheduledTask -TaskName "\Microsoft\Windows\Shell\FamilySafetyMonitor"
-    Disable-ScheduledTask -TaskName "\Microsoft\Windows\Shell\FamilySafetyRefreshTask"
 }
 
 if ($flat_mouse_sensitivity)

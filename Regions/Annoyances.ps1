@@ -2,9 +2,6 @@
 
 wmic.exe UserAccount set PasswordExpires=False
 
-# Disable "Title bar window shake", previously called "Aero shake".
-PolEdit_HKCU 'Software\Policies\Microsoft\Windows\Explorer' -ValueName 'NoWindowMinimizingShortcuts' -Data '1' -Type 'Dword'
-
 # If allowed (1): unused apps would be uninstalled with their user data left intact, then reinstalled if launched afterwards at any point in time.
 PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\Appx' -ValueName 'AllowAutomaticAppArchiving' -Data '0' -Type 'Dword'
 
@@ -34,7 +31,7 @@ PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\LogonUI\B
 PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -ValueName 'Start_IrisRecommendations' -Data '0' -Type 'Dword'
 
 
-##+=+= Make automatic Windows updates tolerable.
+##+=+= Make Windows Update tolerable.
 
 # Block updates that Microsoft deems as causing compatibility issues.
 PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate' -ValueName 'DisableWUfBSafeguards' -Data '0' -Type 'Dword'
