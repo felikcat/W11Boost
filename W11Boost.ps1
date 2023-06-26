@@ -32,7 +32,7 @@ if ($WIN_EDITION -notmatch '.*Enterprise|.*Education|.*Server')
 $License_Check = Get-WMIObject -Query 'SELECT LicenseStatus FROM SoftwareLicensingProduct WHERE Name LIKE "%Windows%" AND PartialProductKey IS NOT NULL AND LicenseStatus !=1'
 if ([bool]::TryParse($a, [ref]$License_Check))
 {
-    & ([ScriptBlock]::Create((irm https://massgrave.dev/get))) /KMS38
+    & ([ScriptBlock]::Create((Invoke-RestMethod https://massgrave.dev/get))) /KMS38
 }
 
 

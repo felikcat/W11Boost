@@ -19,7 +19,9 @@ endif::[]
 
 ====
 
-TIP: Some performance tweaks assume an SSD (fast disk) is used. There will be negative effects on HDDs / slow disks.
+.*Notices about using W11Boost*
+. Some performance tweaks assume an SSD (fast disk) is used. There will be negative effects on HDDs / slow disks.
+. Windows Updates will not automatically be cleared out. Run the built-in "Disk Cleanup" as administrator to clear them out.
 
 .*Performance*
 . App or program startups are not tracked.
