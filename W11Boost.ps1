@@ -28,7 +28,6 @@ if ($WIN_EDITION -notmatch '.*Enterprise|.*Education|.*Server')
     cscript.exe "$env:SystemRoot\system32\slmgr.vbs" /ipk NW6C2-QMPVW-D7KKK-3GKT6-VCFB2 | Out-Null
 }
 
-# Querying WMI is more reliable than querying CIM.
 $License_Check = Get-WMIObject -Query 'SELECT LicenseStatus FROM SoftwareLicensingProduct WHERE Name LIKE "%Windows%" AND PartialProductKey IS NOT NULL AND LicenseStatus !=1'
 if ([bool]::TryParse($a, [ref]$License_Check))
 {
@@ -116,7 +115,7 @@ fsutil.exe behavior set disablelastaccess 3
 
 
 # Thankfully this does not disable the Windows Recovery Environment.
-bcdedit.exe /set recoveryenabled no
+bcdedit.exe /set "{default}" recoveryenabled no
 
 # Do not keep track of recently opened files.
 PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer' -ValueName 'NoRecentDocsHistory' -Data '1' -Type 'Dword'

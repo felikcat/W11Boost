@@ -1,7 +1,3 @@
-// O&O ShutUp10, W10Privacy, BloatyNosy, Wintoys, ChrisTitusTech's winutil, Pointstone AntiTrack, Debotnet, Debloat Windows 10, Atlas OS, Spybot Anti-Beacon, Winrice, fyWin.
-// Remove-Ms-Edge Bye Bye Edge
-
-
 :experimental:
 :imagesdir: Images/
 ifdef::env-github[]
@@ -85,7 +81,7 @@ endif::[]
 
 - Fast startup (also called 'hybrid shutdown') due to stability issues, and excessive disk usage.
 
-- Microsoft's Malicious Removal Tool, which also has an issue of removing "malicious" files that other anti-virus software like Kaspersky excluded.
+- Microsoft's Malicious Removal Tool, which also has an issue of removing "malicious" files that other antivirus software like Kaspersky excluded.
 
 . Enabled separating explorer.exe, one for the Windows Shell, the other for the File Explorer.
 
@@ -144,9 +140,9 @@ image:RSOP.png[]
 
 '''
 
-== Extras
+TIP: For those interested in learning how W11Boost is made and what research or documentation was used, go to xref:DEVELOPER.adoc[DEVELOPER.adoc].
 
-TIP: 
+== Extras
 
 . `W11_LTSC_Replica.bat`
 * De-bloats Windows 11 enough to replicate what Windows 10 Enterprise LTSC 2021 includes by default, which is known to only include what's important.

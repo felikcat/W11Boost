@@ -1,8 +1,6 @@
 #Requires -Version 5 -RunAsAdministrator
 
 $WIN_BUILDNUMBER = (Get-WmiObject Win32_OperatingSystem).BuildNumber
-# You can bypass this check without any noticeable issues.
-# Downside: Group Policy doesn't have full power on non-Enterprise editions, mainly specific to Windows' Telemetry.
 $WIN_EDITION = Get-ItemPropertyValue 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' -Name ProductName
 
 function Download_File

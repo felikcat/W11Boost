@@ -21,6 +21,9 @@
 
 * `Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\EXAMPLE" -Name "Start" -Type DWord -Value 4 -Force` is preferred over using `sc.exe config EXAMPLE start=disabled` since Windows rejects this request depending on the service.
 
+* `bcdedit.exe` will fail if the user screwed up their Boot Entries and fixed it later on; the workaround is to explicitly specify the ID.
+- Instead of: `bcdedit.exe /deletevalue x2apicpolicy`, the workaround is to use `bcdedit.exe /deletevalue "{default}" x2apicpolicy`
+
 * Out-Null is used to wait for the application (commandtype) to complete.
 ** This default behavior of not waiting is specific to 'application', others types wait for each other to complete.
 
@@ -55,11 +58,15 @@ TIP: Example gpedit.msc registry translation: +
 * `-s winget` prevents Error 0x8a150044 if the Windows Store isn't currently reachable.
 
 
-== These features will not be accepted
+== What is avoided
+
+. Disabling VBS on UEFI Lock enabled PCs can boot-loop desktop PCs, but work as intended on laptops. Therefore, `$reduce_mitigations = 1` will only work for the majority of PCs that have CG and VBS' UEFI lock disabled.
+
+. Per user configuration. W11Boost is meant for your machines only, not on PCs owned by your company if you lack their explicit permission to use W11Boost.
+- Multi-seat use cases are insecure unless it's a separate virtual machine for each user. W11Boost is only in line with the VM variant of multi-seating, and will never support Windows' native multi-seat.
+
+
 . Disabling CPU idle states entirely, whether through a Windows power plan or other methods.
-- Causes a 12700k CPU to go from 190W total system draw on idle to 300W.
+- Causes a 12700k CPU to go from 190W total system draw on idle to 300W for no noticeable FPS stability benefit.
 
 . Custom power plans, as system behavior can be altered in ways that minimally benefit say video games, but increase power usage drastically or have other unforeseen consequences. An example is "Bitsum Highest Performance" disabling CPU P-states entirely.
-
-. Per user configuration (unless enforced by Windows). W11Boost is meant for your machines only, do not run this on PCs owned by your company if you lack contractual permission by them to do so.
-- Multi-seat use cases are insecure unless it's a separate virtual machine for each user. W11Boost is only in line with the VM variant of multi-seating, and will never support Windows' native multi-seat.

@@ -51,8 +51,9 @@ $no_blocked_files = 0
 $nuke_microsoft_edge = 0
 
 # 1: Reduces stuttering in some games (Hogwarts Legacy), but lowers Windows' overall security;
-# -> You must replace Windows Defender with Kaspersky Free; Kaspersky has its own separate virtualization security.
-# -> The Vanguard, ESEA, and Faceit anti-cheats will complain about "CFG" being off; enable that yourself if needed.
+#   -> Replace Windows Defender with an alternative antivirus using its own virtualization security, such as Kaspersky Free.
+#   The Vanguard, ESEA, and Faceit anti-cheats will not run if "CFG" is off; enable "CFG" yourself if needed:
+#   -> https://support.microsoft.com/en-us/windows/turn-on-control-flow-guard-on-your-computer-34838428-2471-4d77-8fd6-b8a8fba507a3
 $reduce_mitigations = 1
 
 # Helps with not getting tricked into opening malware and makes Windows less annoying for a power user.
@@ -255,27 +256,29 @@ if (!$allow_system_restore)
 
     Disable-ScheduledTask -TaskName "\Microsoft\Windows\SystemRestore\SR"
 
-    # Delete all restore points.
-    vssadmin.exe delete shadows /all /quiet
+    # Remove all system restore points.
+    Get-CimInstance Win32_ShadowCopy | Remove-CimInstance
 }
 
 if ($reduce_mitigations)
 {
     Disable-WindowsOptionalFeature -NoRestart -Online -Remove -FeatureName VirtualMachinePlatform
 
-    reg.exe import ".\Registry\Reduce Mitigations.reg"
-    # Unnecessary considering the previous registry entries imported, but do it anyway!
-    bcdedit.exe /set hypervisorlaunchtype off
+    bcdedit.exe /set "{default}" loadoptions DISABLE-LSA-ISO,DISABLE-VBS
+    bcdedit.exe /set "{default}" vsmlaunchtype off
 
-    # Source code is in example_real.ps1
-    Download_File 'https://raw.githubusercontent.com/felikcat/remove-process-mitigations/master/Remove_Process_Mitigations.ps1' -Destination ./
+    $REGS =@("ConfigureKernelShadowStacksLaunch", "ConfigureSystemGuardLaunch",
+    "HypervisorEnforcedCodeIntegrity", "LsaCfgFlags", "RequirePlatformSecurityFeatures")
+    $REGS.ForEach({
+        PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\DeviceGuard' -ValueName "**del.$_" -Data '' -Type 'String'
+    })
 
-    . ".\Remove_Process_Mitigations.ps1"
+    PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\DeviceGuard' -ValueName 'EnableVirtualizationBasedSecurity' -Data 0 -Type DWord
+    PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\DeviceGuard' -ValueName 'HVCIMATRequired' -Data 0 -Type 'Dword'
 
-    # Remove all ExploitGuard ProcessMitigations; ProcessMitigations override SystemMitigations.
-    Remove-All-ProcessMitigations
+    PolEdit_HKLM 'SYSTEM\CurrentControlSet\Control\Lsa' -ValueName 'LsaCfgFlags' -Data 0 -Type 'Dword'
 
-    # Disabling DEP works for some VAC "enabled" games, but you can't play CS:GO or TF2 for an hour straight without VAC errors.
+    # Disabling DEP works for some VAC-secured games, but denies playing CS:GO or TF2 for 30 minutes or less straight; causes VAC errors.
     # -> Why: VAC requires both the client and server DLLs to be signed with a certificate to detect cheaters:
     # -> https://github.com/ValveSoftware/source-sdk-2013/issues/76#issuecomment-21562961
     Set-ProcessMitigation -System -Enable DEP
@@ -283,24 +286,19 @@ if ($reduce_mitigations)
     # Ensure "Data Execution Prevention" (DEP) only applies to operating system components and all kernel-mode drivers.
     # OptIn is Microsoft's default value for Windows 10 LTSC 2021.
     # Applying DEP to user-mode programs will slow or break them down, such as the Deus Ex (2000) video game.
-    bcdedit.exe /set nx OptIn
+    bcdedit.exe /set "{default}" nx OptIn
 
-    # Data Execution Prevention (DEP).
-    # -> EmulateAtlThunks
-
-    # Address Space Layout Randomization (ASLR).
-    # -> RequireInfo, ForceRelocateImages, BottomUp, HighEntropy
-
-    # ControlFlowGuard (CFG).
-    # -> SuppressExports, StrictCFG
-
-    # Validate exception chains (SEHOP).
-    # -> SEHOP, SEHOPTelemetry, AuditSEHOP
-
-    # Heap integrity.
-    # -> TerminateOnError
-
-    Set-ProcessMitigation -System -Disable EmulateAtlThunks, RequireInfo, ForceRelocateImages, BottomUp, HighEntropy, CFG, SuppressExports, StrictCFG, SEHOP, SEHOPTelemetry, AuditSEHOP, TerminateOnError
+    # Data Execution Prevention (DEP):
+    #       -> EmulateAtlThunks
+    # Address Space Layout Randomization (ASLR):
+    #       -> RequireInfo, ForceRelocateImages, BottomUp, HighEntropy
+    # Control Flow Guard (CFG):
+    #       -> SuppressExports, StrictCFG
+    # Validate exception chains (SEHOP):
+    #       -> SEHOP, SEHOPTelemetry, AuditSEHOP
+    # Heap integrity:
+    #       -> TerminateOnError
+    Set-ProcessMitigation -PolicyFilePath .\mitigation-policies.xml
 }
 
 if (!$defender_smartscreen)

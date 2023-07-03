@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MitigationPolicy>
+    <SystemConfig>
+        <ASLR ForceRelocateImages="false" RequireInfo="false" BottomUp="false" HighEntropy="false" />
+        <ControlFlowGuard Enable="false" SuppressExports="false" StrictControlFlowGuard="false" />
+        <SEHOP Enable="false" TelemetryOnly="false" Audit="false" />
+        <Heap TerminateOnError="false" />
+    </SystemConfig>
+    <AppConfig Executable="MsSense.exe">
+        <StrictHandle Enable="true" />
+        <SEHOP Enable="true" TelemetryOnly="false" />
+    </AppConfig>
+</MitigationPolicy>

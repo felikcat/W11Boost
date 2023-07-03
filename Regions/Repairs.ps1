@@ -55,14 +55,14 @@ PolEdit_HKLM 'SYSTEM\CurrentControlSet\Control\Power\PowerThrottling' -ValueName
 PolEdit_HKLM 'SYSTEM\CurrentControlSet\Services\NlaSvc\Parameters\Internet' -ValueName 'EnableActiveProbing' -Data '1' -Type 'Dword'
 
 # Use sane defaults for these sensitive timer related settings.
-bcdedit.exe /deletevalue tscsyncpolicy
-bcdedit.exe /deletevalue uselegacyapicmode
-bcdedit.exe /deletevalue useplatformclock
-bcdedit.exe /set uselegacyapicmode no
-bcdedit.exe /deletevalue x2apicpolicy
+bcdedit.exe /deletevalue "{default}" tscsyncpolicy
+bcdedit.exe /deletevalue "{default}" uselegacyapicmode
+bcdedit.exe /deletevalue "{default}" useplatformclock
+bcdedit.exe /deletevalue "{default}" x2apicpolicy
+bcdedit.exe /set "{default}" uselegacyapicmode no
 
 # Enable idle tickless.
-bcdedit.exe /set disabledynamictick no
+bcdedit.exe /set "{default}" disabledynamictick no
 
 # Deny global adjustment of timer resolution precision so poorly written programs can't fuck up the precision for other programs.
 # -> In detail: https://randomascii.wordpress.com/2020/10/04/windows-timer-resolution-the-great-rule-change/
@@ -77,7 +77,7 @@ Enable-MMAgent -ApplicationPreLaunch
 
 # Draw graphical elements for boot (progress spinner, Windows or BIOS logo, etc).
 # This is useful to tell if something went wrong if a BSOD can't show up.
-bcdedit.exe /deletevalue bootuxdisabled
+bcdedit.exe /deletevalue "{default}" bootuxdisabled
 
 # Ensure IPv6 and its related features are enabled.
 Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\iphlpsvc" -Name "Start" -Type DWord -Value 2 -Force
