@@ -195,8 +195,10 @@ if ($WIN_BUILDNUMBER -ge 21327)
     # Less RAM usage, no advertised apps, and restores the classic context menu.
     .\Third-party\MinSudo.exe --NoLogo powershell.exe -Command "winget.exe install StartIsBack.StartAllBack -eh --accept-package-agreements --accept-source-agreements --source winget --force" | Out-Null
 
-    # Note: "Template=" applies to all network interface templates.
-    netsh.exe int tcp set supplemental CongestionProvider=bbr2 Template=
+    $NAME = @("InternetCustom", "DatacenterCustom", "Compat", "Datacenter", "Internet")
+    $NAME.ForEach({
+        netsh.exe int tcp set supplemental Template=$_ CongestionProvider=bbr2
+    })
 }
 
 # If this directory was non-existent before running W11Boost, then add the "Hidden" attribute to line up with default behavior.
