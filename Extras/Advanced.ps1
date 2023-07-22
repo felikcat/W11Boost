@@ -38,7 +38,7 @@ $flat_mouse_sensitivity = 1
 # 0: If NVIDIA ShadowPlay, AMD ReLive, or OBS Studio is used instead.
 $game_dvr = 0
 
-# 0: Disables GPS services, which run even if a GPS isn't installed.
+# 0: Disables GPS services, which run even if a GPS is not installed.
 $geolocation = 1
 
 # 1: If having to manually unblock files you download is intolerable.
@@ -58,7 +58,7 @@ $show_hidden_files = 1
 # -> The Windows Search Index is prone to causing sudden declines in performance, especially on slow hard drives (HDDs).
 $windows_search_indexing = 0
 
-# 0: Recommended if Windows Defender isn't used.
+# 0: Recommended if Windows Defender is not used.
 $windows_security_systray = 1
 
 ##+=+= END OF OPTIONS ||-> Initialize

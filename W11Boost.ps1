@@ -25,7 +25,8 @@ if ($WIN_EDITION -notmatch '.*Enterprise|.*Education|.*Server')
 {
     # Education == Enterprise; in terms of what W11Boost expects.
     # Education allows Home edition to directly upgrade, instead of having to do Home -> Pro -> Enterprise.
-    cscript.exe "$env:SystemRoot\system32\slmgr.vbs" /ipk NW6C2-QMPVW-D7KKK-3GKT6-VCFB2 | Wait-Process
+    $args = '"$env:SystemRoot\system32\slmgr.vbs" /ipk NW6C2-QMPVW-D7KKK-3GKT6-VCFB2'
+    Start-Process -Wait cscript.exe -ArgumentList $args
 }
 
 $License_Check = Get-WMIObject -Query 'SELECT LicenseStatus FROM SoftwareLicensingProduct WHERE Name LIKE "%Windows%" AND PartialProductKey IS NOT NULL AND LicenseStatus !=1'
@@ -38,7 +39,7 @@ if ([bool]::TryParse($a, [ref]$License_Check))
 # Install Winget if it's not present. Mainly an LTSC 2019 and LTSC 2021 specific issue.
 if (-Not (Get-Command -CommandType Application -Name winget -ErrorAction SilentlyContinue))
 {
-    # Installs Winget's dependencies on LTSC 2019 and newer; doesn't work for LTSC 2016.
+    # Installs Winget's dependencies on LTSC 2019 and newer; does not work for LTSC 2016.
     wsreset.exe -i | Wait-Process
     
     Download_File 'https://github.com/microsoft/winget-cli/releases/latest/download/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle' -Destination ./
@@ -193,7 +194,8 @@ PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization' -ValueNa
 if ($WIN_BUILDNUMBER -ge 21327)
 {
     # Less RAM usage, no advertised apps, and restores the classic context menu.
-    .\Third-party\MinSudo.exe --NoLogo powershell.exe -Command "winget.exe install StartIsBack.StartAllBack -eh --accept-package-agreements --accept-source-agreements --source winget --force" | Wait-Process
+    $args = '--NoLogo powershell.exe -Command "winget.exe install StartIsBack.StartAllBack -eh --accept-package-agreements --accept-source-agreements --source winget --force"'
+    Start-Process -Wait ".\Third-party\MinSudo.exe" -ArgumentList $args
 
     $NAME = @("InternetCustom", "DatacenterCustom", "Compat", "Datacenter", "Internet")
     $NAME.ForEach({

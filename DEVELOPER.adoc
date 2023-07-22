@@ -37,10 +37,7 @@ endif::[]
 * `bcdedit.exe` will fail if the user screwed up their Boot Entries and fixed it later on; the workaround is to explicitly specify the ID.
 - Instead of: `bcdedit.exe /deletevalue x2apicpolicy`, the workaround is to use `bcdedit.exe /deletevalue "{default}" x2apicpolicy`
 
-* Wait-Process is used to wait for the application (commandtype) to complete.
-** This default behavior of not waiting is specific to 'application', others types wait for each other to complete.
-
-* Non-volatile registry keys usually do not self-regenerate themselves if their key doesn't exist.
+* Non-volatile registry keys usually do not self-regenerate themselves if their key does not exist.
 ** If the purpose is to revert back to defaults, manually set the default value instead.
 
 * The registry changes Group Policy edits do can be traced with link://docs.microsoft.com/en-us/sysinternals/downloads/procmon[Sysinternals Process Monitor].
@@ -68,7 +65,7 @@ TIP: Example gpedit.msc registry translation: +
 * https://learn.microsoft.com/en-us/windows/package-manager/winget/install#options[`winget install` command line switches/options].
 - https://learn.microsoft.com/en-us/windows/package-manager/winget/uninstall#options[The same but for `winget uninstall`].
 
-* `-s winget` prevents Error 0x8a150044 if the Windows Store isn't currently reachable.
+* `-s winget` prevents Error 0x8a150044 if the Windows Store is not currently reachable.
 
 
 == Exploit mitigations notes

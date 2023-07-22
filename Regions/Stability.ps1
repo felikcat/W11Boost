@@ -21,7 +21,7 @@ PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Valu
 PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\SearchSettings' -ValueName 'IsDeviceSearchHistoryEnabled' -Data '0' -Type 'Dword'
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Shell\IndexerAutomaticMaintenance"
 
-# By default Windows doesn't automatically back-up the registry, but just in case they change this..
+# By default Windows does not automatically back-up the registry, but just in case they change this..
 PolEdit_HKLM 'SYSTEM\CurrentControlSet\Control\Session Manager\Configuration Manager' -ValueName 'EnablePeriodicBackup' -Data '0' -Type 'Dword'
 
 # https://docs.microsoft.com/en-us/windows/desktop/win7appqual/fault-tolerant-heap
