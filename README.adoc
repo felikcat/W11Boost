@@ -167,14 +167,6 @@ TIP: For those interested in learning how W11Boost is made and what research or 
 . `Undo_W11Boost.bat`
 ** Uninstalls W11Boost.
 
-== Promotion
-
-W11Boost had a lot of effort and refinement put into it. I'd be happy if more people know about it, instead of it being myself and my friends using W11Boost.
-
-* Star this GitHub repository if you like it.
-* Make TikTok videos about it if you're passionate about it.
-
-
 == Recommendations
 
 === BIOS

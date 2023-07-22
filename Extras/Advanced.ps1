@@ -14,18 +14,15 @@ $automatic_compatibility = 0
 # 0: Assumption that thumbnail corruption is rare; run the 'Disk Cleanup' program if it happens.
 $automatic_thumbnail_clearing = 0
 
-# 0: Apps installed from the Windows Store don't automatically update.
-# -> It's recommended to occasionally open PowerShell as administrator to then run `winget upgrade --all`.
-$automatic_windows_store_app_updates = 0
+# 0: Stops apps installed from the Windows Store from updating themselves.
+# -> Alternative: open PowerShell as administrator to then run `winget upgrade --all`.
+$automatic_windows_store_app_updates = 1
 
 
 # Disables Sticky, Filter, and Toggle Keys.
 $avoid_key_annoyances = 1
 
-# 1: Only log events with warnings or errors will be recorded.
-$change_event_viewer_behavior = 1
-
-# 0: Relevant to disable smartscreen if you use an alternative antivirus.
+# 0: Disabling is not recommended, even if Windows Defender is not used.
 $defender_smartscreen = 1
 
 # 0: Prevents random packet loss/drop-outs in exchange for higher battery drain.
@@ -35,7 +32,7 @@ $ethernet_power_saving = 0
 # - Alternative: Syncthing on this PC and a PC running either TrueNAS or Unraid.
 $file_history = 0
 
-# 1: No mouse acceleration, which also helps old video games that don't use RawInput.
+# 1: No mouse acceleration, which also helps old video games not using RawInput.
 $flat_mouse_sensitivity = 1
 
 # 0: If NVIDIA ShadowPlay, AMD ReLive, or OBS Studio is used instead.
@@ -47,14 +44,11 @@ $geolocation = 1
 # 1: If having to manually unblock files you download is intolerable.
 $no_blocked_files = 0
 
-# 1: Gives Microsoft Edge a cleveland steamer.
+# 1: Removes Microsoft Edge.
 $nuke_microsoft_edge = 0
 
-# 1: Reduces stuttering in some games (Hogwarts Legacy), but lowers Windows' overall security;
-#   -> Replace Windows Defender with an alternative antivirus using its own virtualization security, such as Kaspersky Free.
-#   The Vanguard, ESEA, and Faceit anti-cheats will not run if "CFG" is off; enable "CFG" yourself if needed:
-#   -> https://support.microsoft.com/en-us/windows/turn-on-control-flow-guard-on-your-computer-34838428-2471-4d77-8fd6-b8a8fba507a3
-$reduce_mitigations = 1
+# 1: Please avoid using this on PCs used for sensitive tasks, such as accessing a bank account.
+$reduce_mitigations = 0
 
 # Helps with not getting tricked into opening malware and makes Windows less annoying for a power user.
 $show_hidden_files = 1
@@ -88,7 +82,6 @@ automatic_thumbnail_clearing = $automatic_thumbnail_clearing
 automatic_windows_store_app_updates = $automatic_windows_store_app_updates
 
 avoid_key_annoyances = $avoid_key_annoyances
-change_event_viewer_behavior = $change_event_viewer_behavior
 defender_smartscreen = $defender_smartscreen
 ethernet_power_saving = $ethernet_power_saving
 file_history = $file_history
@@ -278,11 +271,6 @@ if ($reduce_mitigations)
 
     PolEdit_HKLM 'SYSTEM\CurrentControlSet\Control\Lsa' -ValueName 'LsaCfgFlags' -Data 0 -Type 'Dword'
 
-    # Disabling DEP works for some VAC-secured games, but denies playing CS:GO or TF2 for 30 minutes or less straight; causes VAC errors.
-    # -> Why: VAC requires both the client and server DLLs to be signed with a certificate to detect cheaters:
-    # -> https://github.com/ValveSoftware/source-sdk-2013/issues/76#issuecomment-21562961
-    Set-ProcessMitigation -System -Enable DEP
-
     # Ensure "Data Execution Prevention" (DEP) only applies to operating system components and all kernel-mode drivers.
     # OptIn is Microsoft's default value for Windows 10 LTSC 2021.
     # Applying DEP to user-mode programs will slow or break them down, such as the Deus Ex (2000) video game.
@@ -322,10 +310,4 @@ if ($flat_mouse_sensitivity)
 if (!$windows_security_systray)
 {
     PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows Defender Security Center\Systray' -ValueName 'HideSystray' -Data '1' -Type 'Dword'
-}
-
-if ($change_event_viewer_behavior)
-{
-    # Don't log events without warnings or errors.
-    auditpol.exe /set /category:* /Success:disable
 }
