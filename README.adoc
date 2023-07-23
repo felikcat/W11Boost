@@ -136,7 +136,6 @@ image:RSOP.png[]
 
 . Wait for the automatic reboot and enjoy.
 
-'''
 
 == Extras
 
