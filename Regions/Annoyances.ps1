@@ -49,10 +49,5 @@ PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU' -ValueName '
 # Disable feedback reminders.
 PolEdit_HKCU 'SOFTWARE\Microsoft\Siuf\Rules' -ValueName 'NumberOfSIUFInPeriod' -Data '0' -Type 'Dword'
 PolEdit_HKCU 'SOFTWARE\Microsoft\Siuf\Rules' -ValueName 'PeriodInNanoSeconds' -Data '0' -Type 'Dword'
-
-# Prompt to install updates every Sunday at 03:00/3:00AM.
-PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU' -ValueName 'ScheduledInstallDay' -Data '1' -Type 'Dword'
-PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU' -ValueName 'ScheduledInstallTime' -Data '3' -Type 'Dword'
-
 ##+=+=
 

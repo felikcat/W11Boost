@@ -35,7 +35,9 @@ endif::[]
 * `Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\EXAMPLE" -Name "Start" -Type DWord -Value 4 -Force` is preferred over using `sc.exe config EXAMPLE start=disabled` since Windows rejects this request depending on the service.
 
 * `bcdedit.exe` will fail if the user screwed up their Boot Entries and fixed it later on; the workaround is to explicitly specify the ID.
-- Instead of: `bcdedit.exe /deletevalue x2apicpolicy`, the workaround is to use `bcdedit.exe /deletevalue "{default}" x2apicpolicy`
+- Instead of: `bcdedit.exe /deletevalue x2apicpolicy`, the workaround is to use `bcdedit.exe /deletevalue "\{default\}" x2apicpolicy`
+
+* `setx.exe` is much faster than `[Environment]::SetEnvironmentVariable`; `setx.exe` however cannot remove environment variables.
 
 * Non-volatile registry keys usually do not self-regenerate themselves if their key does not exist.
 ** If the purpose is to revert back to defaults, manually set the default value instead.
@@ -74,7 +76,7 @@ TIP: Example gpedit.msc registry translation: +
 * WSL (Windows Subsystem for Linux) requires CFG (Control Flow Guard) to run. W11Boost currently avoids enabling the other mitigations that might be required later, see the blog post on it.
 - https://msrc.microsoft.com/blog/2019/09/attacking-the-vm-worker-process/#hardening-vmwp
 
-* Disabling DEP works for some VAC-secured games (https://github.com/ValveSoftware/source-sdk-2013/issues/76#issuecomment-21562961[why?]), but denies playing CS:GO or TF2 for an hour or less straight; causes VAC errors.
+* Disabling DEP works for VAC-secured games (https://github.com/ValveSoftware/source-sdk-2013/issues/76#issuecomment-21562961[that are Source mods of other Source games]), but denies playing CS:GO or TF2 for an hour or less straight; causes VAC errors.
 - VAC is loaded by `steam.exe` if Steam is ran as Administrator; otherwise it's `steamservice.exe`.
 
 == What is avoided

@@ -6,11 +6,11 @@ Push-Location $PSScriptRoot
 Start-Transcript -Path ([Environment]::GetFolderPath('MyDocuments') + "\W11Boost_LastRun.log")
 
 # 'Import-Module example.psm1' fails if PowerShell script execution is disabled; do it manually.
-Unblock-File -Path ".\Third-party\PolicyFileEditor\PolFileEditor.dll"
-Add-Type -Path ".\Third-party\PolicyFileEditor\PolFileEditor.dll" -ErrorAction Stop
-. ".\Third-party\PolicyFileEditor\Commands.ps1"
+Unblock-File -Path "..\Third-party\PolicyFileEditor\PolFileEditor.dll"
+Add-Type -Path "..\Third-party\PolicyFileEditor\PolFileEditor.dll" -ErrorAction Stop
+. "..\Third-party\PolicyFileEditor\Commands.ps1"
 
-. ".\imports.ps1"
+. ".\IMPORTS.ps1"
 
 # Required for: Windows Updates, Windows Store (StorSvc), winget (DoSvc).
 $REGS = @("AppXSvc", "ClipSVC", "TokenBroker", "StorSvc", "DoSvc")
@@ -42,7 +42,7 @@ if (-Not (Get-Command -CommandType Application -Name winget -ErrorAction Silentl
     # Installs Winget's dependencies on LTSC 2019 and newer; does not work for LTSC 2016.
     wsreset.exe -i | Wait-Process
     
-    Download_File 'https://github.com/microsoft/winget-cli/releases/latest/download/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle' -Destination ./
+    Download_File 'https://github.com/microsoft/winget-cli/releases/latest/download/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle' -Destination .\
 
     Add-AppxPackage -Path '.\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle'
 
@@ -51,16 +51,16 @@ if (-Not (Get-Command -CommandType Application -Name winget -ErrorAction Silentl
 
 
 # Stops various annoyances, one being Windows Update restarting your PC without your consent.
-. ".\Regions\Annoyances.ps1"
+. ".\Annoyances.ps1"
 
 # Minimize data sent to Microsoft through normal means, also improves performance.
-. ".\Regions\Privacy.ps1"
+. ".\Privacy.ps1"
 
 # Correcting mistakes from other optimizers and user-error.
-. ".\Regions\Repairs.ps1"
+. ".\Repairs.ps1"
 
 # Improves how consistent the performance is for networking, FPS, etc.
-. ".\Regions\Stability.ps1"
+. ".\Stability.ps1"
 
 
 ##+=+= Use optimal online NTP servers for more accurate system time.
@@ -124,7 +124,8 @@ PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer' -Valu
 
 ##+=+= Enable UAC (User Account Control).
 # UAC requires the 'LUA File Virtualization Filter Driver'.
-Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\luafv" -Name "Start" -Type DWord -Value 2 -Force
+Set-ItemProperty -Path "
+}HKLM:\SYSTEM\CurrentControlSet\Services\luafv" -Name "Start" -Type DWord -Value 2 -Force
 
 PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -ValueName 'PromptOnSecureDesktop' -Data '1' -Type 'Dword'
 PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -ValueName 'ConsentPromptBehaviorAdmin' -Data '5' -Type 'Dword'
@@ -156,7 +157,7 @@ Remove-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "AutoEndTasks" -Fo
 
 PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -ValueName 'DisableShutdownNamedPipe' -Data '1' -Type 'Dword'
 
-# A security feature that's disabled by default in Windows 11 Pro. Enabling this makes shutdown times slow.
+# A security feature that's disabled by default in Windows 11. Enabling this makes shutdown times slow.
 PolEdit_HKLM 'SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management' -ValueName 'ClearPageFileAtShutdown' -Data '0' -Type 'Dword'
 ##+=+=
 
@@ -184,21 +185,19 @@ PolEdit_HKCU 'Software\Microsoft\VisualStudio\Telemetry' -ValueName 'TurnOffSwit
 ##+=+=
 
 
-# System Properties -> Advanced -> Performance
-reg.exe import ".\Registry\Performance Options.reg"
-
 # Disable Delivery Optimization's "Allow downloads from other PCs".
 PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization' -ValueName 'DODownloadMode' -Data '0' -Type 'Dword'
 
-# Windows 11 only changes.
-if ($WIN_BUILDNUMBER -ge 21327)
+if ($WIN_BUILDNUMBER -ge 21327) # Windows 11 only
 {
-    # Less RAM usage, no advertised apps, and restores the classic context menu.
-    $args = '--NoLogo powershell.exe -Command "winget.exe install StartIsBack.StartAllBack -eh --accept-package-agreements --accept-source-agreements --source winget --force"'
-    Start-Process -Wait ".\Third-party\MinSudo.exe" -ArgumentList $args
+    # Restore the classic context menu.
+    New-Item -Path "HKCU:\SOFTWARE\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" -Value "" -Type String -Force
 
     $NAME = @("InternetCustom", "DatacenterCustom", "Compat", "Datacenter", "Internet")
     $NAME.ForEach({
+        # BBRv2 is currently the best well-rounded TCP congestion algorithm.
+        # Improvements from BBRv2 can be noticed if you're hosting game or web servers on this PC.
+        # https://ieeexplore.ieee.org/abstract/document/9361674
         netsh.exe int tcp set supplemental Template=$_ CongestionProvider=bbr2
     })
 }

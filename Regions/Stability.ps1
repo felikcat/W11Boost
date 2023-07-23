@@ -51,10 +51,38 @@ Disable-ScheduledTask -TaskName "\Microsoft\Windows\Diagnosis\Scheduled"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Diagnosis\RecommendedTroubleshootingScanner"
 ##+=+=
 
+##+=+= System Properties -> Advanced -> Performance
+# Enable "Show window contents while dragging"
+Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "DragFullWindows" -Type String -Value 1 -Force
+# Enable "Smooth edges of screen fonts"
+Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "FontSmoothing" -Type String -Value 1 -Force
+
+# Enable "Show thumbnails instead of icons"
+Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "IconsOnly" -Type DWord -Value 0 -Force
+# Disable "Animations in taskbar"
+Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "TaskbarAnimations" -Type DWord -Value 0 -Force
+# Enable "Show translucent selection rectangle"
+Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "ListviewAlphaSelect" -Type DWord -Value 1 -Force
+
+# Disable "Animate windows when minimizing and maximizing"
+Set-ItemProperty -Path "HKCU:\Control Panel\Desktop\WindowMetrics\MinAnimate" -Name "MinAnimate" -Type String -Value 0 -Force
+
+Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize" -Name "EnableTransparency" -Type DWord -Value 0 -Force
+
+# Disable "Enable Peek"
+Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\DWM" -Name "EnableAeroPeek" -Type DWord -Value 0 -Force
+# Enable "Save taskbar thumbnail previews"
+Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\DWM" -Name "AlwaysHibernateThumbnails" -Type DWord -Value 1 -Force
+
+#! Always set 'UserPreferencesMask' last!
+Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "UserPreferencesMask" -Type Binary -Value ([byte[]](0x90,0x12,0x03,0x80,0x10,0,0,0)) -Force
+##+=+=
+
 
 # Resets adapter settings to driver defaults; it's assumed if there were prior tweaks done, they're incorrect.
 Reset-NetAdapterAdvancedProperty -Name '*' -DisplayName '*'
 
+# Random disconnection fix for specific network adapters, such as Intel's I225-V
 Set-NetAdapterAdvancedProperty -Name '*' -DisplayName 'Wait for Link' -RegistryValue 0
 
 netsh.exe int tcp set global timestamps=enabled

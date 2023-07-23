@@ -67,7 +67,7 @@ bcdedit.exe /set "{default}" disabledynamictick no
 # Deny global adjustment of timer resolution precision so poorly written programs can't fuck up the precision for other programs.
 # -> In detail: https://randomascii.wordpress.com/2020/10/04/windows-timer-resolution-the-great-rule-change/
 # -> A poorly written program anecdote: https://randomascii.wordpress.com/2020/10/04/windows-timer-resolution-the-great-rule-change/#comment-103111
-if ($WIN_BUILDNUMBER -ge 18836) # Windows 2004/20H1 first public preview build.
+if ($WIN_BUILDNUMBER -ge 18836) # Only Windows 2004/20H1 and above.
 {
     PolEdit_HKLM 'SYSTEM\CurrentControlSet\Control\Session Manager\kernel' -ValueName 'GlobalTimerResolutionRequests' -Data '0' -Type 'Dword'
 }
@@ -96,7 +96,7 @@ $REGS.ForEach({
 
 # https://www.intel.com/content/www/us/en/developer/articles/troubleshooting/openssl-sha-crash-bug-requires-application-update.html
 if ($env:PROCESSOR_IDENTIFIER -match 'GenuineIntel') {
-    [Environment]::SetEnvironmentVariable("OPENSSL_ia32cap", "~0x200000200000000", "Machine")
+    setx.exe /M OPENSSL_ia32cap "~0x200000200000000"
 }
 
 # Ensure default 2GB memory boundary for x86 programs.

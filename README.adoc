@@ -16,7 +16,7 @@ endif::[]
 ====
 
 .*Notices about using W11Boost*
-. Some performance tweaks assume an SSD (fast disk) is used. There will be negative effects on HDDs / slow disks.
+. It's assumed you use an SSD. There will be unintentional slowdown on HDDs (slow disks).
 . Windows Updates will not automatically be cleared out. Run the built-in "Disk Cleanup" as administrator to clear them out.
 
 .*Performance*
@@ -71,7 +71,7 @@ endif::[]
 - Opted out of "being the first to get the latest non-security updates".
 
 . NTP time sync servers are changed to `time.cloudflare.com ntppool1.time.nl ntppool2.time.nl` to reduce time sync failure.
-** Very important for Tor and 2auth/OTP codes from Bitwarden to remain working.
+** Very important for Tor and 2FA codes from Bitwarden to remain working.
 . UAC is enabled for both security, and fixing applications that break from UAC being off, such as Eddie-UI.
 
 . Disabled the following:
@@ -124,7 +124,7 @@ endif::[]
 - Windows Update does not revert W11Boost's changes.
 - W11Boost's changes can be viewed from a graphical interface via `rsop.msc`. +
 image:RSOP.png[]
-- Registry changes are non-destructive, as they are easily revertable without relying on System Restore or registry backups.
+- Registry changes are non-destructive, as they are easily revertible without relying on System Restore or registry backups.
 
 '''
 
@@ -132,15 +132,11 @@ image:RSOP.png[]
 
 . https://github.com/felikcat/W11Boost/archive/refs/heads/master.zip[Download W11Boost] then extract it.
 
-. Disable your antivirus temporarily, then run `W11Boost_Launcher.bat` as Administrator.
+. Run `Install.bat` as Administrator.
 
-. Wait for the automatic reboot then enjoy.
-** Optionally, continue onto the *Extras*.
-
+. Wait for the automatic reboot and enjoy.
 
 '''
-
-TIP: For those interested in learning how W11Boost is made and what research or documentation was used, go to xref:DEVELOPER.adoc[DEVELOPER.adoc].
 
 == Extras
 
@@ -159,12 +155,12 @@ TIP: For those interested in learning how W11Boost is made and what research or 
 
 . `Advanced.bat`
 ** Not meant for usage on PCs you don't personally use.
-** Contains extra features, such as removal of Microsoft Edge (Edge WebView is excluded to prevent program breakage).
+** Contains extra features, such as the removal of Microsoft Edge.
 *** Configuring `Advanced.ps1` is required: +
 1. Open `Advanced.ps1` in a text editor or IDE of your choosing. +
 2. After finished, run `Advanced.bat` as Administrator.
 
-. `Undo_W11Boost.bat`
+. `Uninstall.bat`
 ** Uninstalls W11Boost.
 
 == Recommendations

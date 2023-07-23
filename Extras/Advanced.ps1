@@ -22,9 +22,6 @@ $automatic_windows_store_app_updates = 1
 # Disables Sticky, Filter, and Toggle Keys.
 $avoid_key_annoyances = 1
 
-# 0: Disabling is not recommended, even if Windows Defender is not used.
-$defender_smartscreen = 1
-
 # 0: Prevents random packet loss/drop-outs in exchange for higher battery drain.
 $ethernet_power_saving = 0
 
@@ -41,35 +38,28 @@ $game_dvr = 0
 # 0: Disables GPS services, which run even if a GPS is not installed.
 $geolocation = 1
 
-# 1: If having to manually unblock files you download is intolerable.
-$no_blocked_files = 0
-
 # 1: Removes Microsoft Edge.
 $nuke_microsoft_edge = 0
-
-# 1: Please avoid using this on PCs used for sensitive tasks, such as accessing a bank account.
-$reduce_mitigations = 0
 
 # Helps with not getting tricked into opening malware and makes Windows less annoying for a power user.
 $show_hidden_files = 1
 
 
-# 0: 'Everything' will be installed to be used as the alternative search indexer.
-# -> The Windows Search Index is prone to causing sudden declines in performance, especially on slow hard drives (HDDs).
+# 0: Disables the Windows Search Index.
+# It is prone to causing sudden declines in performance, more so on slow hard drives (HDDs).
+# Use "Installer 64-bit" from https://www.voidtools.com/ if the search becomes intolerable for you.
 $windows_search_indexing = 0
 
-# 0: Recommended if Windows Defender is not used.
-$windows_security_systray = 1
 
 ##+=+= END OF OPTIONS ||-> Initialize
 Push-Location $PSScriptRoot
 Start-Transcript -Path ([Environment]::GetFolderPath('MyDocuments') + "\W11Boost_Advanced_LastRun.log")
 
-Unblock-File -Path ".\..\Third-party\PolicyFileEditor\PolFileEditor.dll"
-Add-Type -Path ".\..\Third-party\PolicyFileEditor\PolFileEditor.dll" -ErrorAction Stop
-. ".\..\Third-party\PolicyFileEditor\Commands.ps1"
+Unblock-File -Path "..\Third-party\PolicyFileEditor\PolFileEditor.dll"
+Add-Type -Path "..\Third-party\PolicyFileEditor\PolFileEditor.dll" -ErrorAction Stop
+. "..\Third-party\PolicyFileEditor\Commands.ps1"
 
-. ".\..\imports.ps1"
+. "..\Regions\IMPORTS.ps1"
 ##+=+=
 
 Clear-Host
@@ -82,20 +72,16 @@ automatic_thumbnail_clearing = $automatic_thumbnail_clearing
 automatic_windows_store_app_updates = $automatic_windows_store_app_updates
 
 avoid_key_annoyances = $avoid_key_annoyances
-defender_smartscreen = $defender_smartscreen
 ethernet_power_saving = $ethernet_power_saving
 file_history = $file_history
 flat_mouse_sensitivity = $flat_mouse_sensitivity
 game_dvr = $game_dvr
 geolocation = $geolocation
-no_blocked_files = $no_blocked_files
 nuke_microsoft_edge = $nuke_microsoft_edge
 
-reduce_mitigations = $reduce_mitigations
 show_hidden_files = $show_hidden_files
 
 windows_search_indexing = $windows_search_indexing
-windows_security_systray = $windows_security_systray
 "
 Pause
 
@@ -146,8 +132,6 @@ if (!$windows_search_indexing)
     PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\SearchSettings' -ValueName 'IsDeviceSearchHistoryEnabled' -Data '0' -Type 'Dword'
 
     Disable-ScheduledTask -TaskName "\Microsoft\Windows\Shell\IndexerAutomaticMaintenance"
-
-    .\..\Third-party\MinSudo.exe --NoLogo powershell.exe -Command "winget.exe install voidtools.Everything -s winget -eh --accept-package-agreements --accept-source-agreements"
 }
 
 if ($show_hidden_files)
@@ -163,17 +147,9 @@ if ($show_hidden_files)
     PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\CabinetState' -ValueName 'FullPath' -Data '1' -Type 'Dword'
 }
 
-if ($no_blocked_files)
-{
-    # SaveZoneInformation 1 = disables blocking downloaded files.
-    PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments' -ValueName 'SaveZoneInformation' -Data '1' -Type 'Dword'
-    # Don't block downloaded files in Explorer, also fixes File History not working for downloaded files.
-    PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\Policies\Attachments' -ValueName 'SaveZoneInformation' -Data '1' -Type 'Dword'
-}
-
 if ($nuke_microsoft_edge)
 {
-    Download_File "https://raw.githubusercontent.com/felikcat/nuke-microsoft-edge/master/Nuke_Microsoft_Edge.ps1" -Destination ./
+    Download_File "https://raw.githubusercontent.com/felikcat/nuke-microsoft-edge/master/Nuke_Microsoft_Edge.ps1" -Destination .\
     . ".\Nuke_Microsoft_Edge.ps1"
 }
 
@@ -253,61 +229,9 @@ if (!$allow_system_restore)
     Get-CimInstance Win32_ShadowCopy | Remove-CimInstance
 }
 
-if ($reduce_mitigations)
-{
-    Disable-WindowsOptionalFeature -NoRestart -Online -Remove -FeatureName VirtualMachinePlatform
-
-    bcdedit.exe /set "{default}" loadoptions DISABLE-LSA-ISO,DISABLE-VBS
-    bcdedit.exe /set "{default}" vsmlaunchtype off
-
-    $REGS =@("ConfigureKernelShadowStacksLaunch", "ConfigureSystemGuardLaunch",
-    "HypervisorEnforcedCodeIntegrity", "LsaCfgFlags", "RequirePlatformSecurityFeatures")
-    $REGS.ForEach({
-        PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\DeviceGuard' -ValueName "**del.$_" -Data '' -Type 'String'
-    })
-
-    PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\DeviceGuard' -ValueName 'EnableVirtualizationBasedSecurity' -Data 0 -Type DWord
-    PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\DeviceGuard' -ValueName 'HVCIMATRequired' -Data 0 -Type 'Dword'
-
-    PolEdit_HKLM 'SYSTEM\CurrentControlSet\Control\Lsa' -ValueName 'LsaCfgFlags' -Data 0 -Type 'Dword'
-
-    # Ensure "Data Execution Prevention" (DEP) only applies to operating system components and all kernel-mode drivers.
-    # OptIn is Microsoft's default value for Windows 10 LTSC 2021.
-    # Applying DEP to user-mode programs will slow or break them down, such as the Deus Ex (2000) video game.
-    bcdedit.exe /set "{default}" nx OptIn
-
-    # Data Execution Prevention (DEP):
-    #       -> EmulateAtlThunks
-    # Address Space Layout Randomization (ASLR):
-    #       -> RequireInfo, ForceRelocateImages, BottomUp, HighEntropy
-    # Control Flow Guard (CFG):
-    #       -> SuppressExports, StrictCFG
-    # Validate exception chains (SEHOP):
-    #       -> SEHOP, SEHOPTelemetry, AuditSEHOP
-    # Heap integrity:
-    #       -> TerminateOnError
-    Set-ProcessMitigation -PolicyFilePath .\mitigation-policies.xml
-}
-
-if (!$defender_smartscreen)
-{
-    PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\System' -ValueName 'EnableSmartScreen' -Data '0' -Type 'Dword'
-
-    PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer' -ValueName 'SmartScreenEnabled' -Data 'Off' -Type 'String'
-
-    PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\AppHost' -ValueName 'EnableWebContentEvaluation' -Data '0' -Type 'Dword'
-
-    Disable-ScheduledTask -TaskName "\Microsoft\Windows\AppID\SmartScreenSpecific"
-}
-
 if ($flat_mouse_sensitivity)
 {
     Set-ItemProperty -Path "HKCU:\Control Panel\Mouse" -Name "MouseSpeed" -Type String -Value 0 -Force
     Set-ItemProperty -Path "HKCU:\Control Panel\Mouse" -Name "MouseThreshold1" -Type String -Value 0 -Force
     Set-ItemProperty -Path "HKCU:\Control Panel\Mouse" -Name "MouseThreshold2" -Type String -Value 0 -Force
-}
-
-if (!$windows_security_systray)
-{
-    PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows Defender Security Center\Systray' -ValueName 'HideSystray' -Data '1' -Type 'Dword'
 }
