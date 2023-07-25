@@ -79,7 +79,7 @@ PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows Defender Security Center\Systr
 ##+=+= Enable -> Blocking downloaded files.
 # SaveZoneInformation 0 = enables blocking downloaded files.
 PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments' -ValueName 'SaveZoneInformation' -Data '0' -Type 'Dword'
-# Don't block downloaded files in Explorer, also fixes File History not working for downloaded files.
+# Do not block downloaded files in Explorer, also fixes File History not working for downloaded files.
 PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\Policies\Attachments' -ValueName 'SaveZoneInformation' -Data '0' -Type 'Dword'
 ##+=+=
 

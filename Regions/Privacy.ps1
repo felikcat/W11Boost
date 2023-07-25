@@ -42,7 +42,7 @@ PolEdit_HKLM 'SOFTWARE\Microsoft\OneDrive' -ValueName 'PreventNetworkTrafficPreU
 PolEdit_HKLM 'SOFTWARE\Microsoft\PolicyManager\current\device\System' -ValueName 'AllowExperimentation' -Data '0' -Type 'Dword'
 
 
-##+=+= [ctfmon.exe] Don't send Microsoft inking and typing data.
+##+=+= [ctfmon.exe] Do not send Microsoft inking and typing data.
 PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\TextInput' -ValueName 'AllowLinguisticDataCollection' -Data '0' -Type 'Dword'
 
 PolEdit_HKCU 'Software\Microsoft\InputPersonalization' -ValueName 'RestrictImplicitInkCollection' -Data '1' -Type 'Dword'
@@ -130,7 +130,7 @@ PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\Windows Error Reporting' -ValueName 'Au
 # 1 = Minimum consent level; "Always ask before sending data: Windows prompts users for consent to send reports."
 PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\Windows Error Reporting' -ValueName 'DefaultConsent' -Data '1' -Type 'Dword'
 
-# Don't allow fully ignoring our custom consent settings.
+# Do not allow fully ignoring our custom consent settings.
 PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\Windows Error Reporting' -ValueName 'DefaultOverrideBehavior' -Data '0' -Type 'Dword'
 PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\Windows Error Reporting' -ValueName 'DontSendAdditionalData' -Data '1' -Type 'Dword'
 PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\Windows Error Reporting' -ValueName 'LoggingDisabled' -Data '1' -Type 'Dword'

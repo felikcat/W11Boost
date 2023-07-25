@@ -20,7 +20,7 @@ PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate' -ValueName 'Exc
 # Show what's slowing down bootups and shutdowns.
 PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -ValueName 'verbosestatus' -Data '1' -Type 'Dword'
 
-# Don't suggest ways to "finish setting up my device to get the most out of Windows".
+# Do not suggest ways to "finish setting up my device to get the most out of Windows".
 PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\UserProfileEngagement' -ValueName 'ScoobeSystemSettingEnabled' -Data '0' -Type 'Dword'
 
 # Disables the startup sound; why: https://youtu.be/UWUBjM2LNJU?t=772

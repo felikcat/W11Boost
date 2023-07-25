@@ -61,7 +61,7 @@ w32tm.exe /resync
 ##+=+=
 
 
-# If logged into a Microsoft account: Don't sync anything.
+# If logged into a Microsoft account: Do not sync anything.
 PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\SettingSync' -ValueName 'SyncPolicy' -Data '5' -Type 'Dword'
 
 PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -ValueName 'ShowSyncProviderNotifications' -Data '0' -Type 'Dword'
@@ -83,7 +83,7 @@ Disable-ScheduledTask -TaskName "\NvTmRep_CrashReport2_{B2FE1952-0186-46C3-BAEC-
 Disable-ScheduledTask -TaskName "\NvTmRep_CrashReport3_{B2FE1952-0186-46C3-BAEC-A80AA35AC5B8}"
 Disable-ScheduledTask -TaskName "\NvTmRep_CrashReport4_{B2FE1952-0186-46C3-BAEC-A80AA35AC5B8}"
 
-# Don't analyze programs' execution time data.
+# Do not analyze programs' execution time data.
 PolEdit_HKLM 'SOFTWARE\Microsoft\Windows NT\CurrentVersion\Perflib' -ValueName 'Disable Performance Counters' -Data '1' -Type 'Dword'
 
 
@@ -95,7 +95,7 @@ PolEdit_HKLM 'SYSTEM\CurrentControlSet\Policies' -ValueName 'NtfsEncryptPagingFi
 
 PolEdit_HKLM 'SYSTEM\CurrentControlSet\Policies' -ValueName 'NtfsForceNonPagedPoolAllocation' -Data '1' -Type 'Dword'
 
-# Don't use NTFS' "Last Access Time Stamp Updates" by default; a program can still explicitly update them for itself.
+# Do not use NTFS' "Last Access Time Stamp Updates" by default; a program can still explicitly update them for itself.
 fsutil.exe behavior set disablelastaccess 3
 ##+=+=
 

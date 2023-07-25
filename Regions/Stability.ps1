@@ -2,14 +2,14 @@
 
 New-PSDrive -Name "HKCR" -PSProvider "Registry" -Root "HKEY_CLASSES_ROOT" 
 
-# Don't automatically update speech recognition and speech synthesis modules.
+# Do not automatically update speech recognition and speech synthesis modules.
 PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Speech' -ValueName 'AllowSpeechModelUpdate' -Data '0' -Type 'Dword'
 
 PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\Policies\Explorer' -ValueName 'LinkResolveIgnoreLinkInfo' -Data '1' -Type 'Dword'
 
-# Don't search disks to attempt fixing a missing shortcut.
+# Do not search disks to attempt fixing a missing shortcut.
 PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\Policies\Explorer' -ValueName 'NoResolveSearch' -Data '1' -Type 'Dword'
-# Don't search all paths related to the missing shortcut.
+# Do not search all paths related to the missing shortcut.
 PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\Policies\Explorer' -ValueName 'NoResolveTrack' -Data '1' -Type 'Dword'
 
 # Disable Explorer's thumbnail shadows.

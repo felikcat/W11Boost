@@ -3,7 +3,7 @@
 # Microsoft's Publisher ID.
 $ID="8wekyb3d8bbwe"
 
-# Don't remove the following, as there's no getting them back through normal means:
+# Do not remove the following, as there's no getting them back through normal means:
 # Microsoft.XboxSpeechToTextOverlay_$ID
 
 # Clipchamp - Video Editor | Paint

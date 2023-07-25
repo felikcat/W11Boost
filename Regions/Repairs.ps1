@@ -26,7 +26,7 @@ Remove-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\GraphicsDriver
 Remove-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\Dwm" -Name "OverlayTestMode"
 
 # These keys will regenerate if Windows is installed to an HDD.
-# These keys don't exist for an SSD or NVMe Windows installation by default.
+# These keys Do not exist for an SSD or NVMe Windows installation by default.
 Remove-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "EnablePrefetcher"
 Remove-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "EnableSuperfetch"
 
@@ -48,7 +48,7 @@ PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\System' -ValueName 'EnableMmx'
 PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\CloudContent' -ValueName 'DisableWindowsConsumerFeatures' -Data '0' -Type 'Dword'
 
 # Process Lasso or manually setting a non-battery saving power profile is preferred instead.
-# Don't make the power saving profiles less helpful.
+# Do not make the power saving profiles less helpful.
 PolEdit_HKLM 'SYSTEM\CurrentControlSet\Control\Power\PowerThrottling' -ValueName 'PowerThrottlingOff' -Data '0' -Type 'Dword'
 
 # Old versions of the Intel PROSet software set this to 0, breaking Windows' internet connectivity check.

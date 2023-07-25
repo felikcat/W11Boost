@@ -152,7 +152,7 @@ image:RSOP.png[]
 
 
 . `Advanced.bat`
-** Not meant for usage on PCs you don't personally use.
+** Not meant for usage on PCs you Do not personally use.
 ** Contains extra features, such as the removal of Microsoft Edge.
 *** Configuring `Advanced.ps1` is required: +
 1. Open `Advanced.ps1` in a text editor or IDE of your choosing. +
