@@ -15,7 +15,7 @@ Add-Type -Path "..\Third-party\PolicyFileEditor\PolFileEditor.dll" -ErrorAction 
 # Required for: Windows Updates, Windows Store (StorSvc), winget (DoSvc).
 $REGS = @("AppXSvc", "ClipSVC", "TokenBroker", "StorSvc", "DoSvc")
 $REGS.ForEach({
-    Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\$_" -Name "Start" -Type DWord -Value 3 -Force
+    Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\$_" -Name "Start" -Type DWord -Value 3
     Start-Service $_
 })
 ##+=+=
@@ -34,21 +34,6 @@ if ([bool]::TryParse($a, [ref]$License_Check))
 {
     & ([ScriptBlock]::Create((Invoke-RestMethod https://massgrave.dev/get))) /KMS38
 }
-
-
-# Install Winget if it's not present. Mainly an LTSC 2019 and LTSC 2021 specific issue.
-if (-Not (Get-Command -CommandType Application -Name winget -ErrorAction SilentlyContinue))
-{
-    # Installs Winget's dependencies on LTSC 2019 and newer; does not work for LTSC 2016.
-    wsreset.exe -i | Wait-Process
-    
-    Download_File 'https://github.com/microsoft/winget-cli/releases/latest/download/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle' -Destination .\
-
-    Add-AppxPackage -Path '.\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle'
-
-    Remove-Item '.\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle'  
-}
-
 
 # Stops various annoyances, one being Windows Update restarting your PC without your consent.
 . ".\Annoyances.ps1"
@@ -70,7 +55,7 @@ net.exe stop w32time
 w32tm.exe /unregister
 w32tm.exe /register
 
-w32tm.exe /config /syncfromflags:manual /manualpeerlist:"time.cloudflare.com ntppool1.time.nl ntppool2.time.nl"
+w32tm.exe /config /syncfromflags:manual /manualpeerlist:"time.cloudflare.com time.nist.gov time.windows.com"
 Start-Service w32time
 w32tm.exe /resync
 ##+=+=
@@ -125,7 +110,7 @@ PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer' -Valu
 ##+=+= Enable UAC (User Account Control).
 # UAC requires the 'LUA File Virtualization Filter Driver'.
 Set-ItemProperty -Path "
-}HKLM:\SYSTEM\CurrentControlSet\Services\luafv" -Name "Start" -Type DWord -Value 2 -Force
+}HKLM:\SYSTEM\CurrentControlSet\Services\luafv" -Name "Start" -Type DWord -Value 2
 
 PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -ValueName 'PromptOnSecureDesktop' -Data '1' -Type 'Dword'
 PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -ValueName 'ConsentPromptBehaviorAdmin' -Data '5' -Type 'Dword'
@@ -153,7 +138,7 @@ PolEdit_HKLM 'SYSTEM\CurrentControlSet\Control\Session Manager\Power' -ValueName
 
 
 # Use default shutdown behavior.
-Remove-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "AutoEndTasks" -Force
+Remove-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "AutoEndTasks"
 
 PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -ValueName 'DisableShutdownNamedPipe' -Data '1' -Type 'Dword'
 
@@ -184,26 +169,27 @@ PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\VisualStudio\Feedback' -ValueName 'Dis
 PolEdit_HKCU 'Software\Microsoft\VisualStudio\Telemetry' -ValueName 'TurnOffSwitch' -Data '1' -Type 'Dword'
 ##+=+=
 
+# Restore the classic context menu.
+New-Item -Path "HKCU:\SOFTWARE\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" -Value "" -Type String
 
-# Disable Delivery Optimization's "Allow downloads from other PCs".
-PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization' -ValueName 'DODownloadMode' -Data '0' -Type 'Dword'
+$NAME = @("InternetCustom", "DatacenterCustom", "Compat", "Datacenter", "Internet")
+$NAME.ForEach({
+    # BBRv2 is currently the best well-rounded TCP congestion algorithm.
+    # Improvements from BBRv2 can be noticed if you're hosting game or web servers on this PC.
+    # https://ieeexplore.ieee.org/abstract/document/9361674
+    netsh.exe int tcp set supplemental Template=$_ CongestionProvider=bbr2
+})
 
-if ($WIN_BUILDNUMBER -ge 21327) # Windows 11 only
-{
-    # Restore the classic context menu.
-    New-Item -Path "HKCU:\SOFTWARE\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" -Value "" -Type String -Force
+PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -ValueName 'legalnoticecaption' -Data 'Disclaimer' -Type 'String'
 
-    $NAME = @("InternetCustom", "DatacenterCustom", "Compat", "Datacenter", "Internet")
-    $NAME.ForEach({
-        # BBRv2 is currently the best well-rounded TCP congestion algorithm.
-        # Improvements from BBRv2 can be noticed if you're hosting game or web servers on this PC.
-        # https://ieeexplore.ieee.org/abstract/document/9361674
-        netsh.exe int tcp set supplemental Template=$_ CongestionProvider=bbr2
-    })
-}
+$notice_text = "You are accessing a device that has installed W11Boost.
+If you or your employeer never consented to this, see the following link on removing W11Boost:
+- https://github.com/felikcat/W11Boost"
+
+PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -ValueName 'legalnoticetext' -Data @notice_text -Type 'String'
 
 # If this directory was non-existent before running W11Boost, then add the "Hidden" attribute to line up with default behavior.
 (Get-Item "$env:windir\System32\GroupPolicy").Attributes = "Directory", "Hidden"
 gpupdate.exe /force
 
-Restart-Computer -Force
+Restart-Computer

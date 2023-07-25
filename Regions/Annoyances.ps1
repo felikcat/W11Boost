@@ -46,8 +46,11 @@ PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate' -ValueName 'All
 # Never force restarts.
 PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU' -ValueName 'NoAutoUpdate' -Data '0' -Type 'Dword'
 
+# Disable Delivery Optimization's "Allow downloads from other PCs".
+PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization' -ValueName 'DODownloadMode' -Data '0' -Type 'Dword'
+##+=+=
+
+
 # Disable feedback reminders.
 PolEdit_HKCU 'SOFTWARE\Microsoft\Siuf\Rules' -ValueName 'NumberOfSIUFInPeriod' -Data '0' -Type 'Dword'
 PolEdit_HKCU 'SOFTWARE\Microsoft\Siuf\Rules' -ValueName 'PeriodInNanoSeconds' -Data '0' -Type 'Dword'
-##+=+=
-

@@ -11,7 +11,7 @@ PolEdit_HKLM 'SYSTEM\CurrentControlSet\Control' -ValueName 'SvcHostSplitThreshol
 PolEdit_HKLM 'System\CurrentControlSet\Control\Session Manager\kernel' -ValueName 'ThreadDpcEnable' -Data '1' -Type 'Dword'
 
 # Delaying the startup of third-party programs gives Windows more room to breathe for its own jobs, speeding up the overall startup time.
-Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Serialize" -Name "Startupdelayinmsec" -Force
+Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Serialize" -Name "Startupdelayinmsec"
 
 # Enforce using "smart multi-homed name resolution".
 PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows NT\DNSClient' -ValueName 'DisableSmartNameResolution' -Data '0' -Type 'Dword'
@@ -19,23 +19,23 @@ PolEdit_HKLM 'SYSTEM\CurrentControlSet\Services\Dnscache\Parameters' -ValueName 
 
 # Modern GPUs can dispatch multiple high-priority queues without slowing each other down, so enable preemption.
 # If a high-priority job is running and preemption is off, it could lead to other software waiting too long to get a share of the GPU's time, and become noticeably slow.
-Remove-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\GraphicsDrivers\Scheduler" -Name "EnablePreemption" -Force
+Remove-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\GraphicsDrivers\Scheduler" -Name "EnablePreemption"
 
 # Explains MPO well and still pertains to Windows in principle:
 # https://kernel.org/doc/html/next/gpu/amdgpu/display/mpo-overview.html
-Remove-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\Dwm" -Name "OverlayTestMode" -Force
+Remove-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\Dwm" -Name "OverlayTestMode"
 
 # These keys will regenerate if Windows is installed to an HDD.
 # These keys don't exist for an SSD or NVMe Windows installation by default.
-Remove-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "EnablePrefetcher" -Force
-Remove-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "EnableSuperfetch" -Force
+Remove-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "EnablePrefetcher"
+Remove-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "EnableSuperfetch"
 
 PolEdit_HKLM 'SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\PrefetchParameters' -ValueName 'EnablePrefetcher' -Data '3' -Type 'Dword'
 # The memory performance issues related to requesting data from disk has been solved years ago.
 # Disabling SysMain (Superfetch) would make memory page fetching slower by:
 # - Less pages being cached into memory/RAM, and in an un-intelligent manner.
 # - Increase the amount of random I/O reads and writes; much slower than RAM.
-Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\SysMain" -Name "Start" -Type DWord -Value 2 -Force
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\SysMain" -Name "Start" -Type DWord -Value 2
 
 # https://docs.microsoft.com/en-us/windows/win32/cimwin32prov/win32-operatingsystem
 # LargeSystemCache is obsolete and not supported.
@@ -80,8 +80,8 @@ Enable-MMAgent -ApplicationPreLaunch
 bcdedit.exe /deletevalue "{default}" bootuxdisabled
 
 # Ensure IPv6 and its related features are enabled.
-Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\iphlpsvc" -Name "Start" -Type DWord -Value 2 -Force
-Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\IpxlatCfgSvc" -Name "Start" -Type DWord -Value 3 -Force
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\iphlpsvc" -Name "Start" -Type DWord -Value 2
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\IpxlatCfgSvc" -Name "Start" -Type DWord -Value 3
 Set-NetAdapterBinding -Name '*' -DisplayName 'Internet Protocol Version 6 (TCP/IPv6)' -Enabled 1
 
 # Programs that rely on 8.3 filenames from the DOS-era will break if this is disabled.
@@ -90,8 +90,8 @@ fsutil.exe behavior set disable8dot3 2
 # Revert to Windows' default shutdown behavior regarding handling of apps and programs.
 $REGS = @("WaitToKillAppTimeOut", "HungAppTimeout", "WaitToKillServiceTimeout")
 $REGS.ForEach({
-    Remove-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name $_ -Force
-    Remove-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control" -Name $_ -Force
+    Remove-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name $_
+    Remove-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control" -Name $_
 })
 
 # https://www.intel.com/content/www/us/en/developer/articles/troubleshooting/openssl-sha-crash-bug-requires-application-update.html
@@ -100,4 +100,4 @@ if ($env:PROCESSOR_IDENTIFIER -match 'GenuineIntel') {
 }
 
 # Ensure default 2GB memory boundary for x86 programs.
-Remove-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "AllocationPreference" -Force
+Remove-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "AllocationPreference"

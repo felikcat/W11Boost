@@ -23,16 +23,18 @@ endif::[]
 
 . link:https://bromiley.medium.com/windows-wednesday-shim-cache-1997ba8b13e7[Matt B's blog post on Application Compatibility Cache]
 
+. link:https://techcommunity.microsoft.com/t5/core-infrastructure-and-security/stiging-made-easy-microsoft-endpoint-manager/ba-p/2422255[Microsoft blog post explaining how to use "Microsoft Endpoint Manager"]; relevant for DoD STIG compliance.
+
 . Whatever else is below here; it'll come up when relevant.
 
 
 == Developer notes
 
 * *Required software:*
-. `winget install Microsoft.WindowsADK -eh`
-. `scoop install git; scoop bucket add sysinternals; scoop install procmon`
+. https://learn.microsoft.com/en-us/windows-hardware/get-started/adk-install[Windows ADK]
+. https://learn.microsoft.com/en-us/sysinternals/downloads/procmon[Process Monitor]
 
-* `Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\EXAMPLE" -Name "Start" -Type DWord -Value 4 -Force` is preferred over using `sc.exe config EXAMPLE start=disabled` since Windows rejects this request depending on the service.
+* `Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\EXAMPLE" -Name "Start" -Type DWord -Value 4` is preferred over using `sc.exe config EXAMPLE start=disabled` since Windows rejects this request depending on the service.
 
 * `bcdedit.exe` will fail if the user screwed up their Boot Entries and fixed it later on; the workaround is to explicitly specify the ID.
 - Instead of: `bcdedit.exe /deletevalue x2apicpolicy`, the workaround is to use `bcdedit.exe /deletevalue "\{default\}" x2apicpolicy`

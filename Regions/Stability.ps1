@@ -13,7 +13,7 @@ PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\Policies\Explorer' -Valu
 PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\Policies\Explorer' -ValueName 'NoResolveTrack' -Data '1' -Type 'Dword'
 
 # Disable Explorer's thumbnail shadows.
-Set-ItemProperty -Path "HKCR:\SystemFileAssociations\image" -Name "Treatment" -Type DWord -Value 2 -Force
+Set-ItemProperty -Path "HKCR:\SystemFileAssociations\image" -Name "Treatment" -Type DWord -Value 2
 
 # Enable multiple processes for explorer.exe
 PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -ValueName 'SeparateProcess' -Data '1' -Type 'Dword'
@@ -53,29 +53,29 @@ Disable-ScheduledTask -TaskName "\Microsoft\Windows\Diagnosis\RecommendedTrouble
 
 ##+=+= System Properties -> Advanced -> Performance
 # Enable "Show window contents while dragging"
-Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "DragFullWindows" -Type String -Value 1 -Force
+Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "DragFullWindows" -Type String -Value 1
 # Enable "Smooth edges of screen fonts"
-Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "FontSmoothing" -Type String -Value 1 -Force
+Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "FontSmoothing" -Type String -Value 1
 
 # Enable "Show thumbnails instead of icons"
-Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "IconsOnly" -Type DWord -Value 0 -Force
+Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "IconsOnly" -Type DWord -Value 0
 # Disable "Animations in taskbar"
-Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "TaskbarAnimations" -Type DWord -Value 0 -Force
+Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "TaskbarAnimations" -Type DWord -Value 0
 # Enable "Show translucent selection rectangle"
-Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "ListviewAlphaSelect" -Type DWord -Value 1 -Force
+Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "ListviewAlphaSelect" -Type DWord -Value 1
 
 # Disable "Animate windows when minimizing and maximizing"
-Set-ItemProperty -Path "HKCU:\Control Panel\Desktop\WindowMetrics\MinAnimate" -Name "MinAnimate" -Type String -Value 0 -Force
+Set-ItemProperty -Path "HKCU:\Control Panel\Desktop\WindowMetrics\MinAnimate" -Name "MinAnimate" -Type String -Value 0
 
-Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize" -Name "EnableTransparency" -Type DWord -Value 0 -Force
+Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize" -Name "EnableTransparency" -Type DWord -Value 0
 
 # Disable "Enable Peek"
-Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\DWM" -Name "EnableAeroPeek" -Type DWord -Value 0 -Force
+Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\DWM" -Name "EnableAeroPeek" -Type DWord -Value 0
 # Enable "Save taskbar thumbnail previews"
-Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\DWM" -Name "AlwaysHibernateThumbnails" -Type DWord -Value 1 -Force
+Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\DWM" -Name "AlwaysHibernateThumbnails" -Type DWord -Value 1
 
 #! Always set 'UserPreferencesMask' last!
-Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "UserPreferencesMask" -Type Binary -Value ([byte[]](0x90,0x12,0x03,0x80,0x10,0,0,0)) -Force
+Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "UserPreferencesMask" -Type Binary -Value ([byte[]](0x90,0x12,0x03,0x80,0x10,0,0,0))
 ##+=+=
 
 
@@ -92,7 +92,7 @@ netsh.exe int tcp set global timestamps=enabled
 PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\Appx' -ValueName 'AllowStorageSenseGlobal' -Data '0' -Type 'Dword'
 PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\StorageSense' -ValueName 'AllowStorageSenseGlobal' -Data '0' -Type 'Dword'
 
-Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion" -Name "StorageSense" -Force
+Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion" -Name "StorageSense"
 
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\DiskFootprint\Diagnostics"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\DiskFootprint\StorageSense"

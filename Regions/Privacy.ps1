@@ -141,8 +141,8 @@ PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting' -ValueName 'I
 PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting' -ValueName 'IncludeShutdownErrs' -Data '0' -Type 'Dword'
 PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting' -ValueName 'IncludeWindowsApps' -Data '0' -Type 'Dword'
 
-Remove-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting\InclusionList" -Recurse -Force
-Remove-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting\Consent" -Recurse -Force
+Remove-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting\InclusionList" -Recurse
+Remove-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting\Consent" -Recurse
 
 PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting\ExclusionList' -ValueName '*' -Data '*' -Type 'String'
 

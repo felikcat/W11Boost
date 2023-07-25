@@ -31,8 +31,6 @@ endif::[]
 
 - Idle tickless for lower power draw, but also has performance benefits to real-time programs like DAWs or virtual machines, and foreground programs like video games.
 
-
-. Windows 11 Only:
 - Enabled the BBRv2 TCP congestion control algorithm to maintain low ping and high speeds during excessive download or upload, it also noticeably increases download & upload speeds during high ping (70ms+).
 
 
@@ -131,6 +129,7 @@ image:RSOP.png[]
 ====
 
 . https://github.com/felikcat/W11Boost/archive/refs/heads/master.zip[Download W11Boost] then extract it.
+- Alternatively, download an https://github.com/felikcat/W11Boost/archive/refs/heads/windows-10.zip[old version] that supports Windows 10.
 
 . Run `Install.bat` as Administrator.
 
@@ -159,8 +158,11 @@ image:RSOP.png[]
 1. Open `Advanced.ps1` in a text editor or IDE of your choosing. +
 2. After finished, run `Advanced.bat` as Administrator.
 
+. `Harden.bat`
+- Enables https://public.cyber.mil/stigs/[DoD STIG compliance] without being attached to an Active Directory hosted either on a Windows Server or Microsoft Entra ID (called "Azure AD" prior).
+
 . `Uninstall.bat`
-** Uninstalls W11Boost.
+- Uninstalls W11Boost.
 
 == Recommendations
 
@@ -180,9 +182,8 @@ Note: if a USB is no longer bootable after these two changes, turn them both bac
 
 
 === Windows
-. Keep the number of programs installed to a minimum. This reduces your chances of being impacted by https://www.bleepingcomputer.com/news/security/hackers-compromise-3cx-desktop-app-in-a-supply-chain-attack/[supply chain attacks] and to prevent causing Windows more issues.
+TIP: These tips increase performance, stability, and security.
 
-. Install all optional updates through Windows Update; it can include device drivers.
+. Keep the number of programs installed to a minimum, and remove unused programs. This reduces your chances of being impacted by https://www.bleepingcomputer.com/news/security/hackers-compromise-3cx-desktop-app-in-a-supply-chain-attack/[supply chain attacks] and to prevent causing Windows more issues.
 
 . Replace Consumer OEM programs with their Enterprise variant. Such as replacing Lenovo Vantage with Lenovo Commercial Vantage.
-

@@ -1,6 +1,5 @@
 #Requires -Version 5 -RunAsAdministrator
 
-$WIN_BUILDNUMBER = (Get-WmiObject Win32_OperatingSystem).BuildNumber
 $WIN_EDITION = Get-ItemPropertyValue 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' -Name ProductName
 
 function Download_File
