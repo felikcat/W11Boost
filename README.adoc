@@ -20,7 +20,7 @@ endif::[]
 . Windows Updates will not automatically be cleared out. Run the built-in "Disk Cleanup" as administrator to clear them out.
 
 .*Performance*
-. App or program startups are not tracked.
+. App startups are not tracked.
 
 . Login screen's acrylic blur is disabled.
 
@@ -29,7 +29,7 @@ endif::[]
 
 - DXGI's DirectFlip with multi-plane overlay (MPO) enabled to lower input lag and reduce stuttering in games.
 
-- Idle tickless for lower power draw, but also has performance benefits to real-time programs like DAWs or virtual machines, and foreground programs like video games.
+- Idle tickless for lower power draw, but also has performance benefits to real-time apps like DAWs or virtual machines, and foreground apps like video games.
 
 - Enabled the BBRv2 TCP congestion control algorithm to maintain low ping and high speeds during excessive download or upload, it also noticeably increases download & upload speeds during high ping (70ms+).
 
@@ -88,15 +88,15 @@ endif::[]
 . IPv6 is used whenever possible; avoids NAT and handles fragmentation locally instead of on the router, leading to higher performance and reliability.
 
 . Enabled "smart multi-homed name resolution".
-- Having this feature disabled can make DNS requests extremely slow, which some bad VPN programs do as a hack to prevent DNS leaks.
+- Having this feature disabled can make DNS requests extremely slow, which some bad VPN apps do as a hack to prevent DNS leaks.
 
-. Crash fix for programs using OpenSSL 1.0.2k (Jan 2017) or older; only applied if an Intel CPU is used.
+. Crash fix for apps using OpenSSL 1.0.2k (Jan 2017) or older; only applied if an Intel CPU is used.
 
 . TCP timestamps enabled for increased reliability under bad network conditions.
 
-. The default 2GB memory boundary is ensured for x86 programs.
-- Prevent bugs or crashes with x86 programs that aren't specifically tested for LargeAddressAware (3GB limit).
-- Manually patch programs with LAA if it's known to be beneficial, such as in GTA:SA.
+. The default 2GB memory boundary is ensured for x86 apps.
+- Prevent bugs or crashes with x86 apps that aren't specifically tested for LargeAddressAware (3GB limit).
+- Manually patch apps with LAA if it's known to be beneficial, such as in GTA:SA.
 
 .*Usability*
 
@@ -104,7 +104,7 @@ endif::[]
 - If they're hidden, they are abused to hide the real file format for malicious purposes. Example: an executable (.exe, .scr) pretending to be a PDF.
 
 . Apps are no longer automatically archived.
-- Archived apps would take a long time to launch, as it needs to reinstall (unarchive) itself.
+- Archived apps would take a long time to launch, as it needs to unarchived.
 
 . The lock screen is replaced with the login screen.
 
@@ -112,7 +112,7 @@ endif::[]
 
 . Installs `winget` if missing or broken.
 
-. Enabled NTFS long paths to prevent issues with Scoop and other programs.
+. Enabled NTFS long paths to prevent issues with Scoop and other apps.
 
 . Ask to enter recovery options after 3 failed boots instead of forcing it.
 
@@ -129,7 +129,6 @@ image:RSOP.png[]
 ====
 
 . https://github.com/felikcat/W11Boost/archive/refs/heads/master.zip[Download W11Boost] then extract it.
-- Alternatively, download an https://github.com/felikcat/W11Boost/archive/refs/heads/windows-10.zip[old version] that supports Windows 10.
 
 . Run `Install.bat` as Administrator.
 
@@ -138,31 +137,39 @@ image:RSOP.png[]
 
 == Extras
 
-. `W11_LTSC_Replica.bat`
-* De-bloats Windows 11 enough to replicate what Windows 10 Enterprise LTSC 2021 includes by default, which is known to only include what's important.
-*** *Exceptions* to prevent breaking apps or programs: App Installer, Store Experience Host, Windows Store, Xbox Game Speech Window.
+. `W11_LTSC_Replica.bat` de-bloats Windows 11 enough to replicate what Windows 10 Enterprise LTSC 2021 includes by default, which is known to only include what's important.
+- *Exceptions* to prevent breaking apps: App Installer, Store Experience Host, Windows Store, Xbox Game Speech Window.
 
-. `Install_Xbox_Minimal.bat`
-- This is meant for if `W11_LTSC_Replica.bat` was used, or for an LTSC variant of Windows.
+. `Install_Xbox_Minimal.bat` is meant for if `W11_LTSC_Replica.bat` was used, or for an LTSC variant of Windows.
 
 - Login to the Microsoft Store before using `Install_Xbox_Minimal.bat`!
 
-** Installs only what's required to support Xbox Controllers (GUI/interface not included, get it link://www.microsoft.com/store/productId/9NBLGGH30XJ3[here]), Microsoft's PC Game Pass, and specific games such as Forza Horizon 4 & 5.
-*** To also get the Game Bar, install the following link://www.microsoft.com/store/productId/9NZKPSTSNW4P[here] then link://www.microsoft.com/store/productId/9NBLGGH537C2[here].
+- Installs only what's required to support Xbox Controllers (GUI/interface not included, get it link://www.microsoft.com/store/productId/9NBLGGH30XJ3[here]), Microsoft's PC Game Pass, and specific games such as Forza Horizon 4 & 5.
+** To also get the Game Bar, install the following link://www.microsoft.com/store/productId/9NZKPSTSNW4P[here] then link://www.microsoft.com/store/productId/9NBLGGH537C2[here].
 
 
 . `Advanced.bat`
-** Not meant for usage on PCs you Do not personally use.
 ** Contains extra features, such as the removal of Microsoft Edge.
 *** Configuring `Advanced.ps1` is required: +
 1. Open `Advanced.ps1` in a text editor or IDE of your choosing. +
 2. After finished, run `Advanced.bat` as Administrator.
 
-. `Harden.bat`
-- Enables https://public.cyber.mil/stigs/[DoD STIG compliance] without being attached to an Active Directory hosted either on a Windows Server or Microsoft Entra ID (called "Azure AD" prior).
+. `Apply_DOD_Stigs.bat` enforces a higher base-line of security via https://public.cyber.mil/stigs/[DoD STIG compliance], and avoids breaking most apps.
+- Attached to an Active Directory hosted on either locally on a Windows Server or an online server via Microsoft Entra ID (called "Azure AD" prior).
+
+. `Harden_Further.bat` is intended to be run after `Apply_DOD_Stigs.bat`.
+- This will break a lot more programs and use-cases; currently not documented.
 
 . `Uninstall.bat`
 - Uninstalls W11Boost.
+
+.Usage guide / tips after using Harden.bat
+[%collapsible]
+====
+
+. Defender SmartScreen will block "unknown" apps from running. Go into that apps' properties to unblock it.
+
+====
 
 == Recommendations
 
@@ -171,7 +178,6 @@ image:RSOP.png[]
 . I/O APIC (IOAPIC 24-119 Entries)
 . Above 4G Decoding and Resizable BAR.
 ** On ASRock motherboards: C.A.M. (Clever Access Memory)
-** This is incompatible with Windows installed on an MBR partition; if Windows can no longer boot, this setting caused it.
 . HPET (High Precision Event Timer)
 
 * *Disable the following:*
@@ -182,8 +188,6 @@ Note: if a USB is no longer bootable after these two changes, turn them both bac
 
 
 === Windows
-TIP: These tips increase performance, stability, and security.
+. Keep the number of apps installed to a minimum, and remove unused apps. This reduces your chances of being impacted by https://www.bleepingcomputer.com/news/security/hackers-compromise-3cx-desktop-app-in-a-supply-chain-attack/[supply chain attacks], prevents causing Windows more issues, and might improve FPS stability.
 
-. Keep the number of programs installed to a minimum, and remove unused programs. This reduces your chances of being impacted by https://www.bleepingcomputer.com/news/security/hackers-compromise-3cx-desktop-app-in-a-supply-chain-attack/[supply chain attacks] and to prevent causing Windows more issues.
-
-. Replace Consumer OEM programs with their Enterprise variant. Such as replacing Lenovo Vantage with Lenovo Commercial Vantage.
+. Replace Consumer OEM apps with their Enterprise variant. Such as replacing Lenovo Vantage with Lenovo Commercial Vantage.

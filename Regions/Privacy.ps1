@@ -18,7 +18,7 @@ PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\DataCollection' -ValueName 'Di
 
 PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\DataCollection' -ValueName 'DoNotShowFeedbackNotifications' -Data '1' -Type 'Dword'
 
-# Fully disable the 'Screenshots access' permission to .appx packaged programs.
+# Fully disable the 'Screenshots access' permission to .appx packaged apps.
 PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\graphicsCaptureProgrammatic' -ValueName 'Value' -Data 'Deny' -Type 'String'
 PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\graphicsCaptureProgrammatic' -ValueName 'Value' -Data 'Deny' -Type 'String'
 PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\graphicsCaptureProgrammatic\NonPackaged' -ValueName 'Value' -Data 'Deny' -Type 'String'
@@ -169,7 +169,7 @@ Disable-ScheduledTask -TaskName "\Microsoft\Windows\Flighting\FeatureConfig\Usag
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Flighting\FeatureConfig\UsageDataReporting"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Flighting\OneSettings\RefreshCache"
 
-# Third-party script that tells various programs and apps to disable or minimize their telemetry.
+# Third-party script that tells various apps to disable or minimize their telemetry.
 Download_File 'https://raw.githubusercontent.com/beatcracker/toptout/master/examples/toptout_pwsh.ps1' -Destination .\
 
 . ".\toptout_pwsh.ps1" -Env -Exec -ShowLog

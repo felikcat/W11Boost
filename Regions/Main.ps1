@@ -1,6 +1,6 @@
 #Requires -Version 5 -RunAsAdministrator
 
-##+=+= Initialize
+#region Initialize
 $host.ui.rawui.windowtitle = "W11Boost by github.com/felikcat"
 Push-Location $PSScriptRoot
 Start-Transcript -Path ([Environment]::GetFolderPath('MyDocuments') + "\W11Boost_LastRun.log")
@@ -18,8 +18,7 @@ $REGS.ForEach({
     Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\$_" -Name "Start" -Type DWord -Value 3
     Start-Service $_
 })
-##+=+=
-
+#endregion
 
 if ($WIN_EDITION -notmatch '.*Enterprise|.*Education|.*Server')
 {
@@ -29,23 +28,24 @@ if ($WIN_EDITION -notmatch '.*Enterprise|.*Education|.*Server')
     Start-Process -Wait cscript.exe -ArgumentList $args
 }
 
-$License_Check = Get-WMIObject -Query 'SELECT LicenseStatus FROM SoftwareLicensingProduct WHERE Name LIKE "%Windows%" AND PartialProductKey IS NOT NULL AND LicenseStatus !=1'
-if ([bool]::TryParse($a, [ref]$License_Check))
+$License_Check = (Get-WMIObject -Query 'SELECT LicenseStatus FROM SoftwareLicensingProduct WHERE Name LIKE "%Windows%" AND PartialProductKey IS NOT NULL AND LicenseStatus !=1').LicenseStatus
+if ($License_Check)
 {
+    # Windows needs to be activated, do it!
     & ([ScriptBlock]::Create((Invoke-RestMethod https://massgrave.dev/get))) /KMS38
 }
 
 # Stops various annoyances, one being Windows Update restarting your PC without your consent.
-. ".\Annoyances.ps1"
+& ".\Annoyances.ps1"
 
 # Minimize data sent to Microsoft through normal means, also improves performance.
-. ".\Privacy.ps1"
+& ".\Privacy.ps1"
 
 # Correcting mistakes from other optimizers and user-error.
-. ".\Repairs.ps1"
+& ".\Repairs.ps1"
 
 # Improves how consistent the performance is for networking, FPS, etc.
-. ".\Stability.ps1"
+& ".\Stability.ps1"
 
 
 ##+=+= Use optimal online NTP servers for more accurate system time.
@@ -83,7 +83,7 @@ Disable-ScheduledTask -TaskName "\NvTmRep_CrashReport2_{B2FE1952-0186-46C3-BAEC-
 Disable-ScheduledTask -TaskName "\NvTmRep_CrashReport3_{B2FE1952-0186-46C3-BAEC-A80AA35AC5B8}"
 Disable-ScheduledTask -TaskName "\NvTmRep_CrashReport4_{B2FE1952-0186-46C3-BAEC-A80AA35AC5B8}"
 
-# Do not analyze programs' execution time data.
+# Do not analyze apps' execution time data.
 PolEdit_HKLM 'SOFTWARE\Microsoft\Windows NT\CurrentVersion\Perflib' -ValueName 'Disable Performance Counters' -Data '1' -Type 'Dword'
 
 
@@ -95,7 +95,7 @@ PolEdit_HKLM 'SYSTEM\CurrentControlSet\Policies' -ValueName 'NtfsEncryptPagingFi
 
 PolEdit_HKLM 'SYSTEM\CurrentControlSet\Policies' -ValueName 'NtfsForceNonPagedPoolAllocation' -Data '1' -Type 'Dword'
 
-# Do not use NTFS' "Last Access Time Stamp Updates" by default; a program can still explicitly update them for itself.
+# Do not use NTFS' "Last Access Time Stamp Updates" by default; apps can still explicitly update these timestamps for themself.
 fsutil.exe behavior set disablelastaccess 3
 ##+=+=
 
@@ -180,13 +180,9 @@ $NAME.ForEach({
     netsh.exe int tcp set supplemental Template=$_ CongestionProvider=bbr2
 })
 
-PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -ValueName 'legalnoticecaption' -Data 'Disclaimer' -Type 'String'
+PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -ValueName 'legalnoticecaption' -Data '' -Type 'String'
 
-$notice_text = "You are accessing a device that has installed W11Boost.
-If you or your employeer never consented to this, see the following link on removing W11Boost:
-- https://github.com/felikcat/W11Boost"
-
-PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -ValueName 'legalnoticetext' -Data @notice_text -Type 'String'
+PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -ValueName 'legalnoticetext' -Data @notice_text -Type ''
 
 # If this directory was non-existent before running W11Boost, then add the "Hidden" attribute to line up with default behavior.
 (Get-Item "$env:windir\System32\GroupPolicy").Attributes = "Directory", "Hidden"

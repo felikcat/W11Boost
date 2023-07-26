@@ -3,15 +3,15 @@
 # System Restore problems:
 # - Cannot restore backups from previous versions of Windows.
 # - Cannot revert Windows updates.
-# - Will revert other personal files (program settings and installations).
+# - Will revert other personal files (app settings and installations).
 $allow_system_restore = 0
 
 
-# 0: Manually set compatibility modes for programs requiring say Windows XP mode.
+# 0: Manually set compatibility modes for apps requiring say Windows XP mode.
 # Potential performance and reliability benefits from forcing this to be manual (compatibility modes enabled by you only).
 $automatic_compatibility = 0
 
-# 0: Assumption that thumbnail corruption is rare; run the 'Disk Cleanup' program if it happens.
+# 0: Assumption that thumbnail corruption is rare; run the 'Disk Cleanup' app if it happens.
 $automatic_thumbnail_clearing = 0
 
 # 0: Stops apps installed from the Windows Store from updating themselves.

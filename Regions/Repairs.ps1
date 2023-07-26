@@ -10,7 +10,7 @@ PolEdit_HKLM 'SYSTEM\CurrentControlSet\Control' -ValueName 'SvcHostSplitThreshol
 # Disabling threaded DPCs is for debugging purposes and will cause spinlocks; it does not lower DPC latency.
 PolEdit_HKLM 'System\CurrentControlSet\Control\Session Manager\kernel' -ValueName 'ThreadDpcEnable' -Data '1' -Type 'Dword'
 
-# Delaying the startup of third-party programs gives Windows more room to breathe for its own jobs, speeding up the overall startup time.
+# Delaying the startup of third-party apps gives Windows more room to breathe for its own jobs, speeding up the overall startup time.
 Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Serialize" -Name "Startupdelayinmsec"
 
 # Enforce using "smart multi-homed name resolution".
@@ -64,13 +64,11 @@ bcdedit.exe /set "{default}" uselegacyapicmode no
 # Enable idle tickless.
 bcdedit.exe /set "{default}" disabledynamictick no
 
-# Deny global adjustment of timer resolution precision so poorly written programs can't fuck up the precision for other programs.
+# Deny global adjustment of timer resolution precision so poorly written apps can't fuck up the precision for other apps.
 # -> In detail: https://randomascii.wordpress.com/2020/10/04/windows-timer-resolution-the-great-rule-change/
-# -> A poorly written program anecdote: https://randomascii.wordpress.com/2020/10/04/windows-timer-resolution-the-great-rule-change/#comment-103111
-if ($WIN_BUILDNUMBER -ge 18836) # Only Windows 2004/20H1 and above.
-{
-    PolEdit_HKLM 'SYSTEM\CurrentControlSet\Control\Session Manager\kernel' -ValueName 'GlobalTimerResolutionRequests' -Data '0' -Type 'Dword'
-}
+# -> A poorly written app anecdote: https://randomascii.wordpress.com/2020/10/04/windows-timer-resolution-the-great-rule-change/#comment-103111
+PolEdit_HKLM 'SYSTEM\CurrentControlSet\Control\Session Manager\kernel' -ValueName 'GlobalTimerResolutionRequests' -Data '0' -Type 'Dword'
+
 
 Enable-MMAgent -ApplicationLaunchPrefetching
 Enable-MMAgent -ApplicationPreLaunch
@@ -84,10 +82,10 @@ Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\iphlpsvc" -Name 
 Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\IpxlatCfgSvc" -Name "Start" -Type DWord -Value 3
 Set-NetAdapterBinding -Name '*' -DisplayName 'Internet Protocol Version 6 (TCP/IPv6)' -Enabled 1
 
-# Programs that rely on 8.3 filenames from the DOS-era will break if this is disabled.
+# Apps that rely on 8.3 filenames from the DOS-era will break if this is disabled.
 fsutil.exe behavior set disable8dot3 2
 
-# Revert to Windows' default shutdown behavior regarding handling of apps and programs.
+# Revert to Windows' default shutdown behavior regarding handling of apps.
 $REGS = @("WaitToKillAppTimeOut", "HungAppTimeout", "WaitToKillServiceTimeout")
 $REGS.ForEach({
     Remove-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name $_
@@ -99,5 +97,5 @@ if ($env:PROCESSOR_IDENTIFIER -match 'GenuineIntel') {
     setx.exe /M OPENSSL_ia32cap "~0x200000200000000"
 }
 
-# Ensure default 2GB memory boundary for x86 programs.
+# Ensure default 2GB memory boundary for x86 apps.
 Remove-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "AllocationPreference"

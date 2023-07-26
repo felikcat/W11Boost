@@ -43,7 +43,7 @@ Disable-MMAgent -MemoryCompression
 Disable-MMAgent -PageCombining
 
 
-##+=+= Disallow automatic: program updates, security scanning, and system diagnostics.
+##+=+= Disallow automatic: app updates, security scanning, and system diagnostics.
 PolEdit_HKLM 'SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\Maintenance' -ValueName 'MaintenanceDisabled' -Data '1' -Type 'Dword'
 
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Diagnosis\Scheduled"
