@@ -18,26 +18,26 @@ bcdedit.exe /set "{default}" nx OptIn
 
 
 ##+=+= Enable -> Windows Defender Smartscreen
-PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\System' -ValueName 'EnableSmartScreen' -Data '1' -Type 'Dword'
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\System' -Name 'EnableSmartScreen' -Value '1' -Type 'Dword'
 
-PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer' -ValueName 'SmartScreenEnabled' -Data 'On' -Type 'String'
+PEAdd_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer' -Name 'SmartScreenEnabled' -Value 'On' -Type 'String'
 
-PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\AppHost' -ValueName 'EnableWebContentEvaluation' -Data '1' -Type 'Dword'
+PEAdd_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\AppHost' -Name 'EnableWebContentEvaluation' -Value '1' -Type 'Dword'
 
 Enable-ScheduledTask -TaskName "\Microsoft\Windows\AppID\SmartScreenSpecific"
 ##+=+=
 
 
 ##+=+= Enable -> Windows Security System tray
-PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows Defender Security Center\Systray' -ValueName 'HideSystray' -Data '0' -Type 'Dword'
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows Defender Security Center\Systray' -Name 'HideSystray' -Value '0' -Type 'Dword'
 ##+=+=
 
 
 ##+=+= Enable -> Blocking downloaded files.
 # SaveZoneInformation 0 = enables blocking downloaded files.
-PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments' -ValueName 'SaveZoneInformation' -Data '0' -Type 'Dword'
+PEAdd_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments' -Name 'SaveZoneInformation' -Value '0' -Type 'Dword'
 # Do not block downloaded files in Explorer, also fixes File History not working for downloaded files.
-PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\Policies\Attachments' -ValueName 'SaveZoneInformation' -Data '0' -Type 'Dword'
+PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\Policies\Attachments' -Name 'SaveZoneInformation' -Value '0' -Type 'Dword'
 ##+=+=
 
 # Disable additional risky services that the DoD STIGs left alone.
@@ -47,7 +47,7 @@ $REGS.ForEach({
 })
 
 #region Enforce DNS-over-HTTPS using Quad9's service.
-PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows NT\DNSClient' -ValueName 'DoHPolicy' -Data '3' -Type 'Dword'
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows NT\DNSClient' -Name 'DoHPolicy' -Value '3' -Type 'Dword'
 
 $NET_ALIAS = (Get-NetAdapter -Physical)
 $NET_DEVID = $NET_ALIAS.InterfaceGuid

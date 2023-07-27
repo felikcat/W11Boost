@@ -1,6 +1,6 @@
 #Requires -Version 5 -RunAsAdministrator
 
-Remove-Item -Path "$env:windir\System32\GroupPolicy" -Recurse
+Remove-Item -Path "$env:windir\System32\GroupPolicy" -Recurse -Force
 gpupdate.exe /force
 
 if ($env:PROCESSOR_IDENTIFIER -match 'GenuineIntel') {

@@ -46,3 +46,6 @@ $STIGS.ForEach({
     # Starting this many processes is horrendously slow.
     Start-Process -Wait "..\Third-party\LGPO.exe" -ArgumentList '/g "$env:TEMP\U_STIG_GPO_Package_July_2023\$_\GPOs"'
 })
+
+PERemove_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'legalnoticecaption'
+PERemove_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'legalnoticetext'

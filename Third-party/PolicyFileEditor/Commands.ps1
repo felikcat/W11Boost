@@ -12,31 +12,31 @@ $scriptRoot = Split-Path $MyInvocation.MyCommand.Path
    Path to the .pol file that is to be modified.
 .PARAMETER Key
    The registry key inside the .pol file that you want to modify.
-.PARAMETER ValueName
+.PARAMETER Name
    The name of the registry value.  May be set to an empty string to modify the default value of a key.
-.PARAMETER Data
+.PARAMETER Value
    The new value to assign to the registry key / value.  Cannot be $null, but can be set to an empty string or empty array.
 .PARAMETER Type
    The type of registry value to set in the policy file.  Cannot be set to Unknown or None, but all other values of the RegistryValueKind enum are legal.
 .PARAMETER NoGptIniUpdate
    When this switch is used, the command will not attempt to update the version number in the gpt.ini file
 .EXAMPLE
-   Set-PolicyFileEntry -Path $env:systemroot\system32\GroupPolicy\Machine\registry.pol -Key Software\Policies\Something -ValueName SomeValue -Data 'Hello, World!' -Type String
+   Set-PolicyFileEntry -Path $env:systemroot\system32\GroupPolicy\Machine\registry.pol -Key Software\Policies\Something -Name SomeValue -Value 'Hello, World!' -Type String
 
    Assigns a value of 'Hello, World!' to the String value Software\Policies\Something\SomeValue in the local computer Machine GPO.  Updates the Machine version counter in $env:systemroot\system32\GroupPolicy\gpt.ini
 .EXAMPLE
-   Set-PolicyFileEntry -Path $env:systemroot\system32\GroupPolicy\Machine\registry.pol -Key Software\Policies\Something -ValueName SomeValue -Data 'Hello, World!' -Type String -NoGptIniUpdate
+   Set-PolicyFileEntry -Path $env:systemroot\system32\GroupPolicy\Machine\registry.pol -Key Software\Policies\Something -Name SomeValue -Value 'Hello, World!' -Type String -NoGptIniUpdate
 
    Same as example 1, except this one does not update gpt.ini right away.  This can be useful if you want to set multiple
    values in the policy file and only trigger a single Group Policy refresh.
 .EXAMPLE
-   Set-PolicyFileEntry -Path $env:systemroot\system32\GroupPolicy\Machine\registry.pol -Key Software\Policies\Something -ValueName SomeValue -Data '0x12345' -Type DWord
+   Set-PolicyFileEntry -Path $env:systemroot\system32\GroupPolicy\Machine\registry.pol -Key Software\Policies\Something -Name SomeValue -Value '0x12345' -Type DWord
 
-   Example demonstrating that strings with valid numeric data (including hexadecimal strings beginning with 0x) can be assigned to the numeric types DWord, QWord and Binary.
+   Example demonstrating that strings with valid numeric Value (including hexadecimal strings beginning with 0x) can be assigned to the numeric types DWord, QWord and Binary.
 .EXAMPLE
    $entries = @(
-       New-Object psobject -Property @{ ValueName = 'MaxXResolution'; Data = 1680 }
-       New-Object psobject -Property @{ ValueName = 'MaxYResolution'; Data = 1050 }
+       New-Object psobject -Property @{ Name = 'MaxXResolution'; Value = 1680 }
+       New-Object psobject -Property @{ Name = 'MaxYResolution'; Value = 1050 }
    )
 
    $entries | Set-PolicyFileEntry -Path $env:SystemRoot\system32\GroupPolicy\Machine\registry.pol `
@@ -50,7 +50,7 @@ $scriptRoot = Split-Path $MyInvocation.MyCommand.Path
    The Key and Type properties could have also been specified via the pipeline objects instead of on the command line,
    but since both values shared the same Key and Type, this example shows that you can pass the values in either way.
 .INPUTS
-   The Key, ValueName, Data, and Type properties may be bound via the pipeline by property name.
+   The Key, Name, Value, and Type properties may be bound via the pipeline by property name.
 .OUTPUTS
    None.  This command does not generate output.
 .NOTES
@@ -77,12 +77,12 @@ function Set-PolicyFileEntry
 
         [Parameter(Mandatory = $true, Position = 2, ValueFromPipelineByPropertyName = $true)]
         [AllowEmptyString()]
-        [string] $ValueName,
+        [string] $Name,
 
         [Parameter(Mandatory = $true, Position = 3, ValueFromPipelineByPropertyName = $true)]
         [AllowEmptyString()]
         [AllowEmptyCollection()]
-        [object] $Data,
+        [object] $Value,
 
         [Parameter(ValueFromPipelineByPropertyName = $true)]
         [ValidateScript({
@@ -124,19 +124,19 @@ function Set-PolicyFileEntry
 
     process
     {
-        $existingEntry = $policyFile.GetValue($Key, $ValueName)
+        $existingEntry = $policyFile.GetValue($Key, $Name)
 
         if ($null -ne $existingEntry -and $Type -eq (PolEntryTypeToRegistryValueKind $existingEntry.Type))
         {
-            $existingData = GetEntryData -Entry $existingEntry -Type $Type
-            if (DataIsEqual $Data $existingData -Type $Type)
+            $existingValue = GetEntryValue -Entry $existingEntry -Type $Type
+            if (ValueIsEqual $Value $existingValue -Type $Type)
             {
-                Write-Verbose "Policy setting '$Key\$ValueName' is already set to '$Data' of type '$Type'."
+                Write-Verbose "Policy setting '$Key\$Name' is already set to '$Value' of type '$Type'."
                 return
             }
         }
 
-        Write-Verbose "Configuring '$Key\$ValueName' to value '$Data' of type '$Type'."
+        Write-Verbose "Configuring '$Key\$Name' to value '$Value' of type '$Type'."
 
         try
         {
@@ -144,15 +144,15 @@ function Set-PolicyFileEntry
             {
                 ([Microsoft.Win32.RegistryValueKind]::Binary)
                 {
-                    $bytes = $Data -as [byte[]]
+                    $bytes = $Value -as [byte[]]
                     if ($null -eq $bytes)
                     {
-                        $errorRecord = InvalidDataTypeCombinationErrorRecord -Message 'When -Type is set to Binary, -Data must be passed a Byte[] array.'
+                        $errorRecord = InvalidValueTypeCombinationErrorRecord -Message 'When -Type is set to Binary, -Value must be passed a Byte[] array.'
                         $PSCmdlet.ThrowTerminatingError($errorRecord)
                     }
                     else
                     {
-                        $policyFile.SetBinaryValue($Key, $ValueName, $bytes)
+                        $policyFile.SetBinaryValue($Key, $Name, $bytes)
                     }
 
                     break
@@ -160,16 +160,16 @@ function Set-PolicyFileEntry
 
                 ([Microsoft.Win32.RegistryValueKind]::String)
                 {
-                    $array = @($Data)
+                    $array = @($Value)
 
                     if ($array.Count -ne 1)
                     {
-                        $errorRecord = InvalidDataTypeCombinationErrorRecord -Message 'When -Type is set to String, -Data must be passed a scalar value or single-element array.'
+                        $errorRecord = InvalidValueTypeCombinationErrorRecord -Message 'When -Type is set to String, -Value must be passed a scalar value or single-element array.'
                         $PSCmdlet.ThrowTerminatingError($errorRecord)
                     }
                     else
                     {
-                        $policyFile.SetStringValue($Key, $ValueName, $array[0].ToString())
+                        $policyFile.SetStringValue($Key, $Name, $array[0].ToString())
                     }
 
                     break
@@ -177,16 +177,16 @@ function Set-PolicyFileEntry
 
                 ([Microsoft.Win32.RegistryValueKind]::ExpandString)
                 {
-                    $array = @($Data)
+                    $array = @($Value)
 
                     if ($array.Count -ne 1)
                     {
-                        $errorRecord = InvalidDataTypeCombinationErrorRecord -Message 'When -Type is set to ExpandString, -Data must be passed a scalar value or single-element array.'
+                        $errorRecord = InvalidValueTypeCombinationErrorRecord -Message 'When -Type is set to ExpandString, -Value must be passed a scalar value or single-element array.'
                         $PSCmdlet.ThrowTerminatingError($errorRecord)
                     }
                     else
                     {
-                        $policyFile.SetStringValue($Key, $ValueName, $array[0].ToString(), $true)
+                        $policyFile.SetStringValue($Key, $Name, $array[0].ToString(), $true)
                     }
 
                     break
@@ -194,16 +194,16 @@ function Set-PolicyFileEntry
 
                 ([Microsoft.Win32.RegistryValueKind]::DWord)
                 {
-                    $array = @($Data)
+                    $array = @($Value)
                     $dword = ($array | Select-Object -First 1) -as [UInt32]
                     if ($null -eq $dword -or $array.Count -ne 1)
                     {
-                        $errorRecord = InvalidDataTypeCombinationErrorRecord -Message 'When -Type is set to DWord, -Data must be passed a valid UInt32 value.'
+                        $errorRecord = InvalidValueTypeCombinationErrorRecord -Message 'When -Type is set to DWord, -Value must be passed a valid UInt32 value.'
                         $PSCmdlet.ThrowTerminatingError($errorRecord)
                     }
                     else
                     {
-                        $policyFile.SetDWORDValue($key, $ValueName, $dword)
+                        $policyFile.SetDWORDValue($key, $Name, $dword)
                     }
 
                     break
@@ -211,16 +211,16 @@ function Set-PolicyFileEntry
 
                 ([Microsoft.Win32.RegistryValueKind]::QWord)
                 {
-                    $array = @($Data)
+                    $array = @($Value)
                     $qword = ($array | Select-Object -First 1) -as [UInt64]
                     if ($null -eq $qword -or $array.Count -ne 1)
                     {
-                        $errorRecord = InvalidDataTypeCombinationErrorRecord -Message 'When -Type is set to QWord, -Data must be passed a valid UInt64 value.'
+                        $errorRecord = InvalidValueTypeCombinationErrorRecord -Message 'When -Type is set to QWord, -Value must be passed a valid UInt64 value.'
                         $PSCmdlet.ThrowTerminatingError($errorRecord)
                     }
                     else
                     {
-                        $policyFile.SetQWORDValue($key, $ValueName, $qword)
+                        $policyFile.SetQWORDValue($key, $Name, $qword)
                     }
 
                     break
@@ -229,13 +229,13 @@ function Set-PolicyFileEntry
                 ([Microsoft.Win32.RegistryValueKind]::MultiString)
                 {
                     $strings = [string[]] @(
-                        foreach ($item in @($Data))
+                        foreach ($item in @($Value))
                         {
                             $item.ToString()
                         }
                     )
 
-                    $policyFile.SetMultiStringValue($Key, $ValueName, $strings)
+                    $policyFile.SetMultiStringValue($Key, $Name, $strings)
 
                     break
                 }
@@ -279,15 +279,15 @@ function Set-PolicyFileEntry
    Path to the .pol file that is to be read.
 .PARAMETER Key
    The registry key inside the .pol file that you want to read.
-.PARAMETER ValueName
+.PARAMETER Name
    The name of the registry value.  May be set to an empty string to read the default value of a key.
 .PARAMETER All
-   Switch indicating that all entries from the specified .pol file should be output, instead of searching for a specific key / ValueName pair.
+   Switch indicating that all entries from the specified .pol file should be output, instead of searching for a specific key / Name pair.
 .EXAMPLE
-   Get-PolicyFileEntry -Path $env:systemroot\system32\GroupPolicy\Machine\registry.pol -Key Software\Policies\Something -ValueName SomeValue
+   Get-PolicyFileEntry -Path $env:systemroot\system32\GroupPolicy\Machine\registry.pol -Key Software\Policies\Something -Name SomeValue
 
    Reads the value of Software\Policies\Something\SomeValue from the Machine admin templates of the local GPO.
-   Either returns an object with the data and type of this registry value (if present), or returns nothing, if not found.
+   Either returns an object with the Value and type of this registry value (if present), or returns nothing, if not found.
 .EXAMPLE
    Get-PolicyFileEntry -Path $env:systemroot\system32\GroupPolicy\Machine\registry.pol -All
 
@@ -296,10 +296,10 @@ function Set-PolicyFileEntry
    None.  This command does not accept pipeline input.
 .OUTPUTS
    If the specified registry value is found, the function outputs a PSCustomObject with the following properties:
-      ValueName:  The same value that was passed to the -ValueName parameter
+      Name:  The same value that was passed to the -Name parameter
       Key:        The same value that was passed to the -Key parameter
-      Data:       The current value assigned to the specified Key / ValueName in the .pol file.
-      Type:       The RegistryValueKind type of the specified Key / ValueName in the .pol file.
+      Value:       The current value assigned to the specified Key / Name in the .pol file.
+      Type:       The RegistryValueKind type of the specified Key / Name in the .pol file.
    If the specified registry value is not found in the .pol file, the command returns nothing.  No error is produced.
 .LINK
    Set-PolicyFileEntry
@@ -322,7 +322,7 @@ function Get-PolicyFileEntry
         [string] $Key,
 
         [Parameter(Mandatory = $true, Position = 2, ParameterSetName = 'ByKeyAndValue')]
-        [string] $ValueName,
+        [string] $Name,
 
         [Parameter(Mandatory = $true, ParameterSetName = 'All')]
         [switch] $All
@@ -344,7 +344,7 @@ function Get-PolicyFileEntry
 
     if ($PSCmdlet.ParameterSetName -eq 'ByKeyAndValue')
     {
-        $entry = $policyFile.GetValue($Key, $ValueName)
+        $entry = $policyFile.GetValue($Key, $Name)
 
         if ($null -ne $entry)
         {
@@ -369,18 +369,18 @@ function Get-PolicyFileEntry
    Path to the .pol file that is to be modified.
 .PARAMETER Key
    The registry key inside the .pol file from which you want to remove a value.
-.PARAMETER ValueName
+.PARAMETER Name
    The name of the registry value to be removed.  May be set to an empty string to remove the default value of a key.
 .PARAMETER NoGptIniUpdate
    When this switch is used, the command will not attempt to update the version number in the gpt.ini file
 .EXAMPLE
-   Remove-PolicyFileEntry -Path $env:systemroot\system32\GroupPolicy\Machine\registry.pol -Key Software\Policies\Something -ValueName SomeValue
+   Remove-PolicyFileEntry -Path $env:systemroot\system32\GroupPolicy\Machine\registry.pol -Key Software\Policies\Something -Name SomeValue
 
    Removes the value Software\Policies\Something\SomeValue from the local computer Machine GPO, if present.  Updates the Machine version counter in $env:systemroot\system32\GroupPolicy\gpt.ini
 .EXAMPLE
    $entries = @(
-       New-Object psobject -Property @{ ValueName = 'MaxXResolution'; Data = 1680 }
-       New-Object psobject -Property @{ ValueName = 'MaxYResolution'; Data = 1050 }
+       New-Object psobject -Property @{ Name = 'MaxXResolution'; Value = 1680 }
+       New-Object psobject -Property @{ Name = 'MaxYResolution'; Value = 1050 }
    )
 
    $entries | Remove-PolicyFileEntry -Path $env:SystemRoot\system32\GroupPolicy\Machine\registry.pol `
@@ -394,7 +394,7 @@ function Get-PolicyFileEntry
    since both values shared the same Key, this example shows that you can pass the value in either way.
 
 .INPUTS
-   The Key and ValueName properties may be bound via the pipeline by property name.
+   The Key and Name properties may be bound via the pipeline by property name.
 .OUTPUTS
    None.  This command does not generate output.
 .NOTES
@@ -420,7 +420,7 @@ function Remove-PolicyFileEntry
         [string] $Key,
 
         [Parameter(Mandatory = $true, Position = 2, ValueFromPipelineByPropertyName = $true)]
-        [string] $ValueName,
+        [string] $Name,
 
         [switch] $NoGptIniUpdate
     )
@@ -446,16 +446,16 @@ function Remove-PolicyFileEntry
 
     process
     {
-        $entry = $policyFile.GetValue($Key, $ValueName)
+        $entry = $policyFile.GetValue($Key, $Name)
 
         if ($null -eq $entry)
         {
-            Write-Verbose "Entry '$Key\$ValueName' is already not present in file '$Path'."
+            Write-Verbose "Entry '$Key\$Name' is already not present in file '$Path'."
             return
         }
 
-        Write-Verbose "Removing entry '$Key\$ValueName' from file '$Path'"
-        $policyFile.DeleteValue($Key, $ValueName)
+        Write-Verbose "Removing entry '$Key\$Name' from file '$Path'"
+        $policyFile.DeleteValue($Key, $Name)
         $dirty = $true
     }
 

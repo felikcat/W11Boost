@@ -87,37 +87,37 @@ Pause
 
 if (!$automatic_windows_store_app_updates)
 {
-    PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\WindowsStore' -ValueName 'AutoDownload' -Data '2' -Type 'Dword'
+    PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\WindowsStore' -Name 'AutoDownload' -Value '2' -Type 'Dword'
 }
 
 if (!$automatic_thumbnail_clearing)
 {
     # Depend on the user clearing out thumbnail caches manually if they get corrupted.
-    PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VolumeCaches\Thumbnail Cache' -ValueName 'Autorun' -Data '0' -Type 'Dword'
+    PEAdd_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VolumeCaches\Thumbnail Cache' -Name 'Autorun' -Value '0' -Type 'Dword'
 }
 
 if (!$automatic_compatibility)
 {
     # Disable "Program Compatibility Assistant".
-    PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -ValueName 'DisablePCA' -Data '1' -Type 'Dword'
+    PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -Name 'DisablePCA' -Value '1' -Type 'Dword'
 
     # Disable "Application Compatibility Engine".
-    PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -ValueName 'DisableEngine' -Data '1' -Type 'Dword'
+    PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -Name 'DisableEngine' -Value '1' -Type 'Dword'
 
     # Disable "SwitchBack Compatibility Engine".
-    PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -ValueName 'SbEnable' -Data '0' -Type 'Dword'
+    PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -Name 'SbEnable' -Value '0' -Type 'Dword'
 
     # Disable user Steps Recorder.
-    PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -ValueName 'DisableUAR' -Data '1' -Type 'Dword'
+    PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -Name 'DisableUAR' -Value '1' -Type 'Dword'
 
     # Disable "Remove Program Compatibility Property Page".
-    PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -ValueName 'DisablePropPage' -Data '0' -Type 'Dword'
+    PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -Name 'DisablePropPage' -Value '0' -Type 'Dword'
 
     # Disable "Inventory Collector".
-    PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -ValueName 'DisableInventory' -Data '1' -Type 'Dword'
+    PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -Name 'DisableInventory' -Value '1' -Type 'Dword'
 
     # Disable 'Program Compatibility Assistant' service
-    PolEdit_HKLM 'SYSTEM\CurrentControlSet\Services' -ValueName 'PcaSvc' -Data '4' -Type 'Dword'
+    PEAdd_HKLM 'SYSTEM\CurrentControlSet\Services' -Name 'PcaSvc' -Value '4' -Type 'Dword'
 
     Disable-ScheduledTask -TaskName "\Microsoft\Windows\Application Experience\Microsoft Compatibility Appraiser"
     Disable-ScheduledTask -TaskName "\Microsoft\Windows\Application Experience\PcaPatchDbTask"
@@ -129,22 +129,22 @@ if (!$windows_search_indexing)
     Stop-Service WSearch
     Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\WSearch" -Name "Start" -Type DWord -Value 4
 
-    PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\SearchSettings' -ValueName 'IsDeviceSearchHistoryEnabled' -Data '0' -Type 'Dword'
+    PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\SearchSettings' -Name 'IsDeviceSearchHistoryEnabled' -Value '0' -Type 'Dword'
 
     Disable-ScheduledTask -TaskName "\Microsoft\Windows\Shell\IndexerAutomaticMaintenance"
 }
 
 if ($show_hidden_files)
 {
-    PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -ValueName 'DontPrettyPath' -Data '1' -Type 'Dword'
+    PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'DontPrettyPath' -Value '1' -Type 'Dword'
 
-    PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -ValueName 'Hidden' -Data '1' -Type 'Dword'
+    PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'Hidden' -Value '1' -Type 'Dword'
 
-    PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -ValueName 'HideFileExt' -Data '0' -Type 'Dword'
+    PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'HideFileExt' -Value '0' -Type 'Dword'
 
-    PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -ValueName 'ShowSuperHidden' -Data '1' -Type 'Dword'
+    PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'ShowSuperHidden' -Value '1' -Type 'Dword'
 
-    PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\CabinetState' -ValueName 'FullPath' -Data '1' -Type 'Dword'
+    PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\CabinetState' -Name 'FullPath' -Value '1' -Type 'Dword'
 }
 
 if ($nuke_microsoft_edge)
@@ -164,7 +164,7 @@ if (!$ethernet_power_saving)
 
 if (!$file_history)
 {
-    PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\FileHistory' -ValueName 'Disabled' -Data '1' -Type 'Dword'
+    PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\FileHistory' -Name 'Disabled' -Value '1' -Type 'Dword'
     Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\fhsvc" -Name "Start" -Type DWord -Value 4
     Disable-ScheduledTask -TaskName "\Microsoft\Windows\FileHistory\File History (maintenance mode)"
 }
@@ -172,24 +172,24 @@ if (!$file_history)
 if ($avoid_key_annoyances)
 {
     # Filter keys.
-    PolEdit_HKCU 'Control Panel\Accessibility\Keyboard Response' -ValueName 'Flags' -Data '98' -Type 'String'
+    PEAdd_HKCU 'Control Panel\Accessibility\Keyboard Response' -Name 'Flags' -Value '98' -Type 'String'
 
-    PolEdit_HKCU 'Control Panel\Accessibility\StickyKeys' -ValueName 'Flags' -Data '482' -Type 'String'
+    PEAdd_HKCU 'Control Panel\Accessibility\StickyKeys' -Name 'Flags' -Value '482' -Type 'String'
 
-    PolEdit_HKCU 'Control Panel\Accessibility\ToggleKeys' -ValueName 'Flags' -Data '38' -Type 'String'
+    PEAdd_HKCU 'Control Panel\Accessibility\ToggleKeys' -Name 'Flags' -Value '38' -Type 'String'
 }
 
 if (!$geolocation)
 {
-    PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors' -ValueName 'DisableLocation' -Data '1' -Type 'Dword'
+    PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors' -Name 'DisableLocation' -Value '1' -Type 'Dword'
 
-    PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors' -ValueName 'DisableLocationScripting' -Data '1' -Type 'Dword'
+    PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors' -Name 'DisableLocationScripting' -Value '1' -Type 'Dword'
 
-    PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors' -ValueName 'DisableWindowsLocationProvider' -Data '1' -Type 'Dword'
+    PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors' -Name 'DisableWindowsLocationProvider' -Value '1' -Type 'Dword'
 
-    PolEdit_HKLM 'SYSTEM\CurrentControlSet\Services\lfsvc' -ValueName 'Start' -Data '4' -Type 'Dword'
+    PEAdd_HKLM 'SYSTEM\CurrentControlSet\Services\lfsvc' -Name 'Start' -Value '4' -Type 'Dword'
 
-    PolEdit_HKLM 'SOFTWARE\Microsoft\Settings\FindMyDevice' -ValueName 'LocationSyncEnabled' -Data '0' -Type 'Dword'
+    PEAdd_HKLM 'SOFTWARE\Microsoft\Settings\FindMyDevice' -Name 'LocationSyncEnabled' -Value '0' -Type 'Dword'
 
     Stop-Service lfsvc
     Disable-ScheduledTask -TaskName "\Microsoft\Windows\Location\Notifications"
@@ -198,30 +198,30 @@ if (!$geolocation)
 
 if (!$game_dvr)
 {
-    PolEdit_HKCU 'System\GameConfigStore' -ValueName 'GameDVR_Enabled' -Data '0' -Type 'Dword'
+    PEAdd_HKCU 'System\GameConfigStore' -Name 'GameDVR_Enabled' -Value '0' -Type 'Dword'
 
-    PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\GameDVR' -ValueName 'AllowGameDVR' -Data '0' -Type 'Dword'
+    PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\GameDVR' -Name 'AllowGameDVR' -Value '0' -Type 'Dword'
 
-    PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\GameDVR' -ValueName 'AppCaptureEnabled' -Data '0' -Type 'Dword'
-    PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\GameDVR' -ValueName 'CursorCaptureEnabled' -Data '0' -Type 'Dword'
-    PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\GameDVR' -ValueName 'HistoricalCaptureEnabled' -Data '0' -Type 'Dword'
+    PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\GameDVR' -Name 'AppCaptureEnabled' -Value '0' -Type 'Dword'
+    PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\GameDVR' -Name 'CursorCaptureEnabled' -Value '0' -Type 'Dword'
+    PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\GameDVR' -Name 'HistoricalCaptureEnabled' -Value '0' -Type 'Dword'
 
-    PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\AppBroadcast\GlobalSettings' -ValueName 'AudioCaptureEnabled' -Data '0' -Type 'Dword'
-    PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\AppBroadcast\GlobalSettings' -ValueName 'MicrophoneCaptureEnabledByDefault' -Data '0' -Type 'Dword'
-    PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\AppBroadcast\GlobalSettings' -ValueName 'CursorCaptureEnabled' -Data '0' -Type 'Dword'
-    PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\AppBroadcast\GlobalSettings' -ValueName 'CameraCaptureEnabledByDefault' -Data '0' -Type 'Dword'
+    PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\AppBroadcast\GlobalSettings' -Name 'AudioCaptureEnabled' -Value '0' -Type 'Dword'
+    PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\AppBroadcast\GlobalSettings' -Name 'MicrophoneCaptureEnabledByDefault' -Value '0' -Type 'Dword'
+    PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\AppBroadcast\GlobalSettings' -Name 'CursorCaptureEnabled' -Value '0' -Type 'Dword'
+    PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\AppBroadcast\GlobalSettings' -Name 'CameraCaptureEnabledByDefault' -Value '0' -Type 'Dword'
 
     # Block Xbox controller's home button from opening the game bar.
-    PolEdit_HKCU 'Software\Microsoft\GameBar' -ValueName 'UseNexusForGameBarEnabled' -Data '0' -Type 'Dword'
+    PEAdd_HKCU 'Software\Microsoft\GameBar' -Name 'UseNexusForGameBarEnabled' -Value '0' -Type 'Dword'
 
-    PolEdit_HKCU 'Software\Microsoft\GameBar' -ValueName 'ShowStartupPanel' -Data '0' -Type 'Dword'
+    PEAdd_HKCU 'Software\Microsoft\GameBar' -Name 'ShowStartupPanel' -Value '0' -Type 'Dword'
 
-    PolEdit_HKLM 'SYSTEM\CurrentControlSet\Services\BcastDVRUserService' -ValueName 'Start' -Data '4' -Type 'Dword'
+    PEAdd_HKLM 'SYSTEM\CurrentControlSet\Services\BcastDVRUserService' -Name 'Start' -Value '4' -Type 'Dword'
 }
 
 if (!$allow_system_restore)
 {
-    PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows NT\SystemRestore' -ValueName 'DisableSR' -Data '1' -Type 'Dword'
+    PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows NT\SystemRestore' -Name 'DisableSR' -Value '1' -Type 'Dword'
 
     Disable-ScheduledTask -TaskName "\Microsoft\Windows\SystemRestore\SR"
 

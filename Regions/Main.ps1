@@ -62,18 +62,18 @@ w32tm.exe /resync
 
 
 # If logged into a Microsoft account: Do not sync anything.
-PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\SettingSync' -ValueName 'SyncPolicy' -Data '5' -Type 'Dword'
+PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\SettingSync' -Name 'SyncPolicy' -Value '5' -Type 'Dword'
 
-PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -ValueName 'ShowSyncProviderNotifications' -Data '0' -Type 'Dword'
+PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'ShowSyncProviderNotifications' -Value '0' -Type 'Dword'
 
-PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\Policies\Explorer' -ValueName 'NoLowDiskSpaceChecks' -Data '1' -Type 'Dword'
+PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\Policies\Explorer' -Name 'NoLowDiskSpaceChecks' -Value '1' -Type 'Dword'
 
 # Disable tracking of application startups.
-PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -ValueName 'Start_TrackProgs' -Data '0' -Type 'Dword'
-PolEdit_HKCU 'Software\Policies\Microsoft\Windows\EdgeUI' -ValueName 'DisableMFUTracking' -Data '1' -Type 'Dword'
-PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\EdgeUI' -ValueName 'DisableMFUTracking' -Data '1' -Type 'Dword'
+PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'Start_TrackProgs' -Value '0' -Type 'Dword'
+PEAdd_HKCU 'Software\Policies\Microsoft\Windows\EdgeUI' -Name 'DisableMFUTracking' -Value '1' -Type 'Dword'
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\EdgeUI' -Name 'DisableMFUTracking' -Value '1' -Type 'Dword'
 
-PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\System' -ValueName 'DisableAcrylicBackgroundOnLogon' -Data '1' -Type 'Dword'
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\System' -Name 'DisableAcrylicBackgroundOnLogon' -Value '1' -Type 'Dword'
 
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Autochk\Proxy"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\DiskDiagnostic\Microsoft-Windows-DiskDiagnosticDataCollector"
@@ -84,16 +84,16 @@ Disable-ScheduledTask -TaskName "\NvTmRep_CrashReport3_{B2FE1952-0186-46C3-BAEC-
 Disable-ScheduledTask -TaskName "\NvTmRep_CrashReport4_{B2FE1952-0186-46C3-BAEC-A80AA35AC5B8}"
 
 # Do not analyze apps' execution time data.
-PolEdit_HKLM 'SOFTWARE\Microsoft\Windows NT\CurrentVersion\Perflib' -ValueName 'Disable Performance Counters' -Data '1' -Type 'Dword'
+PEAdd_HKLM 'SOFTWARE\Microsoft\Windows NT\CurrentVersion\Perflib' -Name 'Disable Performance Counters' -Value '1' -Type 'Dword'
 
 
 ##+=+= NTFS tweaks
-PolEdit_HKLM 'SYSTEM\CurrentControlSet\Control\FileSystem' -ValueName 'LongPathsEnabled' -Data '1' -Type 'Dword'
+PEAdd_HKLM 'SYSTEM\CurrentControlSet\Control\FileSystem' -Name 'LongPathsEnabled' -Value '1' -Type 'Dword'
 
 # Ensure "Virtual Memory Pagefile Encryption" is at its default of 'off'.
-PolEdit_HKLM 'SYSTEM\CurrentControlSet\Policies' -ValueName 'NtfsEncryptPagingFile' -Data '0' -Type 'Dword'
+PEAdd_HKLM 'SYSTEM\CurrentControlSet\Policies' -Name 'NtfsEncryptPagingFile' -Value '0' -Type 'Dword'
 
-PolEdit_HKLM 'SYSTEM\CurrentControlSet\Policies' -ValueName 'NtfsForceNonPagedPoolAllocation' -Data '1' -Type 'Dword'
+PEAdd_HKLM 'SYSTEM\CurrentControlSet\Policies' -Name 'NtfsForceNonPagedPoolAllocation' -Value '1' -Type 'Dword'
 
 # Do not use NTFS' "Last Access Time Stamp Updates" by default; apps can still explicitly update these timestamps for themself.
 fsutil.exe behavior set disablelastaccess 3
@@ -104,17 +104,16 @@ fsutil.exe behavior set disablelastaccess 3
 bcdedit.exe /set "{default}" recoveryenabled no
 
 # Do not keep track of recently opened files.
-PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer' -ValueName 'NoRecentDocsHistory' -Data '1' -Type 'Dword'
+PEAdd_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer' -Name 'NoRecentDocsHistory' -Value '1' -Type 'Dword'
 
 
 ##+=+= Enable UAC (User Account Control).
 # UAC requires the 'LUA File Virtualization Filter Driver'.
-Set-ItemProperty -Path "
-}HKLM:\SYSTEM\CurrentControlSet\Services\luafv" -Name "Start" -Type DWord -Value 2
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\luafv" -Name "Start" -Type DWord -Value 2
 
-PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -ValueName 'PromptOnSecureDesktop' -Data '1' -Type 'Dword'
-PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -ValueName 'ConsentPromptBehaviorAdmin' -Data '5' -Type 'Dword'
-PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -ValueName 'EnableLUA' -Data '1' -Type 'Dword'
+PEAdd_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'PromptOnSecureDesktop' -Value '1' -Type 'Dword'
+PEAdd_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'ConsentPromptBehaviorAdmin' -Value '5' -Type 'Dword'
+PEAdd_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'EnableLUA' -Value '1' -Type 'Dword'
 ##+=+=
 
 
@@ -123,16 +122,16 @@ PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -ValueN
 # [ctfmon.exe] obsessive writes to "HKCU\Software\Microsoft\Input\TypingInsights\Insights" if enabled.
 # Provides prediction for software (touch) keyboards.
 # Settings -> Time & language -> Typing -> Typing insights
-PolEdit_HKCU 'Software\Microsoft\Input\Settings' -ValueName 'InsightsEnabled' -Data '0' -Type 'Dword'
+PEAdd_HKCU 'Software\Microsoft\Input\Settings' -Name 'InsightsEnabled' -Value '0' -Type 'Dword'
 
 # Prediction for hardware keyboards.
-PolEdit_HKCU 'Software\Microsoft\Input\Settings' -ValueName 'EnableHwkbTextPrediction' -Data '0' -Type 'Dword'
+PEAdd_HKCU 'Software\Microsoft\Input\Settings' -Name 'EnableHwkbTextPrediction' -Value '0' -Type 'Dword'
 ##+=+=
 
 
 ##+=+= Shutdown options
 # Disables "Fast startup".
-PolEdit_HKLM 'SYSTEM\CurrentControlSet\Control\Session Manager\Power' -ValueName 'HiberbootEnabled' -Data '0' -Type 'Dword'
+PEAdd_HKLM 'SYSTEM\CurrentControlSet\Control\Session Manager\Power' -Name 'HiberbootEnabled' -Value '0' -Type 'Dword'
 (Get-Item "$env:windir\System32\SleepStudy\UserNotPresentSession.etl").Attributes = 'Archive', 'ReadOnly'
 
 
@@ -140,16 +139,16 @@ PolEdit_HKLM 'SYSTEM\CurrentControlSet\Control\Session Manager\Power' -ValueName
 # Use default shutdown behavior.
 Remove-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "AutoEndTasks"
 
-PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -ValueName 'DisableShutdownNamedPipe' -Data '1' -Type 'Dword'
+PEAdd_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'DisableShutdownNamedPipe' -Value '1' -Type 'Dword'
 
 # A security feature that's disabled by default in Windows 11. Enabling this makes shutdown times slow.
-PolEdit_HKLM 'SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management' -ValueName 'ClearPageFileAtShutdown' -Data '0' -Type 'Dword'
+PEAdd_HKLM 'SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management' -Name 'ClearPageFileAtShutdown' -Value '0' -Type 'Dword'
 ##+=+=
 
 
 # Hidden file extensions are abused to hide the real file format, example:
 # An executable (.exe, .scr) pretending to be a PDF.
-PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -ValueName 'HideFileExt' -Data '0' -Type 'Dword'
+PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'HideFileExt' -Value '0' -Type 'Dword'
 
 
 ##+=+= Speed up Visual Studio by disabling telemetry.
@@ -157,16 +156,16 @@ PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Valu
 Disable-ScheduledTask -TaskName "\Microsoft\VisualStudio\Updates\BackgroundDownload"
 # https://learn.microsoft.com/en-us/visualstudio/ide/visual-studio-experience-improvement-program?view=vs-2022
 # PerfWatson2 (VSCEIP) is intensive on resources, ask to disable it.
-PolEdit_HKLM 'Software\Microsoft\VSCommon\17.0\SQM' -ValueName 'OptIn' -Data '0' -Type 'Dword'
+PEAdd_HKLM 'Software\Microsoft\VSCommon\17.0\SQM' -Name 'OptIn' -Value '0' -Type 'Dword'
 
 # Remove feedback button and its features.
 # Feedback can still be given through the Visual Studio Installer:
 # https://learn.microsoft.com/en-us/visualstudio/ide/how-to-report-a-problem-with-visual-studio?view=vs-2022
-PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\VisualStudio\Feedback' -ValueName 'DisableFeedbackDialog' -Data '1' -Type 'Dword'
-PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\VisualStudio\Feedback' -ValueName 'DisableEmailInput' -Data '1' -Type 'Dword'
-PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\VisualStudio\Feedback' -ValueName 'DisableScreenshotCapture' -Data '1' -Type 'Dword'
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\VisualStudio\Feedback' -Name 'DisableFeedbackDialog' -Value '1' -Type 'Dword'
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\VisualStudio\Feedback' -Name 'DisableEmailInput' -Value '1' -Type 'Dword'
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\VisualStudio\Feedback' -Name 'DisableScreenshotCapture' -Value '1' -Type 'Dword'
 
-PolEdit_HKCU 'Software\Microsoft\VisualStudio\Telemetry' -ValueName 'TurnOffSwitch' -Data '1' -Type 'Dword'
+PEAdd_HKCU 'Software\Microsoft\VisualStudio\Telemetry' -Name 'TurnOffSwitch' -Value '1' -Type 'Dword'
 ##+=+=
 
 # Restore the classic context menu.
@@ -179,10 +178,6 @@ $NAME.ForEach({
     # https://ieeexplore.ieee.org/abstract/document/9361674
     netsh.exe int tcp set supplemental Template=$_ CongestionProvider=bbr2
 })
-
-PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -ValueName 'legalnoticecaption' -Data '' -Type 'String'
-
-PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -ValueName 'legalnoticetext' -Data @notice_text -Type ''
 
 # If this directory was non-existent before running W11Boost, then add the "Hidden" attribute to line up with default behavior.
 (Get-Item "$env:windir\System32\GroupPolicy").Attributes = "Directory", "Hidden"

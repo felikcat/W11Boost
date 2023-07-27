@@ -3,54 +3,54 @@
 wmic.exe UserAccount set PasswordExpires=False
 
 # If allowed (1): unused apps would be uninstalled with their user data left intact, then reinstalled if launched afterwards at any point in time.
-PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\Appx' -ValueName 'AllowAutomaticAppArchiving' -Data '0' -Type 'Dword'
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\Appx' -Name 'AllowAutomaticAppArchiving' -Value '0' -Type 'Dword'
 
 # Skip to the sign-on screen.
-PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\Personalization' -ValueName 'NoLockScreen' -Data '1' -Type 'Dword'
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\Personalization' -Name 'NoLockScreen' -Value '1' -Type 'Dword'
 
 # Disable "Look for an app in the Microsoft Store" or "Browse apps in the Microsoft Store".
-PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\Explorer' -ValueName 'NoUseStoreOpenWith' -Data '1' -Type 'Dword'
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\Explorer' -Name 'NoUseStoreOpenWith' -Value '1' -Type 'Dword'
 
 # Do not show Windows tips.
-PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\CloudContent' -ValueName 'DisableSoftLanding' -Data '1' -Type 'Dword'
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\CloudContent' -Name 'DisableSoftLanding' -Value '1' -Type 'Dword'
 
 # Disable optional driver updates; tends to be very outdated.
-PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate' -ValueName 'ExcludeWUDriversInQualityUpdate' -Data '1' -Type 'Dword'
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate' -Name 'ExcludeWUDriversInQualityUpdate' -Value '1' -Type 'Dword'
 
 # Show what's slowing down bootups and shutdowns.
-PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -ValueName 'verbosestatus' -Data '1' -Type 'Dword'
+PEAdd_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'verbosestatus' -Value '1' -Type 'Dword'
 
 # Do not suggest ways to "finish setting up my device to get the most out of Windows".
-PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\UserProfileEngagement' -ValueName 'ScoobeSystemSettingEnabled' -Data '0' -Type 'Dword'
+PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\UserProfileEngagement' -Name 'ScoobeSystemSettingEnabled' -Value '0' -Type 'Dword'
 
 # Disables the startup sound; why: https://youtu.be/UWUBjM2LNJU?t=772
-PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\EditionOverrides' -ValueName 'UserSetting_DisableStartupSound' -Data '1' -Type 'Dword'
-PolEdit_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\LogonUI\BootAnimation' -ValueName 'DisableStartupSound' -Data '1' -Type 'Dword'
+PEAdd_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\EditionOverrides' -Name 'UserSetting_DisableStartupSound' -Value '1' -Type 'Dword'
+PEAdd_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\LogonUI\BootAnimation' -Name 'DisableStartupSound' -Value '1' -Type 'Dword'
 
 # Disable "Show recommendations for tips, shortcuts, new apps, and more".
-PolEdit_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -ValueName 'Start_IrisRecommendations' -Data '0' -Type 'Dword'
+PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'Start_IrisRecommendations' -Value '0' -Type 'Dword'
 
 
 ##+=+= Make Windows Update tolerable.
 
 # Block updates that Microsoft deems as causing compatibility issues.
-PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate' -ValueName 'DisableWUfBSafeguards' -Data '0' -Type 'Dword'
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate' -Name 'DisableWUfBSafeguards' -Value '0' -Type 'Dword'
 
 # Opt out out of "being the first to get the latest non-security updates".
-PolEdit_HKLM 'SOFTWARE\Microsoft\WindowsUpdate\UX\Settings' -ValueName 'IsContinuousInnovationOptedIn' -Data '0' -Type 'Dword'
+PEAdd_HKLM 'SOFTWARE\Microsoft\WindowsUpdate\UX\Settings' -Name 'IsContinuousInnovationOptedIn' -Value '0' -Type 'Dword'
 
 # Notify to download then install Windows updates; no automatic Windows updates.
-PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU' -ValueName 'AUOptions' -Data '2' -Type 'Dword'
-PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate' -ValueName 'AllowAutoWindowsUpdateDownloadOverMeteredNetwork' -Data '0' -Type 'Dword'
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU' -Name 'AUOptions' -Value '2' -Type 'Dword'
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate' -Name 'AllowAutoWindowsUpdateDownloadOverMeteredNetwork' -Value '0' -Type 'Dword'
 
 # Never force restarts.
-PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU' -ValueName 'NoAutoUpdate' -Data '0' -Type 'Dword'
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU' -Name 'NoAutoUpdate' -Value '0' -Type 'Dword'
 
 # Disable Delivery Optimization's "Allow downloads from other PCs".
-PolEdit_HKLM 'SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization' -ValueName 'DODownloadMode' -Data '0' -Type 'Dword'
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization' -Name 'DODownloadMode' -Value '0' -Type 'Dword'
 ##+=+=
 
 
 # Disable feedback reminders.
-PolEdit_HKCU 'SOFTWARE\Microsoft\Siuf\Rules' -ValueName 'NumberOfSIUFInPeriod' -Data '0' -Type 'Dword'
-PolEdit_HKCU 'SOFTWARE\Microsoft\Siuf\Rules' -ValueName 'PeriodInNanoSeconds' -Data '0' -Type 'Dword'
+PEAdd_HKCU 'SOFTWARE\Microsoft\Siuf\Rules' -Name 'NumberOfSIUFInPeriod' -Value '0' -Type 'Dword'
+PEAdd_HKCU 'SOFTWARE\Microsoft\Siuf\Rules' -Name 'PeriodInNanoSeconds' -Value '0' -Type 'Dword'

@@ -130,9 +130,10 @@ image:RSOP.png[]
 
 . https://github.com/felikcat/W11Boost/archive/refs/heads/master.zip[Download W11Boost] then extract it.
 
-. Run `Install.bat` as Administrator.
+. Open `Install.bat`.
 
 . Wait for the automatic reboot and enjoy.
+- W11Boost does no apparent changes, which is intentional. To see that changes have applied, search then open `rsop.msc` from the Start Menu.
 
 
 == Extras

@@ -55,17 +55,17 @@ function PolEntryToPsObject
     )
 
     $type = PolEntryTypeToRegistryValueKind $PolEntry.Type
-    $data = GetEntryData -Entry $PolEntry -Type $type
+    $Value = GetEntryValue -Entry $PolEntry -Type $type
 
     return New-Object psobject -Property @{
         Key       = $PolEntry.KeyName
-        ValueName = $PolEntry.ValueName
+        Name = $PolEntry.Name
         Type      = $type
-        Data      = $data
+        Value      = $Value
     }
 }
 
-function GetEntryData
+function GetEntryValue
 {
     param (
         [TJX.PolFileEditor.PolEntry] $Entry,
@@ -321,7 +321,7 @@ function EnsureAdminTemplateCseGuidsArePresent
         throw "Malformed gpt.ini line: $Line"
     }
 
-    $valueName = $matches[1]
+    $Name = $matches[1]
     $guidStrings = @($matches[2] -split '(?<=\])(?=\[)')
 
     if ($matches[1] -eq 'gPCMachineExtensionNames')
@@ -340,7 +340,7 @@ function EnsureAdminTemplateCseGuidsArePresent
 
     $newGuidString = ($guidList | Sort-Object -Unique) -join ''
 
-    return "$valueName=$newGuidString"
+    return "$Name=$newGuidString"
 }
 
 function GetNewVersionNumber
@@ -522,7 +522,7 @@ function GetSidForAccount($Account)
     }
 }
 
-function DataIsEqual
+function ValueIsEqual
 {
     param (
         [object] $First,
@@ -555,46 +555,46 @@ function DataIsEqual
     return $true
 }
 
-function ParseKeyValueName
+function ParseKeyName
 {
-    param ([string] $KeyValueName)
+    param ([string] $KeyName)
 
-    $key = $KeyValueName -replace '^\\+|\\+$'
-    $valueName = ''
+    $key = $KeyName -replace '^\\+|\\+$'
+    $Name = ''
 
-    if ($KeyValueName -match '^\\*(?<Key>.+?)\\+(?<ValueName>[^\\]*)$')
+    if ($KeyName -match '^\\*(?<Key>.+?)\\+(?<Name>[^\\]*)$')
     {
         $key = $matches['Key'] -replace '\\{2,}', '\'
-        $valueName = $matches['ValueName']
+        $Name = $matches['Name']
     }
 
-    return $key, $valueName
+    return $key, $Name
 }
 
 function GetTargetResourceCommon
 {
     param (
         [string] $Path,
-        [string] $KeyValueName
+        [string] $KeyName
     )
 
     $configuration = @{
-        KeyValueName = $KeyValueName
+        KeyName = $KeyName
         Ensure       = 'Absent'
-        Data         = $null
+        Value         = $null
         Type         = [Microsoft.Win32.RegistryValueKind]::Unknown
     }
 
     if (Test-Path -LiteralPath $path -PathType Leaf)
     {
-        $key, $valueName = ParseKeyValueName $KeyValueName
-        $entry = Get-PolicyFileEntry -Path $Path -Key $key -ValueName $valueName
+        $key, $Name = ParseKeyName $KeyName
+        $entry = Get-PolicyFileEntry -Path $Path -Key $key -Name $Name
 
         if ($entry)
         {
             $configuration['Ensure'] = 'Present'
             $configuration['Type']   = $entry.Type
-            $configuration['Data']   = @($entry.Data)
+            $configuration['Value']   = @($entry.Value)
         }
     }
 
@@ -605,17 +605,17 @@ function SetTargetResourceCommon
 {
     param (
         [string] $Path,
-        [string] $KeyValueName,
+        [string] $KeyName,
         [string] $Ensure,
-        [string[]] $Data,
+        [string[]] $Value,
         [Microsoft.Win32.RegistryValueKind] $Type
     )
 
-    if ($null -eq $Data) { $Data = @() }
+    if ($null -eq $Value) { $Value = @() }
 
     try
     {
-        Assert-ValidDataAndType -Data $Data -Type $Type
+        Assert-ValidValueAndType -Value $Value -Type $Type
     }
     catch
     {
@@ -623,15 +623,15 @@ function SetTargetResourceCommon
         return
     }
 
-    $key, $valueName = ParseKeyValueName $KeyValueName
+    $key, $Name = ParseKeyName $KeyName
 
     if ($Ensure -eq 'Present')
     {
-        Set-PolicyFileEntry -Path $Path -Key $key -ValueName $valueName -Data $Data -Type $Type
+        Set-PolicyFileEntry -Path $Path -Key $key -Name $Name -Value $Value -Type $Type
     }
     else
     {
-        Remove-PolicyFileEntry -Path $Path -Key $key -ValueName $valueName
+        Remove-PolicyFileEntry -Path $Path -Key $key -Name $Name
     }
 }
 
@@ -640,17 +640,17 @@ function TestTargetResourceCommon
     [OutputType([bool])]
     param (
         [string] $Path,
-        [string] $KeyValueName,
+        [string] $KeyName,
         [string] $Ensure,
-        [string[]] $Data,
+        [string[]] $Value,
         [Microsoft.Win32.RegistryValueKind] $Type
     )
 
-    if ($null -eq $Data) { $Data = @() }
+    if ($null -eq $Value) { $Value = @() }
 
     try
     {
-        Assert-ValidDataAndType -Data $Data -Type $Type
+        Assert-ValidValueAndType -Value $Value -Type $Type
     }
     catch
     {
@@ -658,47 +658,47 @@ function TestTargetResourceCommon
         return $false
     }
 
-    $key, $valueName = ParseKeyValueName $KeyValueName
+    $key, $Name = ParseKeyName $KeyName
 
     $fileExists = Test-Path -LiteralPath $Path -PathType Leaf
 
     if ($Ensure -eq 'Present')
     {
         if (-not $fileExists) { return $false }
-        $entry = Get-PolicyFileEntry -Path $Path -Key $key -ValueName $valueName
+        $entry = Get-PolicyFileEntry -Path $Path -Key $key -Name $Name
 
-        return $null -ne $entry -and $Type -eq $entry.Type -and (DataIsEqual $entry.Data $Data -Type $Type)
+        return $null -ne $entry -and $Type -eq $entry.Type -and (ValueIsEqual $entry.Value $Value -Type $Type)
     }
     else # Ensure is 'Absent'
     {
         if (-not $fileExists) { return $true }
-        $entry = Get-PolicyFileEntry -Path $Path -Key $key -ValueName $valueName
+        $entry = Get-PolicyFileEntry -Path $Path -Key $key -Name $Name
 
         return $null -eq $entry
     }
 
 }
 
-function Assert-ValidDataAndType
+function Assert-ValidValueAndType
 {
     param (
-        [string[]] $Data,
+        [string[]] $Value,
         [Microsoft.Win32.RegistryValueKind] $Type
     )
 
     if ($Type -ne [Microsoft.Win32.RegistryValueKind]::MultiString -and
         $Type -ne [Microsoft.Win32.RegistryValueKind]::Binary -and
-        $Data.Count -gt 1)
+        $Value.Count -gt 1)
     {
-        $errorRecord = InvalidDataTypeCombinationErrorRecord -Message 'Do not pass arrays with multiple values to the -Data parameter when -Type is not set to either Binary or MultiString.'
+        $errorRecord = InvalidValueTypeCombinationErrorRecord -Message 'Do not pass arrays with multiple values to the -Value parameter when -Type is not set to either Binary or MultiString.'
         throw $errorRecord
     }
 }
 
-function InvalidDataTypeCombinationErrorRecord($Message)
+function InvalidValueTypeCombinationErrorRecord($Message)
 {
     $exception = New-Object System.Exception($Message)
     return New-Object System.Management.Automation.ErrorRecord(
-        $exception, 'InvalidDataTypeCombination', [System.Management.Automation.ErrorCategory]::InvalidArgument, $null
+        $exception, 'InvalidValueTypeCombination', [System.Management.Automation.ErrorCategory]::InvalidArgument, $null
     )
 }
