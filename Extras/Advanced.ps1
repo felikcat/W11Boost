@@ -53,7 +53,6 @@ $windows_search_indexing = 0
 
 ##+=+= END OF OPTIONS ||-> Initialize
 Push-Location $PSScriptRoot
-Start-Transcript -Path ([Environment]::GetFolderPath('MyDocuments') + "\W11Boost_Advanced_LastRun.log")
 
 Unblock-File -Path "..\Third-party\PolicyFileEditor\PolFileEditor.dll"
 Add-Type -Path "..\Third-party\PolicyFileEditor\PolFileEditor.dll" -ErrorAction Stop
@@ -98,22 +97,22 @@ if (!$automatic_thumbnail_clearing)
 
 if (!$automatic_compatibility)
 {
-    # Disable "Program Compatibility Assistant".
+    # Disable "Program Compatibility Assistant"
     PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -Name 'DisablePCA' -Value '1' -Type 'Dword'
 
-    # Disable "Application Compatibility Engine".
+    # Disable "Application Compatibility Engine"
     PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -Name 'DisableEngine' -Value '1' -Type 'Dword'
 
-    # Disable "SwitchBack Compatibility Engine".
+    # Disable "SwitchBack Compatibility Engine"
     PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -Name 'SbEnable' -Value '0' -Type 'Dword'
 
-    # Disable user Steps Recorder.
+    # Disable user Steps Recorder
     PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -Name 'DisableUAR' -Value '1' -Type 'Dword'
 
-    # Disable "Remove Program Compatibility Property Page".
+    # Disable "Remove Program Compatibility Property Page"
     PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -Name 'DisablePropPage' -Value '0' -Type 'Dword'
 
-    # Disable "Inventory Collector".
+    # Disable "Inventory Collector"
     PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -Name 'DisableInventory' -Value '1' -Type 'Dword'
 
     # Disable 'Program Compatibility Assistant' service

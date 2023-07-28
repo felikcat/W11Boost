@@ -9,15 +9,19 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
+.*Notices about using W11Boost*
+. Only the latest release/stable Windows 11 builds are tested.
+. *It's assumed Windows is installed onto an SSD.*
+- There will be unintentional slowdown on HDDs (slow disks).
+. *Windows Updates will not automatically be cleared out.*
+- 1. Run the built-in "Disk Cleanup" as administrator to clear out updater packages.
+- 2. Read https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/clean-up-the-winsxs-folder?view=windows-11#use-the-startcomponentcleanup-parameter[Microsoft's component cleanup] page to clear previous versions of Windows components.
+. *More RAM will be used* to increase the general performance of Windows, such as paging more operations to prevent creating more hard page faults, which are perceived as stalling/temporary freezing.
 
 [%collapsible]
-.Be specific about what W11Boost does.
+.I want to know exactly what W11Boost does.
 
 ====
-
-.*Notices about using W11Boost*
-. It's assumed you use an SSD. There will be unintentional slowdown on HDDs (slow disks).
-. Windows Updates will not automatically be cleared out. Run the built-in "Disk Cleanup" as administrator to clear them out.
 
 .*Performance*
 . App startups are not tracked.
@@ -25,7 +29,7 @@ endif::[]
 . Login screen's acrylic blur is disabled.
 
 . Enabled the following:
-- NTFS non-paged pool usage; reduces page-faults and stack usage to lessen DPC latency spikes.
+- Increased NTFS pool usage limit, reducing Windows' page-faults and stack usage. As a downside, RAM usage is increased.
 
 - DXGI's DirectFlip with multi-plane overlay (MPO) enabled to lower input lag and reduce stuttering in games.
 
@@ -33,6 +37,7 @@ endif::[]
 
 - Enabled the BBRv2 TCP congestion control algorithm to maintain low ping and high speeds during excessive download or upload, it also noticeably increases download & upload speeds during high ping (70ms+).
 
+- MemoryCompression reduces stuttering in video games by reducing the amount of writes to the paging file.
 
 . Disabled the following:
 - Analyzing application execution time.
@@ -41,24 +46,29 @@ endif::[]
 
 - Fault Tolerant Heap. FTH severely degrades an application's performance if it got marked for "crashing" too often, such is the case for Assetto Corsa.
 
+- Automatic offline maps updates.
+
 - Explorer's thumbnail shadows. Makes folders with many photos or videos smoother to navigate.
 
 - Searching disks to attempt fixing a missing shortcut.
 
-- MemoryCompression to reduce CPU load and reduce stuttering in video games; downside: higher disk usage if RAM is nearly or entirely used up.
-
-- PageCombining to reduce CPU load; downside: increased RAM usage.
+- PageCombining to reduce CPU load and prevents https://kaimi.io/en/2020/07/reading-another-process-memory-via-windows-10-page-combining-en/[introducing security risks]; downside: increased RAM usage.
 
 - Windows tips in general, such as "recommendations for tips, shortcuts, new apps, and more". This could be considered a usability issue as well for those already versed in using Windows.
 
 . Disabled various forms of telemetry:
 - Visual Studio 2022's PerfWatson2 (VSCEIP).
-
 - Windows Error Reporting, Connected User Experiences and Telemetry, Diagnostic Policy Service, Cloud Content & Consumer Experience.
-
 - Advertising ID for apps (.appx packaged).
-
 - Feedback notifications.
+
+. Disabled the following Scheduled Tasks:
+- `Maintenance\WinSAT`: decides to measure overall PC performance at the worst times, drastically slowing down performance during its measurements.
+- `MUI\LPRemove`: On boot-up, checks and removes unused language packs.
+- `Power Efficiency Diagnostics\AnalyzeSystem`: Knowing this exists and looking for its results is on your part, very deliberate. It's better to manually run this to check for example, PCIe ASPM incompatibilities.
+- `Windows\Autochk\Proxy`: An extension of "Microsoft Customer Experience Improvement Program" spyware.
+
+. For Wi-Fi, other APs (Access Points) are never periodically scanned while currently connected to an AP.
 
 
 .*Reliability*
@@ -68,8 +78,9 @@ endif::[]
 - Updates that Microsoft deems as causing compatibility issues are blocked.
 - Opted out of "being the first to get the latest non-security updates".
 
-. NTP time sync servers are changed to `time.cloudflare.com ntppool1.time.nl ntppool2.time.nl` to reduce time sync failure.
+. NTP time sync servers used are now 3 instead of 1, which are `time.cloudflare.com time.nist.gov time.windows.com` to reduce time sync failure.
 ** Very important for Tor and 2FA codes from Bitwarden to remain working.
+
 . UAC is enabled for both security, and fixing applications that break from UAC being off, such as Eddie-UI.
 
 . Disabled the following:
@@ -118,6 +129,8 @@ endif::[]
 
 
 .*Other*
+. Importing/setting wallpapers is set to 100% of JPEG's quality; less compression, therefore less "blurriness".
+
 . W11Boost's changes are tunneled through the Group Policy Editor, therefore:
 - Windows Update does not revert W11Boost's changes.
 - W11Boost's changes can be viewed from a graphical interface via `rsop.msc`. +
@@ -128,6 +141,7 @@ image:RSOP.png[]
 
 ====
 
+.Installing W11Boost
 . https://github.com/felikcat/W11Boost/archive/refs/heads/master.zip[Download W11Boost] then extract it.
 
 . Open `Install.bat`.
@@ -155,11 +169,14 @@ image:RSOP.png[]
 1. Open `Advanced.ps1` in a text editor or IDE of your choosing. +
 2. After finished, run `Advanced.bat` as Administrator.
 
-. `Apply_DOD_Stigs.bat` enforces a higher base-line of security via https://public.cyber.mil/stigs/[DoD STIG compliance], and avoids breaking most apps.
-- Attached to an Active Directory hosted on either locally on a Windows Server or an online server via Microsoft Entra ID (called "Azure AD" prior).
+. `Apply_STIGs.bat` enforces a higher base-line of security via https://public.cyber.mil/stigs/[DoD STIG compliance], and avoids breaking most apps.
+- This cannot be a perfect replica, as it's local only. +
+This will not attach to an Active Directory hosted either locally via a Windows Server, or an online server via Microsoft Entra ID (called "Azure AD" prior).
 
-. `Harden_Further.bat` is intended to be run after `Apply_DOD_Stigs.bat`.
+. `Harden_Further.bat` is intended to be run after `Apply_STIGs.bat`.
 - This will break a lot more programs and use-cases; currently not documented.
+
+. `Use_Quad9_DoH.bat` sets up encrypted DNS via Quad9 servers.
 
 . `Uninstall.bat`
 - Uninstalls W11Boost.
@@ -172,7 +189,14 @@ image:RSOP.png[]
 
 ====
 
+
 == Recommendations
+
+=== GPU
+. To get https://kernel.org/doc/html/next/gpu/amdgpu/display/mpo-overview.html[Multiplane Overlay] working on NVIDIA cards:
+- Set your display's "Output color depth" to 8bpc.
+image:nvcplui_1.png[]
+- Do not use: custom resolutions, DSR, or scaling.
 
 === BIOS
 * *Enable the following:*

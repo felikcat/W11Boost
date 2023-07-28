@@ -8,7 +8,7 @@ PEAdd_HKLM 'SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters' -Name 'Disabled
 PEAdd_HKLM 'SYSTEM\CurrentControlSet\Control' -Name 'SvcHostSplitThresholdInKB' -Value '3670016' -Type 'Dword'
 
 # Disabling threaded DPCs is for debugging purposes and will cause spinlocks; it does not lower DPC latency.
-PEAdd_HKLM 'System\CurrentControlSet\Control\Session Manager\kernel' -Name 'ThreadDpcEnable' -Value '1' -Type 'Dword'
+Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Session Manager\kernel' -Name 'ThreadDpcEnable' -Value '1' -Type 'Dword'
 
 # Delaying the startup of third-party apps gives Windows more room to breathe for its own jobs, speeding up the overall startup time.
 Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Serialize" -Name "Startupdelayinmsec"
@@ -43,10 +43,6 @@ Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\SysMain" -Name "
 PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\System' -Name 'EnableMmx' -Value '1' -Type 'Dword'
 PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\CloudContent' -Name 'DisableWindowsConsumerFeatures' -Value '0' -Type 'Dword'
 
-# Process Lasso or manually setting a non-battery saving power profile is preferred instead.
-# Do not make the power saving profiles less helpful.
-PEAdd_HKLM 'SYSTEM\CurrentControlSet\Control\Power\PowerThrottling' -Name 'PowerThrottlingOff' -Value '0' -Type 'Dword'
-
 # Old versions of the Intel PROSet software set this to 0, breaking Windows' internet connectivity check.
 PEAdd_HKLM 'SYSTEM\CurrentControlSet\Services\NlaSvc\Parameters\Internet' -Name 'EnableActiveProbing' -Value '1' -Type 'Dword'
 
@@ -59,6 +55,10 @@ bcdedit.exe /set "{default}" uselegacyapicmode no
 # Enable idle tickless.
 bcdedit.exe /set "{default}" disabledynamictick no
 
+# Draw graphical elements for boot (progress spinner, Windows or BIOS logo, etc).
+# This is useful to tell if something went wrong if a BSOD can't show up.
+bcdedit.exe /deletevalue "{default}" bootuxdisabled
+
 # Deny global adjustment of timer resolution precision so poorly written apps can't fuck up the precision for other apps.
 # -> In detail: https://randomascii.wordpress.com/2020/10/04/windows-timer-resolution-the-great-rule-change/
 # -> A poorly written app anecdote: https://randomascii.wordpress.com/2020/10/04/windows-timer-resolution-the-great-rule-change/#comment-103111
@@ -66,10 +66,6 @@ PEAdd_HKLM 'SYSTEM\CurrentControlSet\Control\Session Manager\kernel' -Name 'Glob
 
 Enable-MMAgent -ApplicationLaunchPrefetching
 Enable-MMAgent -ApplicationPreLaunch
-
-# Draw graphical elements for boot (progress spinner, Windows or BIOS logo, etc).
-# This is useful to tell if something went wrong if a BSOD can't show up.
-bcdedit.exe /deletevalue "{default}" bootuxdisabled
 
 # Ensure IPv6 and its related features are enabled.
 Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\iphlpsvc" -Name "Start" -Type DWord -Value 2
@@ -93,3 +89,6 @@ if ($env:PROCESSOR_IDENTIFIER -match 'GenuineIntel') {
 
 # Ensure default 2GB memory boundary for x86 apps.
 Remove-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "AllocationPreference"
+
+# Disk defragmentation does TRIMs on SSDs. Not running TRIMs at least once a week will reduce performance.
+Remove-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Dfrg\BootOptimizeFunction" -Name "Enable"

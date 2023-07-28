@@ -2,7 +2,6 @@
 
 #region Initialize
 Push-Location $PSScriptRoot
-Start-Transcript -Path ([Environment]::GetFolderPath('MyDocuments') + "\W11Boost Logs\Extras - Apply DOD Stigs.log")
 
 Unblock-File -Path "..\Third-party\PolicyFileEditor\PolFileEditor.dll"
 Add-Type -Path "..\Third-party\PolicyFileEditor\PolFileEditor.dll" -ErrorAction Stop

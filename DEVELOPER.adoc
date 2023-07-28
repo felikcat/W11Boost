@@ -25,6 +25,8 @@ endif::[]
 
 . link:https://techcommunity.microsoft.com/t5/core-infrastructure-and-security/stiging-made-easy-microsoft-endpoint-manager/ba-p/2422255[Microsoft blog post explaining how to use "Microsoft Endpoint Manager"]; relevant for DoD STIG compliance.
 
+. https://learn.microsoft.com/en-us/shows/seth-juarez/memory-compression-in-windows-10-rtm[An official Microsoft video explaning the history and the benefits of their Memory Compression], how the "Standby List" (page cache) turns hard page faults into soft page faults.
+
 . Whatever else is below here; it'll come up when relevant.
 
 

@@ -18,6 +18,9 @@ PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\Policies\Explorer' -Name '
 # Disable Explorer's thumbnail shadows.
 Set-ItemProperty -Path "HKCR:\SystemFileAssociations\image" -Name "Treatment" -Type DWord -Value 2
 
+# W11Boost does changes that Windows developer builds would likely not anticipate.
+PEAdd_HKLM 'SOFTWARE\Microsoft\WindowsSelfHost\UI\Visibility' -Name 'HideInsiderPage' -Value '1' -Type 'Dword'
+
 # Enable multiple processes for explorer.exe
 PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'SeparateProcess' -Value '1' -Type 'Dword'
 
@@ -35,15 +38,27 @@ Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\PriorityControl' 
 
 Set-ItemProperty -Path 'HKCU:\Software\Microsoft\GameBar' -Name 'AutoGameModeEnabled' -Value '1' -Type 'Dword'
 
-# https://learn.microsoft.com/en-us/windows/win32/direct3ddxgi/for-best-performance--use-dxgi-flip-model#directflip
-Set-ItemProperty -Path 'HKCU:\Software\Microsoft\DirectX\UserGpuPreferences' -Name 'DirectXUserGlobalSettings' -Value 'SwapEffectUpgradeEnable=1;' -Type 'String'
+Set-ItemProperty -Path 'HKLM:\SYSTEM\Maps' -Name 'AutoUpdateEnabled' -Value '0' -Type 'Dword'
+
+
+# SwapEffectUpgradeEnable: https://learn.microsoft.com/en-us/windows/win32/direct3ddxgi/for-best-performance--use-dxgi-flip-model#directflip
+# VRROptimizeEnable: https://devblogs.microsoft.com/directx/os-variable-refresh-rate/
+Set-ItemProperty -Path 'HKCU:\Software\Microsoft\DirectX\UserGpuPreferences' -Name 'DirectXUserGlobalSettings' -Value 'VRROptimizeEnable=1;SwapEffectUpgradeEnable=1;' -Type 'String'
 
 # Enables hardware-accelerated GPU scheduling except for blocked GPU VIDs listed in:
 # HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\GraphicsDrivers\BlockList\Kernel
 Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\GraphicsDrivers' -Name 'HwSchMode' -Type 'DWord' -Value '2'
 
-Disable-MMAgent -MemoryCompression
+Enable-MMAgent -MemoryCompression
 Disable-MMAgent -PageCombining
+
+$DESIRED_PAGEFILE = (Get-CimInstance Win32_PhysicalMemoryArray).MaxCapacity * 1KB/1MB + 257
+
+$PageFile = Get-CimInstance -ClassName Win32_PageFileSetting -Filter "Name like '%pagefile.sys'"
+$PageFile | Remove-CimInstance
+$PageFile = New-CimInstance -ClassName Win32_PageFileSetting -Property @{ Name= "C:\pagefile.sys" }
+$PageFile | Set-CimInstance -Property @{ InitialSize = $DESIRED_PAGEFILE; MaximumSize = $DESIRED_PAGEFILE }
+
 
 
 ##+=+= Disallow automatic: app updates, security scanning, and system diagnostics.
@@ -54,22 +69,21 @@ Disable-ScheduledTask -TaskName "\Microsoft\Windows\Diagnosis\Scheduled"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Diagnosis\RecommendedTroubleshootingScanner"
 ##+=+=
 
-##+=+= System Properties -> Advanced -> Performance
-Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "UserPreferencesMask" -Type Binary -Value ([byte[]](0x90,0x12,0x03,0x80,0x10,0x00,0x00,0x00))
-##+=+=
-
-
 # Resets adapter settings to driver defaults; it's assumed if there were prior tweaks done, they're incorrect.
 Reset-NetAdapterAdvancedProperty -Name '*' -DisplayName '*'
 
 # Random disconnection fix for specific network adapters, such as Intel's I225-V
 Set-NetAdapterAdvancedProperty -Name '*' -DisplayName 'Wait for Link' -RegistryValue 0
 
+# Never periodically scan for other Access Points (AP) / Wi-Fi networks
+Set-NetAdapterAdvancedProperty -Name '*' -DisplayName 'Global BG Scan blocking' -RegistryValue 2
+
 netsh.exe int tcp set global timestamps=enabled
 
 
-##+=+= Automated file cleanup without user interaction is a bad idea, even if its ran only on low-disk space events.
+#region Automated file cleanup without user interaction is a bad idea, even if its ran only on low-disk space events.
 PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\Appx' -Name 'AllowStorageSenseGlobal' -Value '0' -Type 'Dword'
+
 PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\StorageSense' -Name 'AllowStorageSenseGlobal' -Value '0' -Type 'Dword'
 
 Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion" -Name "StorageSense"
@@ -77,10 +91,10 @@ Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion" -Nam
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\DiskFootprint\Diagnostics"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\DiskFootprint\StorageSense"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\DiskCleanup\SilentCleanup"
-##+=+=
+#endregion
 
 
-##+=+= Disable these scheduler tasks to keep performance and bandwidth usage more consistent.
+#region Disable these scheduler tasks to keep performance and bandwidth usage more consistent.
 Disable-ScheduledTask -TaskName "\Microsoft\Office\OfficeTelemetryAgentFallBack"
 Disable-ScheduledTask -TaskName "\Microsoft\Office\OfficeTelemetryAgentLogOn"
 
@@ -91,22 +105,16 @@ Disable-ScheduledTask -TaskName "\Microsoft\Windows\CertificateServicesClient\Us
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Clip\License Validation"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\CloudExperienceHost\CreateObjectTask"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\File Classification Infrastructure\Property Definition Sync"
-Disable-ScheduledTask -TaskName "\Microsoft\Windows\HelloFace\FODCleanupTask"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\InstallService\SmartRetry"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\International\Synchronize Language Settings"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\LanguageComponentsInstaller\ReconcileLanguageResources"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Maintenance\WinSAT"
 
-Disable-ScheduledTask -TaskName "\Microsoft\Windows\Maps\MapsToastTask"
-Disable-ScheduledTask -TaskName "\Microsoft\Windows\Maps\MapsUpdateTask"
-
-Disable-ScheduledTask -TaskName "\Microsoft\Windows\Mobile Broadband Accounts\MNO Metadata Parser"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\MUI\LPRemove"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\NetTrace\GatherNetworkInfo"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\PI\Sqm-Tasks"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Power Efficiency Diagnostics\AnalyzeSystem"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Printing\EduPrintProv"
-Disable-ScheduledTask -TaskName "\Microsoft\Windows\RecoveryEnvironment\VerifyWinRE"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\RemoteAssistance\RemoteAssistanceTask"
 
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\SettingSync\BackgroundUploadTask"
@@ -114,11 +122,6 @@ Disable-ScheduledTask -TaskName "\Microsoft\Windows\SettingSync\NetworkStateChan
 
 # https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/clean-up-the-winsxs-folder?view=windows-11
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Servicing\StartComponentCleanup"
-
-Disable-ScheduledTask -TaskName "\Microsoft\Windows\SoftwareProtectionPlatform\SvcRestartTask"
-Disable-ScheduledTask -TaskName "\Microsoft\Windows\SoftwareProtectionPlatform\SvcRestartTaskLogon"
-Disable-ScheduledTask -TaskName "\Microsoft\Windows\SoftwareProtectionPlatform\SvcRestartTaskNetwork"
-Disable-ScheduledTask -TaskName "\Microsoft\Windows\SoftwareProtectionPlatform\SvcTrigger"
 
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Speech\SpeechModelDownloadTask"
 
@@ -134,10 +137,31 @@ Disable-ScheduledTask -TaskName "\Microsoft\Windows\WOF\WIM-Hash-Management"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\WOF\WIM-Hash-Validation"
 
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\WS\WSTask"
-Disable-ScheduledTask -TaskName "\Microsoft\Windows\WwanSvc\OobeDiscovery"
 
 # Microsoft's Malicious Removal Tool task can pop up out of nowhere if Windows Update is still allowed to connect.
 PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\MRT' -Name 'DontOfferThroughWUAU' -Value '1' -Type 'Dword'
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\RemovalTools\MRT_HB"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\RemovalTools\MRT_ERROR_HB"
-##+=+=
+#endregion
+
+
+#region Windows Update changes.
+# Deny pre-release (Release Preview, Beta, or Dev channel) updates; go to and only install release updates.
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate' -Name 'ManagePreviewBuildsPolicyValue' -Value '1' -Type 'Dword'
+
+# Block updates that Microsoft deems as causing compatibility issues.
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate' -Name 'DisableWUfBSafeguards' -Value '0' -Type 'Dword'
+
+# Opt out out of "being the first to get the latest non-security updates".
+PEAdd_HKLM 'SOFTWARE\Microsoft\WindowsUpdate\UX\Settings' -Name 'IsContinuousInnovationOptedIn' -Value '0' -Type 'Dword'
+
+# Notify to download then install Windows updates; no automatic Windows updates.
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU' -Name 'AUOptions' -Value '2' -Type 'Dword'
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate' -Name 'AllowAutoWindowsUpdateDownloadOverMeteredNetwork' -Value '0' -Type 'Dword'
+
+# Never force restarts.
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU' -Name 'NoAutoUpdate' -Value '0' -Type 'Dword'
+
+# Disable Delivery Optimization's "Allow downloads from other PCs".
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization' -Name 'DODownloadMode' -Value '0' -Type 'Dword'
+#endregion

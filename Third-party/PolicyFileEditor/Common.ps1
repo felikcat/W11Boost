@@ -690,15 +690,15 @@ function Assert-ValidValueAndType
         $Type -ne [Microsoft.Win32.RegistryValueKind]::Binary -and
         $Value.Count -gt 1)
     {
-        $errorRecord = InvalidValueTypeCombinationErrorRecord -Message 'Do not pass arrays with multiple values to the -Value parameter when -Type is not set to either Binary or MultiString.'
+        $errorRecord = InvalidDataTypeCombinationErrorRecord -Message 'Do not pass arrays with multiple values to the -Value parameter when -Type is not set to either Binary or MultiString.'
         throw $errorRecord
     }
 }
 
-function InvalidValueTypeCombinationErrorRecord($Message)
+function InvalidDataTypeCombinationErrorRecord($Message)
 {
     $exception = New-Object System.Exception($Message)
     return New-Object System.Management.Automation.ErrorRecord(
-        $exception, 'InvalidValueTypeCombination', [System.Management.Automation.ErrorCategory]::InvalidArgument, $null
+        $exception, 'InvalidDataTypeCombination', [System.Management.Automation.ErrorCategory]::InvalidArgument, $null
     )
 }

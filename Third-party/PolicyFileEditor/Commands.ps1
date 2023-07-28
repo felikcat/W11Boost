@@ -32,7 +32,7 @@ $scriptRoot = Split-Path $MyInvocation.MyCommand.Path
 .EXAMPLE
    Set-PolicyFileEntry -Path $env:systemroot\system32\GroupPolicy\Machine\registry.pol -Key Software\Policies\Something -Name SomeValue -Value '0x12345' -Type DWord
 
-   Example demonstrating that strings with valid numeric Value (including hexadecimal strings beginning with 0x) can be assigned to the numeric types DWord, QWord and Binary.
+   Example demonstrating that strings with valid numeric data (including hexadecimal strings beginning with 0x) can be assigned to the numeric types DWord, QWord and Binary.
 .EXAMPLE
    $entries = @(
        New-Object psobject -Property @{ Name = 'MaxXResolution'; Value = 1680 }
@@ -147,7 +147,7 @@ function Set-PolicyFileEntry
                     $bytes = $Value -as [byte[]]
                     if ($null -eq $bytes)
                     {
-                        $errorRecord = InvalidValueTypeCombinationErrorRecord -Message 'When -Type is set to Binary, -Value must be passed a Byte[] array.'
+                        $errorRecord = InvalidDataTypeCombinationErrorRecord -Message 'When -Type is set to Binary, -Value must be passed a Byte[] array.'
                         $PSCmdlet.ThrowTerminatingError($errorRecord)
                     }
                     else
@@ -164,7 +164,7 @@ function Set-PolicyFileEntry
 
                     if ($array.Count -ne 1)
                     {
-                        $errorRecord = InvalidValueTypeCombinationErrorRecord -Message 'When -Type is set to String, -Value must be passed a scalar value or single-element array.'
+                        $errorRecord = InvalidDataTypeCombinationErrorRecord -Message 'When -Type is set to String, -Value must be passed a scalar value or single-element array.'
                         $PSCmdlet.ThrowTerminatingError($errorRecord)
                     }
                     else
@@ -181,7 +181,7 @@ function Set-PolicyFileEntry
 
                     if ($array.Count -ne 1)
                     {
-                        $errorRecord = InvalidValueTypeCombinationErrorRecord -Message 'When -Type is set to ExpandString, -Value must be passed a scalar value or single-element array.'
+                        $errorRecord = InvalidDataTypeCombinationErrorRecord -Message 'When -Type is set to ExpandString, -Value must be passed a scalar value or single-element array.'
                         $PSCmdlet.ThrowTerminatingError($errorRecord)
                     }
                     else
@@ -198,7 +198,7 @@ function Set-PolicyFileEntry
                     $dword = ($array | Select-Object -First 1) -as [UInt32]
                     if ($null -eq $dword -or $array.Count -ne 1)
                     {
-                        $errorRecord = InvalidValueTypeCombinationErrorRecord -Message 'When -Type is set to DWord, -Value must be passed a valid UInt32 value.'
+                        $errorRecord = InvalidDataTypeCombinationErrorRecord -Message 'When -Type is set to DWord, -Value must be passed a valid UInt32 value.'
                         $PSCmdlet.ThrowTerminatingError($errorRecord)
                     }
                     else
@@ -215,7 +215,7 @@ function Set-PolicyFileEntry
                     $qword = ($array | Select-Object -First 1) -as [UInt64]
                     if ($null -eq $qword -or $array.Count -ne 1)
                     {
-                        $errorRecord = InvalidValueTypeCombinationErrorRecord -Message 'When -Type is set to QWord, -Value must be passed a valid UInt64 value.'
+                        $errorRecord = InvalidDataTypeCombinationErrorRecord -Message 'When -Type is set to QWord, -Value must be passed a valid UInt64 value.'
                         $PSCmdlet.ThrowTerminatingError($errorRecord)
                     }
                     else

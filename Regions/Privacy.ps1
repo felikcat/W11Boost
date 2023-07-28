@@ -37,14 +37,12 @@ PEAdd_HKLM 'SOFTWARE\Microsoft\OneDrive' -Name 'PreventNetworkTrafficPreUserSign
 PEAdd_HKLM 'SOFTWARE\Microsoft\PolicyManager\current\device\System' -Name 'AllowExperimentation' -Value '0' -Type 'Dword'
 
 
-##+=+= [ctfmon.exe] Do not send Microsoft inking and typing data.
+#region [ctfmon.exe] Do not send Microsoft inking and typing data.
 PEAdd_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\TextInput' -Name 'AllowLinguisticDataCollection' -Value '0' -Type 'Dword'
 
 PEAdd_HKCU 'Software\Microsoft\InputPersonalization' -Name 'RestrictImplicitInkCollection' -Value '1' -Type 'Dword'
-
 PEAdd_HKCU 'Software\Microsoft\InputPersonalization' -Name 'RestrictImplicitTextCollection' -Value '1' -Type 'Dword'
-
-##+=+=
+#endregion
 
 
 PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\Privacy' -Name 'TailoredExperiencesWithDiagnosticDataEnabled' -Value '0' -Type 'Dword'
@@ -55,20 +53,17 @@ PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Dsh' -Name 'AllowNewsAndInterests' -Valu
 # Remove the Widgets icon from the taskbar.
 PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'TaskbarDa' -Value '0' -Type 'Dword'
 
-# Disallow syncing cellular text messages to Microsoft's servers.
-PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\Messaging' -Name 'AllowMessageSync' -Value '0' -Type 'Dword'
 
-
-##+=+= Fully disable the activity feed.
+#region Fully disable the activity feed.
 PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\System' -Name 'EnableActivityFeed' -Value '0' -Type 'Dword'
 
 PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\System' -Name 'PublishUserActivities' -Value '0' -Type 'Dword'
 
 PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\System' -Name 'UploadUserActivities' -Value '0' -Type 'Dword'
-##+=+=
+#endregion
 
 
-##+=+= Disable cloud/web usage in the start menu.
+#region Disable cloud/web usage in the start menu.
 PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\Search' -Name 'BingSearchEnabled' -Value '0' -Type 'Dword'
 PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\Search' -Name 'CortanaConsent' -Value '0' -Type 'Dword'
 PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\Search' -Name 'CortanaEnabled' -Value '0' -Type 'Dword'
@@ -87,10 +82,10 @@ PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\Windows Search' -Name 'EnableDyn
 
 # Web suggestions that occur while typing.
 PEAdd_HKCU 'Software\Policies\Microsoft\Windows\Explorer' -Name 'DisableSearchBoxSuggestions' -Value '1' -Type 'Dword'
-##+=+=
+#endregion
 
 
-##+=+= Disables Cloud Content & Consumer Experience features; stops automatic installation of "suggested" apps, and Microsoft account notifications.
+#region Disables "Cloud Content" features; stops automatic installation of "suggested" apps, and Microsoft account notifications.
 
 PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\CloudContent' -Name 'DisableCloudOptimizedContent' -Value '1' -Type 'Dword'
 
@@ -100,10 +95,12 @@ $REGS = @("ContentDeliveryAllowed", "OemPreInstalledAppsEnabled", "PreInstalledA
 $REGS.ForEach({
     PEAdd_HKLM 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' -Name $_ -Value '0' -Type 'Dword'
 })
-##+=+=
+Remove-Item -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager\Subscriptions' -Recurse -Force
+Remove-Item -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager\SuggestedApps' -Recurse -Force
+#endregion
 
 
-##+=+= Disable "Customer Experience Improvement Program"; also implies turning off the Inventory Collector.
+#region Disable "Customer Experience Improvement Program"; also implies turning off the Inventory Collector.
 PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\AppV\CEIP' -Name 'CEIPEnable' -Value '0' -Type 'Dword'
 
 PEAdd_HKLM 'SOFTWARE\Microsoft\SQMClient\Windows' -Name 'CEIPEnable' -Value '0' -Type 'Dword'
@@ -112,14 +109,17 @@ PEAdd_HKLM 'SOFTWARE\Microsoft\Windows\Windows Error Reporting' -Name 'Disabled'
 
 PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Messenger\Client' -Name 'CEIP' -Value '2' -Type 'Dword'
 
+# Disable "Application Impact Telemetry"
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -Name 'AITEnable' -Value '0' -Type 'Dword'
+
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\Autochk\Proxy"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Customer Experience Improvement Program\Consolidator"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Customer Experience Improvement Program\KernelCeipTask"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Customer Experience Improvement Program\UsbCeip"
-##+=+=
+#endregion
 
 
-##+=+= Various Windows Error Reporting tweaks.
-
+#region Various Windows Error Reporting tweaks.
 PEAdd_HKLM 'SOFTWARE\Microsoft\Windows\Windows Error Reporting' -Name 'AutoApproveOSDumps' -Value '0' -Type 'Dword'
 
 # 1 = Minimum consent level; "Always ask before sending data: Windows prompts users for consent to send reports."
@@ -147,7 +147,7 @@ Disable-ScheduledTask -TaskName "\Microsoft\Windows\Windows Error Reporting\Queu
 
 # Disable 'Windows Error Reporting' service
 PEAdd_HKLM 'SYSTEM\CurrentControlSet\Services\WerSvc' -Name 'Start' -Value '4' -Type 'Dword'
-##+=+=
+#endregion
 
 
 # Disable 'Connected User Experiences and Telemetry' service

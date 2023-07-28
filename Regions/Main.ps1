@@ -3,7 +3,6 @@
 #region Initialize
 $host.ui.rawui.windowtitle = "W11Boost by github.com/felikcat"
 Push-Location $PSScriptRoot
-Start-Transcript -Path ([Environment]::GetFolderPath('MyDocuments') + "\W11Boost_LastRun.log")
 
 # 'Import-Module example.psm1' fails if PowerShell script execution is disabled; do it manually.
 Unblock-File -Path "..\Third-party\PolicyFileEditor\PolFileEditor.dll"
@@ -18,8 +17,8 @@ $REGS.ForEach({
     Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\$_" -Name "Start" -Type DWord -Value 3
     Start-Service $_
 })
-#endregion
 
+$WIN_EDITION = Get-ItemPropertyValue 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' -Name ProductName
 if ($WIN_EDITION -notmatch '.*Enterprise|.*Education|.*Server')
 {
     # Education == Enterprise; in terms of what W11Boost expects.
@@ -28,12 +27,27 @@ if ($WIN_EDITION -notmatch '.*Enterprise|.*Education|.*Server')
     Start-Process -Wait cscript.exe -ArgumentList $args
 }
 
-$License_Check = (Get-WMIObject -Query 'SELECT LicenseStatus FROM SoftwareLicensingProduct WHERE Name LIKE "%Windows%" AND PartialProductKey IS NOT NULL AND LicenseStatus !=1').LicenseStatus
+$License_Check = (Get-CimInstance -Query 'SELECT LicenseStatus FROM SoftwareLicensingProduct WHERE Name LIKE "%Windows%" AND PartialProductKey IS NOT NULL AND LicenseStatus !=1').LicenseStatus
 if ($License_Check)
 {
     # Windows needs to be activated, do it!
     & ([ScriptBlock]::Create((Invoke-RestMethod https://massgrave.dev/get))) /KMS38
 }
+
+# Installs Winget if not present. Mainly specific to LTSC 2019 and LTSC 2021.
+if (-Not (Get-Command -CommandType Application -Name winget -ErrorAction SilentlyContinue))
+{
+    # Installs Winget's dependencies on LTSC 2019 and newer; does not work for LTSC 2016.
+    wsreset.exe -i | Wait-Process
+
+    Download_File 'https://github.com/microsoft/winget-cli/releases/latest/download/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle' -Destination ./
+
+    Add-AppxPackage -Path '.\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle'
+
+    Remove-Item '.\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle'
+}
+#endregion
+
 
 # Stops various annoyances, one being Windows Update restarting your PC without your consent.
 & ".\Annoyances.ps1"
@@ -48,8 +62,8 @@ if ($License_Check)
 & ".\Stability.ps1"
 
 
-##+=+= Use optimal online NTP servers for more accurate system time.
-net.exe stop w32time
+#region Use optimal online NTP servers for more accurate system time.
+Stop-Service w32time
 
 # Make a clean slate for the time sync settings.
 w32tm.exe /unregister
@@ -57,12 +71,10 @@ w32tm.exe /register
 
 w32tm.exe /config /syncfromflags:manual /manualpeerlist:"time.cloudflare.com time.nist.gov time.windows.com"
 Start-Service w32time
+
 w32tm.exe /resync
-##+=+=
+#endregion
 
-
-# If logged into a Microsoft account: Do not sync anything.
-PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\SettingSync' -Name 'SyncPolicy' -Value '5' -Type 'Dword'
 
 PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'ShowSyncProviderNotifications' -Value '0' -Type 'Dword'
 
@@ -75,7 +87,6 @@ PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\EdgeUI' -Name 'DisableMFUTrackin
 
 PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\System' -Name 'DisableAcrylicBackgroundOnLogon' -Value '1' -Type 'Dword'
 
-Disable-ScheduledTask -TaskName "\Microsoft\Windows\Autochk\Proxy"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\DiskDiagnostic\Microsoft-Windows-DiskDiagnosticDataCollector"
 
 Disable-ScheduledTask -TaskName "\NvTmRep_CrashReport1_{B2FE1952-0186-46C3-BAEC-A80AA35AC5B8}"
@@ -93,9 +104,11 @@ PEAdd_HKLM 'SYSTEM\CurrentControlSet\Control\FileSystem' -Name 'LongPathsEnabled
 # Ensure "Virtual Memory Pagefile Encryption" is at its default of 'off'.
 PEAdd_HKLM 'SYSTEM\CurrentControlSet\Policies' -Name 'NtfsEncryptPagingFile' -Value '0' -Type 'Dword'
 
-PEAdd_HKLM 'SYSTEM\CurrentControlSet\Policies' -Name 'NtfsForceNonPagedPoolAllocation' -Value '1' -Type 'Dword'
+# Allocate more RAM to NTFS' paged pool.
+PEAdd_HKLM 'SYSTEM\CurrentControlSet\Policies' -Name 'NtfsForceNonPagedPoolAllocation' -Value '0' -Type 'Dword'
+fsutil.exe behavior set memoryusage 2
 
-# Do not use NTFS' "Last Access Time Stamp Updates" by default; apps can still explicitly update these timestamps for themself.
+# Do not use "Last Access Time Stamp Updates" by default; apps can still explicitly update these timestamps for themself.
 fsutil.exe behavior set disablelastaccess 3
 ##+=+=
 
@@ -117,24 +130,10 @@ PEAdd_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'En
 ##+=+=
 
 
-##+=+= Disable typing insights.
-
-# [ctfmon.exe] obsessive writes to "HKCU\Software\Microsoft\Input\TypingInsights\Insights" if enabled.
-# Provides prediction for software (touch) keyboards.
-# Settings -> Time & language -> Typing -> Typing insights
-PEAdd_HKCU 'Software\Microsoft\Input\Settings' -Name 'InsightsEnabled' -Value '0' -Type 'Dword'
-
-# Prediction for hardware keyboards.
-PEAdd_HKCU 'Software\Microsoft\Input\Settings' -Name 'EnableHwkbTextPrediction' -Value '0' -Type 'Dword'
-##+=+=
-
-
-##+=+= Shutdown options
+#region Shutdown options
 # Disables "Fast startup".
 PEAdd_HKLM 'SYSTEM\CurrentControlSet\Control\Session Manager\Power' -Name 'HiberbootEnabled' -Value '0' -Type 'Dword'
 (Get-Item "$env:windir\System32\SleepStudy\UserNotPresentSession.etl").Attributes = 'Archive', 'ReadOnly'
-
-
 
 # Use default shutdown behavior.
 Remove-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "AutoEndTasks"
@@ -143,7 +142,7 @@ PEAdd_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'Di
 
 # A security feature that's disabled by default in Windows 11. Enabling this makes shutdown times slow.
 PEAdd_HKLM 'SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management' -Name 'ClearPageFileAtShutdown' -Value '0' -Type 'Dword'
-##+=+=
+#endregion
 
 
 # Hidden file extensions are abused to hide the real file format, example:
@@ -151,8 +150,7 @@ PEAdd_HKLM 'SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management' 
 PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'HideFileExt' -Value '0' -Type 'Dword'
 
 
-##+=+= Speed up Visual Studio by disabling telemetry.
-
+#region Speed up Visual Studio by disabling telemetry.
 Disable-ScheduledTask -TaskName "\Microsoft\VisualStudio\Updates\BackgroundDownload"
 # https://learn.microsoft.com/en-us/visualstudio/ide/visual-studio-experience-improvement-program?view=vs-2022
 # PerfWatson2 (VSCEIP) is intensive on resources, ask to disable it.
@@ -166,10 +164,13 @@ PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\VisualStudio\Feedback' -Name 'DisableEma
 PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\VisualStudio\Feedback' -Name 'DisableScreenshotCapture' -Value '1' -Type 'Dword'
 
 PEAdd_HKCU 'Software\Microsoft\VisualStudio\Telemetry' -Name 'TurnOffSwitch' -Value '1' -Type 'Dword'
-##+=+=
+#endregion
 
 # Restore the classic context menu.
 New-Item -Path "HKCU:\SOFTWARE\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" -Value "" -Type String
+
+# Do not reserve ~5GB or more of space at all times for Windows updates.
+dism.exe /Online /Set-ReservedStorageState /State:Disabled
 
 $NAME = @("InternetCustom", "DatacenterCustom", "Compat", "Datacenter", "Internet")
 $NAME.ForEach({
