@@ -9,14 +9,12 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
-.*Notices about using W11Boost*
-. Only the latest release/stable Windows 11 builds are tested.
-. *It's assumed Windows is installed onto an SSD.*
-- There will be unintentional slowdown on HDDs (slow disks).
-. *Windows Updates will not automatically be cleared out.*
-- 1. Run the built-in "Disk Cleanup" as administrator to clear out updater packages.
-- 2. Read https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/clean-up-the-winsxs-folder?view=windows-11#use-the-startcomponentcleanup-parameter[Microsoft's component cleanup] page to clear previous versions of Windows components.
-. *More RAM will be used* to increase the general performance of Windows, such as paging more operations to prevent creating more hard page faults, which are perceived as stalling/temporary freezing.
+.By default, W11Boost's most important goals compared to alternatives are:
+a. No apps, drivers, etc are broken.
+a. No security sacrifices; also that most security reductions bring fake/placebo performance increases.
+a. Minimal changes to how a PC after installing W11Boost is used compared to prior.
+
+- W11Boost can aid with reducing your tech support requests by family members, co-workers, etc.
 
 [%collapsible]
 .I want to know exactly what W11Boost does.
@@ -25,8 +23,6 @@ endif::[]
 
 .*Performance*
 . App startups are not tracked.
-
-. Login screen's acrylic blur is disabled.
 
 . Enabled the following:
 - Increased NTFS pool usage limit, reducing Windows' page-faults and stack usage. As a downside, RAM usage is increased.
@@ -140,22 +136,26 @@ image:RSOP.png[]
 '''
 
 ====
+.*Before installing W11Boost*
+. If you are using a custom Windows ISO such as Atlas OS, do a clean installation of Windows 11 Education using https://www.microsoft.com/en-us/software-download/windows11[Microsoft's official ISOs]. +
+image:Windows_11_ISO.png[]
 
-.Installing W11Boost
+.*Installing W11Boost*
 . https://github.com/felikcat/W11Boost/archive/refs/heads/master.zip[Download W11Boost] then extract it.
 
 . Open `Install.bat`.
 
 . Wait for the automatic reboot and enjoy.
-- W11Boost does no apparent changes, which is intentional. To see that changes have applied, search then open `rsop.msc` from the Start Menu.
 
 
 == Extras
 
-. `W11_LTSC_Replica.bat` de-bloats Windows 11 enough to replicate what Windows 10 Enterprise LTSC 2021 includes by default, which is known to only include what's important.
-- *Exceptions* to prevent breaking apps: App Installer, Store Experience Host, Windows Store, Xbox Game Speech Window.
+. `Microsoft_App_Debloat.bat` de-bloats Windows 11 enough to replicate what Windows 10 Enterprise LTSC 2021 includes by default, which is known to only include what's important.
+- *Exclusions*:
+** Due to breaking apps: App Installer, Store Experience Host, Windows Store, Xbox Game Speech Window.
+** Due to being high-quality, and not funneling advertisements or towards using a Microsoft account: Camera, Clock, Terminal, Maps, Phone Link.
 
-. `Install_Xbox_Minimal.bat` is meant for if `W11_LTSC_Replica.bat` was used, or for an LTSC variant of Windows.
+. `Install_Xbox_Minimal.bat` is meant for if `Microsoft_App_Debloat.bat` was used, or for an LTSC variant of Windows.
 
 - Login to the Microsoft Store before using `Install_Xbox_Minimal.bat`!
 
@@ -163,9 +163,8 @@ image:RSOP.png[]
 ** To also get the Game Bar, install the following link://www.microsoft.com/store/productId/9NZKPSTSNW4P[here] then link://www.microsoft.com/store/productId/9NBLGGH537C2[here].
 
 
-. `Advanced.bat`
-** Contains extra features, such as the removal of Microsoft Edge.
-*** Configuring `Advanced.ps1` is required: +
+. `Advanced.bat` can remove Microsoft Edge, disable Game DVR, remove various forms of automation, etc.
+** Configuring `Advanced.ps1` is required: +
 1. Open `Advanced.ps1` in a text editor or IDE of your choosing. +
 2. After finished, run `Advanced.bat` as Administrator.
 
@@ -191,6 +190,25 @@ This will not attach to an Active Directory hosted either locally via a Windows 
 
 
 == Recommendations
+
+=== Ethernet
+. Avoid Realtek 2.5Gbit adapters, as they are much more CPU intensive than Intel 2.5Gbit adapters.
+
+- Intel i225-V rev3 (important, as older revisions have serious issues):
+image:Intel_i225v_LM.png[]
+- "Realtek Gaming 2.5GbE Family Controller":
+image:Realtek_LM.png[]
+image:Realtek_HID.png[]
+
+[%collapsible]
+.Buying an Intel i225-V PCIe card
+====
+The Intel i225-V PCIe card tested is https://www.aliexpress.com/store/1100410590[IOCrest's variant], which works well our 6700k and 12700k PCs.
+image:IOCrest_i225-V3_purchase.png[]
+image:Intel_HID.png[]
+
+I have not tested https://www.aliexpress.com/store/1101345677/search?SearchText=i226[DERAPID's Intel i226-V PCIe cards], which are similarly priced and rate well.
+====
 
 === GPU
 . To get https://kernel.org/doc/html/next/gpu/amdgpu/display/mpo-overview.html[Multiplane Overlay] working on NVIDIA cards:

@@ -52,14 +52,6 @@ Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\GraphicsDrivers' 
 Enable-MMAgent -MemoryCompression
 Disable-MMAgent -PageCombining
 
-$DESIRED_PAGEFILE = (Get-CimInstance Win32_PhysicalMemoryArray).MaxCapacity * 1KB/1MB + 257
-
-$PageFile = Get-CimInstance -ClassName Win32_PageFileSetting -Filter "Name like '%pagefile.sys'"
-$PageFile | Remove-CimInstance
-$PageFile = New-CimInstance -ClassName Win32_PageFileSetting -Property @{ Name= "C:\pagefile.sys" }
-$PageFile | Set-CimInstance -Property @{ InitialSize = $DESIRED_PAGEFILE; MaximumSize = $DESIRED_PAGEFILE }
-
-
 
 ##+=+= Disallow automatic: app updates, security scanning, and system diagnostics.
 PEAdd_HKLM 'SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\Maintenance' -Name 'MaintenanceDisabled' -Value '1' -Type 'Dword'

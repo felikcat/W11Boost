@@ -86,7 +86,6 @@ PEAdd_HKCU 'Software\Policies\Microsoft\Windows\Explorer' -Name 'DisableSearchBo
 
 
 #region Disables "Cloud Content" features; stops automatic installation of "suggested" apps, and Microsoft account notifications.
-
 PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\CloudContent' -Name 'DisableCloudOptimizedContent' -Value '1' -Type 'Dword'
 
 PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\CloudContent' -Name 'DisableConsumerAccountStateContent' -Value '1' -Type 'Dword'

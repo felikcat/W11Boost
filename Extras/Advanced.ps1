@@ -7,6 +7,11 @@
 $allow_system_restore = 0
 
 
+# 0: Windows Updates will not automatically be cleared out.
+#  - Run the built-in "Disk Cleanup" as administrator to clear out updater packages.
+#  - Read https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/clean-up-the-winsxs-folder?view=windows-11#use-the-startcomponentcleanup-parameter[Microsoft's component cleanup] page to clear previous versions of Windows components.
+$automatic_cleanups = 0
+
 # 0: Manually set compatibility modes for apps requiring say Windows XP mode.
 # Potential performance and reliability benefits from forcing this to be manual (compatibility modes enabled by you only).
 $automatic_compatibility = 0
@@ -50,7 +55,6 @@ $show_hidden_files = 1
 # Use "Installer 64-bit" from https://www.voidtools.com/ if the search becomes intolerable for you.
 $windows_search_indexing = 0
 
-
 ##+=+= END OF OPTIONS ||-> Initialize
 Push-Location $PSScriptRoot
 
@@ -66,6 +70,7 @@ Write-Output "
 ==== Current settings ====
 allow_system_restore = $allow_system_restore
 
+automatic_cleanups = $automatic_cleanups
 automatic_compatibility = $automatic_compatibility
 automatic_thumbnail_clearing = $automatic_thumbnail_clearing
 automatic_windows_store_app_updates = $automatic_windows_store_app_updates
@@ -83,6 +88,11 @@ show_hidden_files = $show_hidden_files
 windows_search_indexing = $windows_search_indexing
 "
 Pause
+
+if (!$automatic_cleanups)
+{
+
+}
 
 if (!$automatic_windows_store_app_updates)
 {

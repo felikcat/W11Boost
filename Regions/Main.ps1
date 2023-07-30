@@ -150,24 +150,33 @@ PEAdd_HKLM 'SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management' 
 PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'HideFileExt' -Value '0' -Type 'Dword'
 
 
-#region Speed up Visual Studio by disabling telemetry.
-Disable-ScheduledTask -TaskName "\Microsoft\VisualStudio\Updates\BackgroundDownload"
-# https://learn.microsoft.com/en-us/visualstudio/ide/visual-studio-experience-improvement-program?view=vs-2022
-# PerfWatson2 (VSCEIP) is intensive on resources, ask to disable it.
-PEAdd_HKLM 'Software\Microsoft\VSCommon\17.0\SQM' -Name 'OptIn' -Value '0' -Type 'Dword'
+#region Speed up Visual Studio by disabling its telemetry.
+if (Get-CimInstance MSFT_VSInstance)
+{
+    Disable-ScheduledTask -TaskName "\Microsoft\VisualStudio\Updates\BackgroundDownload"
+    # https://learn.microsoft.com/en-us/visualstudio/ide/visual-studio-experience-improvement-program?view=vs-2022
+    # PerfWatson2 (VSCEIP) is intensive on resources, ask to disable it.
+    PEAdd_HKLM 'Software\Microsoft\VSCommon\17.0\SQM' -Name 'OptIn' -Value '0' -Type 'Dword'
 
-# Remove feedback button and its features.
-# Feedback can still be given through the Visual Studio Installer:
-# https://learn.microsoft.com/en-us/visualstudio/ide/how-to-report-a-problem-with-visual-studio?view=vs-2022
-PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\VisualStudio\Feedback' -Name 'DisableFeedbackDialog' -Value '1' -Type 'Dword'
-PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\VisualStudio\Feedback' -Name 'DisableEmailInput' -Value '1' -Type 'Dword'
-PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\VisualStudio\Feedback' -Name 'DisableScreenshotCapture' -Value '1' -Type 'Dword'
+    # Remove feedback button and its features.
+    # Feedback can still be given through the Visual Studio Installer:
+    # https://learn.microsoft.com/en-us/visualstudio/ide/how-to-report-a-problem-with-visual-studio?view=vs-2022
+    PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\VisualStudio\Feedback' -Name 'DisableFeedbackDialog' -Value '1' -Type 'Dword'
+    PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\VisualStudio\Feedback' -Name 'DisableEmailInput' -Value '1' -Type 'Dword'
+    PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\VisualStudio\Feedback' -Name 'DisableScreenshotCapture' -Value '1' -Type 'Dword'
 
-PEAdd_HKCU 'Software\Microsoft\VisualStudio\Telemetry' -Name 'TurnOffSwitch' -Value '1' -Type 'Dword'
+    PEAdd_HKCU 'Software\Microsoft\VisualStudio\Telemetry' -Name 'TurnOffSwitch' -Value '1' -Type 'Dword'
+}
 #endregion
 
+$APPS = @("Microsoft.BingNews_8wekyb3d8bbwe", "Microsoft.WindowsFeedbackHub_8wekyb3d8bbwe")
+$APPS.ForEach({
+    $args = "--NoLogo powershell.exe -Command winget.exe uninstall $_ --exact --silent --accept-source-agreements"
+    Start-Process -Wait ".\Third-party\MinSudo.exe" -ArgumentList $args
+})
+
 # Restore the classic context menu.
-New-Item -Path "HKCU:\SOFTWARE\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" -Value "" -Type String
+New-Item -Path "HKCU:\SOFTWARE\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" -Value "" -Type String -Force
 
 # Do not reserve ~5GB or more of space at all times for Windows updates.
 dism.exe /Online /Set-ReservedStorageState /State:Disabled
@@ -179,6 +188,32 @@ $NAME.ForEach({
     # https://ieeexplore.ieee.org/abstract/document/9361674
     netsh.exe int tcp set supplemental Template=$_ CongestionProvider=bbr2
 })
+
+
+#region Microsoft Edge tweaks
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Edge' -Name 'StartupBoostEnabled' -Value '0' -Type 'Dword'
+# Disallow Microsoft News.
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Edge' -Name 'NewTabPageContentEnabled' -Value '0' -Type 'Dword'
+
+# Disable sponsored links on homepage.
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Edge' -Name 'NewTabPageHideDefaultTopSites' -Value '0' -Type 'Dword'
+
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Edge' -Name 'DefaultBrowserSettingEnabled' -Value '0' -Type 'Dword'
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Edge' -Name 'DefaultBrowserSettingsCampaignEnabled' -Value '0' -Type 'Dword'
+
+# Block recommendations and promotional notifications from Microsoft Edge
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Edge' -Name 'ShowRecommendationsEnabled' -Value '0' -Type 'Dword'
+
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Edge' -Name 'SpotlightExperiencesAndRecommendationsEnabled' -Value '0' -Type 'Dword'
+
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Edge' -Name 'PromotionalTabsEnabled' -Value '0' -Type 'Dword'
+
+# Disable various forms of telemetry.
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Edge' -Name 'DiagnosticData' -Value '0' -Type 'Dword'
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Edge' -Name 'PersonalizationReportingEnabled' -Value '0' -Type 'Dword'
+#endregion
+
+
 
 # If this directory was non-existent before running W11Boost, then add the "Hidden" attribute to line up with default behavior.
 (Get-Item "$env:windir\System32\GroupPolicy").Attributes = "Directory", "Hidden"
