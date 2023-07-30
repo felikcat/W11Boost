@@ -8,11 +8,10 @@ ifdef::env-github[]
 :caution-caption: :fire:
 :warning-caption: :warning:
 endif::[]
-
 .By default, W11Boost's most important goals compared to alternatives are:
-a. No apps, drivers, etc are broken.
-a. No security sacrifices; also that most security reductions bring fake/placebo performance increases.
-a. Minimal changes to how a PC after installing W11Boost is used compared to prior.
+. No apps, drivers, etc are broken.
+. No security sacrifices; also that most security reductions bring fake/placebo performance increases.
+. Minimal changes to how a PC after installing W11Boost is used compared to prior.
 
 - W11Boost can aid with reducing your tech support requests by family members, co-workers, etc.
 
