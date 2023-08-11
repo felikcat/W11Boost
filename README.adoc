@@ -8,12 +8,14 @@ ifdef::env-github[]
 :caution-caption: :fire:
 :warning-caption: :warning:
 endif::[]
-.By default, W11Boost's most important goals compared to alternatives are:
-. No apps, drivers, etc are broken.
-. No security sacrifices; also that most security reductions bring fake/placebo performance increases.
-. Minimal changes to how a PC after installing W11Boost is used compared to prior.
 
-- W11Boost can aid with reducing your tech support requests by family members, co-workers, etc.
+.By default, W11Boost's most important goals compared to alternatives are:
+. No apps or drivers are broken.
+. No security sacrifices.
+. Minimal changes to how a PC is used after installing W11Boost.
+. The easiest to use without sacrificing valuable features.
+- Currently, not the case. W11Boost is being rewritten in C++ as PowerShell can not accomplish what's planned.
+. Has modularity. If you wish to break certain apps or drivers for more performance, you can do so on your own terms.
 
 [%collapsible]
 .I want to know exactly what W11Boost does.
@@ -135,9 +137,22 @@ image:RSOP.png[]
 '''
 
 ====
-.*Before installing W11Boost*
-. If you are using a custom Windows ISO such as Atlas OS, do a clean installation of Windows 11 Education using https://www.microsoft.com/en-us/software-download/windows11[Microsoft's official ISOs]. +
-image:Windows_11_ISO.png[]
+
+.If you are using a custom Windows ISO such as Atlas OS, do the following.
+[%collapsible]
+====
+
+. Download Windows 11 from https://www.microsoft.com/en-us/software-download/windows11[Microsoft].
+
+. image:Windows_11_ISO.png[]
+
+. Click "Download Now" then select your language.
+
+. Flash that ISO to a USB using https://rufus.ie[Rufus].
+
+. Install Windows 11 Education and continue to installing W11Boost.
+
+====
 
 .*Installing W11Boost*
 . https://github.com/felikcat/W11Boost/archive/refs/heads/master.zip[Download W11Boost] then extract it.
@@ -145,7 +160,6 @@ image:Windows_11_ISO.png[]
 . Open `Install.bat`.
 
 . Wait for the automatic reboot and enjoy.
-
 
 == Extras
 
@@ -210,7 +224,7 @@ I have not tested https://www.aliexpress.com/store/1101345677/search?SearchText=
 ====
 
 === GPU
-. To get https://kernel.org/doc/html/next/gpu/amdgpu/display/mpo-overview.html[Multiplane Overlay] working on NVIDIA cards:
+. To enable https://kernel.org/doc/html/next/gpu/amdgpu/display/mpo-overview.html[Multiplane Overlay] on NVIDIA cards:
 - Set your display's "Output color depth" to 8bpc.
 image:nvcplui_1.png[]
 - Do not use: custom resolutions, DSR, or scaling.
@@ -221,12 +235,6 @@ image:nvcplui_1.png[]
 . Above 4G Decoding and Resizable BAR.
 ** On ASRock motherboards: C.A.M. (Clever Access Memory)
 . HPET (High Precision Event Timer)
-
-* *Disable the following:*
-. XHCI Hands Off
-. USB Legacy
-** link://techcommunity.microsoft.com/t5/microsoft-usb-blog/reasons-to-avoid-companion-controllers/ba-p/270710[Why disable these two?] +
-Note: if a USB is no longer bootable after these two changes, turn them both back on.
 
 
 === Windows
