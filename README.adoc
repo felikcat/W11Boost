@@ -14,7 +14,8 @@ endif::[]
 . No security sacrifices.
 . Minimal changes to how a PC is used after installing W11Boost.
 . The easiest to use without sacrificing valuable features.
-- Currently, not the case. W11Boost is being rewritten in https://github.com/felikcat/W11Boost/tree/rust[Rust]; please note that this is highly work in progress, and this Rust rewrite may change around a lot due to being a newbie at it.
+- Currently, not the case.
+** What will be done: W11Boost is being rewritten in https://ziglang.org/[Zig], but if Zig doesn't work out then the https://github.com/felikcat/W11Boost/tree/rust[Rust version] gets priority.
 . Has modularity. If you wish to break certain apps or drivers for more performance, you can do so on your own terms.
 
 [%collapsible]
