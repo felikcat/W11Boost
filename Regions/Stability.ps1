@@ -138,10 +138,10 @@ Disable-ScheduledTask -TaskName "\Microsoft\Windows\RemovalTools\MRT_ERROR_HB"
 
 
 #region Windows Update changes.
-# Deny pre-release (Release Preview, Beta, or Dev channel) updates; go to and only install release updates.
+# Deny pre-release (Release Preview, Beta, or Dev channel) updates.
 PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate' -Name 'ManagePreviewBuildsPolicyValue' -Value '1' -Type 'Dword'
 
-# Block updates that Microsoft deems as causing compatibility issues.
+# Deny updates that Microsoft deems as causing compatibility issues.
 PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate' -Name 'DisableWUfBSafeguards' -Value '0' -Type 'Dword'
 
 # Opt out out of "being the first to get the latest non-security updates".

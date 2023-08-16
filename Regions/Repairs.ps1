@@ -5,17 +5,13 @@
 PEAdd_HKLM 'SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters' -Name 'DisabledComponents' -Value '0' -Type 'Dword'
 
 # Splitting SvcHost less decreases Windows' stability; set it to defaults.
-PEAdd_HKLM 'SYSTEM\CurrentControlSet\Control' -Name 'SvcHostSplitThresholdInKB' -Value '3670016' -Type 'Dword'
+Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control' -Name 'SvcHostSplitThresholdInKB' -Type 'Dword' -Value '3670016'
 
 # Disabling threaded DPCs is for debugging purposes and will cause spinlocks; it does not lower DPC latency.
-Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Session Manager\kernel' -Name 'ThreadDpcEnable' -Value '1' -Type 'Dword'
+Remove-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Session Manager\kernel' -Name 'ThreadDpcEnable'
 
 # Delaying the startup of third-party apps gives Windows more room to breathe for its own jobs, speeding up the overall startup time.
 Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Serialize" -Name "Startupdelayinmsec"
-
-# Enforce using "smart multi-homed name resolution".
-PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows NT\DNSClient' -Name 'DisableSmartNameResolution' -Value '0' -Type 'Dword'
-PEAdd_HKLM 'SYSTEM\CurrentControlSet\Services\Dnscache\Parameters' -Name 'DisableParallelAandAAAA' -Value '0' -Type 'Dword'
 
 # Modern GPUs can dispatch multiple high-priority queues without slowing each other down, so enable preemption.
 # If a high-priority job is running and preemption is off, it could lead to other software waiting too long to get a share of the GPU's time, and become noticeably slow.
