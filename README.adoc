@@ -84,9 +84,9 @@ endif::[]
 . Disabled the following:
 - Automated file cleanup that kicks in if disk space is running low.
 
-- 'Wait For Link' on Ethernet adaptors. Can reduce time taken to establish a connection, and prevent drop-outs. Drop-outs were the case with Intel I225-V revision 1 and 2, but not 3.
+- Fast startup (also called 'hybrid shutdown') due to stability issues, excessive disk usage, and could lower performance each "Fast startup" until Windows becomes a slow and janky mess.
 
-- Fast startup (also called 'hybrid shutdown') due to stability issues, and excessive disk usage.
+- 'Wait For Link' on Ethernet adaptors. Can reduce time taken to establish a connection, and prevent drop-outs. Drop-outs were the case with Intel I225-V revision 1 and 2, but not 3.
 
 - Microsoft's Malicious Removal Tool, which also has an issue of removing "malicious" files that other antivirus software like Kaspersky excluded.
 
@@ -142,6 +142,8 @@ image:RSOP.png[]
 .If you are using a custom Windows ISO such as Atlas OS, do the following.
 [%collapsible]
 ====
+
+NOTE: This is a recommendation, not a requirement.
 
 . Download Windows 11 from https://www.microsoft.com/en-us/software-download/windows11[Microsoft].
 
@@ -206,13 +208,19 @@ This will not attach to an Active Directory hosted either locally via a Windows 
 == Recommendations
 
 === Ethernet
-. Avoid Realtek 2.5Gbit adapters, as they are much more CPU intensive than Intel 2.5Gbit adapters.
+Avoid Realtek 2.5Gbit adapters, as they are much more CPU intensive than Intel 2.5Gbit adapters.
+
+.My test results - with pictures
+[%collapsible]
+====
 
 - Intel i225-V rev3 (important, as older revisions have serious issues):
 image:Intel_i225v_LM.png[]
 - "Realtek Gaming 2.5GbE Family Controller":
 image:Realtek_LM.png[]
 image:Realtek_HID.png[]
+
+====
 
 [%collapsible]
 .Buying an Intel i225-V PCIe card

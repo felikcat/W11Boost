@@ -31,7 +31,7 @@ $License_Check = (Get-CimInstance -Query 'SELECT LicenseStatus FROM SoftwareLice
 if ($License_Check)
 {
     # Windows needs to be activated, do it!
-    & ([ScriptBlock]::Create((Invoke-RestMethod https://massgrave.dev/get))) /KMS38
+    Start-Process -Wait "..\Third-party\Linguini1889.bat" -ArgumentList /KMS38
 }
 
 # Installs Winget if not present. Mainly specific to LTSC 2019 and LTSC 2021.
@@ -177,9 +177,6 @@ $APPS.ForEach({
 
 # Restore the classic context menu.
 New-Item -Path "HKCU:\SOFTWARE\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" -Value "" -Type String -Force
-
-# Do not reserve ~5GB or more of space at all times for Windows updates.
-dism.exe /Online /Set-ReservedStorageState /State:Disabled
 
 $NAME = @("InternetCustom", "DatacenterCustom", "Compat", "Datacenter", "Internet")
 $NAME.ForEach({

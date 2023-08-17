@@ -163,7 +163,5 @@ Disable-ScheduledTask -TaskName "\Microsoft\Windows\Flighting\FeatureConfig\Usag
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Flighting\FeatureConfig\UsageDataReporting"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Flighting\OneSettings\RefreshCache"
 
-# Third-party script that asks various apps to disable or minimize their telemetry.
-Download_File 'https://raw.githubusercontent.com/beatcracker/toptout/master/examples/toptout_pwsh.ps1' -Destination .\
-
-. ".\toptout_pwsh.ps1" -Env -Exec -ShowLog
+# Sets environment variables to ask various apps to disable or minimize their telemetry.
+. "..\Third-party\toptout_pwsh.ps1" -Env -Exec -ShowLog
