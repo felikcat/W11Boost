@@ -14,8 +14,8 @@ endif::[]
 . No security sacrifices.
 . Minimal changes to how a PC is used after installing W11Boost.
 . The easiest to use without sacrificing valuable features.
-- Currently, not the case.
-** What will be done: W11Boost is being rewritten in https://ziglang.org/[Zig], but if Zig doesn't work out then the https://github.com/felikcat/W11Boost/tree/rust[Rust version] gets priority.
+- Currently, not the case. +
+-> What will be done to solve this: W11Boost is being rewritten in https://ziglang.org/[Zig], but if Zig doesn't work out then the https://github.com/felikcat/W11Boost/tree/rust[Rust version] gets priority.
 . Has modularity. If you wish to break certain apps or drivers for more performance, you can do so on your own terms.
 
 [%collapsible]
@@ -38,6 +38,8 @@ endif::[]
 - MemoryCompression reduces stuttering in video games by reducing the amount of writes to the paging file.
 
 . Disabled the following:
+- Power Throttling, as it causes severe performance reduction for VMWare Workstation 17 and other apps I'm unaware of.
+
 - Analyzing application execution time.
 
 - NTFS Last Access Time Stamp Updates; if needed, an application can explicitly update its own access timestamps.
@@ -153,7 +155,13 @@ NOTE: This is a recommendation, not a requirement.
 
 . Flash that ISO to a USB using https://rufus.ie[Rufus].
 
-. Install Windows 11 Education and continue to installing W11Boost.
+. Boot from the USB you flashed that Windows ISO onto. When prompted to "Activate Windows", click "I don't have a product key". Afterwards, select "Windows 11 Education".
+
+. image:WinSetup1.png[]
+
+. image:WinSetup2.png[]
+
+. After Windows 11 Education is installed, continue to installing W11Boost.
 
 ====
 
