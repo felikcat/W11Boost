@@ -14,8 +14,7 @@ endif::[]
 . No security sacrifices.
 . Minimal changes to how a PC is used after installing W11Boost.
 . The easiest to use without sacrificing valuable features.
-- Currently, not the case. +
--> What will be done to solve this: W11Boost is being rewritten in https://ziglang.org/[Zig], but if Zig doesn't work out then the https://github.com/felikcat/W11Boost/tree/rust[Rust version] gets priority.
+- This can be improved upon further. Which will be the case for W11Boost's Zig rewrite, the most important change is it having a graphical interface.
 . Has modularity. If you wish to break certain apps or drivers for more performance, you can do so on your own terms.
 
 [%collapsible]
@@ -258,3 +257,6 @@ image:nvcplui_1.png[]
 . Keep the number of apps installed to a minimum, and remove unused apps. This reduces your chances of being impacted by https://www.bleepingcomputer.com/news/security/hackers-compromise-3cx-desktop-app-in-a-supply-chain-attack/[supply chain attacks], prevents causing Windows more issues, and might improve FPS stability.
 
 . Replace Consumer OEM apps with their Enterprise variant. Such as replacing Lenovo Vantage with Lenovo Commercial Vantage.
+
+. Use Windows Defender, installing alternatives can impact various types of performance such as networking greatly, or even the stability of Windows.
+- Context: Kaspersky reduced the download speeds of my Thinkpad P15 Gen 1 (released 2021) from 882.70mbps to 192.67mbps, and the Windows Security Service would do a constant ~8% CPU usage that noticeably shortened the battery life of this laptop.
