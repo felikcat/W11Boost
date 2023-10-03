@@ -74,9 +74,9 @@ fsutil.exe behavior set disable8dot3 2
 # Revert to Windows' default shutdown behavior regarding handling of apps.
 $REGS = @("WaitToKillAppTimeOut", "HungAppTimeout", "WaitToKillServiceTimeout")
 $REGS.ForEach({
-    Remove-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name $_
-    Remove-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control" -Name $_
-})
+        Remove-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name $_
+        Remove-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control" -Name $_
+    })
 
 # https://www.intel.com/content/www/us/en/developer/articles/troubleshooting/openssl-sha-crash-bug-requires-application-update.html
 if ($env:PROCESSOR_IDENTIFIER -match 'GenuineIntel') {

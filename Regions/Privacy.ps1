@@ -92,8 +92,8 @@ PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\CloudContent' -Name 'DisableCons
 
 $REGS = @("ContentDeliveryAllowed", "OemPreInstalledAppsEnabled", "PreInstalledAppsEnabled", "PreInstalledAppsEverEnabled", "RotatingLockScreenEnabled", "RotatingLockScreenOverlayEnabled", "SilentInstalledAppsEnabled", "SoftLandingEnabled", "SystemPaneSuggestionsEnabled", "SubscribedContent-338389Enabled", "SubscribedContent-338393Enabled", "SubscribedContent-338394Enabled", "SubscribedContent-338396Enabled", "SubscribedContent-353694Enabled", "SubscribedContent-353696Enabled", "SubscribedContent-88000326Enabled")
 $REGS.ForEach({
-    PEAdd_HKLM 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' -Name $_ -Value '0' -Type 'Dword'
-})
+        PEAdd_HKLM 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' -Name $_ -Value '0' -Type 'Dword'
+    })
 Remove-Item -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager\Subscriptions' -Recurse -Force
 Remove-Item -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager\SuggestedApps' -Recurse -Force
 #endregion

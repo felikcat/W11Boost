@@ -14,29 +14,26 @@ Add-Type -Path "..\Third-party\PolicyFileEditor\PolFileEditor.dll" -ErrorAction 
 # Required for: Windows Updates, Windows Store (StorSvc), winget (DoSvc).
 $REGS = @("AppXSvc", "ClipSVC", "TokenBroker", "StorSvc", "DoSvc")
 $REGS.ForEach({
-    Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\$_" -Name "Start" -Type DWord -Value 3
-    Start-Service $_
-})
+        Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\$_" -Name "Start" -Type DWord -Value 3
+        Start-Service $_
+    })
 
 $WIN_EDITION = Get-ItemPropertyValue 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' -Name ProductName
-if ($WIN_EDITION -notmatch '.*Enterprise|.*Education|.*Server')
-{
+if ($WIN_EDITION -notmatch '.*Enterprise|.*Education|.*Server') {
     # Education == Enterprise; in terms of what W11Boost expects.
     # Education allows Home edition to directly upgrade, instead of having to do Home -> Pro -> Enterprise.
-    $args = '"$env:SystemRoot\system32\slmgr.vbs" /ipk NW6C2-QMPVW-D7KKK-3GKT6-VCFB2'
-    Start-Process -Wait cscript.exe -ArgumentList $args
+    $localArgs = '"$env:SystemRoot\system32\slmgr.vbs" /ipk NW6C2-QMPVW-D7KKK-3GKT6-VCFB2'
+    Start-Process -Wait cscript.exe -ArgumentList $localArgs
 }
 
 $License_Check = (Get-CimInstance -Query 'SELECT LicenseStatus FROM SoftwareLicensingProduct WHERE Name LIKE "%Windows%" AND PartialProductKey IS NOT NULL AND LicenseStatus !=1').LicenseStatus
-if ($License_Check)
-{
+if ($License_Check) {
     # Windows needs to be activated, do it!
-    Start-Process -Wait "..\Third-party\MAS\Geranium8566.bat" -ArgumentList /KMS38
+    Start-Process -Wait ".\..\Third-party\MAS\Geranium8566.bat" -ArgumentList /KMS38
 }
 
 # Installs Winget if not present. Mainly specific to LTSC 2019 and LTSC 2021.
-if (-Not (Get-Command -CommandType Application -Name winget -ErrorAction SilentlyContinue))
-{
+if (-Not (Get-Command -CommandType Application -Name winget -ErrorAction SilentlyContinue)) {
     # Installs Winget's dependencies on LTSC 2019 and newer; does not work for LTSC 2016.
     wsreset.exe -i | Wait-Process
 
@@ -47,20 +44,6 @@ if (-Not (Get-Command -CommandType Application -Name winget -ErrorAction Silentl
     Remove-Item '.\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle'
 }
 #endregion
-
-
-# Stops various annoyances, one being Windows Update restarting your PC without your consent.
-& ".\Annoyances.ps1"
-
-# Minimize data sent to Microsoft through normal means, also improves performance.
-& ".\Privacy.ps1"
-
-# Correcting mistakes from other optimizers and user-error.
-& ".\Repairs.ps1"
-
-# Improves how consistent the performance is for networking, FPS, etc.
-& ".\Stability.ps1"
-
 
 #region Use optimal online NTP servers for more accurate system time.
 Stop-Service w32time
@@ -74,6 +57,18 @@ Start-Service w32time
 
 w32tm.exe /resync
 #endregion
+
+# Stops various annoyances, one being Windows Update restarting your PC without your consent.
+& ".\Annoyances.ps1"
+
+# Minimize data sent to Microsoft through normal means, also improves performance.
+& ".\Privacy.ps1"
+
+# Correcting mistakes from other optimizers and user-error.
+& ".\Repairs.ps1"
+
+# Improves how consistent the performance is for networking, FPS, etc.
+& ".\Stability.ps1"
 
 
 PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'ShowSyncProviderNotifications' -Value '0' -Type 'Dword'
@@ -151,8 +146,7 @@ PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name '
 
 
 #region Speed up Visual Studio by disabling its telemetry.
-if (Get-CimInstance MSFT_VSInstance)
-{
+if (Get-CimInstance MSFT_VSInstance) {
     Disable-ScheduledTask -TaskName "\Microsoft\VisualStudio\Updates\BackgroundDownload"
     # https://learn.microsoft.com/en-us/visualstudio/ide/visual-studio-experience-improvement-program?view=vs-2022
     # PerfWatson2 (VSCEIP) is intensive on resources, ask to disable it.
@@ -171,20 +165,20 @@ if (Get-CimInstance MSFT_VSInstance)
 
 $APPS = @("Microsoft.BingNews_8wekyb3d8bbwe", "Microsoft.WindowsFeedbackHub_8wekyb3d8bbwe")
 $APPS.ForEach({
-    $args = "--NoLogo powershell.exe -Command winget.exe uninstall $_ --exact --silent --accept-source-agreements"
-    Start-Process -Wait ".\..\Third-party\NanaRun\MinSudo.exe" -ArgumentList $args
-})
+        $localArgs = "--NoLogo powershell.exe -Command winget.exe uninstall $_ --exact --silent --accept-source-agreements"
+        Start-Process -Wait ".\..\Third-party\NanaRun\MinSudo.exe" -ArgumentList $localArgs
+    })
 
 # Restore the classic context menu.
 New-Item -Path "HKCU:\SOFTWARE\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" -Value "" -Type String -Force
 
 $NAME = @("InternetCustom", "DatacenterCustom", "Compat", "Datacenter", "Internet")
 $NAME.ForEach({
-    # BBRv2 is currently the best well-rounded TCP congestion algorithm.
-    # Improvements from BBRv2 can be noticed if you're hosting game or web servers on this PC.
-    # https://ieeexplore.ieee.org/abstract/document/9361674
-    netsh.exe int tcp set supplemental Template=$_ CongestionProvider=bbr2
-})
+        # BBRv2 is currently the best well-rounded TCP congestion algorithm.
+        # Improvements from BBRv2 can be noticed if you're hosting game or web servers on this PC.
+        # https://ieeexplore.ieee.org/abstract/document/9361674
+        netsh.exe int tcp set supplemental Template=$_ CongestionProvider=bbr2
+    })
 
 
 #region Microsoft Edge tweaks
