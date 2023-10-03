@@ -164,4 +164,4 @@ Disable-ScheduledTask -TaskName "\Microsoft\Windows\Flighting\FeatureConfig\Usag
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Flighting\OneSettings\RefreshCache"
 
 # Sets environment variables to ask various apps to disable or minimize their telemetry.
-. "..\Third-party\toptout_pwsh.ps1" -Env -Exec -ShowLog
+. "..\Third-party\toptout\toptout_pwsh.ps1" -Env -Exec -ShowLog

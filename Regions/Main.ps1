@@ -31,7 +31,7 @@ $License_Check = (Get-CimInstance -Query 'SELECT LicenseStatus FROM SoftwareLice
 if ($License_Check)
 {
     # Windows needs to be activated, do it!
-    Start-Process -Wait "..\Third-party\Linguini1889.bat" -ArgumentList /KMS38
+    Start-Process -Wait "..\Third-party\MAS\Geranium8566.bat" -ArgumentList /KMS38
 }
 
 # Installs Winget if not present. Mainly specific to LTSC 2019 and LTSC 2021.
@@ -172,7 +172,7 @@ if (Get-CimInstance MSFT_VSInstance)
 $APPS = @("Microsoft.BingNews_8wekyb3d8bbwe", "Microsoft.WindowsFeedbackHub_8wekyb3d8bbwe")
 $APPS.ForEach({
     $args = "--NoLogo powershell.exe -Command winget.exe uninstall $_ --exact --silent --accept-source-agreements"
-    Start-Process -Wait ".\Third-party\MinSudo.exe" -ArgumentList $args
+    Start-Process -Wait ".\..\Third-party\NanaRun\MinSudo.exe" -ArgumentList $args
 })
 
 # Restore the classic context menu.

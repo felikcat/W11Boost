@@ -14,7 +14,7 @@ endif::[]
 . No security sacrifices.
 . Minimal changes to how a PC is used after installing W11Boost.
 . The easiest to use without sacrificing valuable features.
-- This can be improved upon further. Which will be the case for W11Boost's Zig rewrite, the most important change is it having a graphical interface.
+- To further this goal, there is a C++ rewrite that has a graphical interface, but this will take me a long time to complete for a first release; not public and not ready.
 . Has modularity. If you wish to break certain apps or drivers for more performance, you can do so on your own terms.
 
 [%collapsible]
@@ -32,18 +32,18 @@ endif::[]
 
 - Idle tickless for lower power draw, but also has performance benefits to real-time apps like DAWs or virtual machines, and foreground apps like video games.
 
-- Enabled the BBRv2 TCP congestion control algorithm to maintain low ping and high speeds during excessive download or upload, it also noticeably increases download & upload speeds during high ping (70ms+).
+- Enabled the BBRv2 TCP congestion control algorithm to minorly lower ping during excessive download or uploading, and improves ping for others connecting to your game or web servers on this PC.
 
 - MemoryCompression reduces stuttering in video games by reducing the amount of writes to the paging file.
 
 . Disabled the following:
-- Power Throttling, as it causes severe performance reduction for VMWare Workstation 17 and other apps I'm unaware of.
+- Power Throttling, as it caused severe performance reduction for VMWare Workstation 17.
 
 - Analyzing application execution time.
 
 - NTFS Last Access Time Stamp Updates; if needed, an application can explicitly update its own access timestamps.
 
-- Fault Tolerant Heap. FTH severely degrades an application's performance if it got marked for "crashing" too often, such is the case for Assetto Corsa.
+- Fault Tolerant Heap. FTH can degrade an application's performance if it got marked for "crashing" too often; Assetto Corsa triggers this.
 
 - Automatic offline maps updates.
 
@@ -78,7 +78,7 @@ endif::[]
 - Opted out of "being the first to get the latest non-security updates".
 
 . NTP time sync servers used are now 3 instead of 1, which are `time.cloudflare.com time.nist.gov time.windows.com` to reduce time sync failure.
-** Very important for Tor and 2FA codes from Bitwarden to remain working.
+** Important for Tor and 2FA codes from Bitwarden to remain working.
 
 . UAC is enabled for both security, and fixing applications that break from UAC being off, such as Eddie-UI.
 
