@@ -1,7 +1,9 @@
 #Requires -Version 5 -RunAsAdministrator
+using assembly System.Windows.Forms
+using namespace System.Windows.Forms
+using namespace System.Drawing
 
 #region Initialize
-$host.ui.rawui.windowtitle = "W11Boost by github.com/felikcat"
 Push-Location $PSScriptRoot
 
 # 'Import-Module example.psm1' fails if PowerShell script execution is disabled; do it manually.
@@ -44,6 +46,64 @@ if (-Not (Get-Command -CommandType Application -Name winget -ErrorAction Silentl
     Remove-Item '.\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle'
 }
 #endregion
+
+# Enable DPI awareness
+[Application]::EnableVisualStyles()
+$code = @"
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    public static extern bool SetProcessDPIAware();
+"@
+$Win32Helpers = Add-Type -MemberDefinition $code -Name "Win32Helpers" -PassThru
+$null = $Win32Helpers::SetProcessDPIAware()
+
+Add-Type -AssemblyName System.Windows.Forms
+Add-Type -AssemblyName System.Drawing
+$Form = New-Object Form -Property @{
+    StartPosition = [FormStartPosition]::CenterScreen
+    MaximizeBox = $false
+    FormBorderStyle = "FixedDialog"
+    Topmost = $true
+    MinimumSize = New-Object Drawing.Size 640, 480
+    MaximumSize = New-Object Drawing.Size 640, 480
+
+    Text = "W11Boost"
+    Font = New-Object Font("Segoe UI", 16)
+}
+$DefaultInstallButton = New-Object Button -Property @{
+    Location = New-Object Drawing.Point  5, 216
+    AutoSize = $false
+    Size = New-Object Drawing.Size       608, 192
+    Text = "Default installation"
+}
+$CustomInstallButton = New-Object Button -Property @{
+    Location = New-Object Drawing.Point  5, 12
+    Size = New-Object Drawing.Size       608, 192
+    Text = "Custom installation"
+}
+
+function CustomInstallWindow{
+    $Form.Controls.Remove($DefaultInstallButton)
+    $Form.Controls.Remove($CustomInstallButton)
+    MinimumSize = New-Object Drawing.Size 1024, 768
+    MaximumSize = New-Object Drawing.Size 1024, 768
+}
+
+$Form.Controls.Add($DefaultInstallButton)
+$Form.Controls.Add($CustomInstallButton)
+$CustomInstallButton.Add_Click({CustomInstallWindow})
+$Form.ShowDialog()
+
+$FormCustom = New-Object Form -Property @{
+    StartPosition = [FormStartPosition]::CenterScreen
+    MaximizeBox = $false
+    FormBorderStyle = "FixedDialog"
+    Topmost = $true
+    MinimumSize = New-Object Drawing.Size 640, 480
+    MaximumSize = New-Object Drawing.Size 640, 480
+
+    Text = "W11Boost"
+    Font = New-Object Font("Segoe UI", 16)
+}
 
 #region Use optimal online NTP servers for more accurate system time.
 Stop-Service w32time
