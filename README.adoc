@@ -167,7 +167,7 @@ NOTE: This is a recommendation, not a requirement.
 .*Installing W11Boost*
 . https://github.com/felikcat/W11Boost/archive/refs/heads/master.zip[Download W11Boost] then extract it.
 
-. Open `Install.bat`.
+. Open `Run.bat`.
 
 . Wait for the automatic reboot and enjoy.
 

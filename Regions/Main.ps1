@@ -60,16 +60,16 @@ w32tm.exe /resync
 
 
 # Stops various annoyances, one being Windows Update restarting your PC without your consent.
-& ".\Annoyances.ps1" | Out-File "${HOME}\Desktop\W11Boost\Annoyances.log"
+& ".\Annoyances.ps1" | Out-File "${HOME}\Desktop\W11Boost logs\Annoyances.log"
 
 # Minimize data sent to Microsoft through normal means, also improves performance.
-& ".\Privacy.ps1" | Out-File "${HOME}\Desktop\W11Boost\Privacy.log"
+& ".\Privacy.ps1" | Out-File "${HOME}\Desktop\W11Boost logs\Privacy.log"
 
 # Correcting mistakes from other optimizers and user-error.
-& ".\Repairs.ps1" | Out-File "${HOME}\Desktop\W11Boost\Repairs.log"
+& ".\Repairs.ps1" | Out-File "${HOME}\Desktop\W11Boost logs\Repairs.log"
 
 # Improves how consistent the performance is for networking, FPS, etc.
-& ".\Stability.ps1" | Out-File "${HOME}\Desktop\W11Boost\Stability.log"
+& ".\Stability.ps1" | Out-File "${HOME}\Desktop\W11Boost logs\Stability.log"
 
 
 PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'ShowSyncProviderNotifications' -Value '0' -Type 'Dword'
@@ -94,7 +94,7 @@ Disable-ScheduledTask -TaskName "\NvTmRep_CrashReport4_{B2FE1952-0186-46C3-BAEC-
 PEAdd_HKLM 'SOFTWARE\Microsoft\Windows NT\CurrentVersion\Perflib' -Name 'Disable Performance Counters' -Value '1' -Type 'Dword'
 
 
-##+=+= NTFS tweaks
+#region NTFS tweaks
 PEAdd_HKLM 'SYSTEM\CurrentControlSet\Control\FileSystem' -Name 'LongPathsEnabled' -Value '1' -Type 'Dword'
 
 # Ensure "Virtual Memory Pagefile Encryption" is at its default of 'off'.
@@ -106,7 +106,7 @@ fsutil.exe behavior set memoryusage 2
 
 # Do not use "Last Access Time Stamp Updates" by default; apps can still explicitly update these timestamps for themself.
 fsutil.exe behavior set disablelastaccess 3
-##+=+=
+#endregion
 
 
 # Thankfully this does not disable the Windows Recovery Environment.
@@ -116,15 +116,14 @@ bcdedit.exe /set "{default}" recoveryenabled no
 PEAdd_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer' -Name 'NoRecentDocsHistory' -Value '1' -Type 'Dword'
 
 
-##+=+= Enable UAC (User Account Control).
+#region Enable UAC (User Account Control).
 # UAC requires the 'LUA File Virtualization Filter Driver'.
 Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\luafv" -Name "Start" -Type DWord -Value 2
 
 PEAdd_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'PromptOnSecureDesktop' -Value '1' -Type 'Dword'
 PEAdd_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'ConsentPromptBehaviorAdmin' -Value '5' -Type 'Dword'
 PEAdd_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'EnableLUA' -Value '1' -Type 'Dword'
-##+=+=
-
+#endregion
 
 #region Shutdown options
 # Disables "Fast startup".

@@ -4,8 +4,9 @@ using namespace System.Windows.Forms
 using namespace System.Drawing
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
-Push-Location $PSScriptRoot
 
+Push-Location $PSScriptRoot
+. ".\IMPORTS.ps1"
 New-Item -ItemType Directory "${HOME}\Desktop\W11Boost logs"
 
 [Application]::EnableVisualStyles()
@@ -49,13 +50,10 @@ $InstallOnlyButton = New-Object Button -Property @{
 
 function FirstWindowControls {
     $Form.Controls.Clear()
-
-    $Form.Controls.Add($InstallOnlyButton)
-    $Form.Controls.Add($ExtrasButton)
-    $Form.Controls.Add($UninstallButton)
+    $Form.Controls.AddRange(($InstallOnlyButton, $ExtrasButton, $UninstallButton))
 }
 
-function CustomInstallWindow{
+function ExtrasWindow{
     $Form.Controls.Clear()
 
     $AdvancedButton = New-Object Button -Property @{
@@ -82,11 +80,40 @@ function CustomInstallWindow{
         Text = "Install STIG policies"
     }
 
-    $Form.Controls.Add($AdvancedButton)
-    $Form.Controls.Add($DebloatWindowsButton)
-    $Form.Controls.Add($InstallXboxMinimalButton)
-    $Form.Controls.Add($ApplyStigsButton)
-    $Form.Controls.Add($GoBack)  
+    $Form.Controls.AddRange(@($AdvancedButton, $DebloatWindowsButton,
+     $InstallXboxMinimalButton, $ApplyStigsButton, $GoBackButton ))
+
+    $DebloatWindowsButton.Add_Click({
+        $Form.Controls.Clear()
+
+        $Label = New-Object Label -Property @{
+            Location = New-Object Drawing.Point (($Form.Width * .35 ), ($Form.Height * .35))
+            AutoSize = $true
+            Text = "Please wait..."
+        }
+        $Form.Controls.Add($Label)
+
+        & ".\..\Extras\Microsoft_App_Debloat.ps1" | Out-File "${HOME}\Desktop\W11Boost logs\Microsoft App Debloat.log"
+
+        NewToastNotification "Removal of Microsoft's bloatware has finished." -ToastTitle "W11Boost"
+        ExtrasWindow
+    })
+
+    $InstallXboxMinimalButton.Add_Click({
+        $Form.Controls.Clear()
+
+        $Label = New-Object Label -Property @{
+            Location = New-Object Drawing.Point (($Form.Width * .35 ), ($Form.Height * .35))
+            AutoSize = $true
+            Text = "Please wait..."
+        }
+        $Form.Controls.Add($Label)
+
+        & ".\..\Extras\Install_Xbox_Minimal.ps1" | Out-File "${HOME}\Desktop\W11Boost logs\Install Xbox Minimal.log"
+
+        NewToastNotification "Installation of Xbox apps and services are complete." -ToastTitle "W11Boost"
+        ExtrasWindow
+    })
 }
 
 function AdvancedWindow {
@@ -102,46 +129,46 @@ function AdvancedWindow {
 #region Draw initial Form/Window and setup button actions.
 FirstWindowControls
 
-$ExtrasButton.Add_Click({CustomInstallWindow})
+$ExtrasButton.Add_Click({ExtrasWindow})
 $UninstallButton.Add_Click({
     $Prompt = [MessageBox]::Show("This will uninstall W11Boost, are you sure?", "W11Boost", [MessageBoxButtons]::YesNo)
     if ($Prompt -eq "Y") {
         $Form.Controls.Clear()
+
         $Label = New-Object Label -Property @{
-            Location = New-Object Drawing.Point (($Form.Width * 0.06), ($Form.Height * .35))
+            Location = New-Object Drawing.Point (($Form.Width * .35 ), ($Form.Height * .35))
             AutoSize = $true
-            Text = "Uninstalling W11Boost, please wait..."
+            Text = "Please wait..."
         }
         $Form.Controls.Add($Label)
 
         & ".\..\Extras\Uninstall.ps1" | Out-File "${HOME}\Desktop\W11Boost logs\Uninstall.log"
 
-        [MessageBox]::Show($Form, "Removal nearly complete; manually reboot to finish.", "W11Boost", [MessageBoxButtons]::OK)
-        $Form.Controls.Clear()
+        [MessageBox]::Show($Form, "Removal of W11Boost nearly complete; manually reboot to finish.", "W11Boost", [MessageBoxButtons]::OK)
         FirstWindowControls
     }
 })
 
-$GoBack = New-Object Button -Property @{
+$GoBackButton = New-Object Button -Property @{
     Location = New-Object Drawing.Point  (($Form.Width * .5), ($Form.Height * .55 ))
     Size = New-Object Drawing.Size       (($Form.Width * .45), ($Form.Height * .25))
     Text = "<- Go back to prior screen"
 }
-$GoBack.Add_Click({FirstWindowControls})
+$GoBackButton.Add_Click({FirstWindowControls})
 
 $InstallOnlyButton.Add_Click({
     $Form.Controls.Clear()
+
     $Label = New-Object Label -Property @{
-        Location = New-Object Drawing.Point (($Form.Width * 0.1), ($Form.Height * .35))
+        Location = New-Object Drawing.Point (($Form.Width * .35 ), ($Form.Height * .35))
         AutoSize = $true
-        Text = "Installing W11Boost, please wait..."
+        Text = "Please wait..."
     }
     $Form.Controls.Add($Label)
 
     & ".\Main.ps1" | Out-File "${HOME}\Desktop\W11Boost logs\Main.log"
-
     [MessageBox]::Show($Form, "Installation nearly complete; manually reboot to finish.", "W11Boost", [MessageBoxButtons]::OK)
-    $Form.Controls.Clear()
+
     FirstWindowControls
 })
 
