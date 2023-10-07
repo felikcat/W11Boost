@@ -9,13 +9,18 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
+== About
+
 .By default, W11Boost's most important goals compared to alternatives are:
 . No apps or drivers are broken.
 . No security sacrifices.
 . Minimal changes to how a PC is used after installing W11Boost.
 . The easiest to use without sacrificing valuable features.
-- To further this goal, there is a C++ rewrite that has a graphical interface, but this will take me a long time to complete for a first release; not public and not ready.
 . Has modularity. If you wish to break certain apps or drivers for more performance, you can do so on your own terms.
+
+image:W11Boost_GUI_1.png[480,360]
+
+image:W11Boost_GUI_2.png[480,360]
 
 [%collapsible]
 .I want to know exactly what W11Boost does.
@@ -136,80 +141,42 @@ endif::[]
 image:RSOP.png[]
 - Registry changes are non-destructive, as they are easily revertible without relying on System Restore or registry backups.
 
-'''
-
 ====
 
-.If you are using a custom Windows ISO such as Atlas OS, do the following.
-[%collapsible]
-====
 
-NOTE: This is a recommendation, not a requirement.
+== Installing W11Boost
 
-. Download Windows 11 from https://www.microsoft.com/en-us/software-download/windows11[Microsoft].
-
-. image:Windows_11_ISO.png[]
-
-. Click "Download Now" then select your language.
-
-. Flash that ISO to a USB using https://rufus.ie[Rufus].
-
-. Boot from the USB you flashed that Windows ISO onto. When prompted to "Activate Windows", click "I don't have a product key". Afterwards, select "Windows 11 Education".
-
-. image:WinSetup1.png[]
-
-. image:WinSetup2.png[]
-
-. After Windows 11 Education is installed, continue to installing W11Boost.
-
-====
-
-.*Installing W11Boost*
 . https://github.com/felikcat/W11Boost/archive/refs/heads/master.zip[Download W11Boost] then extract it.
 
-. Open `Install.bat`.
+. Open `Run.bat`, then click "Install W11Boost".
 
-. Wait for the automatic reboot and enjoy.
 
-== Extras
+== `Advanced.ps1` can disable Game DVR, remove Microsoft Edge and remove various forms of automation, etc. 
 
-. `Microsoft_App_Debloat.bat` de-bloats Windows 11 enough to replicate what Windows 10 Enterprise LTSC 2021 includes by default, which is known to only include what's important.
+* However, configuring `Advanced.ps1` is required.
+. Open `Advanced.ps1` in a text editor or IDE of your choosing. +
+. After finished, run `Advanced.ps1` as Administrator. 
+- No help will be provided on how to do this.
+
+== Background information on the Extras
+
+.*Microsoft app debloater*
+. Replicates what Windows 10 Enterprise LTSC 2021 includes by default, which is known to only include what's important.
 - *Exclusions*:
 ** Due to breaking apps: App Installer, Store Experience Host, Windows Store, Xbox Game Speech Window.
 ** Due to being high-quality, and not funneling advertisements or towards using a Microsoft account: Camera, Clock, Terminal, Maps, Phone Link.
 
-. `Install_Xbox_Minimal.bat` is meant for if `Microsoft_App_Debloat.bat` was used, or for an LTSC variant of Windows.
+.*Xbox services installer*
+. Installing Xbox services is meant for a de-bloated Windows installation, or for an LTSC variant of Windows.
 
-- Login to the Microsoft Store before using `Install_Xbox_Minimal.bat`!
+. Login to the Microsoft Store before using `Install_Xbox_Minimal.bat`!
 
-- Installs only what's required to support Xbox Controllers (GUI/interface not included, get it link://www.microsoft.com/store/productId/9NBLGGH30XJ3[here]), Microsoft's PC Game Pass, and specific games such as Forza Horizon 4 & 5.
-** To also get the Game Bar, install the following link://www.microsoft.com/store/productId/9NZKPSTSNW4P[here] then link://www.microsoft.com/store/productId/9NBLGGH537C2[here].
-
-
-. `Advanced.bat` can remove Microsoft Edge, disable Game DVR, remove various forms of automation, etc.
-** Configuring `Advanced.ps1` is required: +
-1. Open `Advanced.ps1` in a text editor or IDE of your choosing. +
-2. After finished, run `Advanced.bat` as Administrator.
+. Installs only what's required to support Xbox Controllers (GUI/interface not included, get it link://www.microsoft.com/store/productId/9NBLGGH30XJ3[here]), Microsoft's PC Game Pass, and specific games such as Forza Horizon 4 & 5.
+- To also get the Game Bar, install the following link://www.microsoft.com/store/productId/9NZKPSTSNW4P[here] then link://www.microsoft.com/store/productId/9NBLGGH537C2[here].
 
 . `Apply_STIGs.bat` enforces a higher base-line of security via https://public.cyber.mil/stigs/[DoD STIG compliance], and avoids breaking most apps.
 - This cannot be a perfect replica, as it's local only. +
 This will not attach to an Active Directory hosted either locally via a Windows Server, or an online server via Microsoft Entra ID (called "Azure AD" prior).
-
-. `Harden_Further.bat` is intended to be run after `Apply_STIGs.bat`.
-- This will break a lot more programs and use-cases; currently not documented.
-
-. `Use_Quad9_DoH.bat` sets up encrypted DNS via Quad9 servers.
-
-. `Uninstall.bat`
-- Uninstalls W11Boost.
-
-.Usage guide / tips after using Harden.bat
-[%collapsible]
-====
-
-. Defender SmartScreen will block "unknown" apps from running. Go into that apps' properties to unblock it.
-
-====
 
 
 == Recommendations
