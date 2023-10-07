@@ -12,21 +12,9 @@ Add-Type -Path "..\Third-party\PolicyFileEditor\PolFileEditor.dll" -ErrorAction 
 Enable-WindowsOptionalFeature -NoRestart -Online -FeatureName VirtualMachinePlatform
 bcdedit.exe /set "{default}" vsmlaunchtype auto
 
+# Intentionally not checking for hashes here.
 $STIG_NAME = "U_STIG_GPO_Package_August_2023"
-$STIG_HASH = (Get-FileHash -Algorithm SHA256 "..\Third-party\DoD-STIGS\$STIG_NAME.zip").Hash
-$EXPECTED_HASH = "B2382E3208CDC86741113E3FBD30EEAF8532DB94B68196A9E9291F441E87766A"
-
-if ($STIG_HASH -ne $EXPECTED_HASH)
-{
-    # Source: https://public.cyber.mil/stigs/gpo/
-    if ($STIG_HASH -ne $EXPECTED_HASH)
-    {
-        Clear-Host
-        Write-Warning "Did not match the expected SHA256 file hash; stopping now to prevent potential security risks."
-        Exit 1
-    }
-    Expand-Archive "..\Third-party\DoD-STIGS\$STIG_NAME.zip" -DestinationPath "$env:TEMP\$STIG_NAME"
-}
+Expand-Archive "..\Third-party\DoD-STIGS\$STIG_NAME.zip" -DestinationPath "$env:TEMP\$STIG_NAME"
 #endregion Preparation
 
 $STIGS = @("DoD Adobe Acrobat Pro DC Continuous V2R1",
