@@ -143,39 +143,18 @@ image:RSOP.png[]
 
 ====
 
-.If you are using a custom Windows ISO such as Atlas OS, do the following.
-[%collapsible]
-====
-
-NOTE: This is a recommendation, not a requirement.
-
-. Download Windows 11 from https://www.microsoft.com/en-us/software-download/windows11[Microsoft].
-
-. image:Windows_11_ISO.png[]
-
-. Click "Download Now" then select your language.
-
-. Flash that ISO to a USB using https://rufus.ie[Rufus].
-
-. Boot from the USB you flashed that Windows ISO onto. When prompted to "Activate Windows", click "I don't have a product key". Afterwards, select "Windows 11 Education".
-
-. image:WinSetup1.png[]
-
-. image:WinSetup2.png[]
-
-. After Windows 11 Education is installed, continue to installing W11Boost.
-
-====
 
 .*Installing W11Boost*
 . https://github.com/felikcat/W11Boost/archive/refs/heads/master.zip[Download W11Boost] then extract it.
 
 . Open `Run.bat`, then click "Install W11Boost".
 
-TIP: `Advanced.ps1` can remove Microsoft Edge, disable Game DVR, remove various forms of automation, etc. +
--> Configuring `Advanced.ps1` is required <- +
-1. Open `Advanced.ps1` in a text editor or IDE of your choosing. +
-2. After finished, run `Advanced.bat` as Administrator.
+== `Advanced.ps1` can disable Game DVR, remove Microsoft Edge and remove various forms of automation, etc. 
+
+* However, configuring `Advanced.ps1` is required.
+. Open `Advanced.ps1` in a text editor or IDE of your choosing. +
+. After finished, run `Advanced.ps1` as Administrator. 
+- No help will be provided on how to do this.
 
 == Background information on the Extras
 
