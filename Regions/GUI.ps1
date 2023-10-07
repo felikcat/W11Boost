@@ -48,6 +48,18 @@ $InstallOnlyButton = New-Object Button -Property @{
     Text     = "Install W11Boost"
 }
 
+function PleaseWaitText {
+    $Form.Controls.Clear()
+
+    $Label = New-Object Label -Property @{
+        Location = New-Object Drawing.Point (($Form.Width * .35 ), ($Form.Height * .35))
+        AutoSize = $true
+        Text     = "Please wait..."
+    }
+
+    $Form.Controls.Add($Label)
+}
+
 function FirstWindowControls {
     $Form.Controls.Clear()
     $Form.Controls.AddRange(($InstallOnlyButton, $ExtrasButton, $UninstallButton))
@@ -74,18 +86,11 @@ function ExtrasWindow {
         Text     = "Install STIG policies"
     }
 
-    $Form.Controls.AddRange(@($DebloatWindowsButton,
-            $InstallXboxMinimalButton, $ApplyStigsButton, $GoBackButton ))
+    $Form.Controls.AddRange(@($DebloatWindowsButton, $InstallXboxMinimalButton,
+     $ApplyStigsButton, $GoBackButton ))
 
     $DebloatWindowsButton.Add_Click({
-            $Form.Controls.Clear()
-
-            $Label = New-Object Label -Property @{
-                Location = New-Object Drawing.Point (($Form.Width * .35 ), ($Form.Height * .35))
-                AutoSize = $true
-                Text     = "Please wait..."
-            }
-            $Form.Controls.Add($Label)
+            PleaseWaitText
 
             & ".\..\Extras\Microsoft_App_Debloat.ps1" | Out-File "${HOME}\Desktop\W11Boost logs\Microsoft App Debloat.log"
 
@@ -94,14 +99,7 @@ function ExtrasWindow {
         })
 
     $InstallXboxMinimalButton.Add_Click({
-            $Form.Controls.Clear()
-
-            $Label = New-Object Label -Property @{
-                Location = New-Object Drawing.Point (($Form.Width * .35 ), ($Form.Height * .35))
-                AutoSize = $true
-                Text     = "Please wait..."
-            }
-            $Form.Controls.Add($Label)
+            PleaseWaitText
 
             & ".\..\Extras\Install_Xbox_Minimal.ps1" | Out-File "${HOME}\Desktop\W11Boost logs\Install Xbox Minimal.log"
 
@@ -110,25 +108,24 @@ function ExtrasWindow {
         })
 
     $ApplyStigsButton.Add_Click({
+        $Prompt = [MessageBox]::Show("This will extract the STIGs then install all of them. Are you sure?", "W11Boost", [MessageBoxButtons]::YesNo)
+        if ($Prompt -eq "Y") {
+            PleaseWaitText
+
             $STIG_NAME = "U_STIG_GPO_Package_August_2023"
-            $Prompt = [MessageBox]::Show("This will extract the STIGs then install all of them. Are you sure?", "W11Boost", [MessageBoxButtons]::YesNo)
-            if ($Prompt -eq "Y") {
-                $Form.Controls.Clear()
+            $STIG_HASH = (Get-FileHash -Algorithm SHA256 "..\Third-party\DoD-STIGS\$STIG_NAME.zip").Hash
+            $EXPECTED_HASH = "B2382E3208CDC86741113E3FBD30EEAF8532DB94B68196A9E9291F441E87766A"
 
-                $STIG_NAME = "U_STIG_GPO_Package_August_2023"
-                $STIG_HASH = (Get-FileHash -Algorithm SHA256 "..\Third-party\DoD-STIGS\$STIG_NAME.zip").Hash
-                $EXPECTED_HASH = "B2382E3208CDC86741113E3FBD30EEAF8532DB94B68196A9E9291F441E87766A"
-
-                # Source: https://public.cyber.mil/stigs/gpo/
-                if ($STIG_HASH -ne $EXPECTED_HASH) {
-                    [MessageBox]::Show("STIGs did not match the expected SHA256 file hash; stopping now to prevent potential security risks.", "W11Boost", [MessageBoxButtons]::OK)
-                    else {
-                        & ".\..\Extras\Apply_STIGs.ps1" | Out-File "${HOME}\Desktop\W11Boost logs\Apply STIGs.log"
-                        [MessageBox]::Show($Form, "STIGs have been applied. Please reboot manually for the changes to take effect.", "W11Boost", [MessageBoxButtons]::OK)
-                    }
-                }
+            # Source: https://public.cyber.mil/stigs/gpo/
+            if ($STIG_HASH -ne $EXPECTED_HASH) {
+                [MessageBox]::Show("STIGs did not match the expected SHA256 file hash; stopping now to prevent potential security risks.", "W11Boost", [MessageBoxButtons]::OK)
+            } else {
+                    & ".\..\Extras\Apply_STIGs.ps1" | Out-File "${HOME}\Desktop\W11Boost logs\Apply STIGs.log"
+                    [MessageBox]::Show($Form, "STIGs have been applied. Please reboot manually for the changes to take effect.", "W11Boost", [MessageBoxButtons]::OK)
             }
-        })
+        }
+        ExtrasWindow
+    })
 }
 
 function AdvancedWindow {
@@ -148,14 +145,7 @@ $ExtrasButton.Add_Click({ ExtrasWindow })
 $UninstallButton.Add_Click({
         $Prompt = [MessageBox]::Show("This will uninstall W11Boost, are you sure?", "W11Boost", [MessageBoxButtons]::YesNo)
         if ($Prompt -eq "Y") {
-            $Form.Controls.Clear()
-
-            $Label = New-Object Label -Property @{
-                Location = New-Object Drawing.Point (($Form.Width * .35 ), ($Form.Height * .35))
-                AutoSize = $true
-                Text     = "Please wait..."
-            }
-            $Form.Controls.Add($Label)
+            PleaseWaitText
 
             & ".\..\Extras\Uninstall.ps1" | Out-File "${HOME}\Desktop\W11Boost logs\Uninstall.log"
 
@@ -172,14 +162,7 @@ $GoBackButton = New-Object Button -Property @{
 $GoBackButton.Add_Click({ FirstWindowControls })
 
 $InstallOnlyButton.Add_Click({
-        $Form.Controls.Clear()
-
-        $Label = New-Object Label -Property @{
-            Location = New-Object Drawing.Point (($Form.Width * .35 ), ($Form.Height * .35))
-            AutoSize = $true
-            Text     = "Please wait..."
-        }
-        $Form.Controls.Add($Label)
+        PleaseWaitText
 
         & ".\Main.ps1" | Out-File "${HOME}\Desktop\W11Boost logs\Main.log"
         [MessageBox]::Show($Form, "Installation nearly complete; manually reboot to finish.", "W11Boost", [MessageBoxButtons]::OK)
