@@ -128,16 +128,6 @@ function ExtrasWindow {
     })
 }
 
-function AdvancedWindow {
-    $ListBox = New-Object Listbox -Property @{
-        Size          = New-Object Drawing.Size 640, 480
-        SelectionMode = "MultiExtended"
-    }
-    $ListBox.Items.Add("Item 1")
-    $ListBox.Items.Add("Test 2")
-    $Form.Controls.Add($ListBox)
-}
-
 #region Draw initial Form/Window and setup button actions.
 FirstWindowControls
 
