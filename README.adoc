@@ -9,6 +9,8 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
+== About
+
 .By default, W11Boost's most important goals compared to alternatives are:
 . No apps or drivers are broken.
 . No security sacrifices.
@@ -139,15 +141,15 @@ image:W11Boost_GUI_2.png[480,360]
 image:RSOP.png[]
 - Registry changes are non-destructive, as they are easily revertible without relying on System Restore or registry backups.
 
-'''
-
 ====
 
 
-.*Installing W11Boost*
+== Installing W11Boost
+
 . https://github.com/felikcat/W11Boost/archive/refs/heads/master.zip[Download W11Boost] then extract it.
 
 . Open `Run.bat`, then click "Install W11Boost".
+
 
 == `Advanced.ps1` can disable Game DVR, remove Microsoft Edge and remove various forms of automation, etc. 
 
