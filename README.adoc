@@ -151,32 +151,33 @@ image:RSOP.png[]
 . Open `Run.bat`, then click "Install W11Boost".
 
 
-== `Advanced.ps1` can disable Game DVR, remove Microsoft Edge and remove various forms of automation, etc. 
-
-* However, configuring `Advanced.ps1` is required.
+.*`Advanced.ps1` can disable Game DVR, remove Microsoft Edge and remove various forms of automation, etc.*
+* However, configuring `Advanced.ps1` is required:
 . Open `Advanced.ps1` in a text editor or IDE of your choosing. +
 . After finished, run `Advanced.ps1` as Administrator. 
 - No help will be provided on how to do this.
 
 == Background information on the Extras
 
-.*Microsoft app debloater*
+=== Microsoft app debloater
 . Replicates what Windows 10 Enterprise LTSC 2021 includes by default, which is known to only include what's important.
 - *Exclusions*:
 ** Due to breaking apps: App Installer, Store Experience Host, Windows Store, Xbox Game Speech Window.
 ** Due to being high-quality, and not funneling advertisements or towards using a Microsoft account: Camera, Clock, Terminal, Maps, Phone Link.
 
-.*Xbox services installer*
-. Installing Xbox services is meant for a de-bloated Windows installation, or for an LTSC variant of Windows.
+=== Install Xbox services
+. This is meant for a de-bloated Windows installation, or for an LTSC variant of Windows.
 
 . Login to the Microsoft Store before using `Install_Xbox_Minimal.bat`!
 
 . Installs only what's required to support Xbox Controllers (GUI/interface not included, get it link://www.microsoft.com/store/productId/9NBLGGH30XJ3[here]), Microsoft's PC Game Pass, and specific games such as Forza Horizon 4 & 5.
 - To also get the Game Bar, install the following link://www.microsoft.com/store/productId/9NZKPSTSNW4P[here] then link://www.microsoft.com/store/productId/9NBLGGH537C2[here].
 
-. `Apply_STIGs.bat` enforces a higher base-line of security via https://public.cyber.mil/stigs/[DoD STIG compliance], and avoids breaking most apps.
-- This cannot be a perfect replica, as it's local only. +
-This will not attach to an Active Directory hosted either locally via a Windows Server, or an online server via Microsoft Entra ID (called "Azure AD" prior).
+=== Install STIG policies
+. Enforces a higher base-line of security via https://public.cyber.mil/stigs/[DoD STIG compliance], that still avoids breaking apps.
+
+. This cannot be a perfect replica, as it's local only.
+- This will not attach to an Active Directory hosted either locally via a Windows Server, or an online server via Microsoft Entra ID (called "Azure AD" prior).
 
 
 == Recommendations
