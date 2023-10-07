@@ -16,9 +16,9 @@ endif::[]
 . The easiest to use without sacrificing valuable features.
 . Has modularity. If you wish to break certain apps or drivers for more performance, you can do so on your own terms.
 
-image:W11Boost_GUI_1.png[]
+image:W11Boost_GUI_1.png[480,360]
 
-image:W11Boost_GUI_2.png[]
+image:W11Boost_GUI_2.png[480,360]
 
 [%collapsible]
 .I want to know exactly what W11Boost does.
