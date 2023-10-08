@@ -86,8 +86,14 @@ function ExtrasWindow {
         Text     = "Install STIG policies"
     }
 
+    $HardenFurtherButton = New-Object Button -Property @{
+        Location = New-Object Drawing.Point  (($Form.Width * .51), ($Form.Height * .275 ))
+        Size     = New-Object Drawing.Size  (($Form.Width * .45), ($Form.Height * .25))
+        Text     = "Harden further (use after STIGs)"
+    }
+
     $Form.Controls.AddRange(@($DebloatWindowsButton, $InstallXboxMinimalButton,
-     $ApplyStigsButton, $GoBackButton ))
+     $ApplyStigsButton, $HardenFurtherButton, $GoBackButton ))
 
     $DebloatWindowsButton.Add_Click({
             PleaseWaitText
@@ -123,8 +129,20 @@ function ExtrasWindow {
                     & ".\..\Extras\Apply_STIGs.ps1" | Out-File "${HOME}\Desktop\W11Boost logs\Apply STIGs.log"
                     [MessageBox]::Show($Form, "STIGs have been applied. Please reboot manually for the changes to take effect.", "W11Boost", [MessageBoxButtons]::OK)
             }
+            ExtrasWindow
         }
-        ExtrasWindow
+    })
+    $HardenFurtherButton.Add_Click({
+        $Prompt = [MessageBox]::Show("This will break older applications. Are you sure?", "W11Boost", [MessageBoxButtons]::YesNo)
+        if ($Prompt -eq "Y") {
+            PleaseWaitText
+
+            & ".\..\Extras\Harden_Further.ps1" | Out-File "${HOME}\Desktop\W11Boost logs\Harden further.log"
+
+            [MessageBox]::Show($Form, "Additional hardening complete. Please reboot manually for the changes to take effect.", "W11Boost", [MessageBoxButtons]::OK)
+
+            ExtrasWindow
+        }
     })
 }
 

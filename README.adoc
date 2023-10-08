@@ -11,10 +11,14 @@ endif::[]
 
 == About
 
+If you like Atlas OS, this is a more modular and modern alternative. 
+
 .By default, W11Boost's most important goals compared to alternatives are:
+. Clear and concise code, with no need to install modded ISOs, and full code transparency that's easy to read by newbie PowerShell programmers.
 . No apps or drivers are broken.
 . No security sacrifices.
-. Minimal changes to how a PC is used after installing W11Boost.
+. Works equally on both Windows 10 and Windows 11.
+. Minimal changes to how a PC is used after installing W11Boost, however, it's purpose built for single-user use.
 . The easiest to use without sacrificing valuable features.
 . Has modularity. If you wish to break certain apps or drivers for more performance, you can do so on your own terms.
 
@@ -29,6 +33,10 @@ image:W11Boost_GUI_2.png[480,360]
 
 .*Performance*
 . App startups are not tracked.
+
+. Drivers and other system code are not paged to a disk. They are kept in memory instead, at the cost of higher memory usage.
+
+. Exclusive fullscreen mode is allowed again.
 
 . Enabled the following:
 - Increased NTFS pool usage limit, reducing Windows' page-faults and stack usage. As a downside, RAM usage is increased.
@@ -88,6 +96,9 @@ image:W11Boost_GUI_2.png[480,360]
 . UAC is enabled for both security, and fixing applications that break from UAC being off, such as Eddie-UI.
 
 . Disabled the following:
+
+- "https://learn.microsoft.com/en-us/windows/win32/shell/fast-user-switching[Fast User Switching]", as W11Boost is intended for single-user use only.
+
 - Automated file cleanup that kicks in if disk space is running low.
 
 - Fast startup (also called 'hybrid shutdown') due to stability issues, excessive disk usage, and could lower performance each "Fast startup" until Windows becomes a slow and janky mess.
@@ -181,6 +192,16 @@ image:RSOP.png[]
 
 
 == Recommendations
+
+=== Using fullscreen exclusive in games.
+Lowers input delay and GPU usage; potentially higher FPS, depending on the game.
+
+.Drawbacks:
+. Much higher time to switch between the game and another app (Alt + Tab).
+. Increases chances of crashing games.
+
+.How to:
+. Unity engine; use the launch option: `-window-mode exclusive`
 
 === Ethernet
 Avoid Realtek 2.5Gbit adapters, as they are much more CPU intensive than Intel 2.5Gbit adapters.

@@ -71,6 +71,44 @@ w32tm.exe /resync
 # Improves how consistent the performance is for networking, FPS, etc.
 & ".\Stability.ps1" | Out-File "${HOME}\Desktop\W11Boost logs\Stability.log"
 
+# Lower input delay and a little lower GPU usage (potentially higher FPS, depending on the game).
+# Borderless windowed and fullscreen would otherwise be too similar. 
+PEAdd_HKLM 'SYSTEM\CurrentControlSet\Control\Session Manager\Environment' -Name '__COMPAT_LAYER' -Value '~ DISABLEDXMAXIMIZEDWINDOWEDMODE' -Type 'String'
+
+# Prevent network throttling to make online games have less percieved stuttering.
+PEAdd_HKLM 'SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile' -Name 'SystemResponsiveness' -Value '0' -Type 'Dword'
+
+# Increase process priority of games.
+PEAdd_HKLM 'SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games' -Name 'Priority' -Value '6' -Type 'Dword'
+
+# Allow global adjustment of timer resolution precision to enforce 0.5ms, so poorly written apps can't fuck up the precision for other apps.
+# -> In detail: https://randomascii.wordpress.com/2020/10/04/windows-timer-resolution-the-great-rule-change/
+PEAdd_HKLM 'SYSTEM\CurrentControlSet\Control\Session Manager\kernel' -Name 'GlobalTimerResolutionRequests' -Value '1' -Type 'Dword'
+
+#region Install SetTimerResolution
+function STR_Requirement {
+    $localArgs = "--NoLogo powershell.exe -Command winget.exe install Microsoft.VCRedist.2015+.x64 -s winget -eh --accept-package-agreements --accept-source-agreements --force"
+    Start-Process -Wait ".\..\Third-party\NanaRun\MinSudo.exe" -ArgumentList $localArgs
+}
+STR_Requirement
+
+Unblock-File -Path "..\Third-party\STR\SetTimerResolution.exe"
+Copy-Item "..\Third-party\STR\SetTimerResolution.exe" -Destination "$env:LOCALAPPDATA\Programs\STR" -Recurse
+
+function STR_Service {
+    $action = New-ScheduledTaskAction -Execute "SetTimerResolution.exe" -WorkingDirectory "$env:LOCALAPPDATA\Programs\STR" -Argument "--resolution 5000 --no-console"
+    $trigger = New-ScheduledTaskTrigger -AtLogon
+    $principal = New-ScheduledTaskPrincipal -GroupId "BUILTIN\Administrators" -RunLevel Highest
+    $settings = New-ScheduledTaskSettingsSet
+    $task = New-ScheduledTask -Action $action -Principal $principal -Trigger $trigger -Settings $settings
+    Register-ScheduledTask STR -InputObject $task
+    Start-ScheduledTask STR
+}
+STR_Service
+#endregion
+
+# Do not page drivers and other system code to a disk, keep it in memory.
+PEAdd_HKLM 'SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management' -Name 'DisablePagingExecutive' -Value '1' -Type 'Dword'
 
 PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'ShowSyncProviderNotifications' -Value '0' -Type 'Dword'
 
@@ -108,6 +146,9 @@ fsutil.exe behavior set memoryusage 2
 fsutil.exe behavior set disablelastaccess 3
 #endregion
 
+# Allocate less resources to low-priority tasks, 10% total.
+# https://learn.microsoft.com/en-us/windows/win32/procthread/multimedia-class-scheduler-service
+PEAdd_HKLM 'SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile' -Name 'SystemResponsiveness' -Value '10' -Type 'Dword'
 
 # Thankfully this does not disable the Windows Recovery Environment.
 bcdedit.exe /set "{default}" recoveryenabled no

@@ -14,7 +14,7 @@ bcdedit.exe /set "{default}" vsmlaunchtype auto
 
 # Intentionally not checking for hashes here.
 $STIG_NAME = "U_STIG_GPO_Package_August_2023"
-Expand-Archive "..\Third-party\DoD-STIGS\$STIG_NAME.zip" -DestinationPath "$env:TEMP\$STIG_NAME"
+Expand-Archive "..\Third-party\DoD-STIGS\$STIG_NAME.zip" -DestinationPath "$env:TEMP\$STIG_NAME" -Force
 #endregion Preparation
 
 $STIGS = @("DoD Adobe Acrobat Pro DC Continuous V2R1",
@@ -30,8 +30,7 @@ $STIGS = @("DoD Adobe Acrobat Pro DC Continuous V2R1",
 "DoD Windows 11 v1r3",
 "DoD Windows Firewall v1r7")
 $STIGS.ForEach({
-    # Starting this many processes is horrendously slow.
-    Start-Process -Wait ".\..\Third-party\LGPO.exe" -ArgumentList '/g "$env:TEMP\$STIG_NAME\$_\GPOs"'
+    Start-Process ".\..\Third-party\LGPO.exe" -WindowStyle hidden -ArgumentList `"/g`", `"$env:TEMP\$STIG_NAME\$_\GPOs`"
 })
 
 # Remove DoD notices.

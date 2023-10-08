@@ -1,5 +1,10 @@
 #Requires -Version 5 -RunAsAdministrator
 
+# Page Combining is a feature meant to reduce memory usage, but introduces security risks and lowers performance.
+# https://kaimi.io/en/2020/07/reading-another-process-memory-via-windows-10-page-combining-en/
+# https://forums.guru3d.com/threads/a-bit-detailed-info-about-memory-combining-in-win10.419262/
+PEAdd_HKLM 'SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management' -Name 'DisablePageCombining' -Value '1' -Type 'Dword'
+
 # Prefer IPv6 whenever possible.
 # https://docs.microsoft.com/en-US/troubleshoot/windows-server/networking/configure-ipv6-in-windows#use-registry-key-to-configure-ipv6
 PEAdd_HKLM 'SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters' -Name 'DisabledComponents' -Value '0' -Type 'Dword'
@@ -54,11 +59,6 @@ bcdedit.exe /set "{default}" disabledynamictick no
 # Draw graphical elements for boot (progress spinner, Windows or BIOS logo, etc).
 # This is useful to tell if something went wrong if a BSOD can't show up.
 bcdedit.exe /deletevalue "{default}" bootuxdisabled
-
-# Deny global adjustment of timer resolution precision so poorly written apps can't fuck up the precision for other apps.
-# -> In detail: https://randomascii.wordpress.com/2020/10/04/windows-timer-resolution-the-great-rule-change/
-# -> A poorly written app anecdote: https://randomascii.wordpress.com/2020/10/04/windows-timer-resolution-the-great-rule-change/#comment-103111
-PEAdd_HKLM 'SYSTEM\CurrentControlSet\Control\Session Manager\kernel' -Name 'GlobalTimerResolutionRequests' -Value '0' -Type 'Dword'
 
 Enable-MMAgent -ApplicationLaunchPrefetching
 Enable-MMAgent -ApplicationPreLaunch

@@ -2,6 +2,8 @@
 
 New-PSDrive -Name "HKCR" -PSProvider "Registry" -Root "HKEY_CLASSES_ROOT" 
 
+PEAdd_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'HideFastUserSwitching' -Value '1' -Type 'Dword'
+
 # Power Throttling causes severe performance reduction for VMWare Workstation 17.
 PEAdd_HKLM 'SYSTEM\CurrentControlSet\Control\Power\PowerThrottling' -Name 'PowerThrottlingOff' -Value '1' -Type 'Dword'
 

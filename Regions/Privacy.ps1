@@ -90,7 +90,13 @@ PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\CloudContent' -Name 'DisableClou
 
 PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\CloudContent' -Name 'DisableConsumerAccountStateContent' -Value '1' -Type 'Dword'
 
-$REGS = @("ContentDeliveryAllowed", "OemPreInstalledAppsEnabled", "PreInstalledAppsEnabled", "PreInstalledAppsEverEnabled", "RotatingLockScreenEnabled", "RotatingLockScreenOverlayEnabled", "SilentInstalledAppsEnabled", "SoftLandingEnabled", "SystemPaneSuggestionsEnabled", "SubscribedContent-338389Enabled", "SubscribedContent-338393Enabled", "SubscribedContent-338394Enabled", "SubscribedContent-338396Enabled", "SubscribedContent-353694Enabled", "SubscribedContent-353696Enabled", "SubscribedContent-88000326Enabled")
+# 310093 = Windows Welcome Experience
+# 353696 = Suggested Content in Settings app
+# 338387 = Spotlight "Fun Facts"
+# 338388 = App Suggestions in the Start Menu
+# 338389 = Get tips, tricks, and suggestions as you use Windows
+
+$REGS = @("ContentDeliveryAllowed", "OemPreInstalledAppsEnabled", "PreInstalledAppsEnabled", "PreInstalledAppsEverEnabled", "RotatingLockScreenEnabled", "RotatingLockScreenOverlayEnabled", "SilentInstalledAppsEnabled", "SoftLandingEnabled", "SystemPaneSuggestionsEnabled", "SubscribedContent-310093Enabled", "SubscribedContent-338387Enabled", "SubscribedContent-338388Enabled", "SubscribedContent-338389Enabled", "SubscribedContent-338393Enabled", "SubscribedContent-338394Enabled", "SubscribedContent-338396Enabled", "SubscribedContent-353694Enabled", "SubscribedContent-353696Enabled", "SubscribedContent-88000326Enabled")
 $REGS.ForEach({
         PEAdd_HKLM 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' -Name $_ -Value '0' -Type 'Dword'
     })
