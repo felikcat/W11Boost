@@ -6,8 +6,6 @@ Push-Location $PSScriptRoot
 Unblock-File -Path "..\Third-party\PolicyFileEditor\PolFileEditor.dll"
 Add-Type -Path "..\Third-party\PolicyFileEditor\PolFileEditor.dll" -ErrorAction Stop
 . "..\Third-party\PolicyFileEditor\Commands.ps1"
-
-. "..\Regions\IMPORTS.ps1"
 #endregion
 
 #region Preparation

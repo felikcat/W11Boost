@@ -1,5 +1,8 @@
 #Requires -Version 5 -RunAsAdministrator
 
+# Loads Group Policies asynchronous. By default this is already asynchoronous.
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name 'SyncForegroundPolicy' -Value '0' -Type 'Dword'
+
 # Page Combining is a feature meant to reduce memory usage, but introduces security risks and lowers performance.
 # https://kaimi.io/en/2020/07/reading-another-process-memory-via-windows-10-page-combining-en/
 # https://forums.guru3d.com/threads/a-bit-detailed-info-about-memory-combining-in-win10.419262/
