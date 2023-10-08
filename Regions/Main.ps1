@@ -60,16 +60,16 @@ w32tm.exe /resync
 
 
 # Stops various annoyances, one being Windows Update restarting your PC without your consent.
-& ".\Annoyances.ps1" | Out-File "${HOME}\Desktop\W11Boost logs\Annoyances.log"
+Start-Process -WindowStyle hidden -FilePath "powershell.exe" -Verb RunAs ".\Annoyances.ps1 | Out-File '${HOME}\Desktop\W11Boost logs\Annoyances.log'"
 
 # Minimize data sent to Microsoft through normal means, also improves performance.
-& ".\Privacy.ps1" | Out-File "${HOME}\Desktop\W11Boost logs\Privacy.log"
+Start-Process -WindowStyle hidden -FilePath "powershell.exe" -Verb RunAs ".\Privacy.ps1 | Out-File '${HOME}\Desktop\W11Boost logs\Privacy.log'"
 
 # Correcting mistakes from other optimizers and user-error.
-& ".\Repairs.ps1" | Out-File "${HOME}\Desktop\W11Boost logs\Repairs.log"
+Start-Process -WindowStyle hidden -FilePath "powershell.exe" -Verb RunAs ".\Repairs.ps1 | Out-File '${HOME}\Desktop\W11Boost logs\Repairs.log'"
 
 # Improves how consistent the performance is for networking, FPS, etc.
-& ".\Stability.ps1" | Out-File "${HOME}\Desktop\W11Boost logs\Stability.log"
+Start-Process -WindowStyle hidden -FilePath "powershell.exe" -Verb RunAs ".\Stability.ps1 | Out-File '${HOME}\Desktop\W11Boost logs\Stability.log'"
 
 # Lower input delay and a little lower GPU usage (potentially higher FPS, depending on the game).
 # Borderless windowed and fullscreen would otherwise be too similar. 

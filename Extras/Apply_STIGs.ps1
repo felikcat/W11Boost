@@ -6,6 +6,8 @@ Push-Location $PSScriptRoot
 Unblock-File -Path "..\Third-party\PolicyFileEditor\PolFileEditor.dll"
 Add-Type -Path "..\Third-party\PolicyFileEditor\PolFileEditor.dll" -ErrorAction Stop
 . "..\Third-party\PolicyFileEditor\Commands.ps1"
+
+. "..\Regions\IMPORTS.ps1"
 #endregion
 
 #region Preparation
@@ -34,5 +36,5 @@ $STIGS.ForEach({
 })
 
 # Remove DoD notices.
-PERemove_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'legalnoticecaption'
-PERemove_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'legalnoticetext'
+Remove-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'legalnoticecaption'
+Remove-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'legalnoticetext'

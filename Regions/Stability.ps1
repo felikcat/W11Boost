@@ -2,6 +2,9 @@
 
 New-PSDrive -Name "HKCR" -PSProvider "Registry" -Root "HKEY_CLASSES_ROOT" 
 
+# Slower startup times, but loads Group Policies non-asynchronous to prevent initialization bugs.
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name 'SyncForegroundPolicy' -Value '1' -Type 'Dword'
+
 PEAdd_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'HideFastUserSwitching' -Value '1' -Type 'Dword'
 
 # Power Throttling causes severe performance reduction for VMWare Workstation 17.
