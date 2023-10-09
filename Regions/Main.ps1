@@ -71,6 +71,7 @@ Start-Process -WindowStyle hidden -FilePath "powershell.exe" -Verb RunAs ".\Repa
 # Improves how consistent the performance is for networking, FPS, etc.
 Start-Process -WindowStyle hidden -FilePath "powershell.exe" -Verb RunAs ".\Stability.ps1 | Out-File '${HOME}\Desktop\W11Boost logs\Stability.log'"
 
+
 # Lower input delay and a little lower GPU usage (potentially higher FPS, depending on the game).
 # Borderless windowed and fullscreen would otherwise be too similar. 
 PEAdd_HKLM 'SYSTEM\CurrentControlSet\Control\Session Manager\Environment' -Name '__COMPAT_LAYER' -Value '~ DISABLEDXMAXIMIZEDWINDOWEDMODE' -Type 'String'
@@ -206,9 +207,17 @@ if (Get-CimInstance MSFT_VSInstance) {
 
 $APPS = @("Microsoft.BingNews_8wekyb3d8bbwe", "Microsoft.WindowsFeedbackHub_8wekyb3d8bbwe")
 $APPS.ForEach({
-        $localArgs = "--NoLogo powershell.exe -Command winget.exe uninstall $_ --exact --silent --accept-source-agreements"
-        Start-Process -Wait ".\..\Third-party\NanaRun\MinSudo.exe" -ArgumentList $localArgs
-    })
+    $localArgs = "--NoLogo powershell.exe -Command winget.exe uninstall $_ --exact --silent --accept-source-agreements"
+    Start-Process -Wait ".\..\Third-party\NanaRun\MinSudo.exe" -ArgumentList $localArgs
+})
+
+# Icaros = thumbnail support for more file formats, and also loads faster than Windows' default thumbnailer
+# StartAllBack = improved interface, lowers memory usage, and makes Windows more responsive.
+$INSTALL = @("Xanashi.Icaros", "StartIsBack.StartAllBack")
+$INSTALL.ForEach({
+    $localArgs = "--NoLogo powershell.exe -Command winget.exe install $_ --exact --silent --accept-package-agreements --accept-source-agreements --source winget"
+    Start-Process -Wait ".\..\Third-party\NanaRun\MinSudo.exe" -ArgumentList $localArgs
+})
 
 # Restore the classic context menu.
 New-Item -Path "HKCU:\SOFTWARE\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" -Value "" -Type String -Force

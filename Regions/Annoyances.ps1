@@ -14,8 +14,6 @@ PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\Explorer' -Name 'NoUseStoreOpenW
 # Do not show Windows tips.
 PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\CloudContent' -Name 'DisableSoftLanding' -Value '1' -Type 'Dword'
 
-PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\CloudContent' -Name 'DisableTailoredExperiencesWithDiagnosticData' -Value '1' -Type 'Dword'
-
 # Show what's slowing down bootups and shutdowns.
 PEAdd_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'verbosestatus' -Value '1' -Type 'Dword'
 

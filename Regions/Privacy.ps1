@@ -1,9 +1,14 @@
 #Requires -Version 5 -RunAsAdministrator
 
+# RustDesk and AnyDesk are better alternatives.
+PEAdd_HKLM 'SYSTEM\CurrentControlSet\Control\Remote Assistance' -Name 'fAllowToGetHelp' -Value '0' -Type 'Dword'
+
 PEAdd_HKCU 'Software\Microsoft\Personalization\Settings' -Name 'AcceptedPrivacyPolicy' -Value '0' -Type 'Dword'
 
 PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\DataCollection' -Name 'LimitDiagnosticLogCollection' -Value '1' -Type 'Dword'
 
+# Disable advertising ID for apps.
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\AdvertisingInfo' -Name 'DisabledByGroupPolicy' -Value '1' -Type 'Dword'
 PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo' -Name 'Enabled' -Value '0' -Type 'Dword'
 
 PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\DataCollection' -Name 'AllowDeviceNameInTelemetry' -Value '0' -Type 'Dword'
@@ -27,25 +32,20 @@ PEAdd_HKCU 'Software\Microsoft\Speech_OneCore\Settings\OnlineSpeechPrivacy' -Nam
 # Disable telemetry for Tablet PC's handwriting recognition.
 PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\TabletPC' -Name 'PreventHandwritingDataSharing' -Value '1' -Type 'Dword'
 
-# Disable advertising ID for apps.
-PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\AdvertisingInfo' -Name 'DisabledByGroupPolicy' -Value '1' -Type 'Dword'
-
 # Ask OneDrive to only generate network traffic if signed in to OneDrive.
 PEAdd_HKLM 'SOFTWARE\Microsoft\OneDrive' -Name 'PreventNetworkTrafficPreUserSignIn' -Value '1' -Type 'Dword'
-
-# Ask to not allow execution of experiments by Microsoft.
-PEAdd_HKLM 'SOFTWARE\Microsoft\PolicyManager\current\device\System' -Name 'AllowExperimentation' -Value '0' -Type 'Dword'
 
 
 #region [ctfmon.exe] Do not send Microsoft inking and typing data.
 PEAdd_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\TextInput' -Name 'AllowLinguisticDataCollection' -Value '0' -Type 'Dword'
+PEAdd_HKLM 'SOFTWARE\Microsoft\Input\TIPC' -Name 'Enabled' -Value '0' -Type 'Dword'
 
 PEAdd_HKCU 'Software\Microsoft\InputPersonalization' -Name 'RestrictImplicitInkCollection' -Value '1' -Type 'Dword'
 PEAdd_HKCU 'Software\Microsoft\InputPersonalization' -Name 'RestrictImplicitTextCollection' -Value '1' -Type 'Dword'
 #endregion
 
-
-PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\Privacy' -Name 'TailoredExperiencesWithDiagnosticDataEnabled' -Value '0' -Type 'Dword'
+PEAdd_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Privacy' -Name 'TailoredExperiencesWithDiagnosticDataEnabled' -Value '0' -Type 'Dword'
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\CloudContent' -Name 'DisableTailoredExperiencesWithDiagnosticData' -Value '1' -Type 'Dword'
 
 # Stops Windows Widgets from running, unless you use a Widget you added.
 PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Dsh' -Name 'AllowNewsAndInterests' -Value '0' -Type 'Dword'
@@ -53,6 +53,8 @@ PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Dsh' -Name 'AllowNewsAndInterests' -Valu
 # Remove the Widgets icon from the taskbar.
 PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'TaskbarDa' -Value '0' -Type 'Dword'
 
+# Disable the language list fingerprinting method; useful for bypassing geolocation restrictions.
+PEAdd_HKCU 'Control Panel\International\User Profile' -Name 'HttpAcceptLanguageOptOut' -Value '1' -Type 'Dword'
 
 #region Fully disable the activity feed.
 PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\System' -Name 'EnableActivityFeed' -Value '0' -Type 'Dword'
@@ -110,6 +112,9 @@ PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\AppV\CEIP' -Name 'CEIPEnable' -Value '0'
 
 PEAdd_HKLM 'SOFTWARE\Microsoft\SQMClient\Windows' -Name 'CEIPEnable' -Value '0' -Type 'Dword'
 
+# Disable PerfTrack.
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\WDI\{9c5a40da-b965-4fc3-8781-88dd50a6299d}' -Name 'ScenarioExecutionEnabled' -Value '0' -Type 'Dword'
+
 PEAdd_HKLM 'SOFTWARE\Microsoft\Windows\Windows Error Reporting' -Name 'Disabled' -Value '1' -Type 'Dword'
 
 PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Messenger\Client' -Name 'CEIP' -Value '2' -Type 'Dword'
@@ -140,12 +145,17 @@ PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting' -Name 'IncludeK
 PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting' -Name 'IncludeMicrosoftApps' -Value '0' -Type 'Dword'
 PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting' -Name 'IncludeShutdownErrs' -Value '0' -Type 'Dword'
 PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting' -Name 'IncludeWindowsApps' -Value '0' -Type 'Dword'
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting' -Name 'DoReport' -Value '0' -Type 'Dword'
+
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Settings' -Name 'DisableSendGenericDriverNotFoundToWER' -Value '1' -Type 'Dword'
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Settings' -Name 'DisableSendRequestAdditionalSoftwareToWER' -Value '1' -Type 'Dword'
 
 Remove-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting\InclusionList" -Recurse
 Remove-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting\Consent" -Recurse
 
 PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting\ExclusionList' -Name '*' -Value '*' -Type 'String'
 
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\Windows Error Reporting' -Name 'Disabled' -Value '1' -Type 'Dword'
 PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\Windows Error Reporting\ExcludedApplications' -Name '*' -Value '*' -Type 'String'
 
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Windows Error Reporting\QueueReporting"
@@ -154,8 +164,12 @@ Disable-ScheduledTask -TaskName "\Microsoft\Windows\Windows Error Reporting\Queu
 PEAdd_HKLM 'SYSTEM\CurrentControlSet\Services\WerSvc' -Name 'Start' -Value '4' -Type 'Dword'
 #endregion
 
+# Don't ask to change the current privacy settings after applying a major Windows update.
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\OOBE' -Name 'DisablePrivacyExperience' -Value '1' -Type 'Dword'
+
 
 # Disable 'Connected User Experiences and Telemetry' service
+PEAdd_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Diagnostics\DiagTrack' -Name 'ShowedToastAtLevel' -Value '1' -Type 'Dword'
 PEAdd_HKLM 'SYSTEM\CurrentControlSet\Services\DiagTrack' -Name 'Start' -Value '4' -Type 'Dword'
 
 # Disable 'Diagnostic Policy Service'

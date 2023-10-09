@@ -36,6 +36,11 @@ PEAdd_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments' -Nam
 # Blocking downloaded files in Explorer can sometimes break File History for downloaded files.
 PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\Policies\Attachments' -Name 'SaveZoneInformation' -Value '1' -Type 'Dword'
 
+# Automatically enable or disable Smart App Control for Windows 11 build 22621 and newer.
+# Force enabling does not work, therefore Evaluation mode has to be used.
+PEAdd_HKLM 'SYSTEM\CurrentControlSet\Control\CI\Policy' -Name 'VerifiedAndReputablePolicyState' -Value '2' -Type 'Dword'
+
+
 # Disable additional risky services that the DoD STIGs left alone.
 $REGS = @("ShellHWDetection", "Spooler", "LanmanServer", "SSDPSRV", "lfsvc")
 $REGS.ForEach({

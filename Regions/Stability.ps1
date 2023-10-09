@@ -2,6 +2,71 @@
 
 New-PSDrive -Name "HKCR" -PSProvider "Registry" -Root "HKEY_CLASSES_ROOT" 
 
+#region Disable Game DVR and Game Bar
+PEAdd_HKCU 'System\GameConfigStore' -Name 'GameDVR_Enabled' -Value '0' -Type 'Dword'
+
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\GameDVR' -Name 'AllowGameDVR' -Value '0' -Type 'Dword'
+
+PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\GameDVR' -Name 'AppCaptureEnabled' -Value '0' -Type 'Dword'
+PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\GameDVR' -Name 'CursorCaptureEnabled' -Value '0' -Type 'Dword'
+PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\GameDVR' -Name 'HistoricalCaptureEnabled' -Value '0' -Type 'Dword'
+
+PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\AppBroadcast\GlobalSettings' -Name 'AudioCaptureEnabled' -Value '0' -Type 'Dword'
+PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\AppBroadcast\GlobalSettings' -Name 'MicrophoneCaptureEnabledByDefault' -Value '0' -Type 'Dword'
+PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\AppBroadcast\GlobalSettings' -Name 'CursorCaptureEnabled' -Value '0' -Type 'Dword'
+PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\AppBroadcast\GlobalSettings' -Name 'CameraCaptureEnabledByDefault' -Value '0' -Type 'Dword'
+
+# Block Xbox controller's home button from opening the game bar.
+PEAdd_HKCU 'Software\Microsoft\GameBar' -Name 'UseNexusForGameBarEnabled' -Value '0' -Type 'Dword'
+
+PEAdd_HKCU 'Software\Microsoft\GameBar' -Name 'ShowStartupPanel' -Value '0' -Type 'Dword'
+
+PEAdd_HKLM 'SYSTEM\CurrentControlSet\Services\BcastDVRUserService' -Name 'Start' -Value '4' -Type 'Dword'
+#endregion
+
+#region Disable System Restore and File History; unreliable crap.
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows NT\SystemRestore' -Name 'DisableSR' -Value '1' -Type 'Dword'
+PEAdd_HKLM 'SOFTWARE\Microsoft\Windows NT\CurrentVersion\SystemRestore' -Name 'RPSessionInterval' -Value '0' -Type 'Dword'
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\SystemRestore\SR"
+
+# Remove all system restore points.
+Get-CimInstance Win32_ShadowCopy | Remove-CimInstance
+
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\FileHistory' -Name 'Disabled' -Value '1' -Type 'Dword'
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\fhsvc" -Name "Start" -Type DWord -Value 4
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\FileHistory\File History (maintenance mode)"
+#endregion
+
+# Ask to not allow execution of experiments by Microsoft.
+PEAdd_HKLM 'SOFTWARE\Microsoft\PolicyManager\current\device\System' -Name 'AllowExperimentation' -Value '0' -Type 'Dword'
+
+#region Disable automatic Application Compatibility helpers
+# Disable "Program Compatibility Assistant"
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -Name 'DisablePCA' -Value '1' -Type 'Dword'
+
+# Disable "Application Compatibility Engine"
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -Name 'DisableEngine' -Value '1' -Type 'Dword'
+
+# Disable "SwitchBack Compatibility Engine"
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -Name 'SbEnable' -Value '0' -Type 'Dword'
+
+# Disable user Steps Recorder
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -Name 'DisableUAR' -Value '1' -Type 'Dword'
+
+# Disable "Remove Program Compatibility Property Page"
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -Name 'DisablePropPage' -Value '0' -Type 'Dword'
+
+# Disable "Inventory Collector"
+PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -Name 'DisableInventory' -Value '1' -Type 'Dword'
+
+# Disable 'Program Compatibility Assistant' service
+PEAdd_HKLM 'SYSTEM\CurrentControlSet\Services' -Name 'PcaSvc' -Value '4' -Type 'Dword'
+
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\Application Experience\Microsoft Compatibility Appraiser"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\Application Experience\PcaPatchDbTask"
+Disable-ScheduledTask -TaskName "\Microsoft\Windows\Application Experience\ProgramDataUpdater"
+#endregion
+
 PEAdd_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'HideFastUserSwitching' -Value '1' -Type 'Dword'
 
 # Power Throttling causes severe performance reduction for VMWare Workstation 17.
@@ -55,13 +120,14 @@ Enable-MMAgent -MemoryCompression
 Disable-MMAgent -PageCombining
 
 
-##+=+= Disallow automatic: app updates, security scanning, and system diagnostics.
+#region Disallow automatic: app updates, security scanning, and system diagnostics.
 PEAdd_HKLM 'SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\Maintenance' -Name 'MaintenanceDisabled' -Value '1' -Type 'Dword'
+PEAdd_HKLM 'SOFTWARE\Microsoft\Windows\ScheduledDiagnostic' -Name 'EnabledExecution' -Value '0' -Type 'Dword'
 
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Diagnosis\Scheduled"
 
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Diagnosis\RecommendedTroubleshootingScanner"
-##+=+=
+#endregion
 
 # Resets adapter settings to driver defaults; it's assumed if there were prior tweaks done, they're incorrect.
 Reset-NetAdapterAdvancedProperty -Name '*' -DisplayName '*'
