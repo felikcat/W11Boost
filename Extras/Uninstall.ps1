@@ -1,30 +1,12 @@
 #Requires -Version 5 -RunAsAdministrator
-using namespace Microsoft.Win32
 
-Remove-Item -Path "$env:windir\System32\GroupPolicy" -Recurse -Force
-gpupdate.exe /force
+# The following use registry keys: 
+# - ScheduledTasks
+# - Services
+reg.exe import $env:USERPROFILE\W11Boost_Backups\HKEY_CLASSES_ROOT.reg
+reg.exe import $env:USERPROFILE\W11Boost_Backups\HKEY_CURRENT_USER.reg
+reg.exe import $env:USERPROFILE\W11Boost_Backups\HKEY_LOCAL_MACHINE.reg
 
 if ($env:PROCESSOR_IDENTIFIER -match 'GenuineIntel') {
     [Environment]::SetEnvironmentVariable("OPENSSL_ia32cap", $null, "Machine")
 }
-
-# Restore the modern context menu.
-Remove-Item -Path "HKEY_CURRENT_USER\SOFTWARE\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" -Recurse
-
-Enable-ScheduledTask -TaskName "\Microsoft\Windows\Customer Experience Improvement Program\Consolidator"
-Enable-ScheduledTask -TaskName "\Microsoft\Windows\Customer Experience Improvement Program\KernelCeipTask"
-Enable-ScheduledTask -TaskName "\Microsoft\Windows\Customer Experience Improvement Program\UsbCeip"
-
-Enable-ScheduledTask -TaskName "\NvTmRep_CrashReport1_{B2FE1952-0186-46C3-BAEC-A80AA35AC5B8}"
-Enable-ScheduledTask -TaskName "\NvTmRep_CrashReport2_{B2FE1952-0186-46C3-BAEC-A80AA35AC5B8}"
-Enable-ScheduledTask -TaskName "\NvTmRep_CrashReport3_{B2FE1952-0186-46C3-BAEC-A80AA35AC5B8}"
-Enable-ScheduledTask -TaskName "\NvTmRep_CrashReport4_{B2FE1952-0186-46C3-BAEC-A80AA35AC5B8}"
-
-Enable-ScheduledTask -TaskName "\Microsoft\VisualStudio\Updates\BackgroundDownload"
-Enable-ScheduledTask -TaskName "\Microsoft\Windows\Shell\IndexerAutomaticMaintenance"
-
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\fhsvc', 'Start', '3', [RegistryValueKind]::DWord)
-Enable-ScheduledTask -TaskName "\Microsoft\Windows\FileHistory\File History (maintenance mode)"
-
-Enable-ScheduledTask -TaskName "\Microsoft\Windows\Location\Notifications"
-Enable-ScheduledTask -TaskName "\Microsoft\Windows\Location\WindowsActionDialog"

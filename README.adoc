@@ -32,6 +32,7 @@ Like other optimizers, W11Boost has to be reapplied on every major Windows updat
 . Slows down boot-times drastically.
 . The user cannot easily change GPOs, they would have to use a third-party program to remove or change them individually.
 . Error reporting is poor, making it harder to debug W11Boost's issues.
+- Microsoft's tools to test out GPOs are purpose built for Active Directory, which cannot be used by W11Boost, as it wouldn't make sense to have a separate PC running Windows Server to host an Active Directory.
 . Overriden user preferences, such as a few settings you could use in Winaero Tweaker.
 
 ====

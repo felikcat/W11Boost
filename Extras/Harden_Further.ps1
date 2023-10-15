@@ -37,10 +37,8 @@ Enable-ScheduledTask -TaskName "\Microsoft\Windows\AppID\SmartScreenSpecific"
 # Blocking downloaded files in Explorer can sometimes break File History for downloaded files.
 [Registry]::SetValue('HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Policies\Attachments', 'SaveZoneInformation', '1', [RegistryValueKind]::DWord)
 
-# Automatically enable or disable Smart App Control for Windows 11 build 22621 and newer.
-# Force enabling does not work, therefore Evaluation mode has to be used.
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\CI\Policy', 'VerifiedAndReputablePolicyState', '2', [RegistryValueKind]::DWord)
-
+# Enable: Ransomware protection -> Controlled folder access
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows Defender\Windows Defender Exploit Guard\Controlled Folder Access', 'EnableControlledFolderAccess', '1', [RegistryValueKind]::DWord)
 
 # Disable additional risky services that the DoD STIGs left alone.
 $REGS = @("ShellHWDetection", "Spooler", "LanmanServer", "SSDPSRV", "lfsvc")

@@ -39,7 +39,7 @@ $ExtrasButton = New-Object Button -Property @{
 $UninstallButton = New-Object Button -Property @{
     Location = New-Object Drawing.Point    (($Form.Width * .00725), ($Form.Height * .45 ))
     Size     = New-Object Drawing.Size         (($Form.Width * .5), ($Form.Height * .425))
-    Text     = "Remove W11Boost (unfinished)"
+    Text     = "Remove W11Boost"
 }
 
 $InstallOnlyButton = New-Object Button -Property @{

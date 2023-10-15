@@ -6,6 +6,14 @@ Push-Location $PSScriptRoot
 
 . ".\IMPORTS.ps1"
 
+# Backup registry hives only once.
+if (-Not (Test-Path -Path "$env:USERPROFILE\W11Boost_Backups")) {
+    New-Item -Path "$env:USERPROFILE\W11Boost_Backups" -ItemType Directory
+    reg.exe export "HKEY_CLASSES_ROOT" $env:USERPROFILE\W11Boost_Backups\HKEY_CLASSES_ROOT.reg
+    reg.exe export "HKEY_CURRENT_USER" $env:USERPROFILE\W11Boost_Backups\HKEY_CURRENT_USER.reg
+    reg.exe export "HKEY_LOCAL_MACHINE" $env:USERPROFILE\W11Boost_Backups\HKEY_LOCAL_MACHINE.reg
+}
+
 # Required for: Windows Updates, Windows Store (StorSvc), winget (DoSvc).
 $REGS = @("AppXSvc", "ClipSVC", "TokenBroker", "StorSvc", "DoSvc")
 $REGS.ForEach({
@@ -203,16 +211,16 @@ if (Get-CimInstance MSFT_VSInstance) {
 
 $APPS = @("Microsoft.BingNews_8wekyb3d8bbwe", "Microsoft.WindowsFeedbackHub_8wekyb3d8bbwe")
 $APPS.ForEach({
-    $localArgs = "--NoLogo powershell.exe -Command winget.exe uninstall $_ --exact --silent --accept-source-agreements"
-    Start-Process -Wait ".\..\Third-party\NanaRun\MinSudo.exe" -ArgumentList $localArgs
-})
+        $localArgs = "--NoLogo powershell.exe -Command winget.exe uninstall $_ --exact --silent --accept-source-agreements"
+        Start-Process -Wait ".\..\Third-party\NanaRun\MinSudo.exe" -ArgumentList $localArgs
+    })
 
 # Icaros = thumbnail support for more file formats, and also loads faster than Windows' default thumbnailer
 $INSTALL = @("Xanashi.Icaros")
 $INSTALL.ForEach({
-    $localArgs = "--NoLogo powershell.exe -Command winget.exe install $_ --exact --silent --accept-package-agreements --accept-source-agreements --source winget"
-    Start-Process -Wait ".\..\Third-party\NanaRun\MinSudo.exe" -ArgumentList $localArgs
-})
+        $localArgs = "--NoLogo powershell.exe -Command winget.exe install $_ --exact --silent --accept-package-agreements --accept-source-agreements --source winget"
+        Start-Process -Wait ".\..\Third-party\NanaRun\MinSudo.exe" -ArgumentList $localArgs
+    })
 
 # Restore the classic context menu.
 New-Item -Path "HKEY_CURRENT_USER\SOFTWARE\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" -Value "" -Type String -Force
