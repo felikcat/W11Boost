@@ -36,7 +36,7 @@ endif::[]
 . https://learn.microsoft.com/en-us/windows-hardware/get-started/adk-install[Windows ADK]
 . https://learn.microsoft.com/en-us/sysinternals/downloads/procmon[Process Monitor]
 
-* `Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\EXAMPLE" -Name "Start" -Type DWord -Value 4` is preferred over using `sc.exe config EXAMPLE start=disabled` since Windows rejects this request depending on the service.
+* `[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\EXAMPLE', "Start" [RegistryValueKind]::DWord -Value 4` is preferred over using `sc.exe config EXAMPLE start=disabled` since Windows rejects this request depending on the service.
 
 * `bcdedit.exe` will fail if the user screwed up their Boot Entries and fixed it later on; the workaround is to explicitly specify the ID.
 - Instead of: `bcdedit.exe /deletevalue x2apicpolicy`, the workaround is to use `bcdedit.exe /deletevalue "\{default\}" x2apicpolicy`

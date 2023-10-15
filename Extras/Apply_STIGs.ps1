@@ -1,4 +1,5 @@
 #Requires -Version 5 -RunAsAdministrator
+using namespace Microsoft.Win32
 
 #region Initialize
 Push-Location $PSScriptRoot
@@ -34,5 +35,5 @@ $STIGS.ForEach({
 })
 
 # Remove DoD notices.
-Remove-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'legalnoticecaption'
-Remove-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'legalnoticetext'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System', 'legalnoticecaption', '', [RegistryValueKind]::String)
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System', 'legalnoticetext', '', [RegistryValueKind]::String)

@@ -180,7 +180,7 @@ ________________________________________
 # Usage data | Official
 # https://github.com/instructure/canvas-lms/blob/dc0e7b50e838fcca6f111082293b8faf415aff28/lib/tasks/db_load_data.rake#L154
 if ($Env) {
-    Set-EnvVar -Name 'CANVAS_LMS_STATS_COLLECTION' -Value 'opt_out' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'CANVAS_LMS_STATS_COLLECTION', 'opt_out' -ShowLog:$ShowLog
 }
 
 # Canvas LMS
@@ -189,7 +189,7 @@ if ($Env) {
 # Usage data | Unofficial
 # https://github.com/instructure/canvas-lms/blob/dc0e7b50e838fcca6f111082293b8faf415aff28/lib/tasks/db_load_data.rake#L16
 if ($Env) {
-    Set-EnvVar -Name 'TELEMETRY_OPT_IN' -Value '' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'TELEMETRY_OPT_IN', '' -ShowLog:$ShowLog
 }
 
 # Eternal Terminal
@@ -197,7 +197,7 @@ if ($Env) {
 
 # Crash data
 if ($Env) {
-    Set-EnvVar -Name 'ET_NO_TELEMETRY' -Value 'ANY_VALUE' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'ET_NO_TELEMETRY', 'ANY_VALUE' -ShowLog:$ShowLog
 }
 
 # Firefox
@@ -239,7 +239,7 @@ switch (Get-OsMoniker) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'HOMEBREW_NO_ANALYTICS' -Value '1' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'HOMEBREW_NO_ANALYTICS', '1' -ShowLog:$ShowLog
 }
 
 # Homebrew
@@ -248,7 +248,7 @@ if ($Env) {
 # Usage data (alternate environment variable)
 # https://github.com/Homebrew/brew/blob/6ad92949e910041416d84a53966ec46b873e069f/Library/Homebrew/utils/analytics.sh#L38
 if ($Env) {
-    Set-EnvVar -Name 'HOMEBREW_NO_ANALYTICS_THIS_RUN' -Value '1' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'HOMEBREW_NO_ANALYTICS_THIS_RUN', '1' -ShowLog:$ShowLog
 }
 
 # Homebrew
@@ -257,7 +257,7 @@ if ($Env) {
 # Update check
 # https://docs.brew.sh/Manpage
 if ($Env) {
-    Set-EnvVar -Name 'HOMEBREW_NO_AUTO_UPDATE' -Value '1' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'HOMEBREW_NO_AUTO_UPDATE', '1' -ShowLog:$ShowLog
 }
 
 # LYNX VFX
@@ -265,7 +265,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'LYNX_ANALYTICS' -Value '0' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'LYNX_ANALYTICS', '0' -ShowLog:$ShowLog
 }
 
 # Microsoft 365 | Enterprise
@@ -290,7 +290,7 @@ switch (Get-OsMoniker) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'DISABLE_QUICKWIT_TELEMETRY' -Value '1' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'DISABLE_QUICKWIT_TELEMETRY', '1' -ShowLog:$ShowLog
 }
 
 # Automagica
@@ -298,7 +298,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'AUTOMAGICA_NO_TELEMETRY' -Value 'ANY_VALUE' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'AUTOMAGICA_NO_TELEMETRY', 'ANY_VALUE' -ShowLog:$ShowLog
 }
 
 # AWS SAM CLI
@@ -306,7 +306,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'SAM_CLI_TELEMETRY' -Value '0' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'SAM_CLI_TELEMETRY', '0' -ShowLog:$ShowLog
 }
 
 # Azure CLI
@@ -314,7 +314,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'AZURE_CORE_COLLECT_TELEMETRY' -Value '0' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'AZURE_CORE_COLLECT_TELEMETRY', '0' -ShowLog:$ShowLog
 }
 
 # Google Cloud SDK
@@ -322,7 +322,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'CLOUDSDK_CORE_DISABLE_USAGE_REPORTING' -Value 'true' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'CLOUDSDK_CORE_DISABLE_USAGE_REPORTING', 'true' -ShowLog:$ShowLog
 }
 
 # Hoockdeck CLI
@@ -331,7 +331,7 @@ if ($Env) {
 # Usage data
 # https://github.com/hookdeck/hookdeck-cli/blob/8c2e18bfd5d413e1d2418c5a73d56791b3bfb513/pkg/hookdeck/client.go#L56-L61
 if ($Env) {
-    Set-EnvVar -Name 'HOOKDECK_CLI_TELEMETRY_OPTOUT' -Value 'ANY_VALUE' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'HOOKDECK_CLI_TELEMETRY_OPTOUT', 'ANY_VALUE' -ShowLog:$ShowLog
 }
 
 # Netdata
@@ -339,7 +339,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'DO_NOT_TRACK' -Value '1' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'DO_NOT_TRACK', '1' -ShowLog:$ShowLog
 }
 
 # Netlify CLI
@@ -367,7 +367,7 @@ if ($Exec) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'STRIPE_CLI_TELEMETRY_OPTOUT' -Value '1' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'STRIPE_CLI_TELEMETRY_OPTOUT', '1' -ShowLog:$ShowLog
 }
 
 # Tilt
@@ -375,7 +375,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'DO_NOT_TRACK' -Value '1' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'DO_NOT_TRACK', '1' -ShowLog:$ShowLog
 }
 
 # Mattermost Server
@@ -384,7 +384,7 @@ if ($Env) {
 # Diagnostic data
 # https://docs.mattermost.com/manage/telemetry.html#error-and-diagnostics-reporting-feature
 if ($Env) {
-    Set-EnvVar -Name 'MM_LOGSETTINGS_ENABLEDIAGNOSTICS' -Value 'false' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'MM_LOGSETTINGS_ENABLEDIAGNOSTICS', 'false' -ShowLog:$ShowLog
 }
 
 # Mattermost Server
@@ -393,7 +393,7 @@ if ($Env) {
 # Security Update Check
 # https://docs.mattermost.com/manage/telemetry.html#security-update-check-feature
 if ($Env) {
-    Set-EnvVar -Name 'MM_SERVICESETTINGS_ENABLESECURITYFIXALERT' -Value 'false' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'MM_SERVICESETTINGS_ENABLESECURITYFIXALERT', 'false' -ShowLog:$ShowLog
 }
 
 # Aerospike
@@ -411,7 +411,7 @@ if ($Exec) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'FEAST_TELEMETRY' -Value 'False' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'FEAST_TELEMETRY', 'False' -ShowLog:$ShowLog
 }
 
 # InfluxDB
@@ -420,7 +420,7 @@ if ($Env) {
 # Usage data
 # https://docs.influxdata.com/influxdb/v2.0/reference/config-options/
 if ($Env) {
-    Set-EnvVar -Name 'INFLUXD_REPORTING_DISABLED' -Value 'true' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'INFLUXD_REPORTING_DISABLED', 'true' -ShowLog:$ShowLog
 }
 
 # Meltano
@@ -428,7 +428,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'MELTANO_DISABLE_TRACKING' -Value 'True' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'MELTANO_DISABLE_TRACKING', 'True' -ShowLog:$ShowLog
 }
 
 # Quilt
@@ -436,7 +436,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'QUILT_DISABLE_USAGE_METRICS' -Value 'True' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'QUILT_DISABLE_USAGE_METRICS', 'True' -ShowLog:$ShowLog
 }
 
 # TimescaleDB
@@ -454,7 +454,7 @@ if ($Exec) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'ALIBUILD_NO_ANALYTICS' -Value '1' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'ALIBUILD_NO_ANALYTICS', '1' -ShowLog:$ShowLog
 }
 
 # Angular
@@ -463,7 +463,7 @@ if ($Env) {
 # Usage data
 # https://angular.io/analytics
 if ($Env) {
-    Set-EnvVar -Name 'NG_CLI_ANALYTICS' -Value 'false' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'NG_CLI_ANALYTICS', 'false' -ShowLog:$ShowLog
 }
 
 # Angular
@@ -472,7 +472,7 @@ if ($Env) {
 # Usage data (custom)
 # https://angular.io/cli/usage-analytics-gathering
 if ($Env) {
-    Set-EnvVar -Name 'NG_CLI_ANALYTICS_SHARE' -Value 'false' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'NG_CLI_ANALYTICS_SHARE', 'false' -ShowLog:$ShowLog
 }
 
 # Appc Daemon
@@ -480,7 +480,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'APPCD_TELEMETRY' -Value '0' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'APPCD_TELEMETRY', '0' -ShowLog:$ShowLog
 }
 
 # App Center CLI
@@ -499,7 +499,7 @@ if ($Exec) {
 # Usage data (env. var)
 # https://github.com/microsoft/appcenter-cli/blob/master/src/util/profile/telemetry.ts
 if ($Env) {
-    Set-EnvVar -Name 'MOBILE_CENTER_TELEMETRY' -Value 'off' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'MOBILE_CENTER_TELEMETRY', 'off' -ShowLog:$ShowLog
 }
 
 # Arduino CLI
@@ -507,7 +507,7 @@ if ($Env) {
 
 # Internal metrics
 if ($Env) {
-    Set-EnvVar -Name 'ARDUINO_METRICS_ENABLED' -Value 'false' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'ARDUINO_METRICS_ENABLED', 'false' -ShowLog:$ShowLog
 }
 
 # AWS Amplify CLI
@@ -526,7 +526,7 @@ if ($Exec) {
 # Usage data
 # https://github.com/microsoft/botframework-cli/tree/main/packages/cli#bf-configsettelemetry
 if ($Env) {
-    Set-EnvVar -Name 'BF_CLI_TELEMETRY' -Value 'false' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'BF_CLI_TELEMETRY', 'false' -ShowLog:$ShowLog
 }
 
 # Capacitor
@@ -546,7 +546,7 @@ if ($Exec) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'CARBON_TELEMETRY_DISABLED' -Value '1' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'CARBON_TELEMETRY_DISABLED', '1' -ShowLog:$ShowLog
 }
 
 # choosenim
@@ -554,7 +554,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'CHOOSENIM_NO_ANALYTICS' -Value '1' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'CHOOSENIM_NO_ANALYTICS', '1' -ShowLog:$ShowLog
 }
 
 # CocoaPods
@@ -562,7 +562,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'COCOAPODS_DISABLE_STATS' -Value 'true' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'COCOAPODS_DISABLE_STATS', 'true' -ShowLog:$ShowLog
 }
 
 # Apache Cordova CLI
@@ -570,7 +570,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'CI' -Value 'ANY_VALUE' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'CI', 'ANY_VALUE' -ShowLog:$ShowLog
 }
 
 # Cube.js
@@ -579,7 +579,7 @@ if ($Env) {
 # Usage data
 # https://cube.dev/docs/reference/environment-variables#general
 if ($Env) {
-    Set-EnvVar -Name 'CUBEJS_TELEMETRY' -Value 'false' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'CUBEJS_TELEMETRY', 'false' -ShowLog:$ShowLog
 }
 
 # Dagster
@@ -588,7 +588,7 @@ if ($Env) {
 # Usage data (environment variable)
 # https://github.com/dagster-io/dagster/blob/master/python_modules/dagit/dagit/telemetry.py
 if ($Env) {
-    Set-EnvVar -Name 'DAGSTER_DISABLE_TELEMETRY' -Value 'ANY_VALUE' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'DAGSTER_DISABLE_TELEMETRY', 'ANY_VALUE' -ShowLog:$ShowLog
 }
 
 # .NET Interactive
@@ -596,7 +596,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'DOTNET_INTERACTIVE_CLI_TELEMETRY_OPTOUT' -Value '1' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'DOTNET_INTERACTIVE_CLI_TELEMETRY_OPTOUT', '1' -ShowLog:$ShowLog
 }
 
 # dotnet-svcutil
@@ -604,7 +604,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'DOTNET_SVCUTIL_TELEMETRY_OPTOUT' -Value '1' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'DOTNET_SVCUTIL_TELEMETRY_OPTOUT', '1' -ShowLog:$ShowLog
 }
 
 # DVC
@@ -622,7 +622,7 @@ if ($Exec) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'FASTLANE_OPT_OUT_USAGE' -Value 'YES' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'FASTLANE_OPT_OUT_USAGE', 'YES' -ShowLog:$ShowLog
 }
 
 # Flagsmith API
@@ -630,7 +630,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'TELEMETRY_DISABLED' -Value 'ANY_VALUE' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'TELEMETRY_DISABLED', 'ANY_VALUE' -ShowLog:$ShowLog
 }
 
 # Flutter
@@ -648,7 +648,7 @@ if ($Exec) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'GATSBY_TELEMETRY_DISABLED' -Value '1' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'GATSBY_TELEMETRY_DISABLED', '1' -ShowLog:$ShowLog
 }
 
 # Golang
@@ -657,7 +657,7 @@ if ($Env) {
 # Usage data
 # https://github.com/golang/go/discussions/58409
 if ($Env) {
-    Set-EnvVar -Name 'GOTELEMETRY' -Value 'off' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'GOTELEMETRY', 'off' -ShowLog:$ShowLog
 }
 
 # Hasura GraphQL engine
@@ -665,7 +665,7 @@ if ($Env) {
 
 # Usage data (CLI and Console)
 if ($Env) {
-    Set-EnvVar -Name 'HASURA_GRAPHQL_ENABLE_TELEMETRY' -Value 'false' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'HASURA_GRAPHQL_ENABLE_TELEMETRY', 'false' -ShowLog:$ShowLog
 }
 
 # Humbug
@@ -674,7 +674,7 @@ if ($Env) {
 # Usage data
 # https://github.com/bugout-dev/humbug/issues/13
 if ($Env) {
-    Set-EnvVar -Name 'BUGGER_OFF' -Value '1' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'BUGGER_OFF', '1' -ShowLog:$ShowLog
 }
 
 # ImageGear
@@ -685,7 +685,7 @@ if ($Env) {
 switch (Get-OsMoniker) {
     'linux' {
         if ($Env) {
-            Set-EnvVar -Name 'IG_PRO_OPT_OUT' -Value 'YES' -ShowLog:$ShowLog
+            Set-EnvVar -Name 'IG_PRO_OPT_OUT', 'YES' -ShowLog:$ShowLog
         }
     }
 }
@@ -705,7 +705,7 @@ if ($Exec) {
 
 # Usage data and crash reports
 if ($Env) {
-    Set-EnvVar -Name 'MEILI_NO_ANALYTICS' -Value 'true' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'MEILI_NO_ANALYTICS', 'true' -ShowLog:$ShowLog
 }
 
 # ML.NET CLI
@@ -713,7 +713,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'MLDOTNET_CLI_TELEMETRY_OPTOUT' -Value 'True' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'MLDOTNET_CLI_TELEMETRY_OPTOUT', 'True' -ShowLog:$ShowLog
 }
 
 # mssql-cli
@@ -721,7 +721,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'MSSQL_CLI_TELEMETRY_OPTOUT' -Value 'True' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'MSSQL_CLI_TELEMETRY_OPTOUT', 'True' -ShowLog:$ShowLog
 }
 
 # .NET Core SDK
@@ -729,7 +729,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'DOTNET_CLI_TELEMETRY_OPTOUT' -Value 'true' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'DOTNET_CLI_TELEMETRY_OPTOUT', 'true' -ShowLog:$ShowLog
 }
 
 # Next.js
@@ -737,7 +737,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'NEXT_TELEMETRY_DISABLED' -Value '1' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'NEXT_TELEMETRY_DISABLED', '1' -ShowLog:$ShowLog
 }
 
 # NocoDB
@@ -745,7 +745,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'NC_DISABLE_TELE' -Value '1' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'NC_DISABLE_TELE', '1' -ShowLog:$ShowLog
 }
 
 # Nuxt.js
@@ -753,7 +753,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'NUXT_TELEMETRY_DISABLED' -Value '1' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'NUXT_TELEMETRY_DISABLED', '1' -ShowLog:$ShowLog
 }
 
 # One Codex API - Python Client Library and CLI
@@ -761,7 +761,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'ONE_CODEX_NO_TELEMETRY' -Value 'True' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'ONE_CODEX_NO_TELEMETRY', 'True' -ShowLog:$ShowLog
 }
 
 # Ory
@@ -769,7 +769,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'SQA_OPT_OUT' -Value 'true' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'SQA_OPT_OUT', 'true' -ShowLog:$ShowLog
 }
 
 # Oryx
@@ -777,7 +777,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'ORYX_DISABLE_TELEMETRY' -Value 'true' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'ORYX_DISABLE_TELEMETRY', 'true' -ShowLog:$ShowLog
 }
 
 # otel-launcher-node
@@ -785,7 +785,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'LS_METRICS_HOST_ENABLED' -Value '0' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'LS_METRICS_HOST_ENABLED', '0' -ShowLog:$ShowLog
 }
 
 # Pants
@@ -794,7 +794,7 @@ if ($Env) {
 # Usage data
 # https://www.pantsbuild.org/docs/reference-anonymous-telemetry
 if ($Env) {
-    Set-EnvVar -Name 'PANTS_ANONYMOUS_TELEMETRY_ENABLED' -Value 'false' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'PANTS_ANONYMOUS_TELEMETRY_ENABLED', 'false' -ShowLog:$ShowLog
 }
 
 # Microsoft Power Platform CLI
@@ -813,7 +813,7 @@ if ($Exec) {
 # Usage data
 # https://www.prisma.io/docs/concepts/more/telemetry#usage-data
 if ($Env) {
-    Set-EnvVar -Name 'CHECKPOINT_DISABLE' -Value '1' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'CHECKPOINT_DISABLE', '1' -ShowLog:$ShowLog
 }
 
 # projector-cli
@@ -821,7 +821,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'TELEMETRY_ENABLED' -Value '0' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'TELEMETRY_ENABLED', '0' -ShowLog:$ShowLog
 }
 
 # PROSE Code Accelerator SDK
@@ -829,7 +829,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'PROSE_TELEMETRY_OPTOUT' -Value 'ANY_VALUE' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'PROSE_TELEMETRY_OPTOUT', 'ANY_VALUE' -ShowLog:$ShowLog
 }
 
 # Rasa
@@ -837,7 +837,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'RASA_TELEMETRY_ENABLED' -Value 'false' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'RASA_TELEMETRY_ENABLED', 'false' -ShowLog:$ShowLog
 }
 
 # ReportPortal (JS client)
@@ -845,7 +845,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'REPORTPORTAL_CLIENT_JS_NO_ANALYTICS' -Value 'true' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'REPORTPORTAL_CLIENT_JS_NO_ANALYTICS', 'true' -ShowLog:$ShowLog
 }
 
 # ReportPortal (Pytest plugin)
@@ -853,7 +853,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'AGENT_NO_ANALYTICS' -Value '1' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'AGENT_NO_ANALYTICS', '1' -ShowLog:$ShowLog
 }
 
 # RESTler
@@ -862,7 +862,7 @@ if ($Env) {
 # Usage data
 # https://github.com/microsoft/restler-fuzzer/blob/main/docs/user-guide/Telemetry.md
 if ($Env) {
-    Set-EnvVar -Name 'RESTLER_TELEMETRY_OPTOUT' -Value '1' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'RESTLER_TELEMETRY_OPTOUT', '1' -ShowLog:$ShowLog
 }
 
 # Rockset CLI
@@ -870,7 +870,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'ROCKSET_CLI_TELEMETRY_OPTOUT' -Value '1' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'ROCKSET_CLI_TELEMETRY_OPTOUT', '1' -ShowLog:$ShowLog
 }
 
 # Testim Root Cause
@@ -878,7 +878,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'SUGGESTIONS_OPT_OUT' -Value 'ANY_VALUE' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'SUGGESTIONS_OPT_OUT', 'ANY_VALUE' -ShowLog:$ShowLog
 }
 
 # Rover CLI
@@ -886,7 +886,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'APOLLO_TELEMETRY_DISABLED' -Value '1' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'APOLLO_TELEMETRY_DISABLED', '1' -ShowLog:$ShowLog
 }
 
 # Salto CLI
@@ -894,7 +894,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'SALTO_TELEMETRY_DISABLE' -Value '1' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'SALTO_TELEMETRY_DISABLE', '1' -ShowLog:$ShowLog
 }
 
 # Serverless Framework
@@ -902,7 +902,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'SLS_TELEMETRY_DISABLED' -Value '1' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'SLS_TELEMETRY_DISABLED', '1' -ShowLog:$ShowLog
 }
 
 # Serverless Framework
@@ -911,7 +911,7 @@ if ($Env) {
 # Usage data (alternate environment variable)
 # https://github.com/serverless/serverless/blob/18d4d69eb3b1220814ab031690b6ef899280a93a/lib/utils/telemetry/are-disabled.js#L5-L9
 if ($Env) {
-    Set-EnvVar -Name 'SLS_TRACKING_DISABLED' -Value '1' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'SLS_TRACKING_DISABLED', '1' -ShowLog:$ShowLog
 }
 
 # Salesforce CLI
@@ -919,7 +919,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'SFDX_DISABLE_TELEMETRY' -Value 'true' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'SFDX_DISABLE_TELEMETRY', 'true' -ShowLog:$ShowLog
 }
 
 # Salesforce CLI
@@ -928,7 +928,7 @@ if ($Env) {
 # Usage data (alternate environment variable)
 # https://github.com/forcedotcom/sfdx-core/blob/31fc950dd3fea9696d15e28ad944f07a08349e60/src/config/envVars.ts#L176-L179
 if ($Env) {
-    Set-EnvVar -Name 'SF_DISABLE_TELEMETRY' -Value 'true' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'SF_DISABLE_TELEMETRY', 'true' -ShowLog:$ShowLog
 }
 
 # SKU
@@ -936,7 +936,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'SKU_TELEMETRY' -Value 'false' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'SKU_TELEMETRY', 'false' -ShowLog:$ShowLog
 }
 
 # Strapi
@@ -945,7 +945,7 @@ if ($Env) {
 # Usage data
 # https://strapi.io/documentation/developer-docs/latest/setup-deployment-guides/configurations.html#environment
 if ($Env) {
-    Set-EnvVar -Name 'STRAPI_TELEMETRY_DISABLED' -Value 'true' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'STRAPI_TELEMETRY_DISABLED', 'true' -ShowLog:$ShowLog
 }
 
 # Strapi
@@ -954,7 +954,7 @@ if ($Env) {
 # Update check
 # https://strapi.io/documentation/developer-docs/latest/setup-deployment-guides/configurations.html#environment
 if ($Env) {
-    Set-EnvVar -Name 'STRAPI_DISABLE_UPDATE_NOTIFICATION' -Value 'true' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'STRAPI_DISABLE_UPDATE_NOTIFICATION', 'true' -ShowLog:$ShowLog
 }
 
 # Tuist
@@ -962,7 +962,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'TUIST_STATS_OPT_OUT' -Value '1' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'TUIST_STATS_OPT_OUT', '1' -ShowLog:$ShowLog
 }
 
 # TYPO3
@@ -971,7 +971,7 @@ if ($Env) {
 # Update check
 # https://docs.typo3.org/m/typo3/guide-installation/master/en-us/Legacy/Index.html#disabling-the-core-updater
 if ($Env) {
-    Set-EnvVar -Name 'TYPO3_DISABLE_CORE_UPDATER' -Value '1' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'TYPO3_DISABLE_CORE_UPDATER', '1' -ShowLog:$ShowLog
 }
 
 # TYPO3
@@ -980,7 +980,7 @@ if ($Env) {
 # Update check (Apache compatibility)
 # https://forge.typo3.org/issues/53188
 if ($Env) {
-    Set-EnvVar -Name 'REDIRECT_TYPO3_DISABLE_CORE_UPDATER' -Value '1' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'REDIRECT_TYPO3_DISABLE_CORE_UPDATER', '1' -ShowLog:$ShowLog
 }
 
 # vstest
@@ -989,7 +989,7 @@ if ($Env) {
 # Usage data
 # https://github.com/microsoft/vstest/blob/main/src/vstest.console/TestPlatformHelpers/TestRequestManager.cs#L1047
 if ($Env) {
-    Set-EnvVar -Name 'VSTEST_TELEMETRY_OPTEDIN' -Value '0' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'VSTEST_TELEMETRY_OPTEDIN', '0' -ShowLog:$ShowLog
 }
 
 # VueDX
@@ -997,7 +997,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'VUEDX_TELEMETRY' -Value 'off' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'VUEDX_TELEMETRY', 'off' -ShowLog:$ShowLog
 }
 
 # WAPM CLI
@@ -1015,7 +1015,7 @@ if ($Exec) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'HINT_TELEMETRY' -Value 'off' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'HINT_TELEMETRY', 'off' -ShowLog:$ShowLog
 }
 
 # Webiny
@@ -1024,7 +1024,7 @@ if ($Env) {
 # Usage data (env. var)
 # https://github.com/webiny/webiny-js/blob/0240c2000d1743160c601ae4ce40dd2f949d4d07/packages/telemetry/react.js#L9
 if ($Env) {
-    Set-EnvVar -Name 'REACT_APP_WEBINY_TELEMETRY' -Value 'false' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'REACT_APP_WEBINY_TELEMETRY', 'false' -ShowLog:$ShowLog
 }
 
 # Webiny
@@ -1046,7 +1046,7 @@ if ($Exec) {
 # Usage data
 # https://yarnpkg.com/advanced/telemetry
 if ($Env) {
-    Set-EnvVar -Name 'YARN_ENABLE_TELEMETRY' -Value '0' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'YARN_ENABLE_TELEMETRY', '0' -ShowLog:$ShowLog
 }
 
 # AutomatedLab
@@ -1054,7 +1054,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'AUTOMATEDLAB_TELEMETRY_OPTIN' -Value '0' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'AUTOMATEDLAB_TELEMETRY_OPTIN', '0' -ShowLog:$ShowLog
 }
 
 # AutomatedLab
@@ -1062,7 +1062,7 @@ if ($Env) {
 
 # Usage data (legacy env. var.)
 if ($Env) {
-    Set-EnvVar -Name 'AUTOMATEDLAB_TELEMETRY_OPTOUT' -Value '1' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'AUTOMATEDLAB_TELEMETRY_OPTOUT', '1' -ShowLog:$ShowLog
 }
 
 # AutoSPInstaller Online
@@ -1071,7 +1071,7 @@ if ($Env) {
 # Usage data
 # https://github.com/IvanJosipovic/AutoSPInstallerOnline/blob/3b4d0e3a7220632a00e36194ce540b8b34e9ed18/AutoSPInstaller.Core/Startup.cs#L36
 if ($Env) {
-    Set-EnvVar -Name 'DisableTelemetry' -Value 'True' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'DisableTelemetry', 'True' -ShowLog:$ShowLog
 }
 
 # Batect
@@ -1079,7 +1079,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'BATECT_ENABLE_TELEMETRY' -Value 'false' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'BATECT_ENABLE_TELEMETRY', 'false' -ShowLog:$ShowLog
 }
 
 # Chef Workstation
@@ -1088,7 +1088,7 @@ if ($Env) {
 # Usage data
 # https://docs.chef.io/workstation/privacy/#opting-out
 if ($Env) {
-    Set-EnvVar -Name 'CHEF_TELEMETRY_OPT_OUT' -Value '1' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'CHEF_TELEMETRY_OPT_OUT', '1' -ShowLog:$ShowLog
 }
 
 # Consul
@@ -1097,7 +1097,7 @@ if ($Env) {
 # Update check
 # https://www.consul.io/docs/agent/options#disable_update_check
 if ($Env) {
-    Set-EnvVar -Name 'CHECKPOINT_DISABLE' -Value 'ANY_VALUE' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'CHECKPOINT_DISABLE', 'ANY_VALUE' -ShowLog:$ShowLog
 }
 
 # Dagger
@@ -1105,7 +1105,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'DO_NOT_TRACK' -Value '1' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'DO_NOT_TRACK', '1' -ShowLog:$ShowLog
 }
 
 # decK
@@ -1113,7 +1113,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'DECK_ANALYTICS' -Value 'off' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'DECK_ANALYTICS', 'off' -ShowLog:$ShowLog
 }
 
 # Earthly
@@ -1122,7 +1122,7 @@ if ($Env) {
 # Usage data
 # https://github.com/earthly/earthly/blob/main/CHANGELOG.md#v0518---2021-07-08
 if ($Env) {
-    Set-EnvVar -Name 'EARTHLY_DISABLE_ANALYTICS' -Value '1' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'EARTHLY_DISABLE_ANALYTICS', '1' -ShowLog:$ShowLog
 }
 
 # F5 BIG-IP Terraform provider
@@ -1130,7 +1130,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'TEEM_DISABLE' -Value 'true' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'TEEM_DISABLE', 'true' -ShowLog:$ShowLog
 }
 
 # F5 CLI
@@ -1138,7 +1138,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'F5_ALLOW_TELEMETRY' -Value 'false' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'F5_ALLOW_TELEMETRY', 'false' -ShowLog:$ShowLog
 }
 
 # Infracost
@@ -1147,7 +1147,7 @@ if ($Env) {
 # Usage data
 # https://www.infracost.io/docs/integrations/environment_variables/#infracost_self_hosted_telemetry
 if ($Env) {
-    Set-EnvVar -Name 'INFRACOST_SELF_HOSTED_TELEMETRY' -Value 'false' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'INFRACOST_SELF_HOSTED_TELEMETRY', 'false' -ShowLog:$ShowLog
 }
 
 # Infracost
@@ -1156,7 +1156,7 @@ if ($Env) {
 # Update check
 # https://www.infracost.io/docs/integrations/environment_variables/#infracost_skip_update_check
 if ($Env) {
-    Set-EnvVar -Name 'INFRACOST_SKIP_UPDATE_CHECK' -Value 'true' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'INFRACOST_SKIP_UPDATE_CHECK', 'true' -ShowLog:$ShowLog
 }
 
 # Kics
@@ -1165,7 +1165,7 @@ if ($Env) {
 # Usage data (current)
 # https://github.com/Checkmarx/kics/issues/3876
 if ($Env) {
-    Set-EnvVar -Name 'DISABLE_CRASH_REPORT' -Value '1' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'DISABLE_CRASH_REPORT', '1' -ShowLog:$ShowLog
 }
 
 # Kics
@@ -1174,7 +1174,7 @@ if ($Env) {
 # Usage data (legacy)
 # https://github.com/Checkmarx/kics/issues/3876
 if ($Env) {
-    Set-EnvVar -Name 'KICS_COLLECT_TELEMETRY' -Value '0' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'KICS_COLLECT_TELEMETRY', '0' -ShowLog:$ShowLog
 }
 
 # kPow
@@ -1183,7 +1183,7 @@ if ($Env) {
 # Usage data
 # https://docs.kpow.io/about/data-collection#how-do-i-opt-out
 if ($Env) {
-    Set-EnvVar -Name 'ALLOW_UI_ANALYTICS' -Value 'false' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'ALLOW_UI_ANALYTICS', 'false' -ShowLog:$ShowLog
 }
 
 # kubeapt
@@ -1191,7 +1191,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'DASH_DISABLE_TELEMETRY' -Value 'ANY_VALUE' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'DASH_DISABLE_TELEMETRY', 'ANY_VALUE' -ShowLog:$ShowLog
 }
 
 # MSLab
@@ -1199,7 +1199,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'MSLAB_TELEMETRY_LEVEL' -Value 'None' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'MSLAB_TELEMETRY_LEVEL', 'None' -ShowLog:$ShowLog
 }
 
 # Nuke
@@ -1207,7 +1207,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'NUKE_TELEMETRY_OPTOUT' -Value '1' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'NUKE_TELEMETRY_OPTOUT', '1' -ShowLog:$ShowLog
 }
 
 # Packer
@@ -1215,7 +1215,7 @@ if ($Env) {
 
 # Update check
 if ($Env) {
-    Set-EnvVar -Name 'CHECKPOINT_DISABLE' -Value '1' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'CHECKPOINT_DISABLE', '1' -ShowLog:$ShowLog
 }
 
 # PnP PowerShell
@@ -1224,7 +1224,7 @@ if ($Env) {
 # Usage data (env. var)
 # https://pnp.github.io/powershell/articles/configuration.html#disable-or-enable-telemetry
 if ($Env) {
-    Set-EnvVar -Name 'PNPPOWERSHELL_DISABLETELEMETRY' -Value 'true' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'PNPPOWERSHELL_DISABLETELEMETRY', 'true' -ShowLog:$ShowLog
 }
 
 # PnP PowerShell
@@ -1233,7 +1233,7 @@ if ($Env) {
 # Update check
 # https://pnp.github.io/powershell/articles/updatenotifications.html
 if ($Env) {
-    Set-EnvVar -Name 'PNPPOWERSHELL_UPDATECHECK' -Value 'false' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'PNPPOWERSHELL_UPDATECHECK', 'false' -ShowLog:$ShowLog
 }
 
 # Pulumi
@@ -1241,7 +1241,7 @@ if ($Env) {
 
 # Update check
 if ($Env) {
-    Set-EnvVar -Name 'PULUMI_SKIP_UPDATE_CHECK' -Value 'true' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'PULUMI_SKIP_UPDATE_CHECK', 'true' -ShowLog:$ShowLog
 }
 
 # Azure Service Fabric CLI
@@ -1269,7 +1269,7 @@ if ($Exec) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'SCOUT_DISABLE' -Value '1' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'SCOUT_DISABLE', '1' -ShowLog:$ShowLog
 }
 
 # Terraform
@@ -1278,7 +1278,7 @@ if ($Env) {
 # Update check
 # https://www.terraform.io/docs/commands/index.html#disable_checkpoint
 if ($Env) {
-    Set-EnvVar -Name 'CHECKPOINT_DISABLE' -Value 'ANY_VALUE' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'CHECKPOINT_DISABLE', 'ANY_VALUE' -ShowLog:$ShowLog
 }
 
 # Terraform Provider for Azure
@@ -1287,7 +1287,7 @@ if ($Env) {
 # Usage data
 # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs#disable_terraform_partner_id
 if ($Env) {
-    Set-EnvVar -Name 'ARM_DISABLE_TERRAFORM_PARTNER_ID' -Value 'true' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'ARM_DISABLE_TERRAFORM_PARTNER_ID', 'true' -ShowLog:$ShowLog
 }
 
 # Cloud Development Kit for Terraform
@@ -1295,7 +1295,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'CHECKPOINT_DISABLE' -Value 'ANY_VALUE' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'CHECKPOINT_DISABLE', 'ANY_VALUE' -ShowLog:$ShowLog
 }
 
 # Vagrant
@@ -1304,7 +1304,7 @@ if ($Env) {
 # Vagrant update check
 # https://www.vagrantup.com/docs/other/environmental-variables#vagrant_checkpoint_disable
 if ($Env) {
-    Set-EnvVar -Name 'VAGRANT_CHECKPOINT_DISABLE' -Value 'ANY_VALUE' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'VAGRANT_CHECKPOINT_DISABLE', 'ANY_VALUE' -ShowLog:$ShowLog
 }
 
 # Vagrant
@@ -1313,7 +1313,7 @@ if ($Env) {
 # Vagrant box update check
 # https://www.vagrantup.com/docs/other/environmental-variables#vagrant_box_update_check_disable
 if ($Env) {
-    Set-EnvVar -Name 'VAGRANT_BOX_UPDATE_CHECK_DISABLE' -Value 'ANY_VALUE' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'VAGRANT_BOX_UPDATE_CHECK_DISABLE', 'ANY_VALUE' -ShowLog:$ShowLog
 }
 
 # Weave Net
@@ -1321,7 +1321,7 @@ if ($Env) {
 
 # Update check
 if ($Env) {
-    Set-EnvVar -Name 'CHECKPOINT_DISABLE' -Value '1' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'CHECKPOINT_DISABLE', '1' -ShowLog:$ShowLog
 }
 
 # werf
@@ -1329,7 +1329,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'WERF_TELEMETRY' -Value '0' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'WERF_TELEMETRY', '0' -ShowLog:$ShowLog
 }
 
 # WKSctl
@@ -1337,7 +1337,7 @@ if ($Env) {
 
 # Update check
 if ($Env) {
-    Set-EnvVar -Name 'CHECKPOINT_DISABLE' -Value '1' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'CHECKPOINT_DISABLE', '1' -ShowLog:$ShowLog
 }
 
 # AccessMap
@@ -1345,7 +1345,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'ANALYTICS' -Value 'no' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'ANALYTICS', 'no' -ShowLog:$ShowLog
 }
 
 # Oh My Zsh
@@ -1353,7 +1353,7 @@ if ($Env) {
 
 # Update check
 if ($Env) {
-    Set-EnvVar -Name 'DISABLE_AUTO_UPDATE' -Value 'true' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'DISABLE_AUTO_UPDATE', 'true' -ShowLog:$ShowLog
 }
 
 # PowerShell Core
@@ -1362,7 +1362,7 @@ if ($Env) {
 # Usage data
 # https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_telemetry
 if ($Env) {
-    Set-EnvVar -Name 'POWERSHELL_TELEMETRY_OPTOUT' -Value '1' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'POWERSHELL_TELEMETRY_OPTOUT', '1' -ShowLog:$ShowLog
 }
 
 # PowerShell Core
@@ -1371,7 +1371,7 @@ if ($Env) {
 # Update check
 # https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_update_notification
 if ($Env) {
-    Set-EnvVar -Name 'POWERSHELL_UPDATECHECK' -Value 'Off' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'POWERSHELL_UPDATECHECK', 'Off' -ShowLog:$ShowLog
 }
 
 # Azure Application Insights (VSCode)
@@ -1379,7 +1379,7 @@ if ($Env) {
 
 # Usage data
 if ($Env) {
-    Set-EnvVar -Name 'AITOOLSVSCODE_DISABLETELEMETRY' -Value 'ANY_VALUE' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'AITOOLSVSCODE_DISABLETELEMETRY', 'ANY_VALUE' -ShowLog:$ShowLog
 }
 
 # JavaScript debugger (VSCode)
@@ -1388,5 +1388,5 @@ if ($Env) {
 # Usage data
 # https://github.com/microsoft/vscode-js-debug/blob/12ec6df97f45b25b168e1eac8a17b802af73806f/src/ioc.ts#L168
 if ($Env) {
-    Set-EnvVar -Name 'DA_TEST_DISABLE_TELEMETRY' -Value '1' -ShowLog:$ShowLog
+    Set-EnvVar -Name 'DA_TEST_DISABLE_TELEMETRY', '1' -ShowLog:$ShowLog
 }

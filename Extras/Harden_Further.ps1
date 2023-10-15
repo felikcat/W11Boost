@@ -1,7 +1,8 @@
 #Requires -Version 5 -RunAsAdministrator
+using namespace Microsoft.Win32
 
 # Disable LLMNR -> https://www.blackhillsinfosec.com/how-to-disable-llmnr-why-you-want-to/
-PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows NT\DNSClient' -Name 'EnableMulticast' -Value '0' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows NT\DNSClient', 'EnableMulticast', '0', [RegistryValueKind]::DWord)
 
 # Break old apps relying on DOS "short names".
 # https://ttcshelbyville.wordpress.com/2018/12/02/should-you-disable-8dot3-for-performance-and-security/
@@ -17,34 +18,34 @@ bcdedit.exe /set "{default}" nx OptIn
 
 
 #region Enable -> Windows Defender Smartscreen
-PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\System' -Name 'EnableSmartScreen' -Value '1' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\System', 'EnableSmartScreen', '1', [RegistryValueKind]::DWord)
 
-PEAdd_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer' -Name 'SmartScreenEnabled' -Value 'On' -Type 'String'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer', 'SmartScreenEnabled', 'On', [RegistryValueKind]::String)
 
-PEAdd_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\AppHost' -Name 'EnableWebContentEvaluation' -Value '1' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\AppHost', 'EnableWebContentEvaluation', '1', [RegistryValueKind]::DWord)
 
 Enable-ScheduledTask -TaskName "\Microsoft\Windows\AppID\SmartScreenSpecific"
 #endregion
 
 
 # Enable -> Windows Security System tray
-PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows Defender Security Center\Systray' -Name 'HideSystray' -Value '0' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\Systray', 'HideSystray', '0', [RegistryValueKind]::DWord)
 
 
 # Enable -> Blocking downloaded files.
-PEAdd_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments' -Name 'SaveZoneInformation' -Value '1' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments', 'SaveZoneInformation', '1', [RegistryValueKind]::DWord)
 # Blocking downloaded files in Explorer can sometimes break File History for downloaded files.
-PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\Policies\Attachments' -Name 'SaveZoneInformation' -Value '1' -Type 'Dword'
+[Registry]::SetValue('HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Policies\Attachments', 'SaveZoneInformation', '1', [RegistryValueKind]::DWord)
 
 # Automatically enable or disable Smart App Control for Windows 11 build 22621 and newer.
 # Force enabling does not work, therefore Evaluation mode has to be used.
-PEAdd_HKLM 'SYSTEM\CurrentControlSet\Control\CI\Policy' -Name 'VerifiedAndReputablePolicyState' -Value '2' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\CI\Policy', 'VerifiedAndReputablePolicyState', '2', [RegistryValueKind]::DWord)
 
 
 # Disable additional risky services that the DoD STIGs left alone.
 $REGS = @("ShellHWDetection", "Spooler", "LanmanServer", "SSDPSRV", "lfsvc")
 $REGS.ForEach({
-    Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\$_" -Name "Start" -Type DWord -Value 4
+    [Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\$_', 'Start', '4', [RegistryValueKind]::DWord)
 })
 
 gpupdate.exe /force

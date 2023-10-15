@@ -1,128 +1,129 @@
 #Requires -Version 5 -RunAsAdministrator
+using namespace Microsoft.Win32
 
 New-PSDrive -Name "HKCR" -PSProvider "Registry" -Root "HKEY_CLASSES_ROOT" 
 
 #region Disable Game DVR and Game Bar
-PEAdd_HKCU 'System\GameConfigStore' -Name 'GameDVR_Enabled' -Value '0' -Type 'Dword'
+[Registry]::SetValue('HKEY_CURRENT_USER\System\GameConfigStore', 'GameDVR_Enabled', '0', [RegistryValueKind]::DWord)
 
-PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\GameDVR' -Name 'AllowGameDVR' -Value '0' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\GameDVR', 'AllowGameDVR', '0', [RegistryValueKind]::DWord)
 
-PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\GameDVR' -Name 'AppCaptureEnabled' -Value '0' -Type 'Dword'
-PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\GameDVR' -Name 'CursorCaptureEnabled' -Value '0' -Type 'Dword'
-PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\GameDVR' -Name 'HistoricalCaptureEnabled' -Value '0' -Type 'Dword'
+[Registry]::SetValue('HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\GameDVR', 'AppCaptureEnabled', '0', [RegistryValueKind]::DWord)
+[Registry]::SetValue('HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\GameDVR', 'CursorCaptureEnabled', '0', [RegistryValueKind]::DWord)
+[Registry]::SetValue('HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\GameDVR', 'HistoricalCaptureEnabled', '0', [RegistryValueKind]::DWord)
 
-PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\AppBroadcast\GlobalSettings' -Name 'AudioCaptureEnabled' -Value '0' -Type 'Dword'
-PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\AppBroadcast\GlobalSettings' -Name 'MicrophoneCaptureEnabledByDefault' -Value '0' -Type 'Dword'
-PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\AppBroadcast\GlobalSettings' -Name 'CursorCaptureEnabled' -Value '0' -Type 'Dword'
-PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\AppBroadcast\GlobalSettings' -Name 'CameraCaptureEnabledByDefault' -Value '0' -Type 'Dword'
+[Registry]::SetValue('HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\AppBroadcast\GlobalSettings', 'AudioCaptureEnabled', '0', [RegistryValueKind]::DWord)
+[Registry]::SetValue('HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\AppBroadcast\GlobalSettings', 'MicrophoneCaptureEnabledByDefault', '0', [RegistryValueKind]::DWord)
+[Registry]::SetValue('HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\AppBroadcast\GlobalSettings', 'CursorCaptureEnabled', '0', [RegistryValueKind]::DWord)
+[Registry]::SetValue('HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\AppBroadcast\GlobalSettings', 'CameraCaptureEnabledByDefault', '0', [RegistryValueKind]::DWord)
 
 # Block Xbox controller's home button from opening the game bar.
-PEAdd_HKCU 'Software\Microsoft\GameBar' -Name 'UseNexusForGameBarEnabled' -Value '0' -Type 'Dword'
+[Registry]::SetValue('HKEY_CURRENT_USER\Software\Microsoft\GameBar', 'UseNexusForGameBarEnabled', '0', [RegistryValueKind]::DWord)
 
-PEAdd_HKCU 'Software\Microsoft\GameBar' -Name 'ShowStartupPanel' -Value '0' -Type 'Dword'
+[Registry]::SetValue('HKEY_CURRENT_USER\Software\Microsoft\GameBar', 'ShowStartupPanel', '0', [RegistryValueKind]::DWord)
 
-PEAdd_HKLM 'SYSTEM\CurrentControlSet\Services\BcastDVRUserService' -Name 'Start' -Value '4' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\BcastDVRUserService', 'Start', '4', [RegistryValueKind]::DWord)
 #endregion
 
 #region Disable System Restore and File History; unreliable crap.
-PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows NT\SystemRestore' -Name 'DisableSR' -Value '1' -Type 'Dword'
-PEAdd_HKLM 'SOFTWARE\Microsoft\Windows NT\CurrentVersion\SystemRestore' -Name 'RPSessionInterval' -Value '0' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows NT\SystemRestore', 'DisableSR', '1', [RegistryValueKind]::DWord)
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\SystemRestore', 'RPSessionInterval', '0', [RegistryValueKind]::DWord)
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\SystemRestore\SR"
 
 # Remove all system restore points.
 Get-CimInstance Win32_ShadowCopy | Remove-CimInstance
 
-PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\FileHistory' -Name 'Disabled' -Value '1' -Type 'Dword'
-Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\fhsvc" -Name "Start" -Type DWord -Value 4
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\FileHistory', 'Disabled', '1', [RegistryValueKind]::DWord)
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\fhsvc', 'Start', '4', [RegistryValueKind]::DWord)
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\FileHistory\File History (maintenance mode)"
 #endregion
 
 # Ask to not allow execution of experiments by Microsoft.
-PEAdd_HKLM 'SOFTWARE\Microsoft\PolicyManager\current\device\System' -Name 'AllowExperimentation' -Value '0' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\PolicyManager\current\device\System', 'AllowExperimentation', '0', [RegistryValueKind]::DWord)
 
 #region Disable automatic Application Compatibility helpers
 # Disable "Program Compatibility Assistant"
-PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -Name 'DisablePCA' -Value '1' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\AppCompat', 'DisablePCA', '1', [RegistryValueKind]::DWord)
 
 # Disable "Application Compatibility Engine"
-PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -Name 'DisableEngine' -Value '1' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\AppCompat', 'DisableEngine', '1', [RegistryValueKind]::DWord)
 
 # Disable "SwitchBack Compatibility Engine"
-PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -Name 'SbEnable' -Value '0' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\AppCompat', 'SbEnable', '0', [RegistryValueKind]::DWord)
 
 # Disable user Steps Recorder
-PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -Name 'DisableUAR' -Value '1' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\AppCompat', 'DisableUAR', '1', [RegistryValueKind]::DWord)
 
 # Disable "Remove Program Compatibility Property Page"
-PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -Name 'DisablePropPage' -Value '0' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\AppCompat', 'DisablePropPage', '0', [RegistryValueKind]::DWord)
 
 # Disable "Inventory Collector"
-PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\AppCompat' -Name 'DisableInventory' -Value '1' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\AppCompat', 'DisableInventory', '1', [RegistryValueKind]::DWord)
 
 # Disable 'Program Compatibility Assistant' service
-PEAdd_HKLM 'SYSTEM\CurrentControlSet\Services' -Name 'PcaSvc' -Value '4' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services', 'PcaSvc', '4', [RegistryValueKind]::DWord)
 
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Application Experience\Microsoft Compatibility Appraiser"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Application Experience\PcaPatchDbTask"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Application Experience\ProgramDataUpdater"
 #endregion
 
-PEAdd_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'HideFastUserSwitching' -Value '1' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System', 'HideFastUserSwitching', '1', [RegistryValueKind]::DWord)
 
 # Power Throttling causes severe performance reduction for VMWare Workstation 17.
-PEAdd_HKLM 'SYSTEM\CurrentControlSet\Control\Power\PowerThrottling' -Name 'PowerThrottlingOff' -Value '1' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Power\PowerThrottling', 'PowerThrottlingOff', '1', [RegistryValueKind]::DWord)
 
 # Do not automatically update speech recognition and speech synthesis modules.
-PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Speech' -Name 'AllowSpeechModelUpdate' -Value '0' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Speech', 'AllowSpeechModelUpdate', '0', [RegistryValueKind]::DWord)
 
-PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\Policies\Explorer' -Name 'LinkResolveIgnoreLinkInfo' -Value '1' -Type 'Dword'
+[Registry]::SetValue('HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer', 'LinkResolveIgnoreLinkInfo', '1', [RegistryValueKind]::DWord)
 
 # Do not search disks to attempt fixing a missing shortcut.
-PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\Policies\Explorer' -Name 'NoResolveSearch' -Value '1' -Type 'Dword'
+[Registry]::SetValue('HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer', 'NoResolveSearch', '1', [RegistryValueKind]::DWord)
 # Do not search all paths related to the missing shortcut.
-PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\Policies\Explorer' -Name 'NoResolveTrack' -Value '1' -Type 'Dword'
+[Registry]::SetValue('HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer', 'NoResolveTrack', '1', [RegistryValueKind]::DWord)
 
 # Disable Explorer's thumbnail shadows.
-Set-ItemProperty -Path "HKCR:\SystemFileAssociations\image" -Name "Treatment" -Type DWord -Value 2
+[Registry]::SetValue('HKEY_CLASSES_ROOT\SystemFileAssociations\image', 'Treatment', '2', [RegistryValueKind]::DWord)
 
 # W11Boost does changes that Windows developer builds would likely not anticipate.
-PEAdd_HKLM 'SOFTWARE\Microsoft\WindowsSelfHost\UI\Visibility' -Name 'HideInsiderPage' -Value '1' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsSelfHost\UI\Visibility', 'HideInsiderPage', '1', [RegistryValueKind]::DWord)
 
 # Enable multiple processes for explorer.exe
-PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'SeparateProcess' -Value '1' -Type 'Dword'
+[Registry]::SetValue('HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced', 'SeparateProcess', '1', [RegistryValueKind]::DWord)
 
-PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\SearchSettings' -Name 'IsDeviceSearchHistoryEnabled' -Value '0' -Type 'Dword'
+[Registry]::SetValue('HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\SearchSettings', 'IsDeviceSearchHistoryEnabled', '0', [RegistryValueKind]::DWord)
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Shell\IndexerAutomaticMaintenance"
 
 # By default Windows does not automatically back-up the registry, but just in case they change this..
-PEAdd_HKLM 'SYSTEM\CurrentControlSet\Control\Session Manager\Configuration Manager' -Name 'EnablePeriodicBackup' -Value '0' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Configuration Manager', 'EnablePeriodicBackup', '0', [RegistryValueKind]::DWord)
 
 # https://docs.microsoft.com/en-us/windows/desktop/win7appqual/fault-tolerant-heap
-PEAdd_HKLM 'SOFTWARE\Microsoft\FTH' -Name 'Enabled' -Value '0' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\FTH', 'Enabled', '0', [RegistryValueKind]::DWord)
 
 # Sets Windows' default process priority; this is not the default for Windows Server.
-Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\PriorityControl' -Name 'Win32PrioritySeparation' -Value '2' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\PriorityControl', 'Win32PrioritySeparation', '2', [RegistryValueKind]::DWord)
 
-Set-ItemProperty -Path 'HKCU:\Software\Microsoft\GameBar' -Name 'AutoGameModeEnabled' -Value '1' -Type 'Dword'
+[Registry]::SetValue('HKEY_CURRENT_USER\Software\Microsoft\GameBar', 'AutoGameModeEnabled', '1', [RegistryValueKind]::DWord)
 
-Set-ItemProperty -Path 'HKLM:\SYSTEM\Maps' -Name 'AutoUpdateEnabled' -Value '0' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\Maps', 'AutoUpdateEnabled', '0', [RegistryValueKind]::DWord)
 
 
 # SwapEffectUpgradeEnable: https://learn.microsoft.com/en-us/windows/win32/direct3ddxgi/for-best-performance--use-dxgi-flip-model#directflip
 # VRROptimizeEnable: https://devblogs.microsoft.com/directx/os-variable-refresh-rate/
-Set-ItemProperty -Path 'HKCU:\Software\Microsoft\DirectX\UserGpuPreferences' -Name 'DirectXUserGlobalSettings' -Value 'VRROptimizeEnable=1;SwapEffectUpgradeEnable=1;' -Type 'String'
+[Registry]::SetValue('HKEY_CURRENT_USER\Software\Microsoft\DirectX\UserGpuPreferences', 'DirectXUserGlobalSettings', 'VRROptimizeEnable=1;SwapEffectUpgradeEnable=1;', [RegistryValueKind]::String)
 
 # Enables hardware-accelerated GPU scheduling except for blocked GPU VIDs listed in:
 # HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\GraphicsDrivers\BlockList\Kernel
-Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\GraphicsDrivers' -Name 'HwSchMode' -Type 'DWord' -Value '2'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\GraphicsDrivers', 'HwSchMode', '2', [RegistryValueKind]::DWord)
 
 Enable-MMAgent -MemoryCompression
 Disable-MMAgent -PageCombining
 
 
 #region Disallow automatic: app updates, security scanning, and system diagnostics.
-PEAdd_HKLM 'SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\Maintenance' -Name 'MaintenanceDisabled' -Value '1' -Type 'Dword'
-PEAdd_HKLM 'SOFTWARE\Microsoft\Windows\ScheduledDiagnostic' -Name 'EnabledExecution' -Value '0' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\Maintenance', 'MaintenanceDisabled', '1', [RegistryValueKind]::DWord)
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\ScheduledDiagnostic', 'EnabledExecution', '0', [RegistryValueKind]::DWord)
 
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Diagnosis\Scheduled"
 
@@ -142,9 +143,9 @@ netsh.exe int tcp set global timestamps=enabled
 
 
 #region Automated file cleanup without user interaction is a bad idea, even if its ran only on low-disk space events.
-PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\Appx' -Name 'AllowStorageSenseGlobal' -Value '0' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\Appx', 'AllowStorageSenseGlobal', '0', [RegistryValueKind]::DWord)
 
-PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\StorageSense' -Name 'AllowStorageSenseGlobal' -Value '0' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\StorageSense', 'AllowStorageSenseGlobal', '0', [RegistryValueKind]::DWord)
 
 Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion" -Name "StorageSense"
 
@@ -199,7 +200,7 @@ Disable-ScheduledTask -TaskName "\Microsoft\Windows\WOF\WIM-Hash-Validation"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\WS\WSTask"
 
 # Microsoft's Malicious Removal Tool task can pop up out of nowhere if Windows Update is still allowed to connect.
-PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\MRT' -Name 'DontOfferThroughWUAU' -Value '1' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\MRT', 'DontOfferThroughWUAU', '1', [RegistryValueKind]::DWord)
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\RemovalTools\MRT_HB"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\RemovalTools\MRT_ERROR_HB"
 #endregion
@@ -207,21 +208,21 @@ Disable-ScheduledTask -TaskName "\Microsoft\Windows\RemovalTools\MRT_ERROR_HB"
 
 #region Windows Update changes.
 # Deny pre-release (Release Preview, Beta, or Dev channel) updates.
-PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate' -Name 'ManagePreviewBuildsPolicyValue' -Value '1' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate', 'ManagePreviewBuildsPolicyValue', '1', [RegistryValueKind]::DWord)
 
 # Deny updates that Microsoft deems as causing compatibility issues.
-PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate' -Name 'DisableWUfBSafeguards' -Value '0' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate', 'DisableWUfBSafeguards', '0', [RegistryValueKind]::DWord)
 
 # Opt out out of "being the first to get the latest non-security updates".
-PEAdd_HKLM 'SOFTWARE\Microsoft\WindowsUpdate\UX\Settings' -Name 'IsContinuousInnovationOptedIn' -Value '0' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings', 'IsContinuousInnovationOptedIn', '0', [RegistryValueKind]::DWord)
 
 # Notify to download then install Windows updates; no automatic Windows updates.
-PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU' -Name 'AUOptions' -Value '2' -Type 'Dword'
-PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate' -Name 'AllowAutoWindowsUpdateDownloadOverMeteredNetwork' -Value '0' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU', 'AUOptions', '2', [RegistryValueKind]::DWord)
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate', 'AllowAutoWindowsUpdateDownloadOverMeteredNetwork', '0', [RegistryValueKind]::DWord)
 
 # Never force restarts.
-PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU' -Name 'NoAutoUpdate' -Value '0' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU', 'NoAutoUpdate', '0', [RegistryValueKind]::DWord)
 
 # Disable Delivery Optimization's "Allow downloads from other PCs".
-PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization' -Name 'DODownloadMode' -Value '0' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization', 'DODownloadMode', '0', [RegistryValueKind]::DWord)
 #endregion

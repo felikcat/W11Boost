@@ -1,19 +1,42 @@
 #Requires -Version 5 -RunAsAdministrator
+using namespace Microsoft.Win32
 
 # Loads Group Policies asynchronous. By default this is already asynchoronous.
-PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name 'SyncForegroundPolicy' -Value '0' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows NT\CurrentVersion\Winlogon', 'SyncForegroundPolicy', '0', [RegistryValueKind]::DWord)
 
 # Page Combining is a feature meant to reduce memory usage, but introduces security risks and lowers performance.
 # https://kaimi.io/en/2020/07/reading-another-process-memory-via-windows-10-page-combining-en/
 # https://forums.guru3d.com/threads/a-bit-detailed-info-about-memory-combining-in-win10.419262/
-PEAdd_HKLM 'SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management' -Name 'DisablePageCombining' -Value '1' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management', 'DisablePageCombining', '1', [RegistryValueKind]::DWord)
 
 # Prefer IPv6 whenever possible.
 # https://docs.microsoft.com/en-US/troubleshoot/windows-server/networking/configure-ipv6-in-windows#use-registry-key-to-configure-ipv6
-PEAdd_HKLM 'SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters' -Name 'DisabledComponents' -Value '0' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters', 'DisabledComponents', '0', [RegistryValueKind]::DWord)
 
 # Splitting SvcHost less decreases Windows' stability; set it to defaults.
-Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control' -Name 'SvcHostSplitThresholdInKB' -Type 'Dword' -Value '3670016'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control', 'SvcHostSplitThresholdInKB', '3670016', [RegistryValueKind]::DWord)
+
+# Ensure IPv6 and its related features are enabled.
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\iphlpsvc', 'Start', '2', [RegistryValueKind]::DWord)
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\IpxlatCfgSvc', 'Start', '3', [RegistryValueKind]::DWord)
+Set-NetAdapterBinding -Name '*' -DisplayName 'Internet Protocol Version 6 (TCP/IPv6)' -Enabled 1
+
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\PrefetchParameters', 'EnablePrefetcher', '3', [RegistryValueKind]::DWord)
+# The memory performance issues related to requesting data from disk has been solved years ago.
+# Disabling SysMain (Superfetch) would make memory page fetching slower by:
+# - Less pages being cached into memory/RAM, and in an un-intelligent manner.
+# - Increase the amount of random I/O reads and writes; much slower than RAM.
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\SysMain', 'Start', '2', [RegistryValueKind]::DWord)
+
+# Allow Phone -> PC linking on this device.
+# NOTE 1: Allows advertised apps in the start menu on Windows 11; StartAllBack is used to side-step this problem.
+# NOTE 2: 'DisableWindowsConsumerFeatures' = 1 only applies to Enterprise and Education editions of Windows.
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\System', 'EnableMmx', '1', [RegistryValueKind]::DWord)
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\CloudContent', 'DisableWindowsConsumerFeatures', '0', [RegistryValueKind]::DWord)
+
+# Old versions of the Intel PROSet software set this to 0, breaking Windows' internet connectivity check.
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\NlaSvc\Parameters\Internet', 'EnableActiveProbing', '1', [RegistryValueKind]::DWord)
+
 
 # Disabling threaded DPCs is for debugging purposes and will cause spinlocks; it does not lower DPC latency.
 Remove-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Session Manager\kernel' -Name 'ThreadDpcEnable'
@@ -34,21 +57,19 @@ Remove-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\Dwm" -Name "OverlayT
 Remove-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "EnablePrefetcher"
 Remove-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "EnableSuperfetch"
 
-PEAdd_HKLM 'SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\PrefetchParameters' -Name 'EnablePrefetcher' -Value '3' -Type 'Dword'
-# The memory performance issues related to requesting data from disk has been solved years ago.
-# Disabling SysMain (Superfetch) would make memory page fetching slower by:
-# - Less pages being cached into memory/RAM, and in an un-intelligent manner.
-# - Increase the amount of random I/O reads and writes; much slower than RAM.
-Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\SysMain" -Name "Start" -Type DWord -Value 2
+# Ensure default 2GB memory boundary for x86 apps.
+Remove-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "AllocationPreference"
 
-# Allow Phone -> PC linking on this device.
-# NOTE 1: Allows advertised apps in the start menu on Windows 11; StartAllBack is used to side-step this problem.
-# NOTE 2: 'DisableWindowsConsumerFeatures' = 1 only applies to Enterprise and Education editions of Windows.
-PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\System' -Name 'EnableMmx' -Value '1' -Type 'Dword'
-PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\CloudContent' -Name 'DisableWindowsConsumerFeatures' -Value '0' -Type 'Dword'
+# Disk defragmentation does TRIMs on SSDs. Not running TRIMs at least once a week will reduce performance.
+Remove-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Dfrg\BootOptimizeFunction" -Name "Enable"
 
-# Old versions of the Intel PROSet software set this to 0, breaking Windows' internet connectivity check.
-PEAdd_HKLM 'SYSTEM\CurrentControlSet\Services\NlaSvc\Parameters\Internet' -Name 'EnableActiveProbing' -Value '1' -Type 'Dword'
+# Revert to Windows' default shutdown behavior regarding handling of apps.
+$REGS = @("WaitToKillAppTimeOut", "HungAppTimeout", "WaitToKillServiceTimeout")
+$REGS.ForEach({
+    Remove-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name $_
+    Remove-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control" -Name $_
+})
+
 
 # Use sane defaults for these sensitive timer related settings.
 bcdedit.exe /deletevalue "{default}" tscsyncpolicy
@@ -63,31 +84,15 @@ bcdedit.exe /set "{default}" disabledynamictick no
 # This is useful to tell if something went wrong if a BSOD can't show up.
 bcdedit.exe /deletevalue "{default}" bootuxdisabled
 
+
 Enable-MMAgent -ApplicationLaunchPrefetching
 Enable-MMAgent -ApplicationPreLaunch
 
-# Ensure IPv6 and its related features are enabled.
-Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\iphlpsvc" -Name "Start" -Type DWord -Value 2
-Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\IpxlatCfgSvc" -Name "Start" -Type DWord -Value 3
-Set-NetAdapterBinding -Name '*' -DisplayName 'Internet Protocol Version 6 (TCP/IPv6)' -Enabled 1
 
 # Apps that rely on 8.3 filenames from the DOS-era will break if this is disabled.
 fsutil.exe behavior set disable8dot3 2
-
-# Revert to Windows' default shutdown behavior regarding handling of apps.
-$REGS = @("WaitToKillAppTimeOut", "HungAppTimeout", "WaitToKillServiceTimeout")
-$REGS.ForEach({
-        Remove-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name $_
-        Remove-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control" -Name $_
-    })
 
 # https://www.intel.com/content/www/us/en/developer/articles/troubleshooting/openssl-sha-crash-bug-requires-application-update.html
 if ($env:PROCESSOR_IDENTIFIER -match 'GenuineIntel') {
     setx.exe /M OPENSSL_ia32cap "~0x200000200000000"
 }
-
-# Ensure default 2GB memory boundary for x86 apps.
-Remove-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "AllocationPreference"
-
-# Disk defragmentation does TRIMs on SSDs. Not running TRIMs at least once a week will reduce performance.
-Remove-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Dfrg\BootOptimizeFunction" -Name "Enable"

@@ -1,19 +1,15 @@
 #Requires -Version 5 -RunAsAdministrator
+using namespace Microsoft.Win32
 
 #region Initialize
 Push-Location $PSScriptRoot
-
-# 'Import-Module example.psm1' fails if PowerShell script execution is disabled; do it manually.
-Unblock-File -Path "..\Third-party\PolicyFileEditor\PolFileEditor.dll"
-Add-Type -Path "..\Third-party\PolicyFileEditor\PolFileEditor.dll" -ErrorAction Stop
-. "..\Third-party\PolicyFileEditor\Commands.ps1"
 
 . ".\IMPORTS.ps1"
 
 # Required for: Windows Updates, Windows Store (StorSvc), winget (DoSvc).
 $REGS = @("AppXSvc", "ClipSVC", "TokenBroker", "StorSvc", "DoSvc")
 $REGS.ForEach({
-        Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\$_" -Name "Start" -Type DWord -Value 3
+        [Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\$_', 'Start', '3', [RegistryValueKind]::DWord)
         Start-Service $_
     })
 
@@ -74,17 +70,17 @@ Start-Process -WindowStyle hidden -FilePath "powershell.exe" -Verb RunAs ".\Stab
 
 # Lower input delay and a little lower GPU usage (potentially higher FPS, depending on the game).
 # Borderless windowed and fullscreen would otherwise be too similar. 
-PEAdd_HKLM 'SYSTEM\CurrentControlSet\Control\Session Manager\Environment' -Name '__COMPAT_LAYER' -Value '~ DISABLEDXMAXIMIZEDWINDOWEDMODE' -Type 'String'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Environment', '__COMPAT_LAYER', '~ DISABLEDXMAXIMIZEDWINDOWEDMODE', [RegistryValueKind]::String)
 
 # Prevent network throttling to make online games have less percieved stuttering.
-PEAdd_HKLM 'SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile' -Name 'SystemResponsiveness' -Value '0' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile', 'SystemResponsiveness', '0', [RegistryValueKind]::DWord)
 
 # Increase process priority of games.
-PEAdd_HKLM 'SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games' -Name 'Priority' -Value '6' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games', 'Priority', '6', [RegistryValueKind]::DWord)
 
 # Allow global adjustment of timer resolution precision to enforce 0.5ms, so poorly written apps can't fuck up the precision for other apps.
 # -> In detail: https://randomascii.wordpress.com/2020/10/04/windows-timer-resolution-the-great-rule-change/
-PEAdd_HKLM 'SYSTEM\CurrentControlSet\Control\Session Manager\kernel' -Name 'GlobalTimerResolutionRequests' -Value '1' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\kernel', 'GlobalTimerResolutionRequests', '1', [RegistryValueKind]::DWord)
 
 #region Install SetTimerResolution
 function STR_Requirement {
@@ -109,18 +105,18 @@ STR_Service
 #endregion
 
 # Do not page drivers and other system code to a disk, keep it in memory.
-PEAdd_HKLM 'SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management' -Name 'DisablePagingExecutive' -Value '1' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management', 'DisablePagingExecutive', '1', [RegistryValueKind]::DWord)
 
-PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'ShowSyncProviderNotifications' -Value '0' -Type 'Dword'
+[Registry]::SetValue('HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced', 'ShowSyncProviderNotifications', '0', [RegistryValueKind]::DWord)
 
-PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\Policies\Explorer' -Name 'NoLowDiskSpaceChecks' -Value '1' -Type 'Dword'
+[Registry]::SetValue('HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer', 'NoLowDiskSpaceChecks', '1', [RegistryValueKind]::DWord)
 
 # Disable tracking of application startups.
-PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'Start_TrackProgs' -Value '0' -Type 'Dword'
-PEAdd_HKCU 'Software\Policies\Microsoft\Windows\EdgeUI' -Name 'DisableMFUTracking' -Value '1' -Type 'Dword'
-PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\EdgeUI' -Name 'DisableMFUTracking' -Value '1' -Type 'Dword'
+[Registry]::SetValue('HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced', 'Start_TrackProgs', '0', [RegistryValueKind]::DWord)
+[Registry]::SetValue('HKEY_CURRENT_USER\Software\Policies\Microsoft\Windows\EdgeUI', 'DisableMFUTracking', '1', [RegistryValueKind]::DWord)
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\EdgeUI', 'DisableMFUTracking', '1', [RegistryValueKind]::DWord)
 
-PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\System' -Name 'DisableAcrylicBackgroundOnLogon' -Value '1' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\System', 'DisableAcrylicBackgroundOnLogon', '1', [RegistryValueKind]::DWord)
 
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\DiskDiagnostic\Microsoft-Windows-DiskDiagnosticDataCollector"
 
@@ -130,17 +126,17 @@ Disable-ScheduledTask -TaskName "\NvTmRep_CrashReport3_{B2FE1952-0186-46C3-BAEC-
 Disable-ScheduledTask -TaskName "\NvTmRep_CrashReport4_{B2FE1952-0186-46C3-BAEC-A80AA35AC5B8}"
 
 # Do not analyze apps' execution time data.
-PEAdd_HKLM 'SOFTWARE\Microsoft\Windows NT\CurrentVersion\Perflib' -Name 'Disable Performance Counters' -Value '1' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Perflib', 'Disable Performance Counters', '1', [RegistryValueKind]::DWord)
 
 
 #region NTFS tweaks
-PEAdd_HKLM 'SYSTEM\CurrentControlSet\Control\FileSystem' -Name 'LongPathsEnabled' -Value '1' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem', 'LongPathsEnabled', '1', [RegistryValueKind]::DWord)
 
 # Ensure "Virtual Memory Pagefile Encryption" is at its default of 'off'.
-PEAdd_HKLM 'SYSTEM\CurrentControlSet\Policies' -Name 'NtfsEncryptPagingFile' -Value '0' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Policies', 'NtfsEncryptPagingFile', '0', [RegistryValueKind]::DWord)
 
 # Allocate more RAM to NTFS' paged pool.
-PEAdd_HKLM 'SYSTEM\CurrentControlSet\Policies' -Name 'NtfsForceNonPagedPoolAllocation' -Value '0' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Policies', 'NtfsForceNonPagedPoolAllocation', '0', [RegistryValueKind]::DWord)
 fsutil.exe behavior set memoryusage 2
 
 # Do not use "Last Access Time Stamp Updates" by default; apps can still explicitly update these timestamps for themself.
@@ -149,42 +145,42 @@ fsutil.exe behavior set disablelastaccess 3
 
 # Allocate less resources to low-priority tasks, 10% total.
 # https://learn.microsoft.com/en-us/windows/win32/procthread/multimedia-class-scheduler-service
-PEAdd_HKLM 'SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile' -Name 'SystemResponsiveness' -Value '10' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile', 'SystemResponsiveness', '10', [RegistryValueKind]::DWord)
 
 # Thankfully this does not disable the Windows Recovery Environment.
 bcdedit.exe /set "{default}" recoveryenabled no
 
 # Do not keep track of recently opened files.
-PEAdd_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer' -Name 'NoRecentDocsHistory' -Value '1' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer', 'NoRecentDocsHistory', '1', [RegistryValueKind]::DWord)
 
 
 #region Enable UAC (User Account Control).
 # UAC requires the 'LUA File Virtualization Filter Driver'.
-Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\luafv" -Name "Start" -Type DWord -Value 2
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\luafv', 'Start', '2', [RegistryValueKind]::DWord)
 
-PEAdd_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'PromptOnSecureDesktop' -Value '1' -Type 'Dword'
-PEAdd_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'ConsentPromptBehaviorAdmin' -Value '5' -Type 'Dword'
-PEAdd_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'EnableLUA' -Value '1' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System', 'PromptOnSecureDesktop', '1', [RegistryValueKind]::DWord)
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System', 'ConsentPromptBehaviorAdmin', '5', [RegistryValueKind]::DWord)
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System', 'EnableLUA', '1', [RegistryValueKind]::DWord)
 #endregion
 
 #region Shutdown options
 # Disables "Fast startup".
-PEAdd_HKLM 'SYSTEM\CurrentControlSet\Control\Session Manager\Power' -Name 'HiberbootEnabled' -Value '0' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Power', 'HiberbootEnabled', '0', [RegistryValueKind]::DWord)
 (Get-Item "$env:windir\System32\SleepStudy\UserNotPresentSession.etl").Attributes = 'Archive', 'ReadOnly'
 
 # Use default shutdown behavior.
 Remove-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "AutoEndTasks"
 
-PEAdd_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'DisableShutdownNamedPipe' -Value '1' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System', 'DisableShutdownNamedPipe', '1', [RegistryValueKind]::DWord)
 
 # A security feature that's disabled by default in Windows 11. Enabling this makes shutdown times slow.
-PEAdd_HKLM 'SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management' -Name 'ClearPageFileAtShutdown' -Value '0' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management', 'ClearPageFileAtShutdown', '0', [RegistryValueKind]::DWord)
 #endregion
 
 
 # Hidden file extensions are abused to hide the real file format, example:
 # An executable (.exe, .scr) pretending to be a PDF.
-PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'HideFileExt' -Value '0' -Type 'Dword'
+[Registry]::SetValue('HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced', 'HideFileExt', '0', [RegistryValueKind]::DWord)
 
 
 #region Speed up Visual Studio by disabling its telemetry.
@@ -192,16 +188,16 @@ if (Get-CimInstance MSFT_VSInstance) {
     Disable-ScheduledTask -TaskName "\Microsoft\VisualStudio\Updates\BackgroundDownload"
     # https://learn.microsoft.com/en-us/visualstudio/ide/visual-studio-experience-improvement-program?view=vs-2022
     # PerfWatson2 (VSCEIP) is intensive on resources, ask to disable it.
-    PEAdd_HKLM 'Software\Microsoft\VSCommon\17.0\SQM' -Name 'OptIn' -Value '0' -Type 'Dword'
+    [Registry]::SetValue('HKEY_LOCAL_MACHINE\Software\Microsoft\VSCommon\17.0\SQM', 'OptIn', '0', [RegistryValueKind]::DWord)
 
     # Remove feedback button and its features.
     # Feedback can still be given through the Visual Studio Installer:
     # https://learn.microsoft.com/en-us/visualstudio/ide/how-to-report-a-problem-with-visual-studio?view=vs-2022
-    PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\VisualStudio\Feedback' -Name 'DisableFeedbackDialog' -Value '1' -Type 'Dword'
-    PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\VisualStudio\Feedback' -Name 'DisableEmailInput' -Value '1' -Type 'Dword'
-    PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\VisualStudio\Feedback' -Name 'DisableScreenshotCapture' -Value '1' -Type 'Dword'
+    [Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\VisualStudio\Feedback', 'DisableFeedbackDialog', '1', [RegistryValueKind]::DWord)
+    [Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\VisualStudio\Feedback', 'DisableEmailInput', '1', [RegistryValueKind]::DWord)
+    [Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\VisualStudio\Feedback', 'DisableScreenshotCapture', '1', [RegistryValueKind]::DWord)
 
-    PEAdd_HKCU 'Software\Microsoft\VisualStudio\Telemetry' -Name 'TurnOffSwitch' -Value '1' -Type 'Dword'
+    [Registry]::SetValue('HKEY_CURRENT_USER\Software\Microsoft\VisualStudio\Telemetry', 'TurnOffSwitch', '1', [RegistryValueKind]::DWord)
 }
 #endregion
 
@@ -212,15 +208,14 @@ $APPS.ForEach({
 })
 
 # Icaros = thumbnail support for more file formats, and also loads faster than Windows' default thumbnailer
-# StartAllBack = improved interface, lowers memory usage, and makes Windows more responsive.
-$INSTALL = @("Xanashi.Icaros", "StartIsBack.StartAllBack")
+$INSTALL = @("Xanashi.Icaros")
 $INSTALL.ForEach({
     $localArgs = "--NoLogo powershell.exe -Command winget.exe install $_ --exact --silent --accept-package-agreements --accept-source-agreements --source winget"
     Start-Process -Wait ".\..\Third-party\NanaRun\MinSudo.exe" -ArgumentList $localArgs
 })
 
 # Restore the classic context menu.
-New-Item -Path "HKCU:\SOFTWARE\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" -Value "" -Type String -Force
+New-Item -Path "HKEY_CURRENT_USER\SOFTWARE\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" -Value "" -Type String -Force
 
 $NAME = @("InternetCustom", "DatacenterCustom", "Compat", "Datacenter", "Internet")
 $NAME.ForEach({
@@ -232,30 +227,24 @@ $NAME.ForEach({
 
 
 #region Microsoft Edge tweaks
-PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Edge' -Name 'StartupBoostEnabled' -Value '0' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Edge', 'StartupBoostEnabled', '0', [RegistryValueKind]::DWord)
 # Disallow Microsoft News.
-PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Edge' -Name 'NewTabPageContentEnabled' -Value '0' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Edge', 'NewTabPageContentEnabled', '0', [RegistryValueKind]::DWord)
 
 # Disable sponsored links on homepage.
-PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Edge' -Name 'NewTabPageHideDefaultTopSites' -Value '0' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Edge', 'NewTabPageHideDefaultTopSites', '0', [RegistryValueKind]::DWord)
 
-PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Edge' -Name 'DefaultBrowserSettingEnabled' -Value '0' -Type 'Dword'
-PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Edge' -Name 'DefaultBrowserSettingsCampaignEnabled' -Value '0' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Edge', 'DefaultBrowserSettingEnabled', '0', [RegistryValueKind]::DWord)
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Edge', 'DefaultBrowserSettingsCampaignEnabled', '0', [RegistryValueKind]::DWord)
 
 # Block recommendations and promotional notifications from Microsoft Edge
-PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Edge' -Name 'ShowRecommendationsEnabled' -Value '0' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Edge', 'ShowRecommendationsEnabled', '0', [RegistryValueKind]::DWord)
 
-PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Edge' -Name 'SpotlightExperiencesAndRecommendationsEnabled' -Value '0' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Edge', 'SpotlightExperiencesAndRecommendationsEnabled', '0', [RegistryValueKind]::DWord)
 
-PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Edge' -Name 'PromotionalTabsEnabled' -Value '0' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Edge', 'PromotionalTabsEnabled', '0', [RegistryValueKind]::DWord)
 
 # Disable various forms of telemetry.
-PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Edge' -Name 'DiagnosticData' -Value '0' -Type 'Dword'
-PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Edge' -Name 'PersonalizationReportingEnabled' -Value '0' -Type 'Dword'
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Edge', 'DiagnosticData', '0', [RegistryValueKind]::DWord)
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Edge', 'PersonalizationReportingEnabled', '0', [RegistryValueKind]::DWord)
 #endregion
-
-
-
-# If this directory was non-existent before running W11Boost, then add the "Hidden" attribute to line up with default behavior.
-(Get-Item "$env:windir\System32\GroupPolicy").Attributes = "Directory", "Hidden"
-gpupdate.exe /force

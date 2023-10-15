@@ -1,24 +1,29 @@
 #Requires -Version 5 -RunAsAdministrator
 
+# 'Import-Module example.psm1' fails if PowerShell script execution is disabled; do it manually.
+#Unblock-File -Path "..\Third-party\PolicyFileEditor\PolFileEditor.dll"
+#Add-Type -Path "..\Third-party\PolicyFileEditor\PolFileEditor.dll" -ErrorAction Stop
+#. "..\Third-party\PolicyFileEditor\Commands.ps1"
+
 function Download_File {
     Start-BitsTransfer -MaxDownloadTime 120 -RetryInterval 60 -RetryTimeout 300 -TransferPolicy Unrestricted -Source @args
 }
 
-function PEAdd_HKCU {
-    Set-PolicyFileEntry -Path "$env:windir\System32\GroupPolicy\User\registry.pol" -Key @args
-}
+# function PEAdd_HKCU {
+#     Set-PolicyFileEntry -Path "$env:windir\System32\GroupPolicy\User\registry.pol" -Key @args
+# }
 
-function PEAdd_HKLM {
-    Set-PolicyFileEntry -Path "$env:windir\System32\GroupPolicy\Machine\registry.pol" -Key @args
-}
+# function PEAdd_HKLM {
+#     Set-PolicyFileEntry -Path "$env:windir\System32\GroupPolicy\Machine\registry.pol" -Key @args
+# }
 
-function PERemove_HKCU {
-    Remove-PolicyFileEntry -Path "$env:windir\System32\GroupPolicy\User\registry.pol" -Key @args
-}
+# function PERemove_HKCU {
+#     Remove-PolicyFileEntry -Path "$env:windir\System32\GroupPolicy\User\registry.pol" -Key @args
+# }
 
-function PERemove_HKLM {
-    Remove-PolicyFileEntry -Path "$env:windir\System32\GroupPolicy\Machine\registry.pol" -Key @args
-}
+# function PERemove_HKLM {
+#     Remove-PolicyFileEntry -Path "$env:windir\System32\GroupPolicy\Machine\registry.pol" -Key @args
+# }
 
 function NewToastNotification {
     [cmdletbinding()]

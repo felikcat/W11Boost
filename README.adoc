@@ -22,6 +22,21 @@ If you like Atlas OS, this is a more modular and modern alternative.
 . Has semi-modularity. If you wish to break certain apps or drivers for more performance, you can do so on your own terms.
 - Semi-modular due to groups of changes bundled together, rather than individual ones.
 
+Like other optimizers, W11Boost has to be reapplied on every major Windows update, such as going from 21H2 to 22H2; W11Boost used to leverage Group Policy Objects (GPOs) to avoid this.
+
+[%collapsible]
+.Why is GPO now avoided?
+====
+
+. Importing other GPO files can override the prior GPOs, which was the case for applying DoD STIGs after installing W11Boost.
+. Slows down boot-times drastically.
+. The user cannot easily change GPOs, they would have to use a third-party program to remove or change them individually.
+. Error reporting is poor, making it harder to debug W11Boost's issues.
+. Overriden user preferences, such as a few settings you could use in Winaero Tweaker.
+
+====
+
+
 image:W11Boost_GUI_1.png[480,360]
 
 image:W11Boost_GUI_2.png[480,360]
@@ -146,12 +161,6 @@ image:W11Boost_GUI_2.png[480,360]
 .*Other*
 . Importing/setting wallpapers is set to 100% of JPEG's quality; less compression, therefore less "blurriness".
 
-. W11Boost's changes are tunneled through the Group Policy Editor, therefore:
-- Windows Update does not revert W11Boost's changes.
-- W11Boost's changes can be viewed from a graphical interface via `rsop.msc`. +
-image:RSOP.png[]
-- Registry changes are non-destructive, as they are easily revertible without relying on System Restore or registry backups.
-
 ====
 
 
@@ -159,14 +168,9 @@ image:RSOP.png[]
 
 . https://github.com/felikcat/W11Boost/archive/refs/heads/master.zip[Download W11Boost] then extract it.
 
+. Temporarily disable your anti-virus / anti-malware.
+
 . Open `Run.bat`, then click "Install W11Boost".
-
-
-.*`Advanced.ps1` can disable Game DVR, remove Microsoft Edge and remove various forms of automation, etc.*
-* However, configuring `Advanced.ps1` is required:
-. Open `Advanced.ps1` in a text editor or IDE of your choosing. +
-. After finished, run `Advanced.ps1` as Administrator. 
-- No help will be provided on how to do this.
 
 == Recommended apps
 NOTE: Some Windows functions are deliberately broken, such as System Restore, File History, and Remote Assistance. +
@@ -200,6 +204,12 @@ Reason: There are better alternatives.
 
 
 == Recommendations
+
+.*`Advanced.ps1` can disable Game DVR, remove Microsoft Edge and remove various forms of automation, etc.*
+* However, configuring `Advanced.ps1` is required:
+. Open `Advanced.ps1` in a text editor or IDE of your choosing. +
+. After finished, run `Advanced.ps1` as Administrator. 
+- No help will be provided on how to do this.
 
 === Using fullscreen exclusive in games.
 Lowers input delay and GPU usage; potentially higher FPS, depending on the game.

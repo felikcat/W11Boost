@@ -1,4 +1,5 @@
 #Requires -Version 5 -RunAsAdministrator
+using namespace Microsoft.Win32
 
 # 0: Assumption that thumbnail corruption is rare; run the 'Disk Cleanup' app if it happens.
 $automatic_thumbnail_clearing = 0
@@ -64,35 +65,31 @@ Pause
 if (!$automatic_thumbnail_clearing)
 {
     # Depend on the user clearing out thumbnail caches manually if they get corrupted.
-    PEAdd_HKLM 'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VolumeCaches\Thumbnail Cache' -Name 'Autorun' -Value '0' -Type 'Dword'
+    [Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VolumeCaches\Thumbnail Cache', 'Autorun', '0', [RegistryValueKind]::DWord)
 }
 
 if (!$automatic_windows_store_app_updates)
 {
-    PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\WindowsStore' -Name 'AutoDownload' -Value '2' -Type 'Dword'
+    [Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\WindowsStore', 'AutoDownload', '2', [RegistryValueKind]::DWord)
 }
 
 if (!$windows_search_indexing)
 {
     Stop-Service WSearch
-    Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\WSearch" -Name "Start" -Type DWord -Value 4
+    [Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\WSearch', 'Start', '4', [RegistryValueKind]::DWord)
 
-    PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\SearchSettings' -Name 'IsDeviceSearchHistoryEnabled' -Value '0' -Type 'Dword'
+    [Registry]::SetValue('HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\SearchSettings', 'IsDeviceSearchHistoryEnabled', '0', [RegistryValueKind]::DWord)
 
     Disable-ScheduledTask -TaskName "\Microsoft\Windows\Shell\IndexerAutomaticMaintenance"
 }
 
 if ($show_hidden_files)
 {
-    PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'DontPrettyPath' -Value '1' -Type 'Dword'
-
-    PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'Hidden' -Value '1' -Type 'Dword'
-
-    PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'HideFileExt' -Value '0' -Type 'Dword'
-
-    PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'ShowSuperHidden' -Value '1' -Type 'Dword'
-
-    PEAdd_HKCU 'Software\Microsoft\Windows\CurrentVersion\Explorer\CabinetState' -Name 'FullPath' -Value '1' -Type 'Dword'
+    [Registry]::SetValue('HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced', 'DontPrettyPath', '1', [RegistryValueKind]::DWord)
+    [Registry]::SetValue('HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced', 'Hidden', '1', [RegistryValueKind]::DWord)
+    [Registry]::SetValue('HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced', 'HideFileExt', '0', [RegistryValueKind]::DWord)
+    [Registry]::SetValue('HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced', 'ShowSuperHidden', '1', [RegistryValueKind]::DWord)
+    [Registry]::SetValue('HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\CabinetState', 'FullPath', '1', [RegistryValueKind]::DWord)
 }
 
 if ($nuke_microsoft_edge)
@@ -113,24 +110,24 @@ if (!$ethernet_power_saving)
 if ($avoid_key_annoyances)
 {
     # Filter keys.
-    PEAdd_HKCU 'Control Panel\Accessibility\Keyboard Response' -Name 'Flags' -Value '98' -Type 'String'
+    [Registry]::SetValue('HKEY_CURRENT_USER\Control Panel\Accessibility\Keyboard Response', 'Flags', '98', [RegistryValueKind]::String)
 
-    PEAdd_HKCU 'Control Panel\Accessibility\StickyKeys' -Name 'Flags' -Value '482' -Type 'String'
+    [Registry]::SetValue('HKEY_CURRENT_USER\Control Panel\Accessibility\StickyKeys', 'Flags', '482', [RegistryValueKind]::String)
 
-    PEAdd_HKCU 'Control Panel\Accessibility\ToggleKeys' -Name 'Flags' -Value '38' -Type 'String'
+    [Registry]::SetValue('HKEY_CURRENT_USER\Control Panel\Accessibility\ToggleKeys', 'Flags', '38', [RegistryValueKind]::String)
 }
 
 if (!$geolocation)
 {
-    PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors' -Name 'DisableLocation' -Value '1' -Type 'Dword'
+    [Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors', 'DisableLocation', '1', [RegistryValueKind]::DWord)
 
-    PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors' -Name 'DisableLocationScripting' -Value '1' -Type 'Dword'
+    [Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors', 'DisableLocationScripting', '1', [RegistryValueKind]::DWord)
 
-    PEAdd_HKLM 'SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors' -Name 'DisableWindowsLocationProvider' -Value '1' -Type 'Dword'
+    [Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors', 'DisableWindowsLocationProvider', '1', [RegistryValueKind]::DWord)
 
-    PEAdd_HKLM 'SYSTEM\CurrentControlSet\Services\lfsvc' -Name 'Start' -Value '4' -Type 'Dword'
+    [Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\lfsvc', 'Start', '4', [RegistryValueKind]::DWord)
 
-    PEAdd_HKLM 'SOFTWARE\Microsoft\Settings\FindMyDevice' -Name 'LocationSyncEnabled' -Value '0' -Type 'Dword'
+    [Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Settings\FindMyDevice', 'LocationSyncEnabled', '0', [RegistryValueKind]::DWord)
 
     Stop-Service lfsvc
     Disable-ScheduledTask -TaskName "\Microsoft\Windows\Location\Notifications"
@@ -139,7 +136,7 @@ if (!$geolocation)
 
 if ($flat_mouse_sensitivity)
 {
-    Set-ItemProperty -Path "HKCU:\Control Panel\Mouse" -Name "MouseSpeed" -Type String -Value 0
-    Set-ItemProperty -Path "HKCU:\Control Panel\Mouse" -Name "MouseThreshold1" -Type String -Value 0
-    Set-ItemProperty -Path "HKCU:\Control Panel\Mouse" -Name "MouseThreshold2" -Type String -Value 0
+    [Registry]::SetValue('HKEY_CURRENT_USER\Control Panel\Mouse', "MouseSpeed" , '0', [RegistryValueKind]::String)
+    [Registry]::SetValue('HKEY_CURRENT_USER\Control Panel\Mouse', "MouseThreshold1", '0', [RegistryValueKind]::String)
+    [Registry]::SetValue('HKEY_CURRENT_USER\Control Panel\Mouse', "MouseThreshold2", '0', [RegistryValueKind]::String)
 }
