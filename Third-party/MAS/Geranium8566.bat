@@ -1363,8 +1363,8 @@ if not exist "%tokenstore%\" set permerror=1
 
 for %%# in (
 "%tokenstore%"
-"HKEY_LOCAL_MACHINE\SYSTEM\WPA"
-"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\SoftwareProtectionPlatform"
+"HKLM:\SYSTEM\WPA"
+"HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\SoftwareProtectionPlatform"
 ) do if not defined permerror (
 %psc% "$acl = Get-Acl '%%#'; if ($acl.Access.Where{ $_.IdentityReference -eq 'NT SERVICE\sppsvc' -and $_.AccessControlType -eq 'Deny' -or $acl.Access.IdentityReference -notcontains 'NT SERVICE\sppsvc'}) {Exit 2}" %nul%
 if !errorlevel!==2 set permerror=1
@@ -7698,7 +7698,7 @@ function UninstallLicenses($DllPath) {
     }
 }
 
-$OSPP = (Get-ItemProperty -Path "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\OfficeSoftwareProtectionPlatform" -ErrorAction SilentlyContinue).Path
+$OSPP = (Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\OfficeSoftwareProtectionPlatform" -ErrorAction SilentlyContinue).Path
 if ($OSPP) {
     Write-Output "Found Office Software Protection installed, cleaning"
     UninstallLicenses($OSPP + "osppc.dll")
@@ -8287,7 +8287,7 @@ exit /b
 :vNextDiag:
 function PrintModePerPridFromRegistry
 {
-	$vNextRegkey = "HKEY_CURRENT_USER\SOFTWARE\Microsoft\Office\16.0\Common\Licensing\LicensingNext"
+	$vNextRegkey = "HKCU:\SOFTWARE\Microsoft\Office\16.0\Common\Licensing\LicensingNext"
 	$vNextPrids = Get-Item -Path $vNextRegkey -ErrorAction Ignore | Select-Object -ExpandProperty 'property' | Where-Object -FilterScript {$_.ToLower() -like "*retail" -or $_.ToLower() -like "*volume"}
 	If ($vNextPrids -Eq $null)
 	{
@@ -8308,11 +8308,11 @@ function PrintModePerPridFromRegistry
 }
 function PrintSharedComputerLicensing
 {
-	$scaRegKey = "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Office\ClickToRun\Configuration"
+	$scaRegKey = "HKLM:\SOFTWARE\Microsoft\Office\ClickToRun\Configuration"
 	$scaValue = Get-ItemProperty -Path $scaRegKey -ErrorAction Ignore | Select-Object -ExpandProperty "SharedComputerLicensing" -ErrorAction Ignore
-	$scaRegKey2 = "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Office\16.0\Common\Licensing"
+	$scaRegKey2 = "HKLM:\SOFTWARE\Microsoft\Office\16.0\Common\Licensing"
 	$scaValue2 = Get-ItemProperty -Path $scaRegKey2 -ErrorAction Ignore | Select-Object -ExpandProperty "SharedComputerLicensing" -ErrorAction Ignore
-	$scaPolicyKey = "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Office\16.0\Common\Licensing"
+	$scaPolicyKey = "HKLM:\SOFTWARE\Policies\Microsoft\Office\16.0\Common\Licensing"
 	$scaPolicyValue = Get-ItemProperty -Path $scaPolicyKey -ErrorAction Ignore | Select-Object -ExpandProperty "SharedComputerLicensing" -ErrorAction Ignore
 	If ($scaValue -Eq $null -And $scaValue2 -Eq $null -And $scaPolicyValue -Eq $null)
 	{
@@ -8940,8 +8940,8 @@ set "d=!d! Set-Acl -Path %tokenstore% -AclObject $AclObject;"
 %psc% "!d!" %nul%
 
 for %%# in (
-"HKEY_LOCAL_MACHINE\SYSTEM\WPA_QueryValues, EnumerateSubKeys, WriteKey"
-"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\SoftwareProtectionPlatform_SetValue"
+"HKLM:\SYSTEM\WPA_QueryValues, EnumerateSubKeys, WriteKey"
+"HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\SoftwareProtectionPlatform_SetValue"
 ) do for /f "tokens=1,2 delims=_" %%A in (%%#) do (
 set "d=$acl = Get-Acl '%%A';"
 set "d=!d! $rule = New-Object System.Security.AccessControl.RegistryAccessRule ('NT Service\sppsvc', '%%B', 'ContainerInherit, ObjectInherit','None','Allow');"
@@ -9438,8 +9438,8 @@ if not exist "%tokenstore%\" set permerror=1
 
 for %%# in (
 "%tokenstore%"
-"HKEY_LOCAL_MACHINE\SYSTEM\WPA"
-"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\SoftwareProtectionPlatform"
+"HKLM:\SYSTEM\WPA"
+"HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\SoftwareProtectionPlatform"
 ) do if not defined permerror (
 %psc% "$acl = Get-Acl '%%#'; if ($acl.Access.Where{ $_.IdentityReference -eq 'NT SERVICE\sppsvc' -and $_.AccessControlType -eq 'Deny' -or $acl.Access.IdentityReference -notcontains 'NT SERVICE\sppsvc'}) {Exit 2}" %nul%
 if !errorlevel!==2 set permerror=1
@@ -10188,7 +10188,7 @@ if($SetEdition -eq '' -and ($false -eq $getTargetsParam)) {
 $removalCandidates = @();
 $installCandidates = @{};
 
-$packages = Get-ChildItem -Path 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Component Based Servicing\Packages' | select Name | where { $_.name -match '^.*\\Microsoft-Windows-.*Edition~' }
+$packages = Get-ChildItem -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Component Based Servicing\Packages' | select Name | where { $_.name -match '^.*\\Microsoft-Windows-.*Edition~' }
 foreach($package in $packages) {
     $state = (Get-ItemProperty -Path "Registry::$($package.Name)").CurrentState
     $packageName = ($package.Name -split '\\')[-1]
