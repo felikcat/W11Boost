@@ -13,7 +13,7 @@ endif::[]
 
 If you like Atlas OS, this is a more modular and modern alternative. 
 
-.By default, W11Boost's most important goals compared to red to alternatives are:
+.By default, W11Boost's most important goals compared to alternatives are:
 . Works on any Windows 10 or 11 installation. No need to reinstall.
 . Clear and concise code, with full code transparency that's easy to read by newbie PowerShell programmers.
 . Apps are selectively broken, but only if there are better alternatives.
