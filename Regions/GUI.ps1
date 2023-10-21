@@ -1,4 +1,5 @@
 #Requires -Version 5
+#region Initialize
 using assembly System.Windows.Forms
 using namespace System.Windows.Forms
 using namespace System.Drawing
@@ -8,6 +9,7 @@ Add-Type -AssemblyName System.Drawing
 Push-Location $PSScriptRoot
 . ".\IMPORTS.ps1"
 New-Item -ItemType Directory "${HOME}\Desktop\W11Boost logs"
+#endregion
 
 [Application]::EnableVisualStyles()
 $code = @"

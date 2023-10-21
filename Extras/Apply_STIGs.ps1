@@ -1,13 +1,7 @@
 #Requires -Version 5 -RunAsAdministrator
 using namespace Microsoft.Win32
-
-#region Initialize
 Push-Location $PSScriptRoot
-
-Unblock-File -Path "..\Third-party\PolicyFileEditor\PolFileEditor.dll"
-Add-Type -Path "..\Third-party\PolicyFileEditor\PolFileEditor.dll" -ErrorAction Stop
-. "..\Third-party\PolicyFileEditor\Commands.ps1"
-#endregion
+. ".\IMPORTS.ps1"
 
 #region Preparation
 Enable-WindowsOptionalFeature -NoRestart -Online -FeatureName VirtualMachinePlatform

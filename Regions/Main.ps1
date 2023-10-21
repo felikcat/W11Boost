@@ -3,7 +3,6 @@ using namespace Microsoft.Win32
 
 #region Initialize
 Push-Location $PSScriptRoot
-
 . ".\IMPORTS.ps1"
 
 # Backup registry hives only once.

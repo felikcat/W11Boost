@@ -1,5 +1,7 @@
 #Requires -Version 5 -RunAsAdministrator
 using namespace Microsoft.Win32
+Push-Location $PSScriptRoot
+. ".\IMPORTS.ps1"
 
 New-PSDrive -Name "HKCR" -PSProvider "Registry" -Root "HKEY_CLASSES_ROOT" 
 
@@ -227,8 +229,9 @@ Disable-ScheduledTask -TaskName "\Microsoft\Windows\RemovalTools\MRT_ERROR_HB"
 [Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization', 'DODownloadMode', '0', [RegistryValueKind]::DWord)
 #endregion
 
-#region Deny upgrade from Windows 10 22H2 -> Windows 11.
-if ($WIN_BUILD -eq 19045) {
+#region Deny upgrade from Windows 10 -> Windows 11.
+if ($WIN_BUILD -ge 19041 -and ($WIN_BUILD -lt 21664))
+{
     [Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate', 'ProductVersion', 'Windows 10', [RegistryValueKind]::String)
 
     [Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate', 'TargetReleaseVersion', '1', [RegistryValueKind]::DWord)
