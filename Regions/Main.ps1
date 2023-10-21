@@ -208,14 +208,13 @@ $APPS.ForEach({
     })
 
 # Icaros = thumbnail support for more file formats, and also loads faster than Windows' default thumbnailer
-$INSTALL = @("Xanashi.Icaros")
-$INSTALL.ForEach({
-        $localArgs = "--NoLogo powershell.exe -Command winget.exe install $_ --exact --silent --accept-package-agreements --accept-source-agreements --source winget"
-        Start-Process -Wait ".\..\Third-party\NanaRun\MinSudo.exe" -ArgumentList $localArgs
-    })
+$localArgs = "--NoLogo powershell.exe -Command winget.exe install Xanashi.Icaros --exact --silent --accept-package-agreements --accept-source-agreements --source winget"
+Start-Process -Wait ".\..\Third-party\NanaRun\MinSudo.exe" -ArgumentList $localArgs
 
-# Restore the classic context menu.
-New-Item -Path "HKEY_CURRENT_USER\SOFTWARE\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" -Value "" -Type String -Force
+# Restore the classic context menu on Windows 11.
+if ($WIN_BUILD -ge 21664) {
+    [Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32', '', '', [RegistryValueKind]::String)
+}
 
 $NAME = @("InternetCustom", "DatacenterCustom", "Compat", "Datacenter", "Internet")
 $NAME.ForEach({

@@ -1,5 +1,7 @@
 #Requires -Version 5 -RunAsAdministrator
 
+$WIN_BUILD = Get-ItemPropertyValue 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' -Name CurrentBuildNumber
+
 function Download_File {
     Start-BitsTransfer -MaxDownloadTime 120 -RetryInterval 60 -RetryTimeout 300 -TransferPolicy Unrestricted -Source @args
 }

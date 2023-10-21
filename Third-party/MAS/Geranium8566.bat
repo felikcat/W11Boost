@@ -1,3 +1,4 @@
+@set masver=2.4
 @setlocal DisableDelayedExpansion
 @echo off
 
@@ -10,7 +11,7 @@
 ::
 ::   This script is a part of 'Microsoft_Activation_Scripts' (MAS) project.
 ::
-::   Homepage: mass grave[.]dev
+::   Homepage: https://massgrave[.]dev
 ::      Email: windowsaddict@protonmail.com
 ::
 ::============================================================================
@@ -91,7 +92,7 @@ popd
 
 cls
 color 07
-title  Microsoft_Activation_Scripts
+title  Microsoft_Activation_Scripts %masver%
 
 set _args=
 set _elev=
@@ -109,14 +110,18 @@ if defined _args echo "%_args%" | find /i "/" >nul && set _MASunattended=1
 
 ::========================================================================================================================================
 
-set winbuild=1
+set "nul1=1>nul"
+set "nul2=2>nul"
+set "nul6=2^>nul"
 set "nul=>nul 2>&1"
+
+set winbuild=1
 set psc=powershell.exe
 for /f "tokens=6 delims=[]. " %%G in ('ver') do set winbuild=%%G
 
 set _NCS=1
 if %winbuild% LSS 10586 set _NCS=0
-if %winbuild% GEQ 10586 reg query "HKCU\Console" /v ForceV2 2>nul | find /i "0x0" 1>nul && (set _NCS=0)
+if %winbuild% GEQ 10586 reg query "HKCU\Console" /v ForceV2 %nul2% | find /i "0x0" %nul1% && (set _NCS=0)
 
 call :_colorprep
 
@@ -151,13 +156,13 @@ set "_batp=%_batf:'=''%"
 
 set _PSarg="""%~f0""" -el %_args%
 
-set "_ttemp=%temp%"
+set "_ttemp=%userprofile%\AppData\Local\Temp"
 
 setlocal EnableDelayedExpansion
 
 ::========================================================================================================================================
 
-echo "!_batf!" | find /i "!_ttemp!" 1>nul && (
+echo "!_batf!" | find /i "!_ttemp!" %nul1% && (
 if /i not "!_work!"=="!_ttemp!" (
 %nceline%
 echo Script is launched from the temp folder,
@@ -172,15 +177,15 @@ goto MASend
 
 ::  Elevate script as admin and pass arguments and preventing loop
 
->nul fltmc || (
+%nul1% fltmc || (
 if not defined _elev %psc% "start cmd.exe -arg '/c \"!_PSarg:'=''!\"' -verb runas" && exit /b
 %nceline%
-echo This script require admin privileges.
+echo This script requires admin privileges.
 echo To do so, right click on this script and select 'Run as administrator'.
 goto MASend
 )
 
-if not exist "%SystemRoot%\Temp\" mkdir "%SystemRoot%\Temp" 1>nul 2>nul
+if not exist "%SystemRoot%\Temp\" mkdir "%SystemRoot%\Temp" %nul%
 
 ::========================================================================================================================================
 
@@ -196,6 +201,35 @@ start cmd.exe /c ""!_batf!" %_args% -qedit"
 rem quickedit reset code is added at the starting of the script instead of here because it takes time to reflect in some cases
 exit /b
 )
+
+::========================================================================================================================================
+
+::  Check for updates
+
+set -=
+set old=
+
+for /f "delims=[] tokens=2" %%# in ('ping -4 -n 1 updatecheck.mass%-%grave.dev') do (
+if not [%%#]==[] (echo "%%#" | find "127.69" %nul1% && (echo "%%#" | find "127.69.%masver%" %nul1% || set old=1))
+)
+
+if defined old (
+echo ________________________________________________
+%eline%
+echo You are running outdated version MAS %masver%
+echo ________________________________________________
+echo:
+if not defined _MASunattended (
+echo [1] Download Latest MAS
+echo [0] Continue Anyway
+echo:
+call :_color %_Green% "Enter a menu option in the Keyboard [1,0] :"
+choice /C:10 /N
+if !errorlevel!==2 rem
+if !errorlevel!==1 (start ht%-%tps://github.com/mass%-%gravel/Microsoft-Acti%-%vation-Scripts & start %mas% & exit /b)
+)
+)
+cls
 
 ::========================================================================================================================================
 
@@ -229,7 +263,7 @@ setlocal EnableDelayedExpansion
 
 cls
 color 07
-title  Microsoft_Activation_Scripts 2.2
+title  Microsoft_Activation_Scripts %masver%
 mode 76, 30
 
 echo:
@@ -258,7 +292,7 @@ choice /C:123456780 /N
 set _erl=%errorlevel%
 
 if %_erl%==9 exit /b
-if %_erl%==8 start https://%mas%/troubleshoot.html & goto :MainMenu
+if %_erl%==8 start %mas%troubleshoot.html & goto :MainMenu
 if %_erl%==7 goto:Extras
 if %_erl%==6 setlocal & call :troubleshoot      & cls & endlocal & goto :MainMenu
 if %_erl%==5 setlocal & call :_Check_Status_wmi & cls & endlocal & goto :MainMenu
@@ -431,11 +465,13 @@ set _NoEditionChange=0
 
 ::  If value is changed in above lines or parameter is used then script will run in unattended mode
 
+
+
 ::========================================================================================================================================
 
 cls
 color 07
-title  HWID Activation
+title  HWID Activation %masver%
 
 set _args=
 set _elev=
@@ -526,7 +562,7 @@ set "_batp=%_batf:'=''%"
 
 set _PSarg="""%~f0""" -el %_args%
 
-set "_ttemp=%temp%"
+set "_ttemp=%userprofile%\AppData\Local\Temp"
 
 setlocal EnableDelayedExpansion
 
@@ -534,7 +570,7 @@ setlocal EnableDelayedExpansion
 
 cls
 mode 108, 34
-title  HWID Activation
+title  HWID Activation %masver%
 
 ::  Start Windows update service at the beginning and in later checks as well, because in some normal conditions one kick is not enough
 
@@ -1183,7 +1219,7 @@ set showfix=1
 if defined safeboot_option (
 set error=1
 set showfix=1
-call :dk_color2 %Red% "Checking Boot Mode                      " %Blue% "[System is running in safe mode. Run in normal mode.]"
+call :dk_color2 %Red% "Checking Boot Mode                      " %Blue% "[Safe mode found. Run in normal mode.]"
 )
 
 
@@ -1197,7 +1233,7 @@ call :dk_color2 %Red% "Checking Audit Mode                     " %Blue% "[IMAGE_
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\WinPE" /v InstRoot %nul% && (
 set error=1
 set showfix=1
-call :dk_color2 %Red% "Checking WinPE                          " %Blue% "[System is running in WinPE mode. Run in normal mode.]"
+call :dk_color2 %Red% "Checking WinPE                          " %Blue% "[WinPE mode found. Run in normal mode.]"
 )
 
 
@@ -1539,11 +1575,13 @@ set _rem=0
 
 ::  If value is changed in above lines or parameter is used then script will run in unattended mode
 
+
+
 ::========================================================================================================================================
 
 cls
 color 07
-title  Ohook Activation
+title  Ohook Activation %masver%
 
 set _args=
 set _elev=
@@ -1626,7 +1664,7 @@ set "_batp=%_batf:'=''%"
 
 set _PSarg="""%~f0""" -el %_args%
 
-set "_ttemp=%temp%"
+set "_ttemp=%userprofile%\AppData\Local\Temp"
 
 setlocal EnableDelayedExpansion
 
@@ -1639,7 +1677,7 @@ if %_rem%==1 goto :oh_uninstall
 if %_unattended%==0 (
 cls
 mode 76, 25
-title  Ohook Activation
+title  Ohook Activation %masver%
 
 echo:
 echo:
@@ -1675,7 +1713,7 @@ cls
 mode 128, 32
 %psc% "&{$W=$Host.UI.RawUI.WindowSize;$B=$Host.UI.RawUI.BufferSize;$W.Height=32;$B.Height=300;$Host.UI.RawUI.WindowSize=$W;$Host.UI.RawUI.BufferSize=$B;}"
 
-title  Ohook Activation
+title  Ohook Activation %masver%
 
 echo:
 echo Initializing...
@@ -1886,33 +1924,45 @@ call :oh_hookinstall
 ::========================================================================================================================================
 
 ::  Find remnants of Office vNext license block and remove it because it stops non vNext licenses from appearing
+::  https://learn.microsoft.com/en-us/office/troubleshoot/activation/reset-office-365-proplus-activation-state
 
+set _sid=
 set sub_next=
-set kNext=HKCU\SOFTWARE\Microsoft\Office\16.0\Common\Licensing
+for /f "tokens=* delims=" %%a in ('%psc% "$userSIDs = Get-WmiObject -Class Win32_UserAccount | ForEach-Object {write-host $_.SID}" %nul6%') do (if defined _sid (set "_sid=!_sid! HKU\%%a") else (set "_sid=HKU\%%a"))
 
-reg query %kNext%\LicensingNext /v MigrationToV5Done %nul2% | find /i "0x1" %nul% && (
-reg query %kNext%\LicensingNext %nul2% | findstr /i "volume retail" %nul2% | findstr /i "0x2 0x3" %nul% && (
+if not defined _sid (
+call :dk_color %Red% "Checking User Accounts SID              [Not Found]"
+)
+
+for %%# in (!_sid! HKCU) do if not defined sub_next (
+reg query %%#\Software\Microsoft\Office\16.0\Common\Licensing\LicensingNext /v MigrationToV5Done %nul2% | find /i "0x1" %nul% && (
+reg query %%#\Software\Microsoft\Office\16.0\Common\Licensing\LicensingNext %nul2% | findstr /i "volume retail" %nul2% | findstr /i "0x2 0x3" %nul% && (
 set sub_next=1
-reg delete %kNext% /f %nul%
+)
 )
 )
 
-if defined sub_next (
-reg query %kNext%\LicensingNext %nul% && (
-call :dk_color %Red% "Removing Office vNext Block             [Failed]"
-) || (
-echo Removing Office vNext Block             [Successful]
+if defined sub_next for %%# in (!_sid! HKCU) do (
+reg delete %%#\Software\Microsoft\Office\16.0\Common\Licensing /f %nul%
+reg delete %%#\Software\Microsoft\Office\16.0\Common\Identity /f %nul%
+reg delete %%#\Software\Microsoft\Office\16.0\Registration /f %nul%
 )
-)
+
+if defined sub_next echo Removing Office vNext Block             [Successful]
 
 ::========================================================================================================================================
 
-::  Subscription licenses attempt to validate the license and may show a banner "There was a problem checking this device's license status.", other products don't do that.
-::  A simple registry entry can skip this check
+::  Subscription products attempt to validate the license and may show a banner "There was a problem checking this device's license status."
+::  Resiliency registry entry can skip this check
 
-if defined _sublic (
-echo Adding a Reg To Skip License Check      [Successful]
-reg add HKCU\Software\Microsoft\Office\16.0\Common\Licensing\Resiliency /v "TimeOfLastHeartbeatFailure" /t REG_SZ /d "2033-08-18T22:18:45Z" /f %nul%
+if defined o16c2r (
+for %%# in (!_sid! HKCU) do (reg delete %%#\Software\Microsoft\Office\16.0\Common\Licensing\Resiliency /f %nul%)
+for %%# in (!_sid! HKCU) do (
+reg query %%# %nul% && (
+reg add %%#\Software\Microsoft\Office\16.0\Common\Licensing\Resiliency /v "TimeOfLastHeartbeatFailure" /t REG_SZ /d "2040-01-01T00:00:00Z" /f %nul%
+)
+)
+echo Adding Reg Keys To Skip License Check   [Successful]
 )
 
 ::========================================================================================================================================
@@ -1997,7 +2047,7 @@ goto :dk_done
 
 cls
 mode 99, 28
-title  Uninstall Ohook Activation
+title  Uninstall Ohook Activation %masver%
 
 set _present=
 set _unerror=
@@ -2034,15 +2084,21 @@ if exist "%%~A\Microsoft %%~G\root\vfs\%%#\sppc*dll" (set _present=1& del /s /f 
 )
 )
 
-reg query HKCU\Software\Microsoft\Office\16.0\Common\Licensing\Resiliency /s %nul2% | find /i "2033" %nul% && (
+reg query HKCU\Software\Microsoft\Office\16.0\Common\Licensing\Resiliency %nul% && (
 echo:
-echo Deleting - HKCU\Software\Microsoft\Office\16.0\Common\Licensing\Resiliency
+echo Deleting - Registry keys to skip license check
 reg delete HKCU\Software\Microsoft\Office\16.0\Common\Licensing\Resiliency /f
+
+for /f "tokens=* delims=" %%a in ('%psc% "$userSIDs = Get-WmiObject -Class Win32_UserAccount | ForEach-Object {write-host $_.SID}" %nul6%') do (if defined _sid (set "_sid=!_sid! %%a") else (set "_sid=%%a"))
+for %%# in (!_sid!) do (reg query HKU\%%#\Software\Microsoft\Office\16.0\Common\Licensing\Resiliency %nul% && (
+reg delete HKU\%%#\Software\Microsoft\Office\16.0\Common\Licensing\Resiliency /f
+)
+)
 )
 
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\SoftwareProtectionPlatform\0ff1ce15-a989-479d-af46-f275c6370663" %nul% && (
 echo:
-echo Deleting - Registry key to prevent non-genuine banner
+echo Deleting - Registry keys to prevent non-genuine banner
 reg delete "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\SoftwareProtectionPlatform\0ff1ce15-a989-479d-af46-f275c6370663" /f
 )
 
@@ -2179,6 +2235,9 @@ exit /b
 set ierror=
 set hasherror=
 
+if %_hook%==sppc32.dll set offset=2564
+if %_hook%==sppc64.dll set offset=3076
+
 del /s /q "%_hookPath%\sppcs.dll" %nul%
 del /s /q "%_hookPath%\sppc.dll" %nul%
 
@@ -2188,7 +2247,7 @@ if exist "%_hookPath%\sppc.dll" set ierror=1
 mklink "%_hookPath%\sppcs.dll" "%_sppcPath%" %nul%
 if not %errorlevel%==0 set ierror=1
 
-if not exist "%_hookPath%\sppc.dll" call :oh_extractdll "%_hookPath%\sppc.dll"
+if not exist "%_hookPath%\sppc.dll" call :oh_extractdll "%_hookPath%\sppc.dll" "%offset%"
 if not exist "%_hookPath%\sppc.dll" set ierror=1
 
 echo:
@@ -2200,7 +2259,9 @@ set error=1
 call :dk_color %Red% "Symlinking Systems sppc.dll             [Failed]"
 call :dk_color %Red% "Extracting Custom %_hook%            [Failed]"
 echo ["%_hookPath%\sppc.dll"]
-call :dk_color %Blue% "Close Office apps if they are running and try again."
+echo:
+call :dk_color %Blue% "Close ALL Office apps including Outlook and try again."
+call :dk_color %Blue% "If its still not resolved then restart system and try again."
 )
 
 if not defined ierror (
@@ -2519,7 +2580,7 @@ exit /b
 :oh_extractdll
 
 set b=
-%psc% "$f=[io.file]::ReadAllText('!_batp!') -split ':%_hook%\:.*';$bytes = [Con%b%vert]::FromBas%b%e64String($f[1]); $PePath='%1'; $m=[io.file]::ReadAllText('!_batp!') -split ':hexedit\:.*';iex ($m[1]);" %nul2% | find /i "Error found" %nul1% && set hasherror=1
+%psc% "$f=[io.file]::ReadAllText('!_batp!') -split ':%_hook%\:.*';$bytes = [Con%b%vert]::FromBas%b%e64String($f[1]); $PePath='%1'; $offset='%2'; $m=[io.file]::ReadAllText('!_batp!') -split ':hexedit\:.*';iex ($m[1]);" %nul2% | find /i "Error found" %nul1% && set hasherror=1
 exit /b
 
 :hexedit:
@@ -2541,7 +2602,7 @@ $Imagehlp = $TypeBuilder.CreateType()
 
 # Offset information
 $timestampOffset = 136
-$exportTimestampOffset = 3076
+$exportTimestampOffset = $offset
 $checkSumOffset = 216
 
 # Calculate timestamp
@@ -2597,10 +2658,10 @@ $MemoryStream.Close()
 ::  This below blocks of text is encoded in base64 format
 ::  The blocks in labels "sppc64.dll" and "sppc32.dll" contains below files
 ::
-::  C6DF24DEEF2E83813DEE9C81DDD9793A3D60C117A4E8E231B82E32B3192927E7 *sppc64.dll
-::  E6AC83560C19EC7EB868C50EA97EA0ED5632A397A9F43C17E24E6DE4A694D118 *sppc32.dll
+::  e6ac83560c19ec7eb868c50ea97ea0ed5632a397a9f43c17e24e6de4a694d118 *sppc32.dll
+::  c6df24deef2e83813dee9c81ddd9793a3d60c117a4e8e231b82e32b3192927e7 *sppc64.dll
 ::
-::  The files are encoded in base64 to make MAS AIO version. Alternatively, you can use MAS separate files version
+::  The files are encoded in base64 to make MAS AIO version.
 ::
 ::  mass grave[.]dev/ohook
 ::  Here you can find the files source code and info on how to rebuild the identical sppc.dll files
@@ -2761,11 +2822,13 @@ set _NoEditionChange=0
 
 ::  If value is changed in above lines or parameter is used then script will run in unattended mode
 
+
+
 ::========================================================================================================================================
 
 cls
 color 07
-title  KMS38 Activation
+title  KMS38 Activation %masver%
 
 set _args=
 set _elev=
@@ -2852,7 +2915,7 @@ set "_batp=%_batf:'=''%"
 
 set _PSarg="""%~f0""" -el %_args%
 
-set "_ttemp=%temp%"
+set "_ttemp=%userprofile%\AppData\Local\Temp"
 
 setlocal EnableDelayedExpansion
 
@@ -2865,7 +2928,7 @@ if %_rem%==1 goto :k_uninstall
 if %_unattended%==0 (
 cls
 mode 76, 25
-title  KMS38 Activation
+title  KMS38 Activation %masver%
 
 echo:
 echo:
@@ -2896,7 +2959,7 @@ goto :k_menu
 
 cls
 mode 108, 34
-title  KMS38 Activation
+title  KMS38 Activation %masver%
 
 echo:
 echo Initializing...
@@ -3373,7 +3436,7 @@ goto :dk_done
 
 cls
 mode 99, 28
-title  Remove KMS38 Protection
+title  Remove KMS38 Protection %masver%
 
 %nul% reg delete "HKLM\%specific_kms%" /f
 %nul% reg delete "HKU\S-1-5-20\%specific_kms%" /f
@@ -3613,7 +3676,7 @@ exit /b
 
 cls
 color 07
-title  Online KMS Activation
+title  Online KMS Activation %masver%
 
 ::  You are not supposed to edit anything below this.
 
@@ -3685,7 +3748,7 @@ set "_batp=%_batf:'=''%"
 
 set _PSarg="""%~f0""" -el %_args%
 
-set "_ttemp=%temp%"
+set "_ttemp=%userprofile%\AppData\Local\Temp"
 set "_Local=%LocalAppData%"
 
 setlocal EnableDelayedExpansion
@@ -3739,7 +3802,7 @@ if defined _unattended if not defined _unattendedact goto Done
 
 ::========================================================================================================================================
 
-set "_title=Online KMS Activation"
+set "_title=Online KMS Activation %masver%"
 set _gui=
 
 :_KMS_Menu
@@ -3948,7 +4011,7 @@ mode con cols=98 lines=31
 %psc% "&%_buf%"
 title  %_title%
 ) else (
-title  Online KMS Activation
+title  Online KMS Activation %masver%
 )
 
 if defined _gui if %_Debug%==1 mode con cols=98 lines=30
@@ -6742,7 +6805,7 @@ goto :eof
 
 cls
 mode con: cols=91 lines=30
-title Online KMS Complete Uninstall
+title Online KMS Complete Uninstall %masver%
 
 set "key=HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\taskcache\tasks"
 
@@ -6853,7 +6916,7 @@ exit /b
 
 cls
 mode con cols=91 lines=30
-title  Install Activation Auto-Renewal
+title  Install Activation Auto-Renewal %masver%
 
 set error_=
 set "_dest=%ProgramFiles%\Activation-Renewal"
@@ -6882,7 +6945,7 @@ if exist "%_temp%\.*" rmdir /s /q "%_temp%\" %nul%
 
 call :createInfo.txt
 %psc% "$f=[io.file]::ReadAllText('!_batp!') -split \":_extracttask\:.*`r`n\"; [io.file]::WriteAllText('%_dest%\Activation_task.cmd', '@REM Dummy ' + '%random%' + [Environment]::NewLine + $f[1].Trim(), [System.Text.Encoding]::ASCII);"
-title  Install Activation Auto-Renewal
+title  Install Activation Auto-Renewal %masver%
 
 ::========================================================================================================================================
 
@@ -8473,7 +8536,7 @@ PrintLicensesInformation -Mode "Device"
 
 cls
 color 07
-title  Troubleshoot
+title  Troubleshoot %masver%
 
 set _args=
 set _elev=
@@ -8518,7 +8581,7 @@ set "_batp=%_batf:'=''%"
 
 set _PSarg="""%~f0""" -el %_args%
 
-set "_ttemp=%temp%"
+set "_ttemp=%userprofile%\AppData\Local\Temp"
 
 ::  Check desktop location
 
@@ -8540,7 +8603,7 @@ setlocal EnableDelayedExpansion
 
 cls
 color 07
-title  Troubleshoot
+title  Troubleshoot %masver%
 mode con cols=77 lines=30
 
 echo:
@@ -8701,7 +8764,7 @@ goto :at_back
 :retokens
 
 cls
-mode con cols=115 lines=32
+mode con cols=125 lines=32
 %psc% "&{$W=$Host.UI.RawUI.WindowSize;$B=$Host.UI.RawUI.BufferSize;$W.Height=31;$B.Height=200;$Host.UI.RawUI.WindowSize=$W;$Host.UI.RawUI.BufferSize=$B;}"
 title  Fix Licensing ^(ClipSVC ^+ Office vNext ^+ SPP ^+ OSPP^)
 
@@ -8714,6 +8777,8 @@ echo       - It helps in troubleshooting activation issues.
 echo:
 echo       - This option will,
 echo            - Deactivate Windows and Office, you may need to reactivate
+echo              If Windows is activated with motherboard / OEM / Digital license then don't worry
+echo:
 echo            - Clear ClipSVC, Office vNext, SPP and OSPP licenses
 echo            - Fix SPP permissions of tokens folder and registries
 echo            - Trigger the repair option for Office.
@@ -8834,7 +8899,8 @@ for %%# in (wlidsvc LicenseManager) do (net stop %%# /y %nul% & net start %%# /y
 
 ::========================================================================================================================================
 
-::  Clear Office vNext License
+::  Find remnants of Office vNext license block and remove it because it stops non vNext licenses from appearing
+::  https://learn.microsoft.com/en-us/office/troubleshoot/activation/reset-office-365-proplus-activation-state
 
 :cleanvnext
 
@@ -8873,21 +8939,28 @@ echo Deleted Folder - !_Local!\Microsoft\Office\Licenses\
 echo Not Found - !_Local!\Microsoft\Office\Licenses\
 )
 
+
 echo:
-for %%# in (
-HKCU\Software\Microsoft\Office\16.0\Common\Licensing
-HKCU\Software\Microsoft\Office\16.0\Registration
+for /f "tokens=* delims=" %%a in ('%psc% "$userSIDs = Get-WmiObject -Class Win32_UserAccount | ForEach-Object {write-host $_.SID}" %nul6%') do (if defined _sid (set "_sid=!_sid! HKU\%%a") else (set "_sid=HKU\%%a"))
+
+set regfound=
+for %%# in (HKCU !_sid!) do (
+for %%A in (
+%%#\Software\Microsoft\Office\16.0\Common\Licensing
+%%#\Software\Microsoft\Office\16.0\Common\Identity
+%%#\Software\Microsoft\Office\16.0\Registration
 ) do (
-reg query %%# %nul% && (
-reg delete %%# /f %nul% && (
-echo Deleted Registry - %%#
+reg query %%A %nul% && (
+set regfound=1
+reg delete %%A /f %nul% && (
+echo Deleted Registry - %%A
 ) || (
-echo Failed to Delete - %%#
-)
-) || (
-echo Not Found Registry - %%#
+echo Failed to Delete - %%A
 )
 )
+)
+)
+if not defined regfound echo Not Found - Office vNext Registry Keys
 
 ::========================================================================================================================================
 
@@ -9545,7 +9618,7 @@ set _stg=0
 
 cls
 color 07
-title  Change Windows Edition
+title  Change Windows Edition %masver%
 
 set _args=
 set _elev=
@@ -9607,7 +9680,7 @@ set "_batp=%_batf:'=''%"
 
 set _PSarg="""%~f0""" -el %_args%
 
-set "_ttemp=%temp%"
+set "_ttemp=%userprofile%\AppData\Local\Temp"
 
 setlocal EnableDelayedExpansion
 
@@ -9769,7 +9842,7 @@ echo "!_target!" | find /i " %%# " %nul1% || set "_target= !_target! %%# "
 
 if defined _target (
 for %%# in (%_target%) do (
-echo %%# | findstr /i "CountrySpecific CloudEdition" %nul% || (set "_ntarget=!_ntarget! %%#")
+echo %%# | findstr /i "CountrySpecific CloudEdition ServerRdsh" %nul% || (set "_ntarget=!_ntarget! %%#")
 )
 )
 
@@ -9861,18 +9934,31 @@ goto ced_done
 ::  Changing from Core to Non-Core & Changing editions in Windows build older than 17134 requires "changepk /productkey" or DISM Api method and restart
 ::  In other cases, editions can be changed instantly with "slmgr /ipk"
 
+if %_dismapi%==1 (
+mode con cols=105 lines=40
+%psc% "$f=[io.file]::ReadAllText('!_batp!') -split ':checkrebootflag\:.*';iex ($f[1]);" | find /i "True" %nul% && (
+%eline%
+echo Pending Reboot flags found.
+echo:
+echo Restart the system and try again.
+goto ced_done
+)
+)
+
 cls
 %line%
 echo:
+if defined dismnotworking call :dk_color %_Yellow% "DISM.exe is not responding."
 echo Changing the Current Edition [%osedition%] %winbuild% to [%targetedition%]
 echo:
 
 if %_dismapi%==1 (
-call :dk_color %Blue% "Notes-"
+call :dk_color %Green% "Notes-"
 echo:
 echo  - Save your work before continue, system will auto restart.
 echo:
 echo  - You will need to activate with HWID option once the edition is changed.
+%line%
 echo:
 choice /C:21 /N /M "[1] Continue [2] %_exitmsg% : "
 if !errorlevel!==1 exit /b
@@ -9904,7 +9990,7 @@ echo Check this page for help. %mas%troubleshoot
 
 if %_dismapi%==1 (
 echo:
-echo Applying the DISM API method with %_chan% Key %key%
+echo Applying the DISM API method with %_chan% Key %key%. Please wait...
 echo:
 %psc% "$f=[io.file]::ReadAllText('!_batp!') -split ':dismapi\:.*';& ([ScriptBlock]::Create($f[1])) %targetedition% %key%;"
 timeout /t 3 %nul1%
@@ -9924,7 +10010,16 @@ cls
 mode con cols=105 lines=32
 %psc% "&{$W=$Host.UI.RawUI.WindowSize;$B=$Host.UI.RawUI.BufferSize;$W.Height=31;$B.Height=200;$Host.UI.RawUI.WindowSize=$W;$Host.UI.RawUI.BufferSize=$B;}"
 
+%psc% "$f=[io.file]::ReadAllText('!_batp!') -split ':checkrebootflag\:.*';iex ($f[1]);" | find /i "True" %nul% && (
+%eline%
+echo Pending reboot flags found.
 echo:
+echo Restart the system and try again.
+goto ced_done
+)
+
+echo:
+if defined dismnotworking call :dk_color %_Yellow% "Note - DISM.exe is not responding."
 echo Changing the Current Edition [%osedition%] %winbuild% to [%targetedition%]
 echo:
 call :dk_color %Blue% "Important - Save your work before continue, system will auto reboot."
@@ -9973,8 +10068,17 @@ goto ced_done
 
 ::========================================================================================================================================
 
+%psc% "$f=[io.file]::ReadAllText('!_batp!') -split ':checkrebootflag\:.*';iex ($f[1]);" | find /i "True" %nul% && (
+%eline%
+echo Pending reboot flags found.
+echo:
+echo Restart the system and try again.
+goto ced_done
+)
+
 cls
 echo:
+if defined dismnotworking call :dk_color %_Yellow% "Note - DISM.exe is not responding."
 echo Changing the Current Edition [%osedition%] %winbuild% to [%targetedition%]
 echo:
 echo Applying the command with %_chan% Key
@@ -10001,8 +10105,35 @@ exit /b
 
 if %_wmic% EQU 1 set "chkedi=for /f "tokens=2 delims==" %%a in ('"wmic path SoftwareLicensingProduct where (ApplicationID='55c92734-d682-4d71-983e-d6ec3f16059f') get LicenseFamily /VALUE" %nul6%')"
 if %_wmic% EQU 0 set "chkedi=for /f "tokens=2 delims==" %%a in ('%psc% "(([WMISEARCHER]'SELECT LicenseFamily FROM SoftwareLicensingProduct WHERE ApplicationID=''55c92734-d682-4d71-983e-d6ec3f16059f''').Get()).LicenseFamily ^| %% {echo ('LicenseFamily='+$_)}" %nul6%')"
-%chkedi% do (call set "_wtarget= !_wtarget! %%a ")
+%chkedi% do (
+call if exist %Systemdrive%\Windows\System32\spp\tokens\skus\%%a (
+call set "_wtarget= !_wtarget! %%a "
+)
+)
 exit /b
+
+::========================================================================================================================================
+
+::  Check pending reboot flags
+
+:checkrebootflag:
+function Test-PendingReboot
+{
+ if (Test-Path -Path "$env:windir\WinSxS\pending.xml") { return $true }
+ if (Get-ChildItem "HKLM:\Software\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending" -EA Ignore) { return $true }
+ if (Get-Item "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RebootRequired" -EA Ignore) { return $true }
+ try { 
+   $util = [wmiclass]"\\.\root\ccm\clientsdk:CCM_ClientUtilities"
+   $status = $util.DetermineIfRebootPending()
+   if(($status -ne $null) -and $status.RebootPending){
+     return $true
+   }
+ }catch{}
+ 
+ return $false
+}
+Test-PendingReboot
+:checkrebootflag:
 
 ::========================================================================================================================================
 

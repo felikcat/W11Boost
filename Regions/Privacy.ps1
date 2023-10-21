@@ -24,7 +24,6 @@ using namespace Microsoft.Win32
 [Registry]::SetValue('HKEY_CURRENT_USER\Software\Microsoft\Speech_OneCore\Settings\OnlineSpeechPrivacy', 'HasAccepted', '0', [RegistryValueKind]::DWord)
 
 # Disable telemetry for Tablet PC's handwriting recognition.
-New-Item 'HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\TabletPC'
 [Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\TabletPC', 'PreventHandwritingDataSharing', '1', [RegistryValueKind]::DWord)
 
 # Ask OneDrive to only generate network traffic if signed in to OneDrive.

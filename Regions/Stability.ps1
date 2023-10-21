@@ -104,8 +104,10 @@ Disable-ScheduledTask -TaskName "\Microsoft\Windows\Shell\IndexerAutomaticMainte
 # Sets Windows' default process priority; this is not the default for Windows Server.
 [Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\PriorityControl', 'Win32PrioritySeparation', '2', [RegistryValueKind]::DWord)
 
+# Allow Game Mode to pivot GPU resources more towards video games.
 [Registry]::SetValue('HKEY_CURRENT_USER\Software\Microsoft\GameBar', 'AutoGameModeEnabled', '1', [RegistryValueKind]::DWord)
 
+# Disable the auto-updating of offline maps.
 [Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\Maps', 'AutoUpdateEnabled', '0', [RegistryValueKind]::DWord)
 
 
@@ -223,4 +225,14 @@ Disable-ScheduledTask -TaskName "\Microsoft\Windows\RemovalTools\MRT_ERROR_HB"
 
 # Disable Delivery Optimization's "Allow downloads from other PCs".
 [Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization', 'DODownloadMode', '0', [RegistryValueKind]::DWord)
+#endregion
+
+#region Deny upgrade from Windows 10 22H2 -> Windows 11.
+if ($WIN_BUILD -eq 19045) {
+    [Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate', 'ProductVersion', 'Windows 10', [RegistryValueKind]::String)
+
+    [Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate', 'TargetReleaseVersion', '1', [RegistryValueKind]::DWord)
+
+    [Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate', 'TargetReleaseVersionInfo', '22H2', [RegistryValueKind]::String)
+}
 #endregion
