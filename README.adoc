@@ -9,6 +9,19 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
+== Installing W11Boost
+
+. https://github.com/felikcat/W11Boost/archive/refs/heads/master.zip[Download W11Boost] then extract it.
+
+. Temporarily disable your anti-virus / anti-malware.
+
+. Open `Run.bat`, then click "Install W11Boost".
+
+image:W11Boost_GUI_1.png[480,360]
+
+Inside the extras tab: +
+image:W11Boost_GUI_2.png[480,360]
+
 == About
 
 If you like Atlas OS, this is a more modular and modern alternative. 
@@ -36,11 +49,6 @@ Like other optimizers, W11Boost has to be reapplied on every major Windows updat
 . Overriden user preferences, such as a few settings you could use in Winaero Tweaker.
 
 ====
-
-
-image:W11Boost_GUI_1.png[480,360]
-
-image:W11Boost_GUI_2.png[480,360]
 
 [%collapsible]
 .I want to know exactly what W11Boost does.
@@ -161,15 +169,6 @@ image:W11Boost_GUI_2.png[480,360]
 . Importing/setting wallpapers is set to 100% of JPEG's quality; less compression, therefore less "blurriness".
 
 ====
-
-
-== Installing W11Boost
-
-. https://github.com/felikcat/W11Boost/archive/refs/heads/master.zip[Download W11Boost] then extract it.
-
-. Temporarily disable your anti-virus / anti-malware.
-
-. Open `Run.bat`, then click "Install W11Boost".
 
 == Recommended apps
 NOTE: Some Windows functions are deliberately broken, such as System Restore, File History, and Remote Assistance. +
