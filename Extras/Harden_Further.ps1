@@ -40,10 +40,18 @@ Enable-ScheduledTask -TaskName "\Microsoft\Windows\AppID\SmartScreenSpecific"
 # Enable: Ransomware protection -> Controlled folder access
 [Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows Defender\Windows Defender Exploit Guard\Controlled Folder Access', 'EnableControlledFolderAccess', '1', [RegistryValueKind]::DWord)
 
-# Disable additional risky services that the DoD STIGs left alone.
+#region Disable additional risky services that the DoD STIGs left alone.
 $REGS = @("ShellHWDetection", "Spooler", "LanmanServer", "SSDPSRV", "lfsvc")
 $REGS.ForEach({
     [Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\$_', 'Start', '4', [RegistryValueKind]::DWord)
 })
+#endregion
 
-gpupdate.exe /force
+#region Enable UAC (User Account Control).
+# UAC requires the 'LUA File Virtualization Filter Driver'.
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\luafv', 'Start', '2', [RegistryValueKind]::DWord)
+
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System', 'PromptOnSecureDesktop', '1', [RegistryValueKind]::DWord)
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System', 'ConsentPromptBehaviorAdmin', '5', [RegistryValueKind]::DWord)
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System', 'EnableLUA', '1', [RegistryValueKind]::DWord)
+#endregion

@@ -98,6 +98,7 @@ function STR_Requirement {
 STR_Requirement
 
 Unblock-File -Path "..\Third-party\STR\SetTimerResolution.exe"
+New-Item "$env:LOCALAPPDATA\Programs\STR" -ItemType Directory
 Copy-Item "..\Third-party\STR\SetTimerResolution.exe" -Destination "$env:LOCALAPPDATA\Programs\STR" -Recurse
 
 function STR_Service {
@@ -161,15 +162,6 @@ bcdedit.exe /set "{default}" recoveryenabled no
 # Do not keep track of recently opened files.
 [Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer', 'NoRecentDocsHistory', '1', [RegistryValueKind]::DWord)
 
-
-#region Enable UAC (User Account Control).
-# UAC requires the 'LUA File Virtualization Filter Driver'.
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\luafv', 'Start', '2', [RegistryValueKind]::DWord)
-
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System', 'PromptOnSecureDesktop', '1', [RegistryValueKind]::DWord)
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System', 'ConsentPromptBehaviorAdmin', '5', [RegistryValueKind]::DWord)
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System', 'EnableLUA', '1', [RegistryValueKind]::DWord)
-#endregion
 
 #region Shutdown options
 # Disables "Fast startup".

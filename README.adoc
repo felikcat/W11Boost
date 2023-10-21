@@ -109,8 +109,6 @@ image:W11Boost_GUI_2.png[480,360]
 . NTP time sync servers used are now 3 instead of 1, which are `time.cloudflare.com time.nist.gov time.windows.com` to reduce time sync failure.
 ** Important for Tor and 2FA codes from Bitwarden to remain working.
 
-. UAC is enabled for both security, and fixing applications that break from UAC being off, such as Eddie-UI.
-
 . Disabled the following:
 
 - "https://learn.microsoft.com/en-us/windows/win32/shell/fast-user-switching[Fast User Switching]", as W11Boost is intended for single-user use only.

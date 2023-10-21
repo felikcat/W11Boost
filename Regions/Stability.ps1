@@ -118,8 +118,6 @@ Disable-ScheduledTask -TaskName "\Microsoft\Windows\Shell\IndexerAutomaticMainte
 [Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\GraphicsDrivers', 'HwSchMode', '2', [RegistryValueKind]::DWord)
 
 Enable-MMAgent -MemoryCompression
-Disable-MMAgent -PageCombining
-
 
 #region Disallow automatic: app updates, security scanning, and system diagnostics.
 [Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\Maintenance', 'MaintenanceDisabled', '1', [RegistryValueKind]::DWord)
