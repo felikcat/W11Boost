@@ -35,7 +35,7 @@ if ($License_Check) {
 }
 
 # Installs Winget if not present. Mainly specific to LTSC 2019 and LTSC 2021.
-if (-Not (Get-Command -CommandType Application -Name winget -ErrorAction SilentlyContinue)) {
+if (-Not (Get-Command -CommandType Application -Name winget.exe)) {
     # Installs Winget's dependencies on LTSC 2019 and newer; does not work for LTSC 2016.
     wsreset.exe -i | Wait-Process
 
