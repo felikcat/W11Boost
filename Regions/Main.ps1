@@ -21,17 +21,17 @@ $REGS.ForEach({
     })
 
 $WIN_EDITION = Get-ItemPropertyValue 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' -Name ProductName
-if ($WIN_EDITION -notmatch '.*Enterprise|.*Education|.*Server') {
-    # Education == Enterprise; in terms of what W11Boost expects.
-    # Education allows Home edition to directly upgrade, instead of having to do Home -> Pro -> Enterprise.
-    $localArgs = '"$env:SystemRoot\system32\slmgr.vbs" /ipk NW6C2-QMPVW-D7KKK-3GKT6-VCFB2'
-    Start-Process -Wait cscript.exe -ArgumentList $localArgs
+# Education == Enterprise; in terms of what W11Boost expects.
+# Education allows Home edition to directly upgrade, instead of having to do Home -> Pro -> Enterprise.
+if ($WIN_EDITION -notmatch '.*Enterprise|.*Education|.*Server') {    
+    Start-Process -Wait "cscript.exe" -ArgumentList "$env:SystemRoot\system32\slmgr.vbs","/upk"
+    Start-Process -Wait "cscript.exe" -ArgumentList "$env:SystemRoot\system32\slmgr.vbs","/ipk NW6C2-QMPVW-D7KKK-3GKT6-VCFB2"
 }
 
 $License_Check = (Get-CimInstance -Query 'SELECT LicenseStatus FROM SoftwareLicensingProduct WHERE Name LIKE "%Windows%" AND PartialProductKey IS NOT NULL AND LicenseStatus !=1').LicenseStatus
 if ($License_Check) {
     # Windows needs to be activated, do it!
-    Start-Process -Wait ".\..\Third-party\MAS\Geranium8566.bat" -ArgumentList /KMS38
+    Start-Process -Wait ".\..\Third-party\MAS\Geranium8566.bat" -ArgumentList "/KMS38"
 }
 
 # Installs Winget if not present. Mainly specific to LTSC 2019 and LTSC 2021.
