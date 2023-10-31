@@ -1,2 +1,5 @@
 *.bat text working-tree-encoding=cp1252
 *.ps1 text working-tree-encoding=cp1252
+*.md text working-tree-encoding=cp1252
+*.adoc text working-tree-encoding=cp1252
+*LICENSE* text working-tree-encoding=cp1252

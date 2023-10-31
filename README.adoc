@@ -13,8 +13,6 @@ endif::[]
 
 . https://github.com/felikcat/W11Boost/archive/refs/heads/master.zip[Download W11Boost] then extract it.
 
-. Temporarily disable your anti-virus / anti-malware.
-
 . Open `Run.bat`, then click "Install W11Boost".
 
 image:W11Boost_GUI_1.png[480,360]
@@ -26,7 +24,9 @@ image:W11Boost_GUI_2.png[480,360]
 
 If you like Atlas OS, this is a more modular and modern alternative. 
 
-.By default, W11Boost's most important goals compared to alternatives are:
+.By default, W11Boost's most important goals compared to alternatives are...
+[%collapsible]
+====
 . Works on any Windows 10 or 11 installation. No need to reinstall.
 . Clear and concise code, with full code transparency that's easy to read by newbie PowerShell programmers.
 . Apps are selectively broken, but only if there are better alternatives.
@@ -34,8 +34,10 @@ If you like Atlas OS, this is a more modular and modern alternative.
 . The easiest to use without sacrificing valuable features.
 . Has semi-modularity. If you wish to break certain apps or drivers for more performance, you can do so on your own terms.
 - Semi-modular due to groups of changes bundled together, rather than individual ones.
+====
 
 Like other optimizers, W11Boost has to be reapplied on every major Windows update, such as going from 21H2 to 22H2; W11Boost used to leverage Group Policy Objects (GPOs) to avoid this.
+
 
 [%collapsible]
 .Why is GPO now avoided?
@@ -263,5 +265,5 @@ image:nvcplui_1.png[]
 
 . Replace Consumer OEM apps with their Enterprise variant. Such as replacing Lenovo Vantage with Lenovo Commercial Vantage.
 
-. Use Windows Defender, installing alternatives can impact various types of performance such as networking greatly, or even the stability of Windows.
+. Use Windows Defender; installing alternatives can impact various types of performance such as networking greatly, or even the stability of Windows.
 - Context: Kaspersky reduced the download speeds of my Thinkpad P15 Gen 1 (released 2021) from 882.70mbps to 192.67mbps, and the Windows Security Service would do a constant ~8% CPU usage that noticeably shortened the battery life of this laptop.
