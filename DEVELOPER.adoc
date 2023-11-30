@@ -36,19 +36,6 @@ endif::[]
 . https://learn.microsoft.com/en-us/windows-hardware/get-started/adk-install[Windows ADK]
 . https://learn.microsoft.com/en-us/sysinternals/downloads/procmon[Process Monitor]
 
-[%collapsible]
-.Why is GPO now avoided?
-====
-
-. Importing other GPO files can override the prior GPOs, which was the case for applying DoD STIGs after installing W11Boost.
-. Slows down boot-times drastically.
-. The user cannot easily change GPOs, they would have to use a third-party program to remove or change them individually.
-. Error reporting is poor, making it harder to debug W11Boost's issues.
-- Microsoft's tools to test out GPOs are purpose built for Active Directory, which cannot be used by W11Boost, as it wouldn't make sense to have a separate PC running Windows Server to host an Active Directory.
-. Overriden user preferences, such as a few settings you could use in Winaero Tweaker.
-
-====
-
 * `[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\EXAMPLE', "Start" [RegistryValueKind]::DWord -Value 4` is preferred over using `sc.exe config EXAMPLE start=disabled` since Windows rejects this request depending on the service.
 
 * `bcdedit.exe` will fail if the user screwed up their Boot Entries and fixed it later on; the workaround is to explicitly specify the ID.
@@ -97,6 +84,21 @@ TIP: Example gpedit.msc registry translation: +
 - VAC is loaded by `steam.exe` if Steam is ran as Administrator; otherwise it's `steamservice.exe`.
 
 == What is avoided
+
+[%collapsible]
+.Why is GPO now avoided?
+====
+
+. Importing other GPO files can override the prior GPOs, which was the case for applying DoD STIGs after installing W11Boost.
+. Slows down boot-times drastically.
+. The user cannot easily change GPOs, they would have to use a third-party program to remove or change them individually.
+. Error reporting is poor, making it harder to debug W11Boost's issues.
+- Microsoft's tools to test out GPOs are purpose built for Active Directory, which cannot be used by W11Boost, as it wouldn't make sense to have a separate PC running Windows Server to host an Active Directory.
+. Overriden user preferences, such as a few settings you could use in Winaero Tweaker.
+
+'''
+
+====
 
 . Disabling Virtualization Based Security (VBS) on UEFI Lock enabled PCs can boot-loop desktop PCs, but work as intended on laptops. Therefore, `$reduce_mitigations = 1` will only work for the majority of PCs that have Credential Guard (CG) and VBS' UEFI lock disabled.
 
