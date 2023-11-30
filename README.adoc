@@ -9,47 +9,17 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
-== Installing W11Boost
-
-. https://github.com/felikcat/W11Boost/archive/refs/heads/master.zip[Download W11Boost] then extract it.
-
-. Open `Run.bat`, then click "Install W11Boost".
-
-image:W11Boost_GUI_1.png[480,360]
-
-Inside the extras tab: +
-image:W11Boost_GUI_2.png[480,360]
-
 == About
-
-If you like Atlas OS, this is a more modular and modern alternative. 
 
 .By default, W11Boost's most important goals compared to alternatives are...
 [%collapsible]
 ====
 . Works on any Windows 10 or 11 installation. No need to reinstall.
 . Clear and concise code, with full code transparency that's easy to read by newbie PowerShell programmers.
-. Apps are selectively broken, but only if there are better alternatives.
+. Apps are selectively broken, but only if there are better alternatives that entirely replace those apps.
 . Enhances security without being slower.
 . The easiest to use without sacrificing valuable features.
 . Has semi-modularity. If you wish to break certain apps or drivers for more performance, you can do so on your own terms.
-- Semi-modular due to groups of changes bundled together, rather than individual ones.
-====
-
-Like other optimizers, W11Boost has to be reapplied on every major Windows update, such as going from 21H2 to 22H2; W11Boost used to leverage Group Policy Objects (GPOs) to avoid this.
-
-
-[%collapsible]
-.Why is GPO now avoided?
-====
-
-. Importing other GPO files can override the prior GPOs, which was the case for applying DoD STIGs after installing W11Boost.
-. Slows down boot-times drastically.
-. The user cannot easily change GPOs, they would have to use a third-party program to remove or change them individually.
-. Error reporting is poor, making it harder to debug W11Boost's issues.
-- Microsoft's tools to test out GPOs are purpose built for Active Directory, which cannot be used by W11Boost, as it wouldn't make sense to have a separate PC running Windows Server to host an Active Directory.
-. Overriden user preferences, such as a few settings you could use in Winaero Tweaker.
-
 ====
 
 [%collapsible]
@@ -172,38 +142,48 @@ Like other optimizers, W11Boost has to be reapplied on every major Windows updat
 
 ====
 
-== Recommended apps
-NOTE: Some Windows functions are deliberately broken, such as System Restore, File History, and Remote Assistance. +
-Reason: There are better alternatives.
+.Background information on the Extras.
+[%collapsible]
+====
 
-. File History: https://www.resilio.com/individuals/[Resilio Sync]
-. System Restore: https://www.macrium.com/reflectfree[Macrium Reflect]
-. Remote Assistance: https://rustdesk.com/[RustDesk] or https://anydesk.com/en[AnyDesk]
-
-== Background information on the Extras
-
-=== Microsoft app debloater
+.*Microsoft app debloater*
 . Replicates what Windows 10 Enterprise LTSC 2021 includes by default, which is known to only include what's important.
-- *Exclusions*:
+- Exclusions:
 ** Due to breaking apps: App Installer, Store Experience Host, Windows Store, Xbox Game Speech Window.
 ** Due to being high-quality, and not funneling advertisements or towards using a Microsoft account: Camera, Clock, Terminal, Maps, Phone Link.
 
-=== Install Xbox services
+.*Install Xbox services*
 . This is meant for a de-bloated Windows installation, or for an LTSC variant of Windows.
-
 . Login to the Microsoft Store before using `Install_Xbox_Minimal.bat`!
-
 . Installs only what's required to support Xbox Controllers (GUI/interface not included, get it link://www.microsoft.com/store/productId/9NBLGGH30XJ3[here]), Microsoft's PC Game Pass, and specific games such as Forza Horizon 4 & 5.
 - To also get the Game Bar, install the following link://www.microsoft.com/store/productId/9NZKPSTSNW4P[here] then link://www.microsoft.com/store/productId/9NBLGGH537C2[here].
 
-=== Install STIG policies
+.*Install STIG policies*
 . Enforces a higher base-line of security via https://public.cyber.mil/stigs/[DoD STIG compliance], that still avoids breaking apps.
-
 . This cannot be a perfect replica, as it's local only.
 - This will not attach to an Active Directory hosted either locally via a Windows Server, or an online server via Microsoft Entra ID (called "Azure AD" prior).
 
+====
 
-== Recommendations
+
+== 1. Installing W11Boost
+
+. https://github.com/felikcat/W11Boost/archive/refs/heads/master.zip[Download W11Boost] then extract it.
+
+. Open `Run.bat`, then click "Install W11Boost".
+
+image:W11Boost_GUI_1.png[480,360]
+
+Inside the extras tab: +
+image:W11Boost_GUI_2.png[480,360]
+
+
+== 2. Recommended alternative apps
+. File History: https://www.resilio.com/individuals/[Resilio Sync]
+. System Restore: https://www.macrium.com/reflectfree[Macrium Reflect] or https://www.urbackup.org/[UrBackup]
+. Remote Assistance: https://rustdesk.com/[RustDesk] or https://anydesk.com/en[AnyDesk]
+
+== 3. Recommendations
 
 .*`Advanced.ps1` can disable Game DVR, remove Microsoft Edge and remove various forms of automation, etc.*
 * However, configuring `Advanced.ps1` is required:
