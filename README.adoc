@@ -15,7 +15,6 @@ endif::[]
 [%collapsible]
 ====
 . Works on any Windows 10 or 11 installation. No need to reinstall.
-. Clear and concise code, with full code transparency that's easy to read by newbie PowerShell programmers.
 . Apps are selectively broken, but only if there are better alternatives that entirely replace those apps.
 . Enhances security without being slower.
 . The easiest to use without sacrificing valuable features.
@@ -245,5 +244,6 @@ image:nvcplui_1.png[]
 
 . Replace Consumer OEM apps with their Enterprise variant. Such as replacing Lenovo Vantage with Lenovo Commercial Vantage.
 
-. Use Windows Defender; installing alternatives can impact various types of performance such as networking greatly, or even the stability of Windows.
-- Context: Kaspersky reduced the download speeds of my Thinkpad P15 Gen 1 (released 2021) from 882.70mbps to 192.67mbps, and the Windows Security Service would do a constant ~8% CPU usage that noticeably shortened the battery life of this laptop.
+. Install https://www.startallback.com/[StartAllBack] to speed up Windows 11, and also restore old interface elements from Windows 7 or 10.
+
+. A third-party anti-malware program is going to give better protection, but may have flaws such as slowing down your internet speeds. Be sure to test before and after installing say, https://www.kaspersky.com/downloads/free-antivirus[Kaspersky Free], which is still my favorite anti-malware.
