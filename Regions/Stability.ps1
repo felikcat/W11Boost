@@ -117,9 +117,10 @@ Disable-ScheduledTask -TaskName "\Microsoft\Windows\Shell\IndexerAutomaticMainte
 # VRROptimizeEnable: https://devblogs.microsoft.com/directx/os-variable-refresh-rate/
 [Registry]::SetValue('HKEY_CURRENT_USER\Software\Microsoft\DirectX\UserGpuPreferences', 'DirectXUserGlobalSettings', 'VRROptimizeEnable=1;SwapEffectUpgradeEnable=1;', [RegistryValueKind]::String)
 
-# Enables hardware-accelerated GPU scheduling except for blocked GPU VIDs listed in:
+# Disables hardware-accelerated GPU scheduling except for already blocked GPU VIDs listed in:
 # HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\GraphicsDrivers\BlockList\Kernel
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\GraphicsDrivers', 'HwSchMode', '2', [RegistryValueKind]::DWord)
+# Why: stuttering issues in some games, such as Half-Life: Alyx.
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\GraphicsDrivers', 'HwSchMode', '1', [RegistryValueKind]::DWord)
 
 Enable-MMAgent -MemoryCompression
 
