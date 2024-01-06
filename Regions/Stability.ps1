@@ -27,13 +27,9 @@ New-PSDrive -Name "HKCR" -PSProvider "Registry" -Root "HKEY_CLASSES_ROOT"
 [Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\BcastDVRUserService', 'Start', '4', [RegistryValueKind]::DWord)
 #endregion
 
-#region Disable System Restore and File History; unreliable crap.
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows NT\SystemRestore', 'DisableSR', '1', [RegistryValueKind]::DWord)
+#region Disable automatic System Restore points and File History; unreliable crap.
 [Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\SystemRestore', 'RPSessionInterval', '0', [RegistryValueKind]::DWord)
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\SystemRestore\SR"
-
-# Remove all system restore points.
-Get-CimInstance Win32_ShadowCopy | Remove-CimInstance
 
 [Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\FileHistory', 'Disabled', '1', [RegistryValueKind]::DWord)
 [Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\fhsvc', 'Start', '4', [RegistryValueKind]::DWord)

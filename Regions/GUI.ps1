@@ -31,19 +31,13 @@ $Form = New-Object Form -Property @{
 }
 
 $ExtrasButton = New-Object Button -Property @{
-    Height = 181
+    Height = 272
     Dock   = 'Bottom'
     Text   = "Extras"
 }
 
-$UninstallButton = New-Object Button -Property @{
-    Height = 181
-    Dock   = 'Bottom'
-    Text   = "Remove W11Boost"
-}
-
 $InstallOnlyButton = New-Object Button -Property @{
-    Height = 181
+    Height = 272
     Dock   = 'Bottom'
     Text   = "Install W11Boost"
 }
@@ -62,7 +56,7 @@ Temporarily this will appear frozen, this is normal."
 
 function FirstWindowControls {
     $Form.Controls.Clear()
-    $Form.Controls.AddRange(($InstallOnlyButton, $ExtrasButton, $UninstallButton))
+    $Form.Controls.AddRange(($InstallOnlyButton, $ExtrasButton))
 }
 
 function ExtrasWindow {
@@ -129,9 +123,9 @@ function ExtrasWindow {
             if ($Prompt -eq "Y") {
                 PleaseWaitText
 
-                $STIG_NAME = "U_STIG_GPO_Package_August_2023"
+                $STIG_NAME = "U_STIG_GPO_Package_October_2023"
                 $STIG_HASH = (Get-FileHash -Algorithm SHA256 "..\Third-party\DoD-STIGS\$STIG_NAME.zip").Hash
-                $EXPECTED_HASH = "B2382E3208CDC86741113E3FBD30EEAF8532DB94B68196A9E9291F441E87766A"
+                $EXPECTED_HASH = "69b705c44717eac8018e6b207144a5919f8d85d797d60add049e7f34dad9ff8f"
 
                 # Source: https://public.cyber.mil/stigs/gpo/
                 if ($STIG_HASH -ne $EXPECTED_HASH) {
@@ -164,19 +158,6 @@ function ExtrasWindow {
 FirstWindowControls
 
 $ExtrasButton.Add_Click({ ExtrasWindow })
-$UninstallButton.Add_Click({
-        $Prompt = [MessageBox]::Show("This will uninstall W11Boost, are you sure?", "W11Boost", [MessageBoxButtons]::YesNo)
-
-        if ($Prompt -eq "Y") {
-            PleaseWaitText
-
-            & ".\..\Extras\Uninstall.ps1" | Out-File "${HOME}\Desktop\W11Boost logs\Uninstall.log"
-
-            [MessageBox]::Show($Form, "Removal of W11Boost nearly complete; manually reboot to finish.", "W11Boost", [MessageBoxButtons]::OK)
-
-            FirstWindowControls
-        }
-    })
 
 $GoBackButton = New-Object Button -Property @{
     Dock   = 'Bottom'

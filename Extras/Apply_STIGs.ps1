@@ -8,7 +8,7 @@ Enable-WindowsOptionalFeature -NoRestart -Online -FeatureName VirtualMachinePlat
 bcdedit.exe /set "{default}" vsmlaunchtype auto
 
 # Intentionally not checking for hashes here.
-$STIG_NAME = "U_STIG_GPO_Package_August_2023"
+$STIG_NAME = "U_STIG_GPO_Package_October_2023"
 Expand-Archive "..\Third-party\DoD-STIGS\$STIG_NAME.zip" -DestinationPath "$env:TEMP\$STIG_NAME" -Force
 #endregion Preparation
 
@@ -19,15 +19,15 @@ $STIGS = @("DoD Adobe Acrobat Pro DC Continuous V2R1",
 "DoD Microsoft Defender Antivirus STIG v2r4",
 "DoD Microsoft Edge v1r7",
 "DoD Mozilla Firefox v6r5",
-"DoD Office 2019-M365 Apps v2r10",
+"DoD Office 2019-M365 Apps v2r11",
 "DoD Office System 2013 and Components",
 "DoD Office System 2016 and Components",
 "DoD Windows Firewall v1r7")
 
 if ($WIN_BUILD -ge 21664) {
-    $STIGS += ("DoD Windows 11 v1r3")
+    $STIGS += ("DoD Windows 11 v1r5")
 } elseif ($WIN_BUILD -le 19045) {
-    $STIGS += ("DoD Windows 10 v2r6")
+    $STIGS += ("DoD Windows 10 v2r8")
 }
 $STIGS.ForEach({
     Start-Process ".\..\Third-party\LGPO.exe" -WindowStyle hidden -ArgumentList `"/g`", `"$env:TEMP\$STIG_NAME\$_\GPOs`"

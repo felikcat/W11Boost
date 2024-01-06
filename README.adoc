@@ -15,7 +15,7 @@ endif::[]
 [%collapsible]
 ====
 . Works on any Windows 10 or 11 installation. No need to reinstall.
-. Apps are selectively broken, but only if there are better alternatives that entirely replace those apps.
+. By default, no apps or programs are broken.
 . Enhances security without being slower.
 . The easiest to use without sacrificing valuable features.
 . Has semi-modularity. If you wish to break certain apps or drivers for more performance, you can do so on your own terms.
@@ -164,8 +164,22 @@ endif::[]
 
 ====
 
+== 1. Changing Windows edition to "Education" then activating
+NOTE: This is optionally done for less telemetry, and to make W11Boost more effective.
 
-== 1. Installing W11Boost
+. Open the Command Prompt as administrator.
+. `cscript.exe %windir%\system32\slmgr.vbs /upk`
+. `cscript.exe %windir%\system32\slmgr.vbs /ipk NW6C2-QMPVW-D7KKK-3GKT6-VCFB2`
+. Use https://github.com/massgravel/Microsoft-Activation-Scripts[Microsoft Activation Scripts] to activate Windows; I recommend the KMS38 activation.
+
+== 2. Creating a System Restore Point
+. Open the Start Menu and search for "Create a restore point".
+. If System Restore is disabled by your system administrator, run in Command Prompt as administrator: +
+`reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows NT\SystemRestore" /v "DisableSR" /t REG_DWORD /d 0 /f`
+- Afterwards, repeat the first step.
+. Click "Create...", then name it "Before W11Boost".
+
+== 3. Installing W11Boost
 
 . https://github.com/felikcat/W11Boost/archive/refs/heads/master.zip[Download W11Boost] then extract it.
 
@@ -177,12 +191,7 @@ Inside the extras tab: +
 image:W11Boost_GUI_2.png[480,360]
 
 
-== 2. Recommended alternative apps
-. File History: https://www.resilio.com/individuals/[Resilio Sync]
-. System Restore: https://www.macrium.com/reflectfree[Macrium Reflect] or https://www.urbackup.org/[UrBackup]
-. Remote Assistance: https://rustdesk.com/[RustDesk] or https://anydesk.com/en[AnyDesk]
-
-== 3. Recommendations
+== 4. Recommendations
 
 .*`Advanced.ps1` can disable Game DVR, remove Microsoft Edge and remove various forms of automation, etc.*
 * However, configuring `Advanced.ps1` is required:
@@ -199,6 +208,31 @@ Lowers input delay and GPU usage; potentially higher FPS, depending on the game.
 
 .How to:
 . Unity engine; use the launch option: `-window-mode exclusive`
+
+=== GPU
+. To enable https://kernel.org/doc/html/next/gpu/amdgpu/display/mpo-overview.html[Multiplane Overlay] on NVIDIA cards; which makes Borderless Windowed the same speed as Fullscreen:
+- Set your display's "Output color depth" to 8bpc.
+image:nvcplui_1.png[]
+- Do not use: custom resolutions, DSR, or scaling.
+
+=== BIOS
+* *Enable the following:*
+. I/O APIC (IOAPIC 24-119 Entries)
+. Above 4G Decoding and Resizable BAR.
+** On ASRock motherboards: C.A.M. (Clever Access Memory)
+. HPET (High Precision Event Timer)
+
+
+=== Windows
+. Keep the number of apps installed to a minimum, and remove unused apps. This reduces your chances of being impacted by https://www.bleepingcomputer.com/news/security/hackers-compromise-3cx-desktop-app-in-a-supply-chain-attack/[supply chain attacks], prevents causing Windows more issues, and might improve FPS stability.
+
+. If you're okay with installing more software:
+- Install https://www.startallback.com/[StartAllBack] to speed up Windows 11, and also restore old interface elements from Windows 7 or 10.
+- Install https://github.com/Xanashi/Icaros[Icaros] for better and faster image & video thumbnails.
+
+. Replace Consumer OEM apps with their Enterprise variant. Such as replacing Lenovo Vantage with Lenovo Commercial Vantage.
+
+. Third-party antivirus programs provide better protection, but may have flaws such as slowing down your internet speeds. Be sure to test before and after installing say, https://www.kaspersky.com/downloads/free-antivirus[Kaspersky Free], which is still my favorite antivirus.
 
 === Ethernet
 Avoid Realtek 2.5Gbit adapters, as they are much more CPU intensive than Intel 2.5Gbit adapters.
@@ -224,26 +258,3 @@ image:Intel_HID.png[]
 
 I have not tested https://www.aliexpress.com/store/1101345677/search?SearchText=i226[DERAPID's Intel i226-V PCIe cards], which are similarly priced and rate well.
 ====
-
-=== GPU
-. To enable https://kernel.org/doc/html/next/gpu/amdgpu/display/mpo-overview.html[Multiplane Overlay] on NVIDIA cards:
-- Set your display's "Output color depth" to 8bpc.
-image:nvcplui_1.png[]
-- Do not use: custom resolutions, DSR, or scaling.
-
-=== BIOS
-* *Enable the following:*
-. I/O APIC (IOAPIC 24-119 Entries)
-. Above 4G Decoding and Resizable BAR.
-** On ASRock motherboards: C.A.M. (Clever Access Memory)
-. HPET (High Precision Event Timer)
-
-
-=== Windows
-. Keep the number of apps installed to a minimum, and remove unused apps. This reduces your chances of being impacted by https://www.bleepingcomputer.com/news/security/hackers-compromise-3cx-desktop-app-in-a-supply-chain-attack/[supply chain attacks], prevents causing Windows more issues, and might improve FPS stability.
-
-. Replace Consumer OEM apps with their Enterprise variant. Such as replacing Lenovo Vantage with Lenovo Commercial Vantage.
-
-. Install https://www.startallback.com/[StartAllBack] to speed up Windows 11, and also restore old interface elements from Windows 7 or 10.
-
-. A third-party anti-malware program is going to give better protection, but may have flaws such as slowing down your internet speeds. Be sure to test before and after installing say, https://www.kaspersky.com/downloads/free-antivirus[Kaspersky Free], which is still my favorite anti-malware.

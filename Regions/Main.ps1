@@ -5,34 +5,12 @@ using namespace Microsoft.Win32
 Push-Location $PSScriptRoot
 . ".\IMPORTS.ps1"
 
-# Backup registry hives only once.
-if (-Not (Test-Path -Path "$env:USERPROFILE\W11Boost_Backups")) {
-    New-Item -Path "$env:USERPROFILE\W11Boost_Backups" -ItemType Directory
-    reg.exe export "HKEY_CLASSES_ROOT" $env:USERPROFILE\W11Boost_Backups\HKEY_CLASSES_ROOT.reg
-    reg.exe export "HKEY_CURRENT_USER" $env:USERPROFILE\W11Boost_Backups\HKEY_CURRENT_USER.reg
-    reg.exe export "HKEY_LOCAL_MACHINE" $env:USERPROFILE\W11Boost_Backups\HKEY_LOCAL_MACHINE.reg
-}
-
 # Required for: Windows Updates, Windows Store (StorSvc), winget (DoSvc).
 $REGS = @("AppXSvc", "ClipSVC", "TokenBroker", "StorSvc", "DoSvc")
 $REGS.ForEach({
-        [Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\$_', 'Start', '3', [RegistryValueKind]::DWord)
-        Start-Service $_
-    })
-
-$WIN_EDITION = Get-ItemPropertyValue 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' -Name ProductName
-# Education == Enterprise; in terms of what W11Boost expects.
-# Education allows Home edition to directly upgrade, instead of having to do Home -> Pro -> Enterprise.
-if ($WIN_EDITION -notmatch '.*Enterprise|.*Education|.*Server') {    
-    Start-Process -Wait "cscript.exe" -ArgumentList "$env:SystemRoot\system32\slmgr.vbs","/upk"
-    Start-Process -Wait "cscript.exe" -ArgumentList "$env:SystemRoot\system32\slmgr.vbs","/ipk NW6C2-QMPVW-D7KKK-3GKT6-VCFB2"
-}
-
-$License_Check = (Get-CimInstance -Query 'SELECT LicenseStatus FROM SoftwareLicensingProduct WHERE Name LIKE "%Windows%" AND PartialProductKey IS NOT NULL AND LicenseStatus !=1').LicenseStatus
-if ($License_Check) {
-    # Windows needs to be activated, do it!
-    Start-Process -Wait ".\..\Third-party\MAS\Geranium8566.bat" -ArgumentList "/KMS38"
-}
+    [Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\$_', 'Start', '3', [RegistryValueKind]::DWord)
+    Start-Service $_
+})
 
 # Installs Winget if not present. Mainly specific to LTSC 2019 and LTSC 2021.
 if (-Not (Get-Command -CommandType Application -Name winget.exe)) {
@@ -183,36 +161,29 @@ Remove-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "AutoEndTasks"
 
 
 #region Speed up Visual Studio by disabling its telemetry.
-if (Get-CimInstance MSFT_VSInstance) {
-    Disable-ScheduledTask -TaskName "\Microsoft\VisualStudio\Updates\BackgroundDownload"
-    # https://learn.microsoft.com/en-us/visualstudio/ide/visual-studio-experience-improvement-program?view=vs-2022
-    # PerfWatson2 (VSCEIP) is intensive on resources, ask to disable it.
-    [Registry]::SetValue('HKEY_LOCAL_MACHINE\Software\Microsoft\VSCommon\17.0\SQM', 'OptIn', '0', [RegistryValueKind]::DWord)
+Disable-ScheduledTask -TaskName "\Microsoft\VisualStudio\Updates\BackgroundDownload"
+# https://learn.microsoft.com/en-us/visualstudio/ide/visual-studio-experience-improvement-program?view=vs-2022
+# PerfWatson2 (VSCEIP) is intensive on resources, ask to disable it.
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\Software\Microsoft\VSCommon\17.0\SQM', 'OptIn', '0', [RegistryValueKind]::DWord)
 
-    # Remove feedback button and its features.
-    # Feedback can still be given through the Visual Studio Installer:
-    # https://learn.microsoft.com/en-us/visualstudio/ide/how-to-report-a-problem-with-visual-studio?view=vs-2022
-    [Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\VisualStudio\Feedback', 'DisableFeedbackDialog', '1', [RegistryValueKind]::DWord)
-    [Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\VisualStudio\Feedback', 'DisableEmailInput', '1', [RegistryValueKind]::DWord)
-    [Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\VisualStudio\Feedback', 'DisableScreenshotCapture', '1', [RegistryValueKind]::DWord)
+# Remove feedback button and its features.
+# Feedback can still be given through the Visual Studio Installer:
+# https://learn.microsoft.com/en-us/visualstudio/ide/how-to-report-a-problem-with-visual-studio?view=vs-2022
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\VisualStudio\Feedback', 'DisableFeedbackDialog', '1', [RegistryValueKind]::DWord)
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\VisualStudio\Feedback', 'DisableEmailInput', '1', [RegistryValueKind]::DWord)
+[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\VisualStudio\Feedback', 'DisableScreenshotCapture', '1', [RegistryValueKind]::DWord)
 
-    [Registry]::SetValue('HKEY_CURRENT_USER\Software\Microsoft\VisualStudio\Telemetry', 'TurnOffSwitch', '1', [RegistryValueKind]::DWord)
-}
+[Registry]::SetValue('HKEY_CURRENT_USER\Software\Microsoft\VisualStudio\Telemetry', 'TurnOffSwitch', '1', [RegistryValueKind]::DWord)
 #endregion
 
-$APPS = @("Microsoft.BingNews_8wekyb3d8bbwe", "Microsoft.WindowsFeedbackHub_8wekyb3d8bbwe")
+$APPS = @("Microsoft.BingNews", "Microsoft.WindowsFeedbackHub")
 $APPS.ForEach({
-        $localArgs = "--NoLogo powershell.exe -Command winget.exe uninstall $_ --exact --silent --accept-source-agreements"
-        Start-Process -Wait ".\..\Third-party\NanaRun\MinSudo.exe" -ArgumentList $localArgs
-    })
-
-# Icaros = thumbnail support for more file formats, and also loads faster than Windows' default thumbnailer
-$localArgs = "--NoLogo powershell.exe -Command winget.exe install Xanashi.Icaros --exact --silent --accept-package-agreements --accept-source-agreements --source winget"
-Start-Process -Wait ".\..\Third-party\NanaRun\MinSudo.exe" -ArgumentList $localArgs
+    Get-AppxPackage -all $_ | Remove-AppxPackage -AllUsers
+})
 
 # Restore the classic context menu on Windows 11.
 if ($WIN_BUILD -ge 21664) {
-    [Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32', '', '', [RegistryValueKind]::String)
+    [Registry]::SetValue('HKEY_CURRENT_USER\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32', '', '', [RegistryValueKind]::String)
 }
 
 $NAME = @("InternetCustom", "DatacenterCustom", "Compat", "Datacenter", "Internet")
