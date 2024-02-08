@@ -3,38 +3,7 @@ using namespace Microsoft.Win32
 Push-Location $PSScriptRoot
 . ".\IMPORTS.ps1"
 
-New-PSDrive -Name "HKCR" -PSProvider "Registry" -Root "HKEY_CLASSES_ROOT" 
-
-#region Disable Game DVR and Game Bar
-[Registry]::SetValue('HKEY_CURRENT_USER\System\GameConfigStore', 'GameDVR_Enabled', '0', [RegistryValueKind]::DWord)
-
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\GameDVR', 'AllowGameDVR', '0', [RegistryValueKind]::DWord)
-
-[Registry]::SetValue('HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\GameDVR', 'AppCaptureEnabled', '0', [RegistryValueKind]::DWord)
-[Registry]::SetValue('HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\GameDVR', 'CursorCaptureEnabled', '0', [RegistryValueKind]::DWord)
-[Registry]::SetValue('HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\GameDVR', 'HistoricalCaptureEnabled', '0', [RegistryValueKind]::DWord)
-
-[Registry]::SetValue('HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\AppBroadcast\GlobalSettings', 'AudioCaptureEnabled', '0', [RegistryValueKind]::DWord)
-[Registry]::SetValue('HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\AppBroadcast\GlobalSettings', 'MicrophoneCaptureEnabledByDefault', '0', [RegistryValueKind]::DWord)
-[Registry]::SetValue('HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\AppBroadcast\GlobalSettings', 'CursorCaptureEnabled', '0', [RegistryValueKind]::DWord)
-[Registry]::SetValue('HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\AppBroadcast\GlobalSettings', 'CameraCaptureEnabledByDefault', '0', [RegistryValueKind]::DWord)
-
-# Block Xbox controller's home button from opening the game bar.
-[Registry]::SetValue('HKEY_CURRENT_USER\Software\Microsoft\GameBar', 'UseNexusForGameBarEnabled', '0', [RegistryValueKind]::DWord)
-
-[Registry]::SetValue('HKEY_CURRENT_USER\Software\Microsoft\GameBar', 'ShowStartupPanel', '0', [RegistryValueKind]::DWord)
-
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\BcastDVRUserService', 'Start', '4', [RegistryValueKind]::DWord)
-#endregion
-
-#region Disable automatic System Restore points and File History; unreliable crap.
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\SystemRestore', 'RPSessionInterval', '0', [RegistryValueKind]::DWord)
-Disable-ScheduledTask -TaskName "\Microsoft\Windows\SystemRestore\SR"
-
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\FileHistory', 'Disabled', '1', [RegistryValueKind]::DWord)
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\fhsvc', 'Start', '4', [RegistryValueKind]::DWord)
-Disable-ScheduledTask -TaskName "\Microsoft\Windows\FileHistory\File History (maintenance mode)"
-#endregion
+New-PSDrive -Name "HKCR" -PSProvider "Registry" -Root "HKEY_CLASSES_ROOT"
 
 # Ask to not allow execution of experiments by Microsoft.
 [Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\PolicyManager\current\device\System', 'AllowExperimentation', '0', [RegistryValueKind]::DWord)
@@ -116,6 +85,7 @@ Disable-ScheduledTask -TaskName "\Microsoft\Windows\Shell\IndexerAutomaticMainte
 # Disables hardware-accelerated GPU scheduling except for already blocked GPU VIDs listed in:
 # HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\GraphicsDrivers\BlockList\Kernel
 # Why: stuttering issues in some games, such as Half-Life: Alyx.
+# NOTE: This will break DLSS Frame Generation until turned back on.
 [Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\GraphicsDrivers', 'HwSchMode', '1', [RegistryValueKind]::DWord)
 
 Enable-MMAgent -MemoryCompression
@@ -159,8 +129,6 @@ Disable-ScheduledTask -TaskName "\Microsoft\Office\OfficeTelemetryAgentFallBack"
 Disable-ScheduledTask -TaskName "\Microsoft\Office\OfficeTelemetryAgentLogOn"
 
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Application Experience\StartupAppTask"
-Disable-ScheduledTask -TaskName "\Microsoft\Windows\ApplicationData\DsSvcCleanup"
-Disable-ScheduledTask -TaskName "\Microsoft\Windows\AppxDeploymentClient\Pre-staged app cleanup"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\CertificateServicesClient\UserTask-Roam"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Clip\License Validation"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\CloudExperienceHost\CreateObjectTask"
@@ -174,11 +142,7 @@ Disable-ScheduledTask -TaskName "\Microsoft\Windows\MUI\LPRemove"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\NetTrace\GatherNetworkInfo"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\PI\Sqm-Tasks"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Power Efficiency Diagnostics\AnalyzeSystem"
-Disable-ScheduledTask -TaskName "\Microsoft\Windows\Printing\EduPrintProv"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\RemoteAssistance\RemoteAssistanceTask"
-
-Disable-ScheduledTask -TaskName "\Microsoft\Windows\SettingSync\BackgroundUploadTask"
-Disable-ScheduledTask -TaskName "\Microsoft\Windows\SettingSync\NetworkStateChangeTask"
 
 # https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/clean-up-the-winsxs-folder?view=windows-11
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Servicing\StartComponentCleanup"
@@ -230,9 +194,7 @@ Disable-ScheduledTask -TaskName "\Microsoft\Windows\RemovalTools\MRT_ERROR_HB"
 if ($WIN_BUILD -ge 19041 -and ($WIN_BUILD -lt 21664))
 {
     [Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate', 'ProductVersion', 'Windows 10', [RegistryValueKind]::String)
-
     [Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate', 'TargetReleaseVersion', '1', [RegistryValueKind]::DWord)
-
     [Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate', 'TargetReleaseVersionInfo', '22H2', [RegistryValueKind]::String)
 }
 #endregion

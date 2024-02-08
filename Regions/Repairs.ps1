@@ -84,10 +84,8 @@ bcdedit.exe /set "{default}" disabledynamictick no
 # This is useful to tell if something went wrong if a BSOD can't show up.
 bcdedit.exe /deletevalue "{default}" bootuxdisabled
 
-
 Enable-MMAgent -ApplicationLaunchPrefetching
 Enable-MMAgent -ApplicationPreLaunch
-
 
 # Apps that rely on 8.3 filenames from the DOS-era will break if this is disabled.
 fsutil.exe behavior set disable8dot3 2
