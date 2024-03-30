@@ -52,11 +52,6 @@ Start-Process -WindowStyle hidden -FilePath "powershell.exe" -Verb RunAs ".\Repa
 # Improves how consistent the performance is for networking, FPS, etc.
 Start-Process -WindowStyle hidden -FilePath "powershell.exe" -Verb RunAs ".\Stability.ps1 | Out-File '${HOME}\Desktop\W11Boost logs\Stability.log'"
 
-
-# Lower input delay and a little lower GPU usage (potentially higher FPS, depending on the game).
-# Borderless windowed and fullscreen would otherwise be too similar. 
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Environment', '__COMPAT_LAYER', '~ DISABLEDXMAXIMIZEDWINDOWEDMODE', [RegistryValueKind]::String)
-
 # Prevent network throttling to make online games have less percieved stuttering.
 [Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile', 'SystemResponsiveness', '0', [RegistryValueKind]::DWord)
 
