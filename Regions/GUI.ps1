@@ -64,30 +64,17 @@ function ExtrasWindow {
 
     $DebloatWindowsButton = New-Object Button -Property @{
         Dock   = 'Bottom'
-        Height = 109
-        Text   = "Debloat Windows"
+        Height = 218
+        Text   = "Remove default Windows apps with Microsoft logins"
     }
 
     $InstallXboxMinimalButton = New-Object Button -Property @{
         Dock   = 'Bottom'
-        Height = 109
+        Height = 218
         Text   = "Install Xbox services"
     }
 
-    $ApplyStigsButton = New-Object Button -Property @{
-        Dock   = 'Bottom'
-        Height = 109
-        Text   = "Install STIG policies"
-    }
-
-    $HardenFurtherButton = New-Object Button -Property @{
-        Dock   = 'Bottom'
-        Height = 109
-        Text   = "Harden further (use after STIGs)"
-    }
-
-    $Form.Controls.AddRange(@($DebloatWindowsButton, $InstallXboxMinimalButton,
-            $ApplyStigsButton, $HardenFurtherButton, $GoBackButton ))
+    $Form.Controls.AddRange(@($DebloatWindowsButton, $InstallXboxMinimalButton, $GoBackButton ))
 
     $DebloatWindowsButton.Add_Click({
             $Prompt = [MessageBox]::Show("This will uninstall some built-in Windows applications, are you sure?", "W11Boost", [MessageBoxButtons]::YesNo)
@@ -112,42 +99,6 @@ function ExtrasWindow {
                 & ".\..\Extras\Install_Xbox_Minimal.ps1" | Out-File "${HOME}\Desktop\W11Boost logs\Install Xbox Minimal.log"
 
                 NewToastNotification "Installation of Xbox apps and services are complete." -ToastTitle "W11Boost"
-
-                ExtrasWindow
-            }
-        })
-
-    $ApplyStigsButton.Add_Click({
-            $Prompt = [MessageBox]::Show("This will extract the STIGs then install all of them. Are you sure?", "W11Boost", [MessageBoxButtons]::YesNo)
-
-            if ($Prompt -eq "Y") {
-                PleaseWaitText
-
-                $STIG_NAME = "U_STIG_GPO_Package_October_2023"
-                $STIG_HASH = (Get-FileHash -Algorithm SHA256 "..\Third-party\DoD-STIGS\$STIG_NAME.zip").Hash
-                $EXPECTED_HASH = "69b705c44717eac8018e6b207144a5919f8d85d797d60add049e7f34dad9ff8f"
-
-                # Source: https://public.cyber.mil/stigs/gpo/
-                if ($STIG_HASH -ne $EXPECTED_HASH) {
-                    [MessageBox]::Show("STIGs did not match the expected SHA256 file hash; stopping now to prevent potential security risks.", "W11Boost", [MessageBoxButtons]::OK)
-                }
-                else {
-                    & ".\..\Extras\Apply_STIGs.ps1" | Out-File "${HOME}\Desktop\W11Boost logs\Apply STIGs.log"
-                    [MessageBox]::Show($Form, "STIGs have been applied. Please reboot manually for the changes to take effect.", "W11Boost", [MessageBoxButtons]::OK)
-                }
-
-                ExtrasWindow
-            }
-        })
-    $HardenFurtherButton.Add_Click({
-            $Prompt = [MessageBox]::Show("This will break older applications. Are you sure?", "W11Boost", [MessageBoxButtons]::YesNo)
-
-            if ($Prompt -eq "Y") {
-                PleaseWaitText
-
-                & ".\..\Extras\Harden_Further.ps1" | Out-File "${HOME}\Desktop\W11Boost logs\Harden further.log"
-
-                [MessageBox]::Show($Form, "Additional hardening complete. Please reboot manually for the changes to take effect.", "W11Boost", [MessageBoxButtons]::OK)
 
                 ExtrasWindow
             }

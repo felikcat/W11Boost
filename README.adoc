@@ -11,27 +11,22 @@ endif::[]
 
 == About
 
-.By default, W11Boost's most important goals compared to alternatives are...
-[%collapsible]
-====
-. Works on any Windows 10 or 11 installation. No need to reinstall.
-. By default, no apps or programs are broken.
-. Enhances security without being slower.
-. The easiest to use without sacrificing valuable features.
-. Has semi-modularity. If you wish to break certain apps or drivers for more performance, you can do so on your own terms.
-====
+.W11Boost's goals compared to alternative optimizers
+. Works on any Windows 10 or 11 or Server 2019/2022 installation. No need to reinstall.
+. Tries to not break any apps or programs.
+. Very easy to use.
 
 [%collapsible]
 .I want to know exactly what W11Boost does.
 
 ====
 
+This isn't a complete list.
+
 .*Performance*
 . App startups are not tracked.
 
 . Drivers and other system code are not paged to a disk. They are kept in memory instead, at the cost of higher memory usage.
-
-. Exclusive fullscreen mode is allowed again.
 
 . Enabled the following:
 - Increased NTFS pool usage limit, reducing Windows' page-faults and stack usage. As a downside, RAM usage is increased.
@@ -156,11 +151,6 @@ endif::[]
 . Login to the Microsoft Store before using `Install_Xbox_Minimal.bat`!
 . Installs only what's required to support Xbox Controllers (GUI/interface not included, get it link://www.microsoft.com/store/productId/9NBLGGH30XJ3[here]), Microsoft's PC Game Pass, and specific games such as Forza Horizon 4 & 5.
 - To also get the Game Bar, install the following link://www.microsoft.com/store/productId/9NZKPSTSNW4P[here] then link://www.microsoft.com/store/productId/9NBLGGH537C2[here].
-
-.*Install STIG policies*
-. Enforces a higher base-line of security via https://public.cyber.mil/stigs/[DoD STIG compliance], that still avoids breaking apps.
-. This cannot be a perfect replica, as it's local only.
-- This will not attach to an Active Directory hosted either locally via a Windows Server, or an online server via Microsoft Entra ID (called "Azure AD" prior).
 
 ====
 

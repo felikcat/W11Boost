@@ -171,11 +171,6 @@ Disable-ScheduledTask -TaskName "\Microsoft\VisualStudio\Updates\BackgroundDownl
 [Registry]::SetValue('HKEY_CURRENT_USER\Software\Microsoft\VisualStudio\Telemetry', 'TurnOffSwitch', '1', [RegistryValueKind]::DWord)
 #endregion
 
-$APPS = @("Microsoft.BingNews", "Microsoft.WindowsFeedbackHub")
-$APPS.ForEach({
-    Get-AppxPackage -all $_ | Remove-AppxPackage -AllUsers
-})
-
 # Restore the classic context menu on Windows 11.
 if ($WIN_BUILD -ge 21664) {
     [Registry]::SetValue('HKEY_CURRENT_USER\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32', '', '', [RegistryValueKind]::String)
