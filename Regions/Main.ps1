@@ -26,20 +26,6 @@ if (-Not (Get-Command -CommandType Application -Name winget.exe)) {
 #endregion
 
 
-#region Use optimal online NTP servers for more accurate system time.
-Stop-Service w32time
-
-# Make a clean slate for the time sync settings.
-w32tm.exe /unregister
-w32tm.exe /register
-
-w32tm.exe /config /syncfromflags:manual /manualpeerlist:"time.cloudflare.com time.nist.gov time.windows.com"
-Start-Service w32time
-
-w32tm.exe /resync
-#endregion
-
-
 # Stops various annoyances, one being Windows Update restarting your PC without your consent.
 Start-Process -WindowStyle hidden -FilePath "powershell.exe" -Verb RunAs ".\Annoyances.ps1 | Out-File '${HOME}\Desktop\W11Boost logs\Annoyances.log'"
 
