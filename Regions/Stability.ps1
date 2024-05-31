@@ -35,8 +35,6 @@ Disable-ScheduledTask -TaskName "\Microsoft\Windows\Application Experience\PcaPa
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Application Experience\ProgramDataUpdater"
 #endregion
 
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System', 'HideFastUserSwitching', '1', [RegistryValueKind]::DWord)
-
 # Power Throttling causes severe performance reduction for VMWare Workstation 17.
 [Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Power\PowerThrottling', 'PowerThrottlingOff', '1', [RegistryValueKind]::DWord)
 
@@ -52,9 +50,6 @@ Disable-ScheduledTask -TaskName "\Microsoft\Windows\Application Experience\Progr
 
 # Disable Explorer's thumbnail shadows.
 [Registry]::SetValue('HKEY_CLASSES_ROOT\SystemFileAssociations\image', 'Treatment', '2', [RegistryValueKind]::DWord)
-
-# W11Boost does changes that Windows developer builds would likely not anticipate.
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsSelfHost\UI\Visibility', 'HideInsiderPage', '1', [RegistryValueKind]::DWord)
 
 # Enable multiple processes for explorer.exe
 [Registry]::SetValue('HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced', 'SeparateProcess', '1', [RegistryValueKind]::DWord)
@@ -102,16 +97,16 @@ Disable-ScheduledTask -TaskName "\Microsoft\Windows\Diagnosis\RecommendedTrouble
 # Resets adapter settings to driver defaults; it's assumed if there were prior tweaks done, they're incorrect.
 Reset-NetAdapterAdvancedProperty -Name '*' -DisplayName '*'
 
-# Random disconnection fix for specific network adapters, such as Intel's I225-V
+# Random disconnection fix for specific network adapters, such as Intel's I225-V.
 Set-NetAdapterAdvancedProperty -Name '*' -DisplayName 'Wait for Link' -RegistryValue 0
 
-# Never periodically scan for other Access Points (AP) / Wi-Fi networks
+# Never periodically scan for other Access Points (AP) / Wi-Fi networks.
 Set-NetAdapterAdvancedProperty -Name '*' -DisplayName 'Global BG Scan blocking' -RegistryValue 2
 
 netsh.exe int tcp set global timestamps=enabled
 
 
-#region Automated file cleanup without user interaction is a bad idea, even if its ran only on low-disk space events.
+#region Automated file cleanup without user interaction is a bad idea, even if ran only on low-disk space events.
 [Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\Appx', 'AllowStorageSenseGlobal', '0', [RegistryValueKind]::DWord)
 
 [Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\StorageSense', 'AllowStorageSenseGlobal', '0', [RegistryValueKind]::DWord)
@@ -147,12 +142,9 @@ Disable-ScheduledTask -TaskName "\Microsoft\Windows\RemoteAssistance\RemoteAssis
 # https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/clean-up-the-winsxs-folder?view=windows-11
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Servicing\StartComponentCleanup"
 
-Disable-ScheduledTask -TaskName "\Microsoft\Windows\Speech\SpeechModelDownloadTask"
-
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Sysmain\ResPriStaticDbSync"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Sysmain\WsSwapAssessmentTask"
 
-Disable-ScheduledTask -TaskName "\Microsoft\Windows\USB\Usb-Notifications"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\WDI\ResolutionHost"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\Windows Filtering Platform\BfeOnServiceStartTypeChange"
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\WlanSvc\CDSSync"
@@ -170,14 +162,8 @@ Disable-ScheduledTask -TaskName "\Microsoft\Windows\RemovalTools\MRT_ERROR_HB"
 
 
 #region Windows Update changes.
-# Deny pre-release (Release Preview, Beta, or Dev channel) updates.
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate', 'ManagePreviewBuildsPolicyValue', '1', [RegistryValueKind]::DWord)
-
 # Deny updates that Microsoft deems as causing compatibility issues.
 [Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate', 'DisableWUfBSafeguards', '0', [RegistryValueKind]::DWord)
-
-# Opt out out of "being the first to get the latest non-security updates".
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings', 'IsContinuousInnovationOptedIn', '0', [RegistryValueKind]::DWord)
 
 # Notify to download then install Windows updates; no automatic Windows updates.
 [Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU', 'AUOptions', '2', [RegistryValueKind]::DWord)
@@ -185,16 +171,4 @@ Disable-ScheduledTask -TaskName "\Microsoft\Windows\RemovalTools\MRT_ERROR_HB"
 
 # Never force restarts.
 [Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU', 'NoAutoUpdate', '0', [RegistryValueKind]::DWord)
-
-# Disable Delivery Optimization's "Allow downloads from other PCs".
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization', 'DODownloadMode', '0', [RegistryValueKind]::DWord)
-#endregion
-
-#region Deny upgrade from Windows 10 -> Windows 11.
-if ($WIN_BUILD -ge 19041 -and ($WIN_BUILD -lt 21664))
-{
-    [Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate', 'ProductVersion', 'Windows 10', [RegistryValueKind]::String)
-    [Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate', 'TargetReleaseVersion', '1', [RegistryValueKind]::DWord)
-    [Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate', 'TargetReleaseVersionInfo', '22H2', [RegistryValueKind]::String)
-}
 #endregion

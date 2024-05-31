@@ -9,12 +9,18 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
+WARNING: Only Windows 10 Enterprise LTSC 2021 and Windows 11 Enterprise LTSC 2024 (for both, also includes IoT versions) are supported, as they don't revert changes on updates it seems. +
+You can download this special Windows 11 version from: https://forums.mydigitallife.net/posts/1837518 +
+Use https://rufus.ie to write that ISO to a USB, so you can install that Windows.
+
 == About
 
 .W11Boost's goals compared to alternative optimizers
-. Works on any Windows 10 or 11 or Server 2019/2022 installation. No need to reinstall.
-. Tries to not break any apps or programs.
+. Tries not to break any apps or programs, except DLSS Frame Generation due to stuttering issues in games (without DLSS FG).
+- If DLSS FG support is desired, run this command after installing W11Boost, use Command Prompt as Administrator: `reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\GraphicsDrivers" /v "HwSchMode" /t REG_DWORD /d 2 /f`
 . Very easy to use.
+. Tries not to trigger anti-malware detections, so you can leave it on during W11Boost's installation.
+. Doesn't ruin your security unlike AtlasOS. It can be argued however that W11Boost making updates not be forcefully installed is less secure.
 
 [%collapsible]
 .I want to know exactly what W11Boost does.
@@ -26,7 +32,7 @@ This isn't a complete list.
 .*Performance*
 . App startups are not tracked.
 
-. Drivers and other system code are not paged to a disk. They are kept in memory instead, at the cost of higher memory usage.
+. Drivers and other system code are not paged to a disk. They are kept in memory instead, at the cost of higher RAM usage.
 
 . Enabled the following:
 - Increased NTFS pool usage limit, reducing Windows' page-faults and stack usage. As a downside, RAM usage is increased.
@@ -80,12 +86,7 @@ This isn't a complete list.
 - Updates that Microsoft deems as causing compatibility issues are blocked.
 - Opted out of "being the first to get the latest non-security updates".
 
-. NTP time sync servers used are now 3 instead of 1, which are `time.cloudflare.com time.nist.gov time.windows.com` to reduce time sync failure.
-** Important for Tor and 2FA codes from Bitwarden to remain working.
-
 . Disabled the following:
-
-- "https://learn.microsoft.com/en-us/windows/win32/shell/fast-user-switching[Fast User Switching]", as W11Boost is intended for single-user use only.
 
 - Automated file cleanup that kicks in if disk space is running low.
 
@@ -93,7 +94,7 @@ This isn't a complete list.
 
 - 'Wait For Link' on Ethernet adaptors. Can reduce time taken to establish a connection, and prevent drop-outs. Drop-outs were the case with Intel I225-V revision 1 and 2, but not 3.
 
-- Microsoft's Malicious Removal Tool, which also has an issue of removing "malicious" files that other antivirus software like Kaspersky excluded.
+- Microsoft's Malicious Removal Tool, which also has an issue of removing "malicious" files that other anti-malware software like Kaspersky excluded.
 
 . Enabled separating explorer.exe, one for the Windows Shell, the other for the File Explorer.
 
@@ -154,22 +155,14 @@ This isn't a complete list.
 
 ====
 
-== 1. Changing Windows edition to "Education" then activating
-NOTE: This is optionally done for less telemetry, and to make W11Boost more effective.
-
-. Open the Command Prompt as administrator.
-. `cscript.exe %windir%\system32\slmgr.vbs /upk`
-. `cscript.exe %windir%\system32\slmgr.vbs /ipk NW6C2-QMPVW-D7KKK-3GKT6-VCFB2`
-. Use https://github.com/massgravel/Microsoft-Activation-Scripts[Microsoft Activation Scripts] to activate Windows; I recommend the KMS38 activation.
-
-== 2. Creating a System Restore Point
+== 1. Creating a System Restore Point
 . Open the Start Menu and search for "Create a restore point".
 . If System Restore is disabled by your system administrator, run in Command Prompt as administrator: +
 `reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows NT\SystemRestore" /v "DisableSR" /t REG_DWORD /d 0 /f`
 - Afterwards, repeat the first step.
 . Click "Create...", then name it "Before W11Boost".
 
-== 3. Installing W11Boost
+== 2. Installing W11Boost
 
 . https://github.com/felikcat/W11Boost/archive/refs/heads/master.zip[Download W11Boost] then extract it.
 
@@ -181,23 +174,13 @@ Inside the extras tab: +
 image:W11Boost_GUI_2.png[480,360]
 
 
-== 4. Recommendations
+== 3. Recommendations
 
 .*`Advanced.ps1` can disable Game DVR, remove Microsoft Edge and remove various forms of automation, etc.*
 * However, configuring `Advanced.ps1` is required:
 . Open `Advanced.ps1` in a text editor or IDE of your choosing. +
 . After finished, run `Advanced.ps1` as Administrator. 
 - No help will be provided on how to do this.
-
-=== Using fullscreen exclusive in games.
-Lowers input delay and GPU usage; potentially higher FPS, depending on the game.
-
-.Drawbacks:
-. Much higher time to switch between the game and another app (Alt + Tab).
-. Increases chances of crashing games.
-
-.How to:
-. Unity engine; use the launch option: `-window-mode exclusive`
 
 === GPU
 . To enable https://kernel.org/doc/html/next/gpu/amdgpu/display/mpo-overview.html[Multiplane Overlay] on NVIDIA cards; which makes Borderless Windowed the same speed as Fullscreen:
@@ -222,7 +205,7 @@ image:nvcplui_1.png[]
 
 . Replace Consumer OEM apps with their Enterprise variant. Such as replacing Lenovo Vantage with Lenovo Commercial Vantage.
 
-. Third-party antivirus programs provide better protection, but may have flaws such as slowing down your internet speeds. Be sure to test before and after installing say, https://www.kaspersky.com/downloads/free-antivirus[Kaspersky Free], which is still my favorite antivirus.
+. Third-party anti-malware programs provide better protection, but may have flaws such as slowing down your internet speeds. Be sure to test before and after installing say, https://www.kaspersky.com/downloads/free-antivirus[Kaspersky Free], which is my favorite anti-malware.
 
 === Ethernet
 Avoid Realtek 2.5Gbit adapters, as they are much more CPU intensive than Intel 2.5Gbit adapters.
@@ -248,3 +231,14 @@ image:Intel_HID.png[]
 
 I have not tested https://www.aliexpress.com/store/1101345677/search?SearchText=i226[DERAPID's Intel i226-V PCIe cards], which are similarly priced and rate well.
 ====
+
+
+=== Using fullscreen exclusive in games.
+Lowers input delay and GPU usage; potentially higher FPS, depending on the game.
+
+.Drawbacks:
+. Much higher time to switch between the game and another app (Alt + Tab).
+. Increases chances of crashing games.
+
+.How to:
+. Unity engine; use the launch option: `-window-mode exclusive`
