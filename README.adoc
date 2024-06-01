@@ -157,7 +157,7 @@ NOTE: Only LTSB, LTSC, and Server editions of Windows are recommended, as they d
 - Which to use? Depends. Windows Server is less bloated but will break more apps, due to them requiring a business license, or deliberately not supporting Server editions, and drivers you need might not be supported. +
 - Use https://rufus.ie to write that ISO to a USB, so you can install Windows 11 IoT Enterprise LTSC 2024 or Windows Server 2025.
 
-== 0. Converting Windows edition to Education, if not willing to use LTSB, LTSC, or Server.
+== 0. Converting Windows edition to Education, if not willing to use LTSB, LTSC, or Server
 NOTE: This is optionally done for less telemetry, and to make W11Boost more effective.
 
 . Open the Command Prompt as administrator.
