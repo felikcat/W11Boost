@@ -9,10 +9,10 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
-WARNING: Only LTSB, LTSC, and Server editions of Windows are recommended, as they don't revert W11Boost's changes on updates it seems. +
+WARNING: Only LTSB, LTSC, and Server editions of Windows are recommended, as they don't revert W11Boost's changes on updates it seems, and are less bloated to begin with. +
 - You can download Windows 11 LTSC from the https://forums.mydigitallife.net/threads/discussion-windows-11-enterprise-iot-enterprise-n-ltsc-2024-24h2-26100-x.88280/page-14#post-1837518[MyDigitalLife forums], or https://forums.mydigitallife.net/threads/discussion-windows-server-2025.88013/page-4#post-1837192[Windows Server 2025] from the same website. +
 - Which to use? Depends. Windows Server is less bloated but will break more apps, due to them requiring a business license, or deliberately not supporting Server editions, and drivers you need may not be supported. +
-- Use https://rufus.ie to write that ISO to a USB, so you can install Windows 11 IoT Enterprise LTSC 2024 or Windows Server 2025 .
+- Use https://rufus.ie to write that ISO to a USB, so you can install Windows 11 IoT Enterprise LTSC 2024 or Windows Server 2025.
 
 == About
 
@@ -22,7 +22,7 @@ WARNING: Only LTSB, LTSC, and Server editions of Windows are recommended, as the
 - If DLSS FG support is desired, run this command after installing W11Boost, use Command Prompt as Administrator: `reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\GraphicsDrivers" /v "HwSchMode" /t REG_DWORD /d 2 /f`
 . Very easy to use.
 . Tries not to trigger anti-malware detections, so you can leave it on during W11Boost's installation.
-. Doesn't ruin your security unlike some other optimizers. It can be argued however that W11Boost making updates not be forcefully installed is less secure.
+. Doesn't ruin your security. It can be argued however that W11Boost making updates not be forcefully installed is less secure.
 
 [%collapsible]
 .I want to know exactly what W11Boost does.
