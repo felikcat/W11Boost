@@ -9,11 +9,6 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
-WARNING: Only LTSB, LTSC, and Server editions of Windows are recommended, as they don't revert W11Boost's changes on updates it seems, and are less bloated to begin with. +
-- You can download Windows 11 LTSC from the https://forums.mydigitallife.net/threads/discussion-windows-11-enterprise-iot-enterprise-n-ltsc-2024-24h2-26100-x.88280/page-14#post-1837518[MyDigitalLife forums], or https://forums.mydigitallife.net/threads/discussion-windows-server-2025.88013/page-4#post-1837192[Windows Server 2025] from the same website. +
-- Which to use? Depends. Windows Server is less bloated but will break more apps, due to them requiring a business license, or deliberately not supporting Server editions, and drivers you need may not be supported. +
-- Use https://rufus.ie to write that ISO to a USB, so you can install Windows 11 IoT Enterprise LTSC 2024 or Windows Server 2025.
-
 == About
 
 .W11Boost's goals compared to alternative optimizers
@@ -156,6 +151,20 @@ This isn't a complete list.
 - To also get the Game Bar, install the following link://www.microsoft.com/store/productId/9NZKPSTSNW4P[here] then link://www.microsoft.com/store/productId/9NBLGGH537C2[here].
 
 ====
+
+NOTE: Only LTSB, LTSC, and Server editions of Windows are recommended, as they don't revert W11Boost's changes on updates it seems, and are less bloated to begin with. +
+- You can download Windows 11 LTSC from the https://forums.mydigitallife.net/threads/discussion-windows-11-enterprise-iot-enterprise-n-ltsc-2024-24h2-26100-x.88280/page-14#post-1837518[MyDigitalLife forums], or https://forums.mydigitallife.net/threads/discussion-windows-server-2025.88013/page-4#post-1837192[Windows Server 2025] from the same website. +
+- Which to use? Depends. Windows Server is less bloated but will break more apps, due to them requiring a business license, or deliberately not supporting Server editions, and drivers you need might not be supported. +
+- Use https://rufus.ie to write that ISO to a USB, so you can install Windows 11 IoT Enterprise LTSC 2024 or Windows Server 2025.
+
+== 0. Converting Windows edition to Education, if not willing to use LTSB, LTSC, or Server.
+NOTE: This is optionally done for less telemetry, and to make W11Boost more effective.
+
+. Open the Command Prompt as administrator.
+. `cscript.exe %windir%\system32\slmgr.vbs /upk`
+. `cscript.exe %windir%\system32\slmgr.vbs /ipk NW6C2-QMPVW-D7KKK-3GKT6-VCFB2`
+. Use https://github.com/massgravel/Microsoft-Activation-Scripts[Microsoft Activation Scripts] to activate Windows; I recommend the KMS38 activation.
+
 
 == 1. Creating a System Restore Point
 . Open the Start Menu and search for "Create a restore point".
