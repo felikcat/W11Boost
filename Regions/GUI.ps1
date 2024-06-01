@@ -8,6 +8,7 @@ Add-Type -AssemblyName System.Drawing
 
 Push-Location $PSScriptRoot
 . ".\IMPORTS.ps1"
+Remove-Item -Path "${HOME}\Desktop\W11Boost logs" -Recurse -Force -ErrorAction SilentlyContinue
 New-Item -ItemType Directory "${HOME}\Desktop\W11Boost logs"
 #endregion
 

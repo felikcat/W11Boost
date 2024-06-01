@@ -1,5 +1,4 @@
 #Requires -Version 5 -RunAsAdministrator
-using namespace Microsoft.Win32
 
 #region Initialize
 Push-Location $PSScriptRoot
@@ -8,9 +7,9 @@ Push-Location $PSScriptRoot
 # Required for: Windows Updates, Windows Store (StorSvc), winget (DoSvc).
 $REGS = @("AppXSvc", "ClipSVC", "TokenBroker", "StorSvc", "DoSvc")
 $REGS.ForEach({
-    [Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\$_', 'Start', '3', [RegistryValueKind]::DWord)
-    Start-Service $_
-})
+        SetReg -Path "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\$_" -Key 'Start' -Value '3' -Type 'DWord'
+        Start-Service $_
+    })
 
 # Installs Winget if not present. Mainly specific to LTSC 2019 and LTSC 2021.
 if (-Not (Get-Command -CommandType Application -Name winget.exe)) {
@@ -39,14 +38,14 @@ Start-Process -WindowStyle hidden -FilePath "powershell.exe" -Verb RunAs ".\Repa
 Start-Process -WindowStyle hidden -FilePath "powershell.exe" -Verb RunAs ".\Stability.ps1 | Out-File '${HOME}\Desktop\W11Boost logs\Stability.log'"
 
 # Prevent network throttling to make online games have less percieved stuttering.
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile', 'SystemResponsiveness', '0', [RegistryValueKind]::DWord)
+SetReg -Path 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile' -Key 'SystemResponsiveness' -Value '0' -Type 'DWord'
 
 # Increase process priority of games.
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games', 'Priority', '6', [RegistryValueKind]::DWord)
+SetReg -Path 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games' -Key 'Priority' -Value '6' -Type 'DWord'
 
 # Allow global adjustment of timer resolution precision to enforce 0.5ms, so poorly written apps can't fuck up the precision for other apps.
 # -> In detail: https://randomascii.wordpress.com/2020/10/04/windows-timer-resolution-the-great-rule-change/
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\kernel', 'GlobalTimerResolutionRequests', '1', [RegistryValueKind]::DWord)
+SetReg -Path 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\kernel' -Key 'GlobalTimerResolutionRequests' -Value '1' -Type 'DWord'
 
 #region Install SetTimerResolution
 function STR_Requirement {
@@ -72,18 +71,18 @@ STR_Service
 #endregion
 
 # Do not page drivers and other system code to a disk, keep it in memory.
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management', 'DisablePagingExecutive', '1', [RegistryValueKind]::DWord)
+SetReg -Path 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management' -Key 'DisablePagingExecutive' -Value '1' -Type 'DWord'
 
-[Registry]::SetValue('HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced', 'ShowSyncProviderNotifications', '0', [RegistryValueKind]::DWord)
+SetReg -Path 'HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Key 'ShowSyncProviderNotifications' -Value '0' -Type 'DWord'
 
-[Registry]::SetValue('HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer', 'NoLowDiskSpaceChecks', '1', [RegistryValueKind]::DWord)
+SetReg -Path 'HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer' -Key 'NoLowDiskSpaceChecks' -Value '1' -Type 'DWord'
 
 # Disable tracking of application startups.
-[Registry]::SetValue('HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced', 'Start_TrackProgs', '0', [RegistryValueKind]::DWord)
-[Registry]::SetValue('HKEY_CURRENT_USER\Software\Policies\Microsoft\Windows\EdgeUI', 'DisableMFUTracking', '1', [RegistryValueKind]::DWord)
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\EdgeUI', 'DisableMFUTracking', '1', [RegistryValueKind]::DWord)
+SetReg -Path 'HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Key 'Start_TrackProgs' -Value '0' -Type 'DWord'
+SetReg -Path 'HKEY_CURRENT_USER\Software\Policies\Microsoft\Windows\EdgeUI' -Key 'DisableMFUTracking' -Value '1' -Type 'DWord'
+SetReg -Path 'HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\EdgeUI' -Key 'DisableMFUTracking' -Value '1' -Type 'DWord'
 
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\System', 'DisableAcrylicBackgroundOnLogon', '1', [RegistryValueKind]::DWord)
+SetReg -Path 'HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\System' -Key 'DisableAcrylicBackgroundOnLogon' -Value '1' -Type 'DWord'
 
 Disable-ScheduledTask -TaskName "\Microsoft\Windows\DiskDiagnostic\Microsoft-Windows-DiskDiagnosticDataCollector"
 
@@ -93,17 +92,17 @@ Disable-ScheduledTask -TaskName "\NvTmRep_CrashReport3_{B2FE1952-0186-46C3-BAEC-
 Disable-ScheduledTask -TaskName "\NvTmRep_CrashReport4_{B2FE1952-0186-46C3-BAEC-A80AA35AC5B8}"
 
 # Do not analyze apps' execution time data.
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Perflib', 'Disable Performance Counters', '1', [RegistryValueKind]::DWord)
+SetReg -Path 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Perflib' -Key 'Disable Performance Counters' -Value '1' -Type 'DWord'
 
 
 #region NTFS tweaks
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem', 'LongPathsEnabled', '1', [RegistryValueKind]::DWord)
+SetReg -Path 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem' -Key 'LongPathsEnabled' -Value '1' -Type 'DWord'
 
 # Ensure "Virtual Memory Pagefile Encryption" is at its default of 'off'.
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Policies', 'NtfsEncryptPagingFile', '0', [RegistryValueKind]::DWord)
+SetReg -Path 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Policies' -Key 'NtfsEncryptPagingFile' -Value '0' -Type 'DWord'
 
 # Allocate more RAM to NTFS' paged pool.
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Policies', 'NtfsForceNonPagedPoolAllocation', '0', [RegistryValueKind]::DWord)
+SetReg -Path 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Policies' -Key 'NtfsForceNonPagedPoolAllocation' -Value '0' -Type 'DWord'
 fsutil.exe behavior set memoryusage 2
 
 # Do not use "Last Access Time Stamp Updates" by default; apps can still explicitly update these timestamps for themself.
@@ -112,54 +111,54 @@ fsutil.exe behavior set disablelastaccess 3
 
 # Allocate less resources to low-priority tasks, 10% total.
 # https://learn.microsoft.com/en-us/windows/win32/procthread/multimedia-class-scheduler-service
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile', 'SystemResponsiveness', '10', [RegistryValueKind]::DWord)
+SetReg -Path 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile' -Key 'SystemResponsiveness' -Value '10' -Type 'DWord'
 
 # Thankfully this does not disable the Windows Recovery Environment.
 bcdedit.exe /set "{default}" recoveryenabled no
 
 # Do not keep track of recently opened files.
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer', 'NoRecentDocsHistory', '1', [RegistryValueKind]::DWord)
+SetReg -Path 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer' -Key 'NoRecentDocsHistory' -Value '1' -Type 'DWord'
 
 
 #region Shutdown options
 # Disables "Fast startup".
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Power', 'HiberbootEnabled', '0', [RegistryValueKind]::DWord)
+SetReg -Path 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Power' -Key 'HiberbootEnabled' -Value '0' -Type 'DWord'
 (Get-Item "$env:windir\System32\SleepStudy\UserNotPresentSession.etl").Attributes = 'Archive', 'ReadOnly'
 
 # Use default shutdown behavior.
 Remove-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "AutoEndTasks"
 
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System', 'DisableShutdownNamedPipe', '1', [RegistryValueKind]::DWord)
+SetReg -Path 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Key 'DisableShutdownNamedPipe' -Value '1' -Type 'DWord'
 
 # A security feature that's disabled by default in Windows 11. Enabling this makes shutdown times slow.
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management', 'ClearPageFileAtShutdown', '0', [RegistryValueKind]::DWord)
+SetReg -Path 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management' -Key 'ClearPageFileAtShutdown' -Value '0' -Type 'DWord'
 #endregion
 
 
 # Hidden file extensions are abused to hide the real file format, example:
 # An executable (.exe, .scr) pretending to be a PDF.
-[Registry]::SetValue('HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced', 'HideFileExt', '0', [RegistryValueKind]::DWord)
+SetReg -Path 'HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Key 'HideFileExt' -Value '0' -Type 'DWord'
 
 
 #region Speed up Visual Studio by disabling its telemetry.
 Disable-ScheduledTask -TaskName "\Microsoft\VisualStudio\Updates\BackgroundDownload"
 # https://learn.microsoft.com/en-us/visualstudio/ide/visual-studio-experience-improvement-program?view=vs-2022
 # PerfWatson2 (VSCEIP) is intensive on resources, ask to disable it.
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\Software\Microsoft\VSCommon\17.0\SQM', 'OptIn', '0', [RegistryValueKind]::DWord)
+SetReg -Path 'HKEY_LOCAL_MACHINE\Software\Microsoft\VSCommon\17.0\SQM' -Key 'OptIn' -Value '0' -Type 'DWord'
 
 # Remove feedback button and its features.
 # Feedback can still be given through the Visual Studio Installer:
 # https://learn.microsoft.com/en-us/visualstudio/ide/how-to-report-a-problem-with-visual-studio?view=vs-2022
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\VisualStudio\Feedback', 'DisableFeedbackDialog', '1', [RegistryValueKind]::DWord)
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\VisualStudio\Feedback', 'DisableEmailInput', '1', [RegistryValueKind]::DWord)
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\VisualStudio\Feedback', 'DisableScreenshotCapture', '1', [RegistryValueKind]::DWord)
+SetReg -Path 'HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\VisualStudio\Feedback' -Key 'DisableFeedbackDialog' -Value '1' -Type 'DWord'
+SetReg -Path 'HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\VisualStudio\Feedback' -Key 'DisableEmailInput' -Value '1' -Type 'DWord'
+SetReg -Path 'HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\VisualStudio\Feedback' -Key 'DisableScreenshotCapture' -Value '1' -Type 'DWord'
 
-[Registry]::SetValue('HKEY_CURRENT_USER\Software\Microsoft\VisualStudio\Telemetry', 'TurnOffSwitch', '1', [RegistryValueKind]::DWord)
+SetReg -Path 'HKEY_CURRENT_USER\Software\Microsoft\VisualStudio\Telemetry' -Key 'TurnOffSwitch' -Value '1' -Type 'DWord'
 #endregion
 
 # Restore the classic context menu on Windows 11.
 if ($WIN_BUILD -ge 21664) {
-    [Registry]::SetValue('HKEY_CURRENT_USER\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32', '', '', [RegistryValueKind]::String)
+    SetReg -Path 'HKEY_CURRENT_USER\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32' -Key '' -Value '' -Type 'String'
 }
 
 $NAME = @("InternetCustom", "DatacenterCustom", "Compat", "Datacenter", "Internet")
@@ -172,24 +171,24 @@ $NAME.ForEach({
 
 
 #region Microsoft Edge tweaks
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Edge', 'StartupBoostEnabled', '0', [RegistryValueKind]::DWord)
+SetReg -Path 'HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Edge' -Key 'StartupBoostEnabled' -Value '0' -Type 'DWord'
 # Disallow Microsoft News.
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Edge', 'NewTabPageContentEnabled', '0', [RegistryValueKind]::DWord)
+SetReg -Path 'HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Edge' -Key 'NewTabPageContentEnabled' -Value '0' -Type 'DWord'
 
 # Disable sponsored links on homepage.
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Edge', 'NewTabPageHideDefaultTopSites', '0', [RegistryValueKind]::DWord)
+SetReg -Path 'HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Edge' -Key 'NewTabPageHideDefaultTopSites' -Value '0' -Type 'DWord'
 
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Edge', 'DefaultBrowserSettingEnabled', '0', [RegistryValueKind]::DWord)
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Edge', 'DefaultBrowserSettingsCampaignEnabled', '0', [RegistryValueKind]::DWord)
+SetReg -Path 'HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Edge' -Key 'DefaultBrowserSettingEnabled' -Value '0' -Type 'DWord'
+SetReg -Path 'HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Edge' -Key 'DefaultBrowserSettingsCampaignEnabled' -Value '0' -Type 'DWord'
 
 # Block recommendations and promotional notifications from Microsoft Edge
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Edge', 'ShowRecommendationsEnabled', '0', [RegistryValueKind]::DWord)
+SetReg -Path 'HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Edge' -Key 'ShowRecommendationsEnabled' -Value '0' -Type 'DWord'
 
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Edge', 'SpotlightExperiencesAndRecommendationsEnabled', '0', [RegistryValueKind]::DWord)
+SetReg -Path 'HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Edge' -Key 'SpotlightExperiencesAndRecommendationsEnabled' -Value '0' -Type 'DWord'
 
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Edge', 'PromotionalTabsEnabled', '0', [RegistryValueKind]::DWord)
+SetReg -Path 'HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Edge' -Key 'PromotionalTabsEnabled' -Value '0' -Type 'DWord'
 
 # Disable various forms of telemetry.
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Edge', 'DiagnosticData', '0', [RegistryValueKind]::DWord)
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Edge', 'PersonalizationReportingEnabled', '0', [RegistryValueKind]::DWord)
+SetReg -Path 'HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Edge' -Key 'DiagnosticData' -Value '0' -Type 'DWord'
+SetReg -Path 'HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Edge' -Key 'PersonalizationReportingEnabled' -Value '0' -Type 'DWord'
 #endregion

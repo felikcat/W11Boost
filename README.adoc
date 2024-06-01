@@ -9,13 +9,15 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
-WARNING: Only Windows 10 Enterprise LTSC 2021 and Windows 11 Enterprise LTSC 2024 (for both, also includes IoT versions) are supported, as they don't revert changes on updates it seems. +
-You can download this special Windows 11 version from: https://forums.mydigitallife.net/posts/1837518 +
-Use https://rufus.ie to write that ISO to a USB, so you can install that Windows.
+WARNING: Only LTSB, LTSC, and Server editions of Windows are recommended, as they don't revert W11Boost's changes on updates it seems. +
+- You can download Windows 11 LTSC from the https://forums.mydigitallife.net/threads/discussion-windows-11-enterprise-iot-enterprise-n-ltsc-2024-24h2-26100-x.88280/page-14#post-1837518[MyDigitalLife forums], or https://forums.mydigitallife.net/threads/discussion-windows-server-2025.88013/page-4#post-1837192[Windows Server 2025] from the same website. +
+- Which to use? Depends. Windows Server is less bloated but will break more apps, due to them requiring a business license, or deliberately not supporting Server editions, and drivers you need may not be supported. +
+- Use https://rufus.ie to write that ISO to a USB, so you can install Windows 11 IoT Enterprise LTSC 2024 or Windows Server 2025 .
 
 == About
 
 .W11Boost's goals compared to alternative optimizers
+. Doesn't force you into changing your workflow or preferences. If you still want to use Insider builds or other bad ideas, you can.
 . Tries not to break any apps or programs, except DLSS Frame Generation due to stuttering issues in games (without DLSS FG).
 - If DLSS FG support is desired, run this command after installing W11Boost, use Command Prompt as Administrator: `reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\GraphicsDrivers" /v "HwSchMode" /t REG_DWORD /d 2 /f`
 . Very easy to use.

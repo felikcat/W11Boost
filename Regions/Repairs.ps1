@@ -1,41 +1,42 @@
 #Requires -Version 5 -RunAsAdministrator
-using namespace Microsoft.Win32
+Push-Location $PSScriptRoot
+. ".\IMPORTS.ps1"
 
 # Loads Group Policies asynchronous. By default this is already asynchoronous.
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows NT\CurrentVersion\Winlogon', 'SyncForegroundPolicy', '0', [RegistryValueKind]::DWord)
+SetReg -Path 'HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows NT\CurrentVersion\Winlogon' -Key 'SyncForegroundPolicy' -Value '0' -Type 'DWord'
 
 # Page Combining is a feature meant to reduce memory usage, but introduces security risks and lowers performance.
 # https://kaimi.io/en/2020/07/reading-another-process-memory-via-windows-10-page-combining-en/
 # https://forums.guru3d.com/threads/a-bit-detailed-info-about-memory-combining-in-win10.419262/
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management', 'DisablePageCombining', '1', [RegistryValueKind]::DWord)
+SetReg -Path 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management' -Key 'DisablePageCombining' -Value '1' -Type 'DWord'
 
 # Prefer IPv6 whenever possible.
 # https://docs.microsoft.com/en-US/troubleshoot/windows-server/networking/configure-ipv6-in-windows#use-registry-key-to-configure-ipv6
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters', 'DisabledComponents', '0', [RegistryValueKind]::DWord)
+SetReg -Path 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters' -Key 'DisabledComponents' -Value '0' -Type 'DWord'
 
 # Splitting SvcHost less decreases Windows' stability; set it to defaults.
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control', 'SvcHostSplitThresholdInKB', '3670016', [RegistryValueKind]::DWord)
+SetReg -Path 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control' -Key 'SvcHostSplitThresholdInKB' -Value '3670016' -Type 'DWord'
 
 # Ensure IPv6 and its related features are enabled.
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\iphlpsvc', 'Start', '2', [RegistryValueKind]::DWord)
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\IpxlatCfgSvc', 'Start', '3', [RegistryValueKind]::DWord)
+SetReg -Path 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\iphlpsvc' -Key 'Start' -Value '2' -Type 'DWord'
+SetReg -Path 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\IpxlatCfgSvc' -Key 'Start' -Value '3' -Type 'DWord'
 Set-NetAdapterBinding -Name '*' -DisplayName 'Internet Protocol Version 6 (TCP/IPv6)' -Enabled 1
 
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\PrefetchParameters', 'EnablePrefetcher', '3', [RegistryValueKind]::DWord)
+SetReg -Path 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\PrefetchParameters' -Key 'EnablePrefetcher' -Value '3' -Type 'DWord'
 # The memory performance issues related to requesting data from disk has been solved years ago.
 # Disabling SysMain (Superfetch) would make memory page fetching slower by:
 # - Less pages being cached into memory/RAM, and in an un-intelligent manner.
 # - Increase the amount of random I/O reads and writes; much slower than RAM.
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\SysMain', 'Start', '2', [RegistryValueKind]::DWord)
+SetReg -Path 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\SysMain' -Key 'Start' -Value '2' -Type 'DWord'
 
 # Allow Phone -> PC linking on this device.
 # NOTE 1: Allows advertised apps in the start menu on Windows 11; StartAllBack is used to side-step this problem.
 # NOTE 2: 'DisableWindowsConsumerFeatures' = 1 only applies to Enterprise and Education editions of Windows.
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\System', 'EnableMmx', '1', [RegistryValueKind]::DWord)
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\CloudContent', 'DisableWindowsConsumerFeatures', '0', [RegistryValueKind]::DWord)
+SetReg -Path 'HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\System' -Key 'EnableMmx' -Value '1' -Type 'DWord'
+SetReg -Path 'HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\CloudContent' -Key 'DisableWindowsConsumerFeatures' -Value '0' -Type 'DWord'
 
 # Old versions of the Intel PROSet software set this to 0, breaking Windows' internet connectivity check.
-[Registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\NlaSvc\Parameters\Internet', 'EnableActiveProbing', '1', [RegistryValueKind]::DWord)
+SetReg -Path 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\NlaSvc\Parameters\Internet' -Key 'EnableActiveProbing' -Value '1' -Type 'DWord'
 
 
 # Disabling threaded DPCs is for debugging purposes and will cause spinlocks; it does not lower DPC latency.
@@ -66,9 +67,9 @@ Remove-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Dfrg\BootOptimizeFunction" -
 # Revert to Windows' default shutdown behavior regarding handling of apps.
 $REGS = @("WaitToKillAppTimeOut", "HungAppTimeout", "WaitToKillServiceTimeout")
 $REGS.ForEach({
-    Remove-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name $_
-    Remove-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control" -Name $_
-})
+        Remove-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name $_
+        Remove-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control" -Name $_
+    })
 
 
 # Use sane defaults for these sensitive timer related settings.
