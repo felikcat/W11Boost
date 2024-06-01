@@ -22,7 +22,7 @@ WARNING: Only LTSB, LTSC, and Server editions of Windows are recommended, as the
 - If DLSS FG support is desired, run this command after installing W11Boost, use Command Prompt as Administrator: `reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\GraphicsDrivers" /v "HwSchMode" /t REG_DWORD /d 2 /f`
 . Very easy to use.
 . Tries not to trigger anti-malware detections, so you can leave it on during W11Boost's installation.
-. Doesn't ruin your security unlike AtlasOS. It can be argued however that W11Boost making updates not be forcefully installed is less secure.
+. Doesn't ruin your security unlike some other optimizers. It can be argued however that W11Boost making updates not be forcefully installed is less secure.
 
 [%collapsible]
 .I want to know exactly what W11Boost does.
