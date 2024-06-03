@@ -187,6 +187,8 @@ image:W11Boost_GUI_2.png[480,360]
 
 == 3. Recommendations
 
+TIP: For LTSC and Windows Server, if you need the Microsoft store, run in Command Prompt as Administrator: `wsreset.exe -i`
+
 .*`Advanced.ps1` can disable Game DVR, remove Microsoft Edge and remove various forms of automation, etc.*
 * However, configuring `Advanced.ps1` is required:
 . Open `Advanced.ps1` in a text editor or IDE of your choosing. +
