@@ -152,13 +152,13 @@ This isn't a complete list.
 
 ====
 
-NOTE: Only LTSB, LTSC, and Server editions of Windows are recommended, as they don't revert W11Boost's changes on updates it seems, and are less bloated to begin with. +
-- You can download Windows 11 LTSC from the https://forums.mydigitallife.net/threads/discussion-windows-11-enterprise-iot-enterprise-n-ltsc-2024-24h2-26100-x.88280/page-14#post-1837518[MyDigitalLife forums], or https://forums.mydigitallife.net/threads/discussion-windows-server-2025.88013/page-4#post-1837192[Windows Server 2025] from the same website. +
-- Which to use? Depends. Windows Server is less bloated but will break more apps, due to them requiring a business license, or deliberately not supporting Server editions, and drivers you need might not be supported. +
+NOTE: Only the LTSC version of Windows is recommended, as it grants more control and is less bloated to begin with. +
+- You can download Windows 11 LTSC from the https://forums.mydigitallife.net/threads/discussion-windows-11-enterprise-iot-enterprise-n-ltsc-2024-24h2-26100-x.88280/page-14#post-1837518[MyDigitalLife forums]. +
 - Use https://rufus.ie to write that ISO to a USB, so you can install Windows 11 IoT Enterprise LTSC 2024 or Windows Server 2025.
 
-== 0. Converting Windows edition to Education, if not willing to use LTSB, LTSC, or Server
-NOTE: This is optionally done for less telemetry, and to make W11Boost more effective.
+WARNING: Do not use LTSC if you use https://apps.microsoft.com/detail/9nz98vnk5x1s[Intel Application Optimization], you're stuck on the Education/Enterprise edition of Windows 11.
+
+== 0. Converting Windows edition to Education, if not willing to use LTSC
 
 . Open the Command Prompt as administrator.
 . `cscript.exe %windir%\system32\slmgr.vbs /upk`
