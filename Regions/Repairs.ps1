@@ -95,3 +95,9 @@ fsutil.exe behavior set disable8dot3 2
 if ($env:PROCESSOR_IDENTIFIER -match 'GenuineIntel') {
     setx.exe /M OPENSSL_ia32cap "~0x200000200000000"
 }
+
+$NAME = @("InternetCustom", "DatacenterCustom", "Compat", "Datacenter", "Internet")
+$NAME.ForEach({
+    # ctcp is used instead of bbr2 due to it breaking Steam on Windows 11 24H2.
+    netsh.exe int tcp set supplemental Template=$_ CongestionProvider=ctcp
+})

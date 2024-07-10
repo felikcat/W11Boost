@@ -161,15 +161,6 @@ if ($WIN_BUILD -ge 21664) {
     SetReg -Path 'HKEY_CURRENT_USER\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32' -Key '' -Value '' -Type 'String'
 }
 
-$NAME = @("InternetCustom", "DatacenterCustom", "Compat", "Datacenter", "Internet")
-$NAME.ForEach({
-        # BBRv2 is currently the best well-rounded TCP congestion algorithm.
-        # Improvements from BBRv2 can be noticed if you're hosting game or web servers on this PC.
-        # https://ieeexplore.ieee.org/abstract/document/9361674
-        netsh.exe int tcp set supplemental Template=$_ CongestionProvider=bbr2
-    })
-
-
 #region Microsoft Edge tweaks
 SetReg -Path 'HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Edge' -Key 'StartupBoostEnabled' -Value '0' -Type 'DWord'
 # Disallow Microsoft News.
