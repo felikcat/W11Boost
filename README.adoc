@@ -152,13 +152,7 @@ This isn't a complete list.
 
 ====
 
-NOTE: Only the LTSC version of Windows is recommended, as it grants more control and is less bloated to begin with. +
-- You can download Windows 11 LTSC from the https://forums.mydigitallife.net/threads/discussion-windows-11-enterprise-iot-enterprise-n-ltsc-2024-24h2-26100-x.88280/page-14#post-1837518[MyDigitalLife forums]. +
-- Use https://rufus.ie to write that ISO to a USB, so you can install Windows 11 IoT Enterprise LTSC 2024 or Windows Server 2025.
-
-WARNING: Do not use LTSC if you use https://apps.microsoft.com/detail/9nz98vnk5x1s[Intel Application Optimization], you're stuck on the Education/Enterprise edition of Windows 11.
-
-== 0. Converting Windows edition to Education, if not willing to use LTSC
+== 0. Converting Windows edition to Education, if not using LTSC
 
 . Open the Command Prompt as administrator.
 . `cscript.exe %windir%\system32\slmgr.vbs /upk`
