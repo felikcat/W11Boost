@@ -9,6 +9,8 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
+WARNING: C++ rewrite is nearly complete. Use the PowerShell version still if you want, but there's different design decisions in the rewrite.
+
 == About
 
 .W11Boost's goals compared to alternative optimizers
