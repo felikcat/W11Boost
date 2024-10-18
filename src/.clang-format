@@ -1,0 +1,4 @@
+BasedOnStyle: LLVM
+# Don't screw up my includes fucker
+IncludeBlocks: Preserve
+SortIncludes: Never

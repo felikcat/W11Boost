@@ -1,0 +1,146 @@
+module;
+#include <windows.h>
+#include <UserEnv.h>
+#include <combaseapi.h>
+#include <comdef.h>
+#include <gpedit.h>
+export module PrivacyMode;
+import Common;
+
+export size_t install_privacy_mode() {
+  // Apartment-threaded required for GPOs
+  HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
+  if (FAILED(hr))
+    return 1;
+
+  CoCreateInstance(_CLSID_GroupPolicyObject, NULL, CLSCTX_INPROC_SERVER,
+                   _IID_IGroupPolicyObject, (LPVOID *)&pGPO);
+
+  hr = pGPO->OpenLocalMachineGPO(GPO_OPEN_LOAD_REGISTRY);
+  if (FAILED(hr))
+    return 1;
+
+  HKEY hKey = HKEY_LOCAL_MACHINE;
+  pGPO->GetRegistryKey(GPO_SECTION_MACHINE, &hKey);
+
+  // Do not analyze apps' execution time data.
+  set_dword(hKey, LR"(SOFTWARE\Microsoft\Windows NT\CurrentVersion\Perflib)",
+            L"Disable Performance Counters", 1);
+
+  // Do not keep track of recently opened files.
+  set_dword(hKey,
+            LR"(SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer)",
+            L"NoRecentDocsHistory", 1);
+
+  // Disable Superfetch.
+  set_dword(hKey, LR"(SYSTEM\CurrentControlSet\Services\SysMain)", L"Start", 4);
+  set_dword(
+      hKey,
+      LR"(SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management)",
+      L"EnableSuperfetch", 0);
+
+  // Disable Prefetch.
+  set_dword(
+      hKey,
+      LR"(SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\PrefetchParameters)",
+      L"EnablePrefetcher", 0);
+
+  // Do not use "Last Access Time Stamp Updates" by default; apps can still
+  // explicitly update these timestamps for themself.
+  wchar_t disableFileTimestamps[] =
+      L"fsutil.exe behavior set disablelastaccess 3";
+  start_command_and_wait(disableFileTimestamps);
+
+  // Disable "Application Impact Telemetry".
+  set_dword(hKey, LR"(SOFTWARE\Policies\Microsoft\Windows\AppCompat)",
+            L"AITEnable", 0);
+
+  // Disable "Program Compatibility Assistant"
+  set_dword(hKey, LR"(SOFTWARE\Policies\Microsoft\Windows\AppCompat)",
+            L"DisablePCA", 1);
+
+  // Disable "Application Compatibility Engine"
+  set_dword(hKey, LR"(SOFTWARE\Policies\Microsoft\Windows\AppCompat)",
+            L"DisableEngine", 1);
+
+  // Disable "SwitchBack Compatibility Engine"
+  set_dword(hKey, LR"(SOFTWARE\Policies\Microsoft\Windows\AppCompat)",
+            L"SbEnable", 0);
+
+  // Disable "User Steps Recorder"
+  set_dword(hKey, LR"(SOFTWARE\Policies\Microsoft\Windows\AppCompat)",
+            L"DisableUAR", 1);
+
+  // Disable "Inventory Collector"
+  set_dword(hKey, LR"(SOFTWARE\Policies\Microsoft\Windows\AppCompat)",
+            L"DisableInventory", 1);
+
+  // Disable "Program Compatibility Assistant" service
+  set_dword(hKey, LR"(SYSTEM\CurrentControlSet\Services)", L"PcaSvc", 4);
+
+  // Disable PerfTrack.
+  set_dword(
+      hKey,
+      LR"(SOFTWARE\Policies\Microsoft\Windows\WDI\{9c5a40da-b965-4fc3-8781-88dd50a6299d})",
+      L"ScenarioExecutionEnabled", 0);
+  set_dword(hKey, LR"(SOFTWARE\Policies\Microsoft\Messenger\Client)", L"CEIP",
+            2);
+
+  // [P1] Disable tracking of application startups.
+  set_dword(hKey, LR"(SOFTWARE\Policies\Microsoft\Windows\EdgeUI)",
+            L"DisableMFUTracking", 1);
+
+  // Fully disable the activity feed.
+  set_dword(hKey, LR"(SOFTWARE\Policies\Microsoft\Windows\System)",
+            L"EnableActivityFeed", 0);
+  set_dword(hKey, LR"(SOFTWARE\Policies\Microsoft\Windows\System)",
+            L"PublishUserActivities", 0);
+  set_dword(hKey, LR"(SOFTWARE\Policies\Microsoft\Windows\System)",
+            L"UploadUserActivities", 0);
+
+  gp_cleanup(hr);
+
+  //---- HKEY_CURRENT_USER ----//
+  CoCreateInstance(_CLSID_GroupPolicyObject, NULL, CLSCTX_INPROC_SERVER,
+                   _IID_IGroupPolicyObject, (LPVOID *)&pGPO);
+
+  hr = pGPO->OpenLocalMachineGPO(GPO_OPEN_LOAD_REGISTRY);
+  if (FAILED(hr))
+    return 1;
+
+  hKey = HKEY_CURRENT_USER;
+  pGPO->GetRegistryKey(GPO_SECTION_USER, &hKey);
+
+  // Do not search disks to attempt fixing a missing shortcut.
+  set_dword(hKey,
+            LR"(Software\Microsoft\Windows\CurrentVersion\Policies\Explorer)",
+            L"LinkResolveIgnoreLinkInfo", 1);
+  set_dword(hKey,
+            LR"(Software\Microsoft\Windows\CurrentVersion\Policies\Explorer)",
+            L"NoResolveSearch", 1);
+  set_dword(hKey,
+            LR"(Software\Microsoft\Windows\CurrentVersion\Policies\Explorer)",
+            L"NoResolveTrack", 1);
+
+  // Disable Device Search History.
+  set_dword(hKey,
+            LR"(Software\Microsoft\Windows\CurrentVersion\SearchSettings)",
+            L"IsDeviceSearchHistoryEnabled", 0);
+
+  // By default Windows does not automatically back-up the registry, but just in
+  // case they change this..
+  set_dword(
+      hKey,
+      LR"(SYSTEM\CurrentControlSet\Control\Session Manager\Configuration Manager)",
+      L"EnablePeriodicBackup", 0);
+
+  // [P2] Disable tracking of application startups.
+  set_dword(hKey,
+            LR"(Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced)",
+            L"Start_TrackProgs", 0);
+  set_dword(hKey, LR"(Software\Policies\Microsoft\Windows\EdgeUI)",
+            L"DisableMFUTracking", 1);
+
+  gp_cleanup(hr);
+  return 0;
+};

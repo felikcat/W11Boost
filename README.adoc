@@ -9,24 +9,17 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
-WARNING: C++ rewrite is nearly complete. Use the PowerShell version still if you want, but there's different design decisions in the rewrite.
-
 == About
 
-.W11Boost's goals compared to alternative optimizers
-. Doesn't force you into changing your workflow or preferences. If you still want to use Insider builds or other bad ideas, you can.
-. Tries not to break any apps or programs, except DLSS Frame Generation due to stuttering issues in games (without DLSS FG).
-- If DLSS FG support is desired, run this command after installing W11Boost, use Command Prompt as Administrator: `reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\GraphicsDrivers" /v "HwSchMode" /t REG_DWORD /d 2 /f`
-. Very easy to use.
-. Tries not to trigger anti-malware detections, so you can leave it on during W11Boost's installation.
-. Doesn't ruin your security. It can be argued however that W11Boost making updates not be forcefully installed is less secure.
+image:W11Boost_GUI.png[480,360]
+
+This works best with unmodified Windows installs, as W11Boost no longer "repairs" installations.
 
 [%collapsible]
-.I want to know exactly what W11Boost does.
-
+.What W11Boost exactly does when you apply it.
 ====
 
-This isn't a complete list.
+This is outdated and needs to be rewritten.
 
 .*Performance*
 . App startups are not tracked.
@@ -136,24 +129,6 @@ This isn't a complete list.
 
 ====
 
-.Background information on the Extras.
-[%collapsible]
-====
-
-.*Microsoft app debloater*
-. Replicates what Windows 10 Enterprise LTSC 2021 includes by default, which is known to only include what's important.
-- Exclusions:
-** Due to breaking apps: App Installer, Store Experience Host, Windows Store, Xbox Game Speech Window.
-** Due to being high-quality, and not funneling advertisements or towards using a Microsoft account: Camera, Clock, Terminal, Maps, Phone Link.
-
-.*Install Xbox services*
-. This is meant for a de-bloated Windows installation, or for an LTSC variant of Windows.
-. Login to the Microsoft Store before using `Install_Xbox_Minimal.bat`!
-. Installs only what's required to support Xbox Controllers (GUI/interface not included, get it link://www.microsoft.com/store/productId/9NBLGGH30XJ3[here]), Microsoft's PC Game Pass, and specific games such as Forza Horizon 4 & 5.
-- To also get the Game Bar, install the following link://www.microsoft.com/store/productId/9NZKPSTSNW4P[here] then link://www.microsoft.com/store/productId/9NBLGGH537C2[here].
-
-====
-
 == 0. Converting Windows edition to Education, if not using LTSC
 
 . Open the Command Prompt as administrator.
@@ -163,39 +138,28 @@ This isn't a complete list.
 
 
 == 0. Creating a full backup of your system
-It's good hygiene to do this regardless, but it's not required. This might save your ass multiple times in your life.
+Not required, but it's good hygiene to do so. This might save your ass multiple times in your life.
 
 * Use: https://www.urbackup.org[UrBackup]. You will need another computer to store backups on, but this will end up costing less long-term than services such as Backblaze, plus you completely own your data. 
 - Optionally, you can also use https://www.backblaze.com/cloud-backup/personal[Backblaze] for extra redundancy in case of sudden natural disasters, or other situations where you cannot move your backups into a safe location in time.
 
-== 1. Creating a System Restore Point
-. Open the Start Menu and search for "Create a restore point".
-. If System Restore is disabled by your system administrator, run in Command Prompt as administrator: +
-`reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows NT\SystemRestore" /v "DisableSR" /t REG_DWORD /d 0 /f`
-- Afterwards, repeat the first step.
-. Click "Create...", then name it "Before W11Boost".
+== 1. Installing W11Boost
 
-== 2. Installing W11Boost
+. Download and run the latest release of W11Boost, which currently only supports 32/64-bit CPUs.
 
-. https://github.com/felikcat/W11Boost/archive/refs/heads/master.zip[Download W11Boost] then extract it.
+TIP: If W11Boost fails to install, clear out your group policy edits by deleting `C:\Windows\System32\GroupPolicy\Machine\Registry.pol` and `C:\Windows\System32\GroupPolicy\User\Registry.pol`, then run `gpupdate /force` in Command Prompt as Administrator.
 
-. Open `Run.bat`, then click "Install W11Boost".
+. Install https://winaerotweaker.com/[Winaero Tweaker] to set personal preferences.
 
-image:W11Boost_GUI_1.png[480,360]
+. Download https://github.com/beatcracker/toptout/archive/refs/heads/master.zip[toptout] and run in PowerShell as administrator: `.\topout_directory\examples\toptout_pwsh.ps1 -Env -Exec`
 
-Inside the extras tab: +
-image:W11Boost_GUI_2.png[480,360]
+== 2. Recommendations
 
-
-== 3. Recommendations
-
-TIP: For LTSC and Windows Server, if you need the Microsoft store, run in Command Prompt as Administrator: `wsreset.exe -i`
-
-.*`Advanced.ps1` can disable Game DVR, remove Microsoft Edge and remove various forms of automation, etc.*
-* However, configuring `Advanced.ps1` is required:
-. Open `Advanced.ps1` in a text editor or IDE of your choosing. +
-. After finished, run `Advanced.ps1` as Administrator. 
-- No help will be provided on how to do this.
+=== CPU
+. Install https://bitsum.com/parkcontrol/[ParkControl] and use the Bitsum Highest Performance profile, this will increase FPS on an Intel Core i7 12700k in VRChat and possibly other games.
+. Check if the default process priority located in "Performance Options" -> "Advanced" -> "Processor scheduling" is set to "Programs". You can search "performance of Windows" in the Start Menu to locate where to open "Performance Options".
+. Ensure Game Mode is on.
+- Also: Optimizations for windowed games.
 
 === GPU
 . To enable https://kernel.org/doc/html/next/gpu/amdgpu/display/mpo-overview.html[Multiplane Overlay] on NVIDIA cards; which makes Borderless Windowed the same speed as Fullscreen:
@@ -210,7 +174,6 @@ image:nvcplui_1.png[]
 ** On ASRock motherboards: C.A.M. (Clever Access Memory)
 . HPET (High Precision Event Timer)
 
-
 === Windows
 . Keep the number of apps installed to a minimum, and remove unused apps. This reduces your chances of being impacted by https://www.bleepingcomputer.com/news/security/hackers-compromise-3cx-desktop-app-in-a-supply-chain-attack/[supply chain attacks], prevents causing Windows more issues, and might improve FPS stability.
 
@@ -220,7 +183,7 @@ image:nvcplui_1.png[]
 
 . Replace Consumer OEM apps with their Enterprise variant. Such as replacing Lenovo Vantage with Lenovo Commercial Vantage.
 
-. Third-party anti-malware programs provide better protection, but may have flaws such as slowing down your internet speeds. Be sure to test before and after installing say, https://www.kaspersky.com/downloads/free-antivirus[Kaspersky Free], which is my favorite anti-malware.
+. Third-party anti-malware programs provide better protection, but may have flaws such as slowing down your internet speeds. Be sure to test before and after.
 
 === Ethernet
 Avoid Realtek 2.5Gbit adapters, as they are much more CPU intensive than Intel 2.5Gbit adapters.

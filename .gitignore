@@ -1,0 +1,7 @@
+.vs/
+src/.vs
+src/ARM
+src/x64
+src/W11Boost
+src/Release
+src/Debug

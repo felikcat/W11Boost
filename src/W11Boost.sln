@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35327.3
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "W11Boost", "W11Boost.vcxproj", "{1B11C0FF-A062-4120-B316-09A2959D7AB3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|ARM64 = Debug|ARM64
+		Debug|x86 = Debug|x86
+		Release|ARM64 = Release|ARM64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1B11C0FF-A062-4120-B316-09A2959D7AB3}.Debug|ARM64.ActiveCfg = Debug|ARM
+		{1B11C0FF-A062-4120-B316-09A2959D7AB3}.Debug|ARM64.Build.0 = Debug|ARM
+		{1B11C0FF-A062-4120-B316-09A2959D7AB3}.Debug|x86.ActiveCfg = Debug|Win32
+		{1B11C0FF-A062-4120-B316-09A2959D7AB3}.Debug|x86.Build.0 = Debug|Win32
+		{1B11C0FF-A062-4120-B316-09A2959D7AB3}.Release|ARM64.ActiveCfg = Release|ARM
+		{1B11C0FF-A062-4120-B316-09A2959D7AB3}.Release|ARM64.Build.0 = Release|ARM
+		{1B11C0FF-A062-4120-B316-09A2959D7AB3}.Release|x86.ActiveCfg = Release|Win32
+		{1B11C0FF-A062-4120-B316-09A2959D7AB3}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6F57A559-D51A-4A1D-9234-12D7965820CB}
+	EndGlobalSection
+EndGlobal

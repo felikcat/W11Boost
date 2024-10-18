@@ -86,7 +86,7 @@ TIP: Example gpedit.msc registry translation: +
 == What is avoided
 
 [%collapsible]
-.Why is GPO now avoided?
+.Downsides to GPO compared to direct registry edits
 ====
 
 . Importing other GPO files can override the prior GPOs, which was the case for applying DoD STIGs after installing W11Boost.
