@@ -1,10 +1,7 @@
-module;
-#include <windows.h>
-#include <srrestoreptapi.h>
-#include <accctrl.h>
-#include <aclapi.h>
-export module RestorePoint;
-import Common;
+#include "Common.h"
+#include <AccCtrl.h>
+#include <AclAPI.h>
+#include <SrRestorePtApi.h>
 
 typedef bool(WINAPI *PFN_SETRESTOREPTW)(PRESTOREPOINTINFOW, PSTATEMGRSTATUS);
 
@@ -14,7 +11,7 @@ bool InitializeCOMSecurity() {
   // returned by ConvertStringSecurityDescriptorToSecurityDescriptor().
 
   SECURITY_DESCRIPTOR securityDesc = {0};
-  EXPLICIT_ACCESS ea[5] = {0};
+  EXPLICIT_ACCESS ea[5] = {{0}};
   ACL *pAcl = NULL;
   unsigned __int64
       rgSidBA[(SECURITY_MAX_SID_SIZE + sizeof(unsigned __int64) - 1) /
@@ -44,7 +41,7 @@ bool InitializeCOMSecurity() {
   //
 
   // Initialize the security descriptor.
-  fRet = ::InitializeSecurityDescriptor(&securityDesc,
+  fRet = InitializeSecurityDescriptor(&securityDesc,
                                         SECURITY_DESCRIPTOR_REVISION);
   if (!fRet)
     goto exit;
@@ -52,31 +49,31 @@ bool InitializeCOMSecurity() {
   // Create an administrator group security identifier (SID).
   cbSid = sizeof(rgSidBA);
   fRet =
-      ::CreateWellKnownSid(WinBuiltinAdministratorsSid, NULL, rgSidBA, &cbSid);
+      CreateWellKnownSid(WinBuiltinAdministratorsSid, NULL, rgSidBA, &cbSid);
   if (!fRet)
     goto exit;
 
   // Create a local service security identifier (SID).
   cbSid = sizeof(rgSidLS);
-  fRet = ::CreateWellKnownSid(WinLocalServiceSid, NULL, rgSidLS, &cbSid);
+  fRet = CreateWellKnownSid(WinLocalServiceSid, NULL, rgSidLS, &cbSid);
   if (!fRet)
     goto exit;
 
   // Create a network service security identifier (SID).
   cbSid = sizeof(rgSidNS);
-  fRet = ::CreateWellKnownSid(WinNetworkServiceSid, NULL, rgSidNS, &cbSid);
+  fRet = CreateWellKnownSid(WinNetworkServiceSid, NULL, rgSidNS, &cbSid);
   if (!fRet)
     goto exit;
 
   // Create a personal account security identifier (SID).
   cbSid = sizeof(rgSidPS);
-  fRet = ::CreateWellKnownSid(WinSelfSid, NULL, rgSidPS, &cbSid);
+  fRet = CreateWellKnownSid(WinSelfSid, NULL, rgSidPS, &cbSid);
   if (!fRet)
     goto exit;
 
   // Create a local service security identifier (SID).
   cbSid = sizeof(rgSidSY);
-  fRet = ::CreateWellKnownSid(WinLocalSystemSid, NULL, rgSidSY, &cbSid);
+  fRet = CreateWellKnownSid(WinLocalSystemSid, NULL, rgSidSY, &cbSid);
   if (!fRet)
     goto exit;
 
@@ -130,24 +127,24 @@ bool InitializeCOMSecurity() {
   ea[4].Trustee.ptstrName = (LPTSTR)rgSidSY;
 
   // Create an access control list (ACL) using this ACE list.
-  dwRet = ::SetEntriesInAcl(ARRAYSIZE(ea), ea, NULL, &pAcl);
+  dwRet = SetEntriesInAcl(ARRAYSIZE(ea), ea, NULL, &pAcl);
   if (dwRet != ERROR_SUCCESS || pAcl == NULL) {
     fRet = FALSE;
     goto exit;
   }
 
   // Set the security descriptor owner to Administrators.
-  fRet = ::SetSecurityDescriptorOwner(&securityDesc, rgSidBA, FALSE);
+  fRet = SetSecurityDescriptorOwner(&securityDesc, rgSidBA, FALSE);
   if (!fRet)
     goto exit;
 
   // Set the security descriptor group to Administrators.
-  fRet = ::SetSecurityDescriptorGroup(&securityDesc, rgSidBA, FALSE);
+  fRet = SetSecurityDescriptorGroup(&securityDesc, rgSidBA, FALSE);
   if (!fRet)
     goto exit;
 
   // Set the discretionary access control list (DACL) to the ACL.
-  fRet = ::SetSecurityDescriptorDacl(&securityDesc, TRUE, pAcl, FALSE);
+  fRet = SetSecurityDescriptorDacl(&securityDesc, TRUE, pAcl, FALSE);
   if (!fRet)
     goto exit;
 
@@ -155,7 +152,7 @@ bool InitializeCOMSecurity() {
   // CoInitializeSecurity() for your application. Note that an
   // explicit security descriptor is being passed down.
 
-  hrRet = ::CoInitializeSecurity(
+  hrRet = CoInitializeSecurity(
       &securityDesc, -1, NULL, NULL, RPC_C_AUTHN_LEVEL_PKT_PRIVACY,
       RPC_C_IMP_LEVEL_IDENTIFY, NULL, EOAC_DISABLE_AAA | EOAC_NO_CUSTOM_MARSHAL,
       NULL);
@@ -168,7 +165,7 @@ bool InitializeCOMSecurity() {
 
 exit:
 
-  ::LocalFree(pAcl);
+  LocalFree(pAcl);
 
   return fRet;
 }
@@ -177,7 +174,7 @@ void restorepoint_prep() {
   HKEY hKey = HKEY_LOCAL_MACHINE;
 
   result = RegCreateKeyExW(
-      hKey, LR"(SOFTWARE\Microsoft\Windows NT\CurrentVersion\SystemRestore)", 0,
+      hKey, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\SystemRestore", 0,
       NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hSubKey, NULL);
 
   if (result == ERROR_SUCCESS) {
@@ -187,7 +184,7 @@ void restorepoint_prep() {
   }
 
   result = RegCreateKeyExW(
-      hKey, LR"(SOFTWARE\Policies\Microsoft\Windows NT\SystemRestore)", 0, NULL,
+      hKey, L"SOFTWARE\\Policies\\Microsoft\\Windows NT\\SystemRestore", 0, NULL,
       REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hSubKey, NULL);
 
   if (result == ERROR_SUCCESS) {
@@ -203,7 +200,7 @@ void restorepoint_prep_revert() {
   HKEY hKey = HKEY_LOCAL_MACHINE;
 
   result = RegCreateKeyExW(
-      hKey, LR"(SOFTWARE\Microsoft\Windows NT\CurrentVersion\SystemRestore)", 0,
+      hKey, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\SystemRestore", 0,
       NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hSubKey, NULL);
 
   if (result == ERROR_SUCCESS) {
@@ -213,21 +210,21 @@ void restorepoint_prep_revert() {
   RegCloseKey(hKey);
 }
 
-export size_t create_restore_point() {
+int create_restore_point() {
   STATEMGRSTATUS SMgrStatus;
 
   // COINIT_MULTITHREADED seems to cause race conditions
   HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
   if (FAILED(hr))
-    return 1;
+    return EXIT_FAILURE;
 
   bool fRet = InitializeCOMSecurity();
   if (FAILED(fRet))
-    return 1;
+    return EXIT_FAILURE;
 
   HMODULE hSrClient = LoadLibraryW(L"srclient.dll");
   if (NULL == hSrClient)
-    return 1;
+    return EXIT_FAILURE;
 
   RESTOREPOINTINFOW RestorePtInfo = {.dwEventType = BEGIN_SYSTEM_CHANGE,
                                      .dwRestorePtType = APPLICATION_INSTALL,
@@ -240,7 +237,7 @@ export size_t create_restore_point() {
       (PFN_SETRESTOREPTW)GetProcAddress(hSrClient, "SRSetRestorePointW");
   if (NULL == fnSRSetRestorePointW) {
     goto exit;
-    return 1;
+    return EXIT_FAILURE;
   }
 
   restorepoint_prep();
@@ -250,11 +247,11 @@ export size_t create_restore_point() {
 
   if (!fRet) { // Either SR is off, or restore point creation failed outright
     goto exit;
-    return 1;
+    return EXIT_FAILURE;
   }
 
-  RestorePtInfo = {.dwEventType = END_SYSTEM_CHANGE,
-                   .llSequenceNumber = SMgrStatus.llSequenceNumber};
+  RestorePtInfo.dwEventType = END_SYSTEM_CHANGE;
+  RestorePtInfo.llSequenceNumber = SMgrStatus.llSequenceNumber;
 
   // End System Restore point
   fRet = fnSRSetRestorePointW(&RestorePtInfo, &SMgrStatus);

@@ -1,36 +1,30 @@
-#include "Resource.h"
-#include <windows.h>
-#include <dwmapi.h>
-#include <wtypes.h>
-#include <shlwapi.h>
-#include <cstdio>
-import Edits;
-import RestorePoint;
-import PrivacyMode;
-import MSStore;
+#include "resource.h"
+#include "Common.h"
+#include <Shlwapi.h>
+#include <shellapi.h>
 
 /* Type notes:
-    void * = HINTERNET;
-    const wchar_t * = LPCWSTR;
-    unsigned long = DWORD;
-    unsigned __int64 = ULONGLONG;
+    HINTERNET = void *
+    LPCWSTR = const wchar_t *
+    DWORD = unsigned long
+    ULONGLONG = unsigned __int64
     WCHAR = wchar_t
     ATOM = WORD = unsigned short
-    UINT = size_t
+    UINT = unsigned int
     TCHAR = WCHAR = wchar_t
 */
 
 #define MAX_LOADSTRING 100
 
 // Global Variables:
-HINSTANCE hInst;                       // current instance
-wchar_t szTitle[MAX_LOADSTRING];       // The title bar text
-wchar_t szWindowClass[MAX_LOADSTRING]; // the main window class name
+HINSTANCE hInst;            // Current instance
+wchar_t szTitle[MAX_LOADSTRING]; // The title bar text
+wchar_t szWindowClass[MAX_LOADSTRING]; // The main window class name
 
 // Forward declarations of functions included in this code module:
 unsigned short MyRegisterClass(HINSTANCE hInstance);
-bool InitInstance(HINSTANCE, size_t);
-LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
+bool InitInstance(HINSTANCE, int);
+LRESULT CALLBACK WndProc(HWND, unsigned int, WPARAM, LPARAM);
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                       _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine,
@@ -39,24 +33,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
   UNREFERENCED_PARAMETER(lpCmdLine);
 
   // Place code that should always be ran here:
-  wchar_t currentPath[260]; // MAX_PATH = 260
-  GetModuleFileNameW(NULL, currentPath, 260);
-
-  wchar_t *removeExe = wcsrchr(currentPath, L'\\');
-  if (removeExe != NULL) {
-    *removeExe = L'\0';
-  }
-
-  const wchar_t *dirName = L"W11Boost Logs";
-  wchar_t fullPath[260];
-  swprintf_s(fullPath, 260, L"%s\\%s", currentPath, dirName);
-
-  // Ensure double-null termination
-  size_t len = wcslen(fullPath);
-  if (len + 2 < MAX_PATH) {
-    fullPath[len + 1] = L'\0';
-  }
-
+  wchar_t *fullPath = get_log_directory();
   if (PathFileExistsW(fullPath)) {
     SHFILEOPSTRUCTW dir = {0};
     dir.wFunc = FO_DELETE;
@@ -64,8 +41,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     dir.fFlags = FOF_NO_UI | FOF_NOERRORUI;
     SHFileOperationW(&dir);
   }
-
   CreateDirectoryW(fullPath, NULL);
+  free(fullPath);
 
   // Initialize global strings
   LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
@@ -90,7 +67,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     }
   }
 
-  return (size_t)msg.wParam;
+  return (int)msg.wParam;
 }
 
 //
@@ -125,11 +102,11 @@ unsigned short MyRegisterClass(HINSTANCE hInstance) {
 //        In this function, we save the instance handle in a global variable and
 //        create and display the main program window.
 //
-bool InitInstance(HINSTANCE hInstance, size_t nCmdShow) {
+bool InitInstance(HINSTANCE hInstance, int nCmdShow) {
   hInst = hInstance; // Store instance handle in our global variable
 
-  size_t width = 640;
-  size_t height = 480;
+  int width = 640;
+  int height = 480;
 
   HWND hWnd = CreateWindowExW(
       0, szWindowClass, szTitle, WS_OVERLAPPED | WS_MINIMIZEBOX | WS_SYSMENU,
@@ -145,8 +122,8 @@ bool InitInstance(HINSTANCE hInstance, size_t nCmdShow) {
   // Puts W11Boost's window in the center of the current monitor
   if (GetMonitorInfoW(monitor, &mi)) {
     RECT rcWork = mi.rcWork;
-    size_t x = rcWork.left + (rcWork.right - rcWork.left - width) / 2;
-    size_t y = rcWork.top + (rcWork.bottom - rcWork.top - height) / 2;
+    int x = rcWork.left + (rcWork.right - rcWork.left - width) / 2;
+    int y = rcWork.top + (rcWork.bottom - rcWork.top - height) / 2;
 
     SetWindowPos(hWnd, NULL, x, y, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
   }
@@ -167,13 +144,13 @@ bool InitInstance(HINSTANCE hInstance, size_t nCmdShow) {
 //  WM_DESTROY  - post a quit message and return
 //
 //
-LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
+LRESULT CALLBACK WndProc(HWND hWnd, unsigned int message, WPARAM wParam,
                          LPARAM lParam) {
   switch (message) {
   case WM_CREATE: {
-    size_t fontSize = 30;
-    size_t dpi = GetDpiForWindow(hWnd);
-    size_t fontDpi = 96;
+    int fontSize = 30;
+    int dpi = GetDpiForWindow(hWnd);
+    int fontDpi = 96;
     HFONT hFont = CreateFontW(MulDiv(fontSize, dpi, fontDpi), 0, 0, 0, FW_LIGHT,
                               FALSE, FALSE, 0, ANSI_CHARSET, OUT_OUTLINE_PRECIS,
                               CLIP_DEFAULT_PRECIS, CLEARTYPE_NATURAL_QUALITY,
@@ -182,8 +159,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
     RECT rcClient;
     GetClientRect(hWnd, &rcClient);
 
-    size_t buttonWidth = rcClient.right / 2;
-    size_t buttonHeight = rcClient.bottom / 2;
+    int buttonWidth = rcClient.right / 2;
+    int buttonHeight = rcClient.bottom / 2;
 
     HWND hButton1 = CreateWindowW(
         L"BUTTON", L"Apply W11Boost",
@@ -216,13 +193,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
     SendMessageW(hButton4, WM_SETFONT, (WPARAM)hFont, TRUE);
   } break;
   case WM_COMMAND: {
-    size_t wmId = LOWORD(wParam);
+    int wmId = LOWORD(wParam);
     // Parse the selections:
     switch (wmId) {
     case IDC_APPLY_W11BOOST:
       if (MessageBoxW(hWnd, L"Are you sure you want to apply W11Boost?",
                       L"W11Boost", MB_YESNO) == IDYES) {
-        size_t gpResult = gp_edits();
+        int gpResult = gp_edits();
         if (gpResult == 0) {
           MessageBoxW(hWnd, L"Complete. Manually reboot to apply all changes.",
                       L"W11Boost", MB_OK);
@@ -235,7 +212,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
       if (MessageBoxW(
               hWnd, L"Are you sure you want to create a System Restore point?",
               L"W11Boost", MB_YESNO) == IDYES) {
-        size_t srResult = create_restore_point();
+        int srResult = create_restore_point();
         if (srResult == 0) {
           MessageBoxW(hWnd, L"System Restore point successfully created.",
                       L"W11Boost", MB_OK);
@@ -250,7 +227,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
                       L"This will hide as much activity as possible on your "
                       L"PC, do you want this?",
                       L"W11Boost", MB_YESNO) == IDYES) {
-        size_t pmResult = install_privacy_mode();
+        int pmResult = install_privacy_mode();
 
         if (pmResult == 0) {
           MessageBoxW(hWnd, L"Successfully installed Privacy Mode.",
@@ -266,7 +243,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
                       L"Do you wish to install the Microsoft Store and .appx + "
                       L".appxbundle support?",
                       L"W11Boost", MB_YESNO) == IDYES) {
-        size_t msResult = install_microsoft_store();
+        int msResult = install_microsoft_store();
 
         if (msResult == 0) {
           MessageBoxW(hWnd,
@@ -274,7 +251,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
                       L"additional minutes to show up.",
                       L"W11Boost", MB_OK);
         } else {
-          MessageBoxW(hWnd, L"The App Installer likely failed to install!",
+          MessageBoxW(hWnd, L"The 'App Installer' failed to install!",
                       L"W11Boost", MB_OK);
         }
       }
@@ -285,6 +262,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
   case WM_PAINT: {
     PAINTSTRUCT ps;
     HDC hdc = BeginPaint(hWnd, &ps);
+    if (hdc == NULL) {
+      MessageBoxW(hWnd, L"BeginPaint failed", L"W11Boost -> Error",
+                  MB_OK | MB_ICONERROR);
+      return -1;
+    }
     EndPaint(hWnd, &ps);
   } break;
   case WM_DESTROY:

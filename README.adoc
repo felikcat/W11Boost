@@ -125,7 +125,7 @@ This is outdated and needs to be rewritten.
 
 
 .*Other*
-. Importing/setting wallpapers is set to 100% of JPEG's quality; less compression, therefore less "blurriness".
+
 
 ====
 
