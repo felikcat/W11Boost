@@ -38,6 +38,5 @@ target_include_directories(W11Boost PRIVATE ${CMAKE_SOURCE_DIR})
 target_link_libraries(W11Boost PRIVATE
   gpedit.lib
   userenv.lib
-  wininet.lib
   shlwapi.lib
 )

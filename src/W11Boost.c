@@ -17,8 +17,8 @@
 #define MAX_LOADSTRING 100
 
 // Global Variables:
-HINSTANCE hInst;            // Current instance
-wchar_t szTitle[MAX_LOADSTRING]; // The title bar text
+HINSTANCE hInst;                       // Current instance
+wchar_t szTitle[MAX_LOADSTRING];       // The title bar text
 wchar_t szWindowClass[MAX_LOADSTRING]; // The main window class name
 
 // Forward declarations of functions included in this code module:
@@ -239,11 +239,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, unsigned int message, WPARAM wParam,
       }
       break;
     case IDC_INSTALL_MICROSOFT_STORE:
-      if (MessageBoxW(hWnd,
-                      L"Do you wish to install the Microsoft Store and .appx + "
-                      L".appxbundle support?",
+      if (MessageBoxW(hWnd, L"Do you wish to install the Microsoft Store?",
                       L"W11Boost", MB_YESNO) == IDYES) {
-        int msResult = install_microsoft_store();
+        wchar_t cmdLine1[] = L"wsreset.exe -i";
+        int msResult = start_command_and_wait(cmdLine1);
 
         if (msResult == 0) {
           MessageBoxW(hWnd,
@@ -251,7 +250,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, unsigned int message, WPARAM wParam,
                       L"additional minutes to show up.",
                       L"W11Boost", MB_OK);
         } else {
-          MessageBoxW(hWnd, L"The 'App Installer' failed to install!",
+          MessageBoxW(hWnd, L"Failed to install the Microsoft Store!",
                       L"W11Boost", MB_OK);
         }
       }
