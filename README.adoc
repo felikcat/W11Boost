@@ -13,7 +13,7 @@ endif::[]
 
 image:W11Boost_GUI.png[480,360]
 
-This works best with unmodified Windows installs, as W11Boost no longer "repairs" installations.
+This works best with unmodified Windows installs, as W11Boost no longer "repairs" installations until I readd it in a later release.
 
 [%collapsible]
 .What W11Boost exactly does when you apply it.
@@ -129,31 +129,32 @@ This is outdated and needs to be rewritten.
 
 ====
 
-== 0. Converting Windows edition to Education, if not using LTSC
-
-. Open the Command Prompt as administrator.
-. `cscript.exe %windir%\system32\slmgr.vbs /upk`
-. `cscript.exe %windir%\system32\slmgr.vbs /ipk NW6C2-QMPVW-D7KKK-3GKT6-VCFB2`
-. Use https://github.com/massgravel/Microsoft-Activation-Scripts[Microsoft Activation Scripts] to activate Windows; I recommend the KMS38 activation.
-
-
 == 0. Creating a full backup of your system
 Not required, but it's good hygiene to do so. This might save your ass multiple times in your life.
 
 * Use: https://www.urbackup.org[UrBackup]. You will need another computer to store backups on, but this will end up costing less long-term than services such as Backblaze, plus you completely own your data. 
 - Optionally, you can also use https://www.backblaze.com/cloud-backup/personal[Backblaze] for extra redundancy in case of sudden natural disasters, or other situations where you cannot move your backups into a safe location in time.
 
-== 1. Installing W11Boost
+== 1. If not using Enterprise or LTSC or Education, convert the Windows edition to Education
 
-. Download and run the latest release of W11Boost, which currently only supports 32/64-bit CPUs.
+. Open the Command Prompt as administrator.
+. `cscript.exe %windir%\system32\slmgr.vbs /upk`
+. `cscript.exe %windir%\system32\slmgr.vbs /ipk NW6C2-QMPVW-D7KKK-3GKT6-VCFB2`
+. Use https://github.com/abbodi1406/KMS_VL_ALL_AIO/releases[KMS_VL_ALL_AIO-$version.7z] to activate Windows, and install its auto-renewal. +
+To open a .7z archive on Windows 10 or older versions of Windows 11, you need https://www.7-zip.org/[7-Zip].
+
+== 2. Installing W11Boost
 
 TIP: If W11Boost fails to install, clear out your group policy edits by deleting `C:\Windows\System32\GroupPolicy\Machine\Registry.pol` and `C:\Windows\System32\GroupPolicy\User\Registry.pol`, then run `gpupdate /force` in Command Prompt as Administrator.
+
+. Download and run the https://github.com/felikcat/W11Boost/releases[latest release of W11Boost]. +
+Only Windows 10 version 1803 and newer are officially supported.
 
 . Install https://winaerotweaker.com/[Winaero Tweaker] to set personal preferences.
 
 . Download https://github.com/beatcracker/toptout/archive/refs/heads/master.zip[toptout] and run in PowerShell as administrator: `.\topout_directory\examples\toptout_pwsh.ps1 -Env -Exec`
 
-== 2. Recommendations
+== 3. Recommendations
 
 === CPU
 . Install https://bitsum.com/parkcontrol/[ParkControl] and use the Bitsum Highest Performance profile, this will increase FPS on an Intel Core i7 12700k in VRChat and possibly other games.
