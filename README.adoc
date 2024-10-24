@@ -9,6 +9,8 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
+WARNING: This won't be getting updates. I left Windows for Linux for all of my efforts, most of which are staying private.
+
 == About
 
 image:W11Boost_GUI.png[480,360]
