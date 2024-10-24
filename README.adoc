@@ -152,12 +152,16 @@ Only Windows 10 version 1803 and newer are officially supported.
 
 . Install https://winaerotweaker.com/[Winaero Tweaker] to set personal preferences.
 
-. Download https://github.com/beatcracker/toptout/archive/refs/heads/master.zip[toptout] and run in PowerShell as administrator: `.\topout_directory\examples\toptout_pwsh.ps1 -Env -Exec`
+. Download https://github.com/beatcracker/toptout/archive/refs/heads/master.zip[toptout] and open PowerShell as administrator:
+- `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`
+- `.\topout_directory\examples\toptout_pwsh.ps1 -Env -Exec`
+- `Set-ExecutionPolicy -ExecutionPolicy Restricted -Scope CurrentUser`
 
 == 3. Recommendations
 
 === CPU
-. Install https://bitsum.com/parkcontrol/[ParkControl] and use the Bitsum Highest Performance profile, this will increase FPS on an Intel Core i7 12700k in VRChat and possibly other games.
+. Install https://bitsum.com/download-process-lasso/[Process Lasso] and use `Active Power Profile -> Bitsum Highest Performance` profile. +
+Setting this power profile is not recommended for laptops, however there are other benefits to using Process Lasso.
 . Check if the default process priority located in "Performance Options" -> "Advanced" -> "Processor scheduling" is set to "Programs". You can search "performance of Windows" in the Start Menu to locate where to open "Performance Options".
 . Ensure Game Mode is on.
 - Also: Optimizations for windowed games.
