@@ -14,7 +14,7 @@ endif::[]
 image:W11Boost_GUI.png[480,360]
 
 Until I readd the "Fix Windows" feature in a future release, W11Boost works best with unmodified Windows installs. +
-If you wish to know what W11Boost does, look at the source code, it should be clean enough to understand and every change is documented.
+If you wish to know what W11Boost does, look at the source code, every change is documented and the source code should be easy to understand.
 
 == 0. Creating a full backup of your system
 Not required, but it's good hygiene to do so. This might save your ass multiple times in your life.
