@@ -9,127 +9,12 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
-WARNING: This won't be getting updates. I left Windows for Linux for all of my efforts, most of which are staying private.
-
 == About
 
 image:W11Boost_GUI.png[480,360]
 
-This works best with unmodified Windows installs, as W11Boost no longer "repairs" installations until I readd it in a later release.
-
-[%collapsible]
-.What W11Boost exactly does when you apply it.
-====
-
-This is outdated and needs to be rewritten.
-
-.*Performance*
-. App startups are not tracked.
-
-. Drivers and other system code are not paged to a disk. They are kept in memory instead, at the cost of higher RAM usage.
-
-. Enabled the following:
-- Increased NTFS pool usage limit, reducing Windows' page-faults and stack usage. As a downside, RAM usage is increased.
-
-- DXGI's DirectFlip with multi-plane overlay (MPO) enabled to lower input lag and reduce stuttering in games.
-
-- Idle tickless for lower power draw, but also has performance benefits to real-time apps like DAWs or virtual machines, and foreground apps like video games.
-
-- Enabled the BBRv2 TCP congestion control algorithm to minorly lower ping during excessive download or uploading, and improves ping for others connecting to your game or web servers on this PC.
-
-- MemoryCompression reduces stuttering in video games by reducing the amount of writes to the paging file.
-
-. Disabled the following:
-- Power Throttling, as it caused severe performance reduction for VMWare Workstation 17.
-
-- Analyzing application execution time.
-
-- NTFS Last Access Time Stamp Updates; if needed, an application can explicitly update its own access timestamps.
-
-- Fault Tolerant Heap. FTH can degrade an application's performance if it got marked for "crashing" too often; Assetto Corsa triggers this.
-
-- Automatic offline maps updates.
-
-- Explorer's thumbnail shadows. Makes folders with many photos or videos smoother to navigate.
-
-- Searching disks to attempt fixing a missing shortcut.
-
-- PageCombining to reduce CPU load and prevents https://kaimi.io/en/2020/07/reading-another-process-memory-via-windows-10-page-combining-en/[introducing security risks]; downside: increased RAM usage.
-
-- Windows tips in general, such as "recommendations for tips, shortcuts, new apps, and more". This could be considered a usability issue as well for those already versed in using Windows.
-
-. Disabled various forms of telemetry:
-- Visual Studio 2022's PerfWatson2 (VSCEIP).
-- Windows Error Reporting, Connected User Experiences and Telemetry, Diagnostic Policy Service, Cloud Content & Consumer Experience.
-- Advertising ID for apps (.appx packaged).
-- Feedback notifications.
-
-. Disabled the following Scheduled Tasks:
-- `Maintenance\WinSAT`: decides to measure overall PC performance at the worst times, drastically slowing down performance during its measurements.
-- `MUI\LPRemove`: On boot-up, checks and removes unused language packs.
-- `Power Efficiency Diagnostics\AnalyzeSystem`: Knowing this exists and looking for its results is on your part, very deliberate. It's better to manually run this to check for example, PCIe ASPM incompatibilities.
-- `Windows\Autochk\Proxy`: An extension of "Microsoft Customer Experience Improvement Program" spyware.
-
-. For Wi-Fi, other APs (Access Points) are never periodically scanned while currently connected to an AP.
-
-
-.*Reliability*
-
-. Windows Updates:
-- Now only prompts for download then installation; updates are never automatic.
-- Updates that Microsoft deems as causing compatibility issues are blocked.
-- Opted out of "being the first to get the latest non-security updates".
-
-. Disabled the following:
-
-- Automated file cleanup that kicks in if disk space is running low.
-
-- Fast startup (also called 'hybrid shutdown') due to stability issues, excessive disk usage, and could lower performance each "Fast startup" until Windows becomes a slow and janky mess.
-
-- 'Wait For Link' on Ethernet adaptors. Can reduce time taken to establish a connection, and prevent drop-outs. Drop-outs were the case with Intel I225-V revision 1 and 2, but not 3.
-
-- Microsoft's Malicious Removal Tool, which also has an issue of removing "malicious" files that other anti-malware software like Kaspersky excluded.
-
-. Enabled separating explorer.exe, one for the Windows Shell, the other for the File Explorer.
-
-. Game Mode enabled to keep FPS consistent in games in certain situations, such as having OBS Studio recording your games.
-
-. IPv6 is used whenever possible; avoids NAT and handles fragmentation locally instead of on the router, leading to higher performance and reliability.
-
-. Enabled "smart multi-homed name resolution".
-- Having this feature disabled can make DNS requests extremely slow, which some bad VPN apps do as a hack to prevent DNS leaks.
-
-. Crash fix for apps using OpenSSL 1.0.2k (Jan 2017) or older; only applied if an Intel CPU is used.
-
-. TCP timestamps enabled for increased reliability under bad network conditions.
-
-. The default 2GB memory boundary is ensured for x86 apps.
-- Prevent bugs or crashes with x86 apps that aren't specifically tested for LargeAddressAware (3GB limit).
-- Manually patch apps with LAA if it's known to be beneficial, such as in GTA:SA.
-
-.*Usability*
-
-. Hidden file extensions are shown.
-- If they're hidden, they are abused to hide the real file format for malicious purposes. Example: an executable (.exe, .scr) pretending to be a PDF.
-
-. Apps are no longer automatically archived.
-- Archived apps would take a long time to launch, as it needs to unarchived.
-
-. The lock screen is replaced with the login screen.
-
-. Windows is activated using the KMS38 method if it wasn't activated prior. This also prevents deactivation after hardware changes.
-
-. Installs `winget` if missing or broken.
-
-. Enabled NTFS long paths to prevent issues with Scoop and other apps.
-
-. Ask to enter recovery options after 3 failed boots instead of forcing it.
-
-
-.*Other*
-
-
-====
+Until I readd the "Fix Windows" feature in a future release, W11Boost works best with unmodified Windows installs. +
+If you wish to know what W11Boost does, look at the source code, it should be clean enough to understand and every change is documented.
 
 == 0. Creating a full backup of your system
 Not required, but it's good hygiene to do so. This might save your ass multiple times in your life.
@@ -142,8 +27,8 @@ Not required, but it's good hygiene to do so. This might save your ass multiple 
 . Open the Command Prompt as administrator.
 . `cscript.exe %windir%\system32\slmgr.vbs /upk`
 . `cscript.exe %windir%\system32\slmgr.vbs /ipk NW6C2-QMPVW-D7KKK-3GKT6-VCFB2`
-. Use https://github.com/abbodi1406/KMS_VL_ALL_AIO/releases[KMS_VL_ALL_AIO-$version.7z] to activate Windows, and install its auto-renewal. +
-To open a .7z archive on Windows 10 or older versions of Windows 11, you need https://www.7-zip.org/[7-Zip].
+. Use https://github.com/abbodi1406/KMS_VL_ALL_AIO/releases[KMS_VL_ALL_AIO-$version.7z] to activate Windows by installing its auto-renewal.
+- To open a .7z archive on Windows, you need https://www.7-zip.org/[7-Zip].
 
 == 2. Installing W11Boost
 
@@ -218,7 +103,7 @@ I have not tested https://www.aliexpress.com/store/1101345677/search?SearchText=
 ====
 
 
-=== Using fullscreen exclusive in games.
+=== Using fullscreen exclusive in games
 Lowers input delay and GPU usage; potentially higher FPS, depending on the game.
 
 .Drawbacks:
