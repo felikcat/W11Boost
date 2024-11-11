@@ -7,15 +7,17 @@ int install_privacy_mode() {
   if (FAILED(hr))
     return EXIT_FAILURE;
 
-  CoCreateInstance(&_CLSID_GroupPolicyObject, NULL, CLSCTX_INPROC_SERVER,
-                   &_IID_IGroupPolicyObject, (LPVOID *)&pGPO);
+  hr = CoCreateInstance(_CLSID_GroupPolicyObject, NULL, CLSCTX_INPROC_SERVER,
+                   _IID_IGroupPolicyObject, (LPVOID *)&pGPO);
+  if (FAILED(hr))
+    return EXIT_FAILURE;
 
-  hr = pGPO->lpVtbl->OpenLocalMachineGPO(pGPO, GPO_OPEN_LOAD_REGISTRY);
+  hr = pGPO->OpenLocalMachineGPO(GPO_OPEN_LOAD_REGISTRY);
   if (FAILED(hr))
     return EXIT_FAILURE;
 
   HKEY hKey = HKEY_LOCAL_MACHINE;
-  pGPO->lpVtbl->GetRegistryKey(pGPO, GPO_SECTION_MACHINE, &hKey);
+  pGPO->GetRegistryKey(GPO_SECTION_MACHINE, &hKey);
 
   // Do not analyze apps' execution time data.
   set_dword(hKey, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Perflib",
@@ -95,15 +97,17 @@ int install_privacy_mode() {
   gp_cleanup(hr);
 
   //---- HKEY_CURRENT_USER ----//
-  CoCreateInstance(&_CLSID_GroupPolicyObject, NULL, CLSCTX_INPROC_SERVER,
-                   &_IID_IGroupPolicyObject, (LPVOID *)&pGPO);
+  hr = CoCreateInstance(_CLSID_GroupPolicyObject, NULL, CLSCTX_INPROC_SERVER,
+                   _IID_IGroupPolicyObject, (LPVOID *)&pGPO);
+  if (FAILED(hr))
+    return EXIT_FAILURE;
 
-  hr = pGPO->lpVtbl->OpenLocalMachineGPO(pGPO, GPO_OPEN_LOAD_REGISTRY);
+  hr = pGPO->OpenLocalMachineGPO(GPO_OPEN_LOAD_REGISTRY);
   if (FAILED(hr))
     return EXIT_FAILURE;
 
   hKey = HKEY_CURRENT_USER;
-  pGPO->lpVtbl->GetRegistryKey(pGPO, GPO_SECTION_USER, &hKey);
+  pGPO->GetRegistryKey(GPO_SECTION_USER, &hKey);
 
   // Do not search disks to attempt fixing a missing shortcut.
   set_dword(hKey,

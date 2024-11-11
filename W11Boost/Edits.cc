@@ -9,15 +9,17 @@ int gp_edits() {
     return EXIT_FAILURE;
 
   //---- HKEY_LOCAL_MACHINE ----//
-  CoCreateInstance(&_CLSID_GroupPolicyObject, NULL, CLSCTX_INPROC_SERVER,
-                   &_IID_IGroupPolicyObject, (void **)&pGPO);
+  hr = CoCreateInstance(_CLSID_GroupPolicyObject, NULL, CLSCTX_INPROC_SERVER,
+                   _IID_IGroupPolicyObject, (LPVOID *)&pGPO);
+  if (FAILED(hr))
+    return EXIT_FAILURE;
 
-  hr = pGPO->lpVtbl->OpenLocalMachineGPO(pGPO, GPO_OPEN_LOAD_REGISTRY);
+  hr = pGPO->OpenLocalMachineGPO(GPO_OPEN_LOAD_REGISTRY);
   if (FAILED(hr))
     return EXIT_FAILURE;
 
   hKey = HKEY_LOCAL_MACHINE;
-  pGPO->lpVtbl->GetRegistryKey(pGPO, GPO_SECTION_MACHINE, &hKey);
+  pGPO->GetRegistryKey(GPO_SECTION_MACHINE, &hKey);
 
   // If allowed (1): unused apps would be uninstalled with their user data left
   // intact, then reinstalled if launched afterwards at any point in time.
@@ -225,15 +227,17 @@ int gp_edits() {
 
   //---- HKEY_CURRENT_USER ----//
   gp_cleanup(hr);
-  CoCreateInstance(&_CLSID_GroupPolicyObject, NULL, CLSCTX_INPROC_SERVER,
-                   &_IID_IGroupPolicyObject, (LPVOID *)&pGPO);
+  hr = CoCreateInstance(_CLSID_GroupPolicyObject, NULL, CLSCTX_INPROC_SERVER,
+                   _IID_IGroupPolicyObject, (LPVOID *)&pGPO);
+  if (FAILED(hr))
+    return EXIT_FAILURE;
 
-  hr = pGPO->lpVtbl->OpenLocalMachineGPO(pGPO, GPO_OPEN_LOAD_REGISTRY);
+  hr = pGPO->OpenLocalMachineGPO(GPO_OPEN_LOAD_REGISTRY);
   if (FAILED(hr))
     return EXIT_FAILURE;
 
   hKey = HKEY_CURRENT_USER;
-  pGPO->lpVtbl->GetRegistryKey(pGPO, GPO_SECTION_USER, &hKey);
+  pGPO->GetRegistryKey(GPO_SECTION_USER, &hKey);
 
   set_dword(hKey,
             L"Software\\Microsoft\\Windows\\CurrentVersion\\AdvertisingInfo",

@@ -10,22 +10,6 @@
 #include <time.h>
 #include <stdio.h>
 
-const CLSID _CLSID_GroupPolicyObject = {
-    0xea502722, 0xa23d, 0x11d1, {0xa7, 0xd3, 0x0, 0x0, 0xf8, 0x75, 0x71, 0xe3}};
-const IID _IID_IGroupPolicyObject = {
-    0xea502723, 0xa23d, 0x11d1, {0xa7, 0xd3, 0x0, 0x0, 0xf8, 0x75, 0x71, 0xe3}};
-const CLSID _CLSID_GPESnapIn = {
-    0x8fc0b734, 0xa0e1, 0x11d1, {0xa7, 0xd3, 0x0, 0x0, 0xf8, 0x75, 0x71, 0xe3}};
-GUID RegistryID = {0x35378EAC,
-                   0x683F,
-                   0x11D2,
-                   {0xA8, 0x9A, 0x00, 0xC0, 0x4F, 0xBB, 0xCF, 0xA2}};
-GUID RegistryID;
-IGroupPolicyObject *pGPO;
-HKEY hKey;
-HKEY hSubKey;
-LONG result;
-
 wchar_t *get_log_directory() {
   wchar_t currentPath[MAX_PATH];
   GetModuleFileNameW(NULL, currentPath, MAX_PATH);
@@ -37,54 +21,66 @@ wchar_t *get_log_directory() {
 
   const wchar_t *dirName = L"W11Boost Logs";
   wchar_t *fullPath = (wchar_t *)malloc(MAX_PATH * sizeof(wchar_t));
-  swprintf_s(fullPath, MAX_PATH, L"%s\\%s", currentPath, dirName);
 
-  // Ensure double-null termination
-  size_t len = wcslen(fullPath);
-  if (len + 2 < MAX_PATH) {
-    fullPath[len + 1] = L'\0';
+  if (fullPath != NULL) {
+    swprintf_s(fullPath, MAX_PATH, L"%s\\%s", currentPath, dirName);
+    // Ensure double-null termination
+    size_t len = wcslen(fullPath);
+    if (len != NULL && len + 2 < MAX_PATH) {
+      fullPath[len + 1] = L'\0';
+    }
   }
+
   return fullPath;
 }
 
 utf8_result wide_string_to_utf8(const wchar_t *wide_string) {
   if (wide_string == NULL || *wide_string == U'\0')
-    return (utf8_result){NULL, false};
+    return {NULL, false};
 
-  size_t wide_length = 0;
+  int wide_length = 0;
   while (wide_string[wide_length] != U'\0')
     wide_length++;
 
-  size_t size_needed = WideCharToMultiByte(CP_UTF8, 0, wide_string, wide_length,
+  int size_needed = WideCharToMultiByte(CP_UTF8, 0, wide_string, wide_length,
                                            NULL, 0, NULL, NULL);
   if (size_needed <= 0)
-    return (utf8_result){NULL, false};
+    return {NULL, false};
 
   char *result = (char *)malloc(size_needed + 1);
   if (result == NULL)
-    return (utf8_result){NULL, false};
+    return {NULL, false};
 
   int converted_result =
-      WideCharToMultiByte(CP_UTF8, 0, wide_string, (int)wide_length, &result[0],
+      WideCharToMultiByte(CP_UTF8, 0, wide_string, wide_length, &result[0],
                           size_needed, NULL, NULL);
   if (converted_result <= 0) {
     free(result);
-    return (utf8_result){NULL, true};
+    return {NULL, true};
   }
   result[size_needed] = '\0';
-  return (utf8_result){result, false}; // if SUCCESS (0), proceed
+  return {result, false}; // if SUCCESS (0), proceed
 }
 
 int log_registry(const wchar_t *subKey, const wchar_t *valueName,
                  const char *typeName) {
   wchar_t *currentDir = get_log_directory();
   wchar_t logLocation[MAX_PATH];
+
+  if (currentDir == NULL)
+    return EXIT_FAILURE;
+
   swprintf_s(logLocation, MAX_PATH, L"%s\\Registry.log", currentDir);
+
+  if (currentDir == NULL)
+    return EXIT_FAILURE;
 
   FILE *logFile = NULL;
   errno_t err = _wfopen_s(&logFile, logLocation, L"a");
-  if (err != 0 || logFile == NULL)
+  if (err != 0 || logFile == NULL) {
+    free(currentDir);
     return EXIT_FAILURE;
+  }
 
   if (logFile) {
     time_t now;
@@ -103,7 +99,13 @@ int log_registry(const wchar_t *subKey, const wchar_t *valueName,
       fprintf_s(logFile, "%s %s %s\\%s\n", timeString, typeName,
                 narrow_subKey.string, narrow_valueName.string);
     }
+
+    if (narrow_subKey.string)
+      free(narrow_subKey.string);
+    if (narrow_valueName.string)
+      free(narrow_valueName.string);
   }
+
   fclose(logFile);
   free(currentDir);
   return EXIT_SUCCESS;
@@ -158,7 +160,7 @@ LSTATUS set_environment(HKEY hKey, const wchar_t *valueName,
   if (result == ERROR_SUCCESS)
     result =
         RegSetValueExW(hSubKey, valueName, 0, REG_EXPAND_SZ,
-                       (const BYTE *)value, (wcslen(value) * sizeof(wchar_t)));
+                       (const BYTE *)value, (DWORD)(wcslen(value) * sizeof(wchar_t)));
 
   const char *typeName = " - EXPAND_SZ: ";
   log_registry(subKey, valueName, typeName);
@@ -182,18 +184,22 @@ LSTATUS remove_subkey(HKEY hKey, const wchar_t *subKey,
   return result;
 }
 
-void gp_cleanup(HRESULT hr) {
+int gp_cleanup(HRESULT hr) {
   RegCloseKey(hKey);
 
   if (SUCCEEDED(hr))
-    hr = pGPO->lpVtbl->Save(pGPO, TRUE, TRUE, &RegistryID,
-                            (GUID *)&_CLSID_GPESnapIn);
+    hr = pGPO->Save(TRUE, TRUE, &RegistryID, (GUID *)&_CLSID_GPESnapIn);
+
+  if (FAILED(hr))
+    return EXIT_FAILURE;
 
   // Apply new policy objects to the registry
   RefreshPolicyEx(TRUE, RP_FORCE);
 
   if (pGPO)
-    pGPO->lpVtbl->Release(pGPO);
+    pGPO->Release();
+
+  return EXIT_SUCCESS;
 }
 
 int start_command_and_wait(wchar_t *cmdLine) {
@@ -218,7 +224,7 @@ int start_command_and_wait(wchar_t *cmdLine) {
 bool append_wchar_t(const wchar_t *original, const wchar_t *append,
                     wchar_t *result) {
   wcscpy_s(result, MAX_PATH, original);
-  if (SUCCEEDED(PathAppendW(result, append)))
+  if ((PathAppendW(result, append)) == TRUE)
     return true;
 
   return false;

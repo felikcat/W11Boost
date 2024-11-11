@@ -219,7 +219,7 @@ int create_restore_point() {
     return EXIT_FAILURE;
 
   bool fRet = InitializeCOMSecurity();
-  if (FAILED(fRet))
+  if (fRet == FALSE)
     return EXIT_FAILURE;
 
   HMODULE hSrClient = LoadLibraryW(L"srclient.dll");
@@ -255,7 +255,10 @@ int create_restore_point() {
 
   // End System Restore point
   fRet = fnSRSetRestorePointW(&RestorePtInfo, &SMgrStatus);
-
+  if (!fRet) {
+    goto exit;
+    return EXIT_FAILURE;
+  }
   restorepoint_prep_revert();
 
 exit:

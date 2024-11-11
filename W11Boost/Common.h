@@ -8,15 +8,21 @@
 #include <gpedit.h> // Requires prsht.h first; not unused
 #include <stdbool.h>
 
-extern const CLSID _CLSID_GroupPolicyObject;
-extern const IID _IID_IGroupPolicyObject;
-extern const CLSID _CLSID_GPESnapIn;
+constexpr inline CLSID _CLSID_GroupPolicyObject = {
+    0xea502722, 0xa23d, 0x11d1, {0xa7, 0xd3, 0x0, 0x0, 0xf8, 0x75, 0x71, 0xe3}};
+constexpr inline IID _IID_IGroupPolicyObject = {
+    0xea502723, 0xa23d, 0x11d1, {0xa7, 0xd3, 0x0, 0x0, 0xf8, 0x75, 0x71, 0xe3}};
+constexpr inline CLSID _CLSID_GPESnapIn = {
+    0x8fc0b734, 0xa0e1, 0x11d1, {0xa7, 0xd3, 0x0, 0x0, 0xf8, 0x75, 0x71, 0xe3}};
 
-extern GUID RegistryID;
-extern IGroupPolicyObject *pGPO;
-extern HKEY hKey;
-extern HKEY hSubKey;
-extern LONG result;
+inline GUID RegistryID = {0x35378EAC,
+                   0x683F,
+                   0x11D2,
+                   {0xA8, 0x9A, 0x00, 0xC0, 0x4F, 0xBB, 0xCF, 0xA2}};
+inline IGroupPolicyObject *pGPO;
+inline HKEY hKey;
+inline HKEY hSubKey;
+inline LONG result;
 
 typedef struct {
   char *string;
@@ -36,7 +42,7 @@ LSTATUS set_environment(HKEY hKey, const wchar_t *valueName,
                         const wchar_t *value);
 LSTATUS remove_subkey(HKEY hKey, const wchar_t *subKey,
                       const wchar_t *valueName);
-void gp_cleanup(HRESULT hr);
+int gp_cleanup(HRESULT hr);
 int start_command_and_wait(wchar_t *cmdLine);
 bool append_wchar_t(const wchar_t *original, const wchar_t *append,
                     wchar_t *result);

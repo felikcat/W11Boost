@@ -57,7 +57,7 @@ image:Procmon64_2.png[]
 `SecurityHealthService.exe`
 
 TIP: Example gpedit.msc registry translation: +
-`HKCU\Software\Microsoft\Windows\CurrentVersion\Group Policy Objects\{2F5A9005-4CB6-4314-B846-8C3EB66C9C24}Machine\Software\Policies\Microsoft\Windows` *->* `HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\CloudContent`
+`HKCU\Software\Microsoft\Windows\CurrentVersion\Group Policy Objects\{2F5A9005-4CB6-4314-B846-8C3EB66C9C24}Machine\Software\Policies\Microsoft\Windows\CloudContent` *->* `HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\CloudContent`
 
 * Drivers currently loaded by Windows can be seen with link:https://systeminformer.sourceforge.io/downloads.php[System Informer] via:
 . The "System" process -> Properties (right-click or press Enter with "System" selected) -> Modules

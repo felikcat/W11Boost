@@ -1,4 +1,4 @@
-#include "resource.h"
+#include "Resource.h"
 #include "Common.h"
 #include <Shlwapi.h>
 #include <shellapi.h>
@@ -105,8 +105,8 @@ unsigned short MyRegisterClass(HINSTANCE hInstance) {
 bool InitInstance(HINSTANCE hInstance, int nCmdShow) {
   hInst = hInstance; // Store instance handle in our global variable
 
-  int width = 640;
-  int height = 480;
+  int width = 800;
+  int height = 600;
 
   HWND hWnd = CreateWindowExW(
       0, szWindowClass, szTitle, WS_OVERLAPPED | WS_MINIMIZEBOX | WS_SYSMENU,
@@ -148,51 +148,81 @@ LRESULT CALLBACK WndProc(HWND hWnd, unsigned int message, WPARAM wParam,
                          LPARAM lParam) {
   switch (message) {
   case WM_CREATE: {
-    int fontSize = 30;
-    int dpi = GetDpiForWindow(hWnd);
-    int fontDpi = 96;
-    HFONT hFont = CreateFontW(MulDiv(fontSize, dpi, fontDpi), 0, 0, 0, FW_LIGHT,
-                              FALSE, FALSE, 0, ANSI_CHARSET, OUT_OUTLINE_PRECIS,
+    struct s_font {
+      int size, dpi;
+    } font;
+
+    font.size = 30;
+    font.dpi = 96;
+
+    int screen_dpi = GetDpiForWindow(hWnd);
+    int scale_font = MulDiv(font.size, screen_dpi, font.dpi);
+
+    HFONT hFont = CreateFontW(scale_font, 0, 0, 0, FW_LIGHT, FALSE, FALSE, 0,
+                              ANSI_CHARSET, OUT_OUTLINE_PRECIS,
                               CLIP_DEFAULT_PRECIS, CLEARTYPE_NATURAL_QUALITY,
                               DEFAULT_PITCH | FF_DONTCARE, L"Segoe UI");
 
     RECT rcClient;
     GetClientRect(hWnd, &rcClient);
 
-    int buttonWidth = rcClient.right / 2;
-    int buttonHeight = rcClient.bottom / 2;
+    struct s_common {
+      int left, top, centerWidth, centerHeight;
+    } common;
 
-    HWND hButton1 = CreateWindowW(
-        L"BUTTON", L"Apply W11Boost",
-        WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_FLAT,
-        rcClient.left + buttonWidth, rcClient.top, buttonWidth, buttonHeight,
-        hWnd, (HMENU)IDC_APPLY_W11BOOST, GetModuleHandle(NULL), NULL);
+    struct s_button {
+      int width, height;
+      HWND apply;
+    } button;
 
-    HWND hButton2 = CreateWindowW(
-        L"BUTTON", L"Privacy Mode",
-        WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_FLAT, rcClient.left,
-        rcClient.top + buttonHeight, buttonWidth, buttonHeight, hWnd,
-        (HMENU)IDC_PRIVACY_MODE, GetModuleHandle(NULL), NULL);
+    struct s_checkbox {
+      int width, height;
+      HWND onlinePrivacy, localPrivacy;
+    } checkbox;
 
-    HWND hButton3 = CreateWindowW(
-        L"BUTTON", L"Create a backup",
-        WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_FLAT,
-        rcClient.left + buttonWidth, rcClient.top + buttonHeight, buttonWidth,
-        buttonHeight, hWnd, (HMENU)IDC_CREATE_RESTORE_POINT,
-        GetModuleHandle(NULL), NULL);
+    common.centerWidth = rcClient.right / 2;
+    common.centerHeight = rcClient.bottom / 2;
+    common.left = rcClient.left + 2;
+    common.top = rcClient.top - 2;
 
-    HWND hButton4 = CreateWindowW(
-        L"BUTTON", L"Add Microsoft Store",
-        WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_FLAT, rcClient.left,
-        rcClient.top, buttonWidth, buttonHeight, hWnd,
-        (HMENU)IDC_INSTALL_MICROSOFT_STORE, GetModuleHandle(NULL), NULL);
+    button.height = NULL; // TODO
+    button.width = common.centerHeight / 2; 
 
-    SendMessageW(hButton1, WM_SETFONT, (WPARAM)hFont, TRUE);
-    SendMessageW(hButton2, WM_SETFONT, (WPARAM)hFont, TRUE);
-    SendMessageW(hButton3, WM_SETFONT, (WPARAM)hFont, TRUE);
-    SendMessageW(hButton4, WM_SETFONT, (WPARAM)hFont, TRUE);
+    checkbox.width = rcClient.right;
+    checkbox.height = (common.centerHeight * 2) / 10; // 20%
+
+    struct s_button const aButton = {
+        .apply = CreateWindowW(
+            L"BUTTON", L"Apply W11Boost",
+            WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_FLAT, common.left,
+            rcClient.bottom - button.height, button.width, button.height, hWnd,
+            (HMENU)IDC_APPLY_W11BOOST, GetModuleHandle(NULL), NULL),
+    };
+    struct s_checkbox const aCheckbox = {
+        .onlinePrivacy = CreateWindowW(
+            L"BUTTON", L"Reduce online data collection",
+            WS_CHILD | WS_VISIBLE | BS_CHECKBOX | BS_FLAT, common.left,
+            common.top, checkbox.width, checkbox.height, hWnd, (HMENU)1,
+            ((GetModuleHandle(NULL))), NULL),
+        .localPrivacy = CreateWindowW(
+            L"BUTTON", L"Reduce local data collection",
+            WS_CHILD | WS_VISIBLE | BS_CHECKBOX | BS_FLAT, common.left,
+            common.top + checkbox.height, checkbox.width, checkbox.height, hWnd,
+            (HMENU)2, ((GetModuleHandle(NULL))), NULL)};
+
+    HWND hButton[] = {aButton.apply};
+    HWND hCheckbox[] = {aCheckbox.onlinePrivacy, aCheckbox.localPrivacy};
+
+    for (size_t i = 0; i < sizeof hButton / sizeof aButton.apply; ++i) {
+      SendMessageW(hButton[i], WM_SETFONT, (WPARAM)hFont, TRUE);
+    }
+
+    for (size_t i = 0; i < sizeof hCheckbox / sizeof aCheckbox.onlinePrivacy; ++i) {
+      SendMessageW(hCheckbox[i], WM_SETFONT, (WPARAM)hFont, TRUE);
+    }
   } break;
   case WM_COMMAND: {
+    CheckDlgButton(hWnd, 1, BST_CHECKED);
     int wmId = LOWORD(wParam);
     // Parse the selections:
     switch (wmId) {
@@ -254,6 +284,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, unsigned int message, WPARAM wParam,
                       L"W11Boost", MB_OK);
         }
       }
+      break;
     default:
       return DefWindowProcW(hWnd, message, wParam, lParam);
     }
@@ -261,11 +292,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, unsigned int message, WPARAM wParam,
   case WM_PAINT: {
     PAINTSTRUCT ps;
     HDC hdc = BeginPaint(hWnd, &ps);
+
     if (hdc == NULL) {
       MessageBoxW(hWnd, L"BeginPaint failed", L"W11Boost -> Error",
                   MB_OK | MB_ICONERROR);
       return -1;
     }
+
+    // Change to COLOR_MENU later
+    FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_ACTIVEBORDER + 1));
     EndPaint(hWnd, &ps);
   } break;
   case WM_DESTROY:
