@@ -1,4 +1,3 @@
-#define __STDC_WANT_LIB_EXT1__ 1
 #include "Common.h"
 #include <UserEnv.h>
 #include <Shlwapi.h>

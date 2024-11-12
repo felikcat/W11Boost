@@ -29,7 +29,7 @@ If you wish to know what W11Boost does, look at the source code, every change is
 TIP: If W11Boost fails to install, clear out your group policy edits by deleting `C:\Windows\System32\GroupPolicy\Machine\Registry.pol` and `C:\Windows\System32\GroupPolicy\User\Registry.pol`, then run `gpupdate /force` in Command Prompt as Administrator.
 
 . Download and run the https://github.com/felikcat/W11Boost/releases[latest release of W11Boost]. +
-Only Windows 10 version 1803 and newer are officially supported.
+Only Windows 10 version 1803 and newer are officially supported, and your anti-virus must be disabled.
 
 . Install https://winaerotweaker.com/[Winaero Tweaker] to set personal preferences.
 

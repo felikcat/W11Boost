@@ -3,3 +3,4 @@
 .cache
 build
 x64
+vcpkg_installed

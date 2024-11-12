@@ -52,5 +52,7 @@ void restorepoint_prep();
 int create_restore_point();
 int gp_edits();
 wchar_t *get_log_directory();
+int rw_w11boost();
+int install_appx_support();
 
 #endif // COMMON_H

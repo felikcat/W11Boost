@@ -30,6 +30,12 @@
     <ClCompile Include="W11Boost.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Removal.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AppxSupport.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common.h">
@@ -52,6 +58,9 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="..\.gitignore">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="vcpkg.json">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

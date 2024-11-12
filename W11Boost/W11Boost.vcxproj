@@ -57,6 +57,9 @@
     <EnableClangTidyCodeAnalysis>true</EnableClangTidyCodeAnalysis>
     <EnableMicrosoftCodeAnalysis>true</EnableMicrosoftCodeAnalysis>
   </PropertyGroup>
+  <PropertyGroup Label="Vcpkg">
+    <VcpkgEnableManifest>true</VcpkgEnableManifest>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -104,9 +107,11 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AppxSupport.cc" />
     <ClCompile Include="Common.cc" />
     <ClCompile Include="Edits.cc" />
     <ClCompile Include="PrivacyMode.cc" />
+    <ClCompile Include="Removal.cc" />
     <ClCompile Include="RestorePoint.cc" />
     <ClCompile Include="W11Boost.cc" />
   </ItemGroup>
@@ -121,6 +126,7 @@
   <ItemGroup>
     <None Include="..\.clang-format" />
     <None Include="..\.gitignore" />
+    <None Include="vcpkg.json" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

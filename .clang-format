@@ -1,4 +1,5 @@
 BasedOnStyle: LLVM
+ColumnLimit: 120
 # Don't screw up my includes fucker
 IncludeBlocks: Preserve
 SortIncludes: Never

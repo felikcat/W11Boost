@@ -77,9 +77,10 @@ int gp_edits() {
   const wchar_t *filePath =
       L"C:\\Windows\\System32\\SleepStudy\\UserNotPresentSession.etl";
 
-  // Incase the file doesn't exist.
+  DeleteFileW(filePath);
+
   FILE *file = NULL;
-  errno_t err = _wfopen_s(&file, filePath, L"w");
+  errno_t err = _wfopen_s(&file, filePath, L"a");
   if (err != 0 || file == NULL)
     return EXIT_FAILURE;
     

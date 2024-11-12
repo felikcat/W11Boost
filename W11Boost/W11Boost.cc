@@ -20,14 +20,23 @@
 HINSTANCE hInst;                       // Current instance
 wchar_t szTitle[MAX_LOADSTRING];       // The title bar text
 wchar_t szWindowClass[MAX_LOADSTRING]; // The main window class name
+bool rpCheckboxStatus, pmCheckboxStatus, msCheckboxStatus, appxCheckboxStatus;
+int gpResult;
+HWND hWnd;
 
 // Forward declarations of functions included in this code module:
 unsigned short MyRegisterClass(HINSTANCE hInstance);
 bool InitInstance(HINSTANCE, int);
 LRESULT CALLBACK WndProc(HWND, unsigned int, WPARAM, LPARAM);
 
-int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
-                      _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine,
+void appx_void() {
+  int appxResult = install_appx_support();
+
+  if (appxResult != 0)
+    MessageBoxW(hWnd, L"Failed to install .appx/.appxbundle and WinGet support!", L"W11Boost -> Error", MB_OK);
+}
+
+int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine,
                       _In_ int nCmdShow) {
   UNREFERENCED_PARAMETER(hPrevInstance);
   UNREFERENCED_PARAMETER(lpCmdLine);
@@ -54,8 +63,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     return FALSE;
   }
 
-  HACCEL hAccelTable =
-      LoadAcceleratorsW(hInstance, MAKEINTRESOURCE(IDC_W11BOOST));
+  HACCEL hAccelTable = LoadAcceleratorsW(hInstance, MAKEINTRESOURCE(IDC_W11BOOST));
 
   MSG msg;
 
@@ -108,9 +116,8 @@ bool InitInstance(HINSTANCE hInstance, int nCmdShow) {
   int width = 800;
   int height = 600;
 
-  HWND hWnd = CreateWindowExW(
-      0, szWindowClass, szTitle, WS_OVERLAPPED | WS_MINIMIZEBOX | WS_SYSMENU,
-      CW_USEDEFAULT, 0, width, height, NULL, NULL, hInstance, NULL);
+  hWnd = CreateWindowExW(0, szWindowClass, szTitle, WS_OVERLAPPED | WS_MINIMIZEBOX | WS_SYSMENU, CW_USEDEFAULT, 0,
+                         width, height, NULL, NULL, hInstance, NULL);
 
   if (!hWnd) {
     return FALSE;
@@ -144,74 +151,99 @@ bool InitInstance(HINSTANCE hInstance, int nCmdShow) {
 //  WM_DESTROY  - post a quit message and return
 //
 //
-LRESULT CALLBACK WndProc(HWND hWnd, unsigned int message, WPARAM wParam,
-                         LPARAM lParam) {
+LRESULT CALLBACK WndProc(HWND hWnd, unsigned int message, WPARAM wParam, LPARAM lParam) {
   switch (message) {
   case WM_CREATE: {
     struct s_font {
       int size, dpi;
     } font;
 
-    font.size = 30;
+    font.size = 24;
     font.dpi = 96;
 
     int screen_dpi = GetDpiForWindow(hWnd);
     int scale_font = MulDiv(font.size, screen_dpi, font.dpi);
 
-    HFONT hFont = CreateFontW(scale_font, 0, 0, 0, FW_LIGHT, FALSE, FALSE, 0,
-                              ANSI_CHARSET, OUT_OUTLINE_PRECIS,
-                              CLIP_DEFAULT_PRECIS, CLEARTYPE_NATURAL_QUALITY,
-                              DEFAULT_PITCH | FF_DONTCARE, L"Segoe UI");
+    HFONT hFont = CreateFontW(scale_font, 0, 0, 0, FW_LIGHT, FALSE, FALSE, 0, ANSI_CHARSET, OUT_OUTLINE_PRECIS,
+                              CLIP_DEFAULT_PRECIS, CLEARTYPE_NATURAL_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Segoe UI");
 
     RECT rcClient;
     GetClientRect(hWnd, &rcClient);
 
     struct s_common {
-      int left, top, centerWidth, centerHeight;
+      int left, right, top, bottom, centerWidth, centerHeight;
     } common;
 
     struct s_button {
       int width, height;
-      HWND apply;
+      HWND apply, remove;
     } button;
 
     struct s_checkbox {
       int width, height;
-      HWND onlinePrivacy, localPrivacy;
+      HWND onlinePrivacy, localPrivacy, backup, store, appx, fix, stig;
     } checkbox;
 
     common.centerWidth = rcClient.right / 2;
     common.centerHeight = rcClient.bottom / 2;
-    common.left = rcClient.left + 2;
-    common.top = rcClient.top - 2;
 
-    button.height = NULL; // TODO
-    button.width = common.centerHeight / 2; 
+    common.left = rcClient.left + 4;
+    common.right = rcClient.right - 4;
+
+    common.top = rcClient.top + 2;
+    common.bottom = rcClient.bottom - 2;
+
+    button.width = common.centerWidth;
+    button.height = (common.centerHeight * 4) / 10; // 40%
 
     checkbox.width = rcClient.right;
     checkbox.height = (common.centerHeight * 2) / 10; // 20%
 
     struct s_button const aButton = {
-        .apply = CreateWindowW(
-            L"BUTTON", L"Apply W11Boost",
-            WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_FLAT, common.left,
-            rcClient.bottom - button.height, button.width, button.height, hWnd,
-            (HMENU)IDC_APPLY_W11BOOST, GetModuleHandle(NULL), NULL),
+        .apply = CreateWindowW(L"BUTTON", L"Apply W11Boost", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_FLAT,
+                               common.left, common.bottom - button.height, button.width, button.height, hWnd,
+                               (HMENU)IDC_APPLY_W11BOOST, GetModuleHandle(NULL), NULL),
+        .remove = CreateWindowW(L"BUTTON", L"Remove W11Boost", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_FLAT,
+                                common.right - button.width, common.bottom - button.height, button.width, button.height,
+                                hWnd, (HMENU)IDC_REMOVE_W11BOOST, GetModuleHandle(NULL), NULL),
     };
     struct s_checkbox const aCheckbox = {
-        .onlinePrivacy = CreateWindowW(
-            L"BUTTON", L"Reduce online data collection",
-            WS_CHILD | WS_VISIBLE | BS_CHECKBOX | BS_FLAT, common.left,
-            common.top, checkbox.width, checkbox.height, hWnd, (HMENU)1,
-            ((GetModuleHandle(NULL))), NULL),
-        .localPrivacy = CreateWindowW(
-            L"BUTTON", L"Reduce local data collection",
-            WS_CHILD | WS_VISIBLE | BS_CHECKBOX | BS_FLAT, common.left,
-            common.top + checkbox.height, checkbox.width, checkbox.height, hWnd,
-            (HMENU)2, ((GetModuleHandle(NULL))), NULL)};
+        .onlinePrivacy =
+            CreateWindowW(L"BUTTON", L"Reduce online data collection", WS_CHILD | WS_VISIBLE | BS_CHECKBOX | BS_FLAT,
+                          common.left, common.top + checkbox.height, checkbox.width, checkbox.height, hWnd, (HMENU)1,
+                          ((GetModuleHandle(NULL))), NULL),
+        .localPrivacy =
+            CreateWindowW(L"BUTTON", L"Reduce local data collection", WS_CHILD | WS_VISIBLE | BS_CHECKBOX | BS_FLAT,
+                          common.left, common.top + (checkbox.height * 2), checkbox.width, checkbox.height, hWnd,
+                          (HMENU)IDC_PRIVACY_MODE, ((GetModuleHandle(NULL))), NULL),
+        .backup =
+            CreateWindowW(L"BUTTON", L"Create a system restore point", WS_CHILD | WS_VISIBLE | BS_CHECKBOX | BS_FLAT,
+                          common.left, common.top + (checkbox.height * 3), checkbox.width, checkbox.height, hWnd,
+                          (HMENU)IDC_CREATE_RESTORE_POINT, ((GetModuleHandle(NULL))), NULL),
+        .store = CreateWindowW(L"BUTTON", L"Install the Microsoft Store", WS_CHILD | WS_VISIBLE | BS_CHECKBOX | BS_FLAT,
+                               common.left, common.top + (checkbox.height * 4), checkbox.width, checkbox.height, hWnd,
+                               (HMENU)IDC_INSTALL_MICROSOFT_STORE, ((GetModuleHandle(NULL))), NULL),
+        .appx = CreateWindowW(L"BUTTON", L"Install .appx/.appxbundle support and WinGet",
+                              WS_CHILD | WS_VISIBLE | BS_CHECKBOX | BS_FLAT, common.left,
+                              common.top + (checkbox.height * 5), checkbox.width, checkbox.height, hWnd,
+                              (HMENU)IDC_INSTALL_APPX_SUPPORT, ((GetModuleHandle(NULL))), NULL),
+        .fix = CreateWindowW(L"BUTTON", L"Attempt to fix Windows", WS_CHILD | WS_VISIBLE | BS_CHECKBOX | BS_FLAT,
+                             common.left, common.top + (checkbox.height * 6), checkbox.width, checkbox.height, hWnd,
+                             (HMENU)6, ((GetModuleHandle(NULL))), NULL),
+        .stig = CreateWindowW(L"BUTTON", L"DoD STIG baseline compliance (hardening)",
+                              WS_CHILD | WS_VISIBLE | BS_CHECKBOX | BS_FLAT, common.left,
+                              common.top + (checkbox.height * 7), checkbox.width, checkbox.height, hWnd, (HMENU)6,
+                              ((GetModuleHandle(NULL))), NULL),
+    };
 
-    HWND hButton[] = {aButton.apply};
-    HWND hCheckbox[] = {aCheckbox.onlinePrivacy, aCheckbox.localPrivacy};
+    HWND hButton[] = {aButton.apply, aButton.remove};
+    HWND hCheckbox[] = {aCheckbox.onlinePrivacy, aCheckbox.localPrivacy, aCheckbox.backup, aCheckbox.store,
+                        aCheckbox.appx,          aCheckbox.fix,          aCheckbox.stig};
+
+    HWND optionalText =
+        CreateWindowW(L"STATIC", L"Optional:", WS_CHILD | WS_VISIBLE | BS_FLAT | BS_CENTER, common.left, common.top,
+                      checkbox.width, checkbox.height, hWnd, NULL, ((GetModuleHandle(NULL))), NULL);
+    SendMessageW(optionalText, WM_SETFONT, (WPARAM)hFont, TRUE);
 
     for (size_t i = 0; i < sizeof hButton / sizeof aButton.apply; ++i) {
       SendMessageW(hButton[i], WM_SETFONT, (WPARAM)hFont, TRUE);
@@ -220,87 +252,133 @@ LRESULT CALLBACK WndProc(HWND hWnd, unsigned int message, WPARAM wParam,
     for (size_t i = 0; i < sizeof hCheckbox / sizeof aCheckbox.onlinePrivacy; ++i) {
       SendMessageW(hCheckbox[i], WM_SETFONT, (WPARAM)hFont, TRUE);
     }
+
+    CheckDlgButton(hWnd, IDC_PRIVACY_MODE, BST_CHECKED);
+    CheckDlgButton(hWnd, IDC_CREATE_RESTORE_POINT, BST_CHECKED);
   } break;
+
   case WM_COMMAND: {
-    CheckDlgButton(hWnd, 1, BST_CHECKED);
     int wmId = LOWORD(wParam);
+
     // Parse the selections:
     switch (wmId) {
     case IDC_APPLY_W11BOOST:
-      if (MessageBoxW(hWnd, L"Are you sure you want to apply W11Boost?",
-                      L"W11Boost", MB_YESNO) == IDYES) {
-        int gpResult = gp_edits();
-        if (gpResult == 0) {
-          MessageBoxW(hWnd, L"Complete. Manually reboot to apply all changes.",
-                      L"W11Boost", MB_OK);
+      if (MessageBoxW(hWnd, L"Do you want to apply W11Boost?", L"W11Boost", MB_YESNO) == IDYES) {
+        rpCheckboxStatus = IsDlgButtonChecked(hWnd, IDC_CREATE_RESTORE_POINT);
+        pmCheckboxStatus = IsDlgButtonChecked(hWnd, IDC_PRIVACY_MODE);
+        msCheckboxStatus = IsDlgButtonChecked(hWnd, IDC_INSTALL_MICROSOFT_STORE);
+        appxCheckboxStatus = IsDlgButtonChecked(hWnd, IDC_INSTALL_APPX_SUPPORT);
+
+        if (rpCheckboxStatus) {
+          int srResult = create_restore_point();
+
+          if (srResult != 0)
+            MessageBoxW(hWnd, L"System Restore point failed to be created!", L"W11Boost -> Error", MB_OK);
+        }
+
+        if (pmCheckboxStatus) {
+          int pmResult = install_privacy_mode();
+
+          if (pmResult != 0)
+            MessageBoxW(hWnd, L"Failed to install 'Reduce local data collection'!", L"W11Boost -> Error", MB_OK);
+        }
+
+        if (msCheckboxStatus) {
+          wchar_t cmdLine1[] = L"wsreset.exe -i";
+          int msResult = start_command_and_wait(cmdLine1);
+
+          if (msResult != 0)
+            MessageBoxW(hWnd, L"Failed to install the Microsoft Store!", L"W11Boost -> Error", MB_OK);
+        }
+
+        if (msCheckboxStatus != TRUE && appxCheckboxStatus) {
+          if (MessageBoxW(hWnd,
+                          L"Are you certain the Microsoft Store is already installed? It is required for "
+                          L".appx/.appxbundle and WinGet support.",
+                          L"W11Boost", MB_YESNO) == IDYES) {
+            appx_void();
+          }
+        } else if (msCheckboxStatus && appxCheckboxStatus) {
+          appx_void();
+        }
+      }
+
+      gpResult = gp_edits();
+
+      if (gpResult == 0) {
+        MessageBoxW(hWnd, L"Complete. Manually reboot to apply all changes.", L"W11Boost", MB_OK);
+      } else {
+        MessageBoxW(hWnd, L"Failed to install W11Boost!", L"W11Boost -> Error", MB_OK);
+      }
+      break;
+
+    case IDC_REMOVE_W11BOOST:
+      if (MessageBoxW(hWnd, L"Do you want to remove W11Boost?", L"W11Boost", MB_YESNO) == IDYES) {
+        int rwResult = rw_w11boost();
+        if (rwResult == 0) {
+          MessageBoxW(hWnd, L"Complete. Manually reboot to apply all changes.", L"W11Boost", MB_OK);
         } else {
-          MessageBoxW(hWnd, L"Failed to install W11Boost!", L"W11Boost", MB_OK);
+          MessageBoxW(hWnd, L"Failed to remove W11Boost!", L"W11Boost -> Error", MB_OK);
         }
       }
       break;
+
     case IDC_CREATE_RESTORE_POINT:
-      if (MessageBoxW(
-              hWnd, L"Are you sure you want to create a System Restore point?",
-              L"W11Boost", MB_YESNO) == IDYES) {
-        int srResult = create_restore_point();
-        if (srResult == 0) {
-          MessageBoxW(hWnd, L"System Restore point successfully created.",
-                      L"W11Boost", MB_OK);
-        } else {
-          MessageBoxW(hWnd, L"System Restore point failed to be created!",
-                      L"W11Boost", MB_OK);
-        }
+      rpCheckboxStatus = IsDlgButtonChecked(hWnd, IDC_CREATE_RESTORE_POINT);
+
+      if (rpCheckboxStatus) {
+        CheckDlgButton(hWnd, IDC_CREATE_RESTORE_POINT, BST_UNCHECKED);
+      } else {
+        CheckDlgButton(hWnd, IDC_CREATE_RESTORE_POINT, BST_CHECKED);
       }
       break;
+
     case IDC_PRIVACY_MODE:
-      if (MessageBoxW(hWnd,
-                      L"This will hide as much activity as possible on your "
-                      L"PC, do you want this?",
-                      L"W11Boost", MB_YESNO) == IDYES) {
-        int pmResult = install_privacy_mode();
+      pmCheckboxStatus = IsDlgButtonChecked(hWnd, IDC_PRIVACY_MODE);
 
-        if (pmResult == 0) {
-          MessageBoxW(hWnd, L"Successfully installed Privacy Mode.",
-                      L"W11Boost", MB_OK);
-        } else {
-          MessageBoxW(hWnd, L"Failed to install Privacy Mode!", L"W11Boost",
-                      MB_OK);
-        }
+      if (pmCheckboxStatus) {
+        CheckDlgButton(hWnd, IDC_PRIVACY_MODE, BST_UNCHECKED);
+      } else {
+        CheckDlgButton(hWnd, IDC_PRIVACY_MODE, BST_CHECKED);
       }
       break;
+
     case IDC_INSTALL_MICROSOFT_STORE:
-      if (MessageBoxW(hWnd, L"Do you wish to install the Microsoft Store?",
-                      L"W11Boost", MB_YESNO) == IDYES) {
-        wchar_t cmdLine1[] = L"wsreset.exe -i";
-        int msResult = start_command_and_wait(cmdLine1);
+      msCheckboxStatus = IsDlgButtonChecked(hWnd, IDC_INSTALL_MICROSOFT_STORE);
 
-        if (msResult == 0) {
-          MessageBoxW(hWnd,
-                      L"Completed. The Microsoft Store may take a few "
-                      L"additional minutes to show up.",
-                      L"W11Boost", MB_OK);
-        } else {
-          MessageBoxW(hWnd, L"Failed to install the Microsoft Store!",
-                      L"W11Boost", MB_OK);
-        }
+      if (msCheckboxStatus) {
+        CheckDlgButton(hWnd, IDC_INSTALL_MICROSOFT_STORE, BST_UNCHECKED);
+      } else {
+        CheckDlgButton(hWnd, IDC_INSTALL_MICROSOFT_STORE, BST_CHECKED);
       }
       break;
+
+    case IDC_INSTALL_APPX_SUPPORT:
+      appxCheckboxStatus = IsDlgButtonChecked(hWnd, IDC_INSTALL_APPX_SUPPORT);
+
+      if (appxCheckboxStatus) {
+        CheckDlgButton(hWnd, IDC_INSTALL_APPX_SUPPORT, BST_UNCHECKED);
+      } else {
+        CheckDlgButton(hWnd, IDC_INSTALL_APPX_SUPPORT, BST_CHECKED);
+      }
+      break;
+
     default:
       return DefWindowProcW(hWnd, message, wParam, lParam);
     }
-  } break;
+    break;
+  }
+
   case WM_PAINT: {
     PAINTSTRUCT ps;
     HDC hdc = BeginPaint(hWnd, &ps);
 
     if (hdc == NULL) {
-      MessageBoxW(hWnd, L"BeginPaint failed", L"W11Boost -> Error",
-                  MB_OK | MB_ICONERROR);
-      return -1;
+      MessageBoxW(hWnd, L"BeginPaint failed", L"W11Boost -> Error", MB_OK | MB_ICONERROR);
+      return EXIT_FAILURE;
     }
 
-    // Change to COLOR_MENU later
-    FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_ACTIVEBORDER + 1));
+    FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_MENU + 1));
     EndPaint(hWnd, &ps);
   } break;
   case WM_DESTROY:
