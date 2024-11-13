@@ -10,10 +10,12 @@
 #define IDR_MAINFRAME                   128
 #define IDC_APPLY_W11BOOST              200
 #define IDC_CREATE_RESTORE_POINT        201
-#define IDC_PRIVACY_MODE                202
+#define IDC_LOCAL_PRIVACY                202
 #define IDC_INSTALL_MICROSOFT_STORE     203
 #define IDC_REMOVE_W11BOOST				204
 #define IDC_INSTALL_APPX_SUPPORT		205
+#define IDC_ONLINE_PRIVACY				206
+#define IDC_DISABLE_SLEEP				207
 #define IDC_STATIC                      -1
 
 // Next default values for new objects

@@ -1,4 +1,4 @@
-#include "Common.h"
+import Common;
 #include <AccCtrl.h>
 #include <AclAPI.h>
 #include <SrRestorePtApi.h>
@@ -13,21 +13,11 @@ bool InitializeCOMSecurity() {
   SECURITY_DESCRIPTOR securityDesc = {0};
   EXPLICIT_ACCESS ea[5] = {{0}};
   ACL *pAcl = NULL;
-  unsigned __int64
-      rgSidBA[(SECURITY_MAX_SID_SIZE + sizeof(unsigned __int64) - 1) /
-                           sizeof(unsigned __int64)] = {0};
-  unsigned __int64
-      rgSidLS[(SECURITY_MAX_SID_SIZE + sizeof(unsigned __int64) - 1) /
-                           sizeof(unsigned __int64)] = {0};
-  unsigned __int64
-      rgSidNS[(SECURITY_MAX_SID_SIZE + sizeof(unsigned __int64) - 1) /
-              sizeof(unsigned __int64)] = {0};
-  unsigned __int64
-      rgSidPS[(SECURITY_MAX_SID_SIZE + sizeof(unsigned __int64) - 1) /
-                           sizeof(unsigned __int64)] = {0};
-  unsigned __int64
-      rgSidSY[(SECURITY_MAX_SID_SIZE + sizeof(unsigned __int64) - 1) /
-                           sizeof(unsigned __int64)] = {0};
+  unsigned __int64 rgSidBA[(SECURITY_MAX_SID_SIZE + sizeof(unsigned __int64) - 1) / sizeof(unsigned __int64)] = {0};
+  unsigned __int64 rgSidLS[(SECURITY_MAX_SID_SIZE + sizeof(unsigned __int64) - 1) / sizeof(unsigned __int64)] = {0};
+  unsigned __int64 rgSidNS[(SECURITY_MAX_SID_SIZE + sizeof(unsigned __int64) - 1) / sizeof(unsigned __int64)] = {0};
+  unsigned __int64 rgSidPS[(SECURITY_MAX_SID_SIZE + sizeof(unsigned __int64) - 1) / sizeof(unsigned __int64)] = {0};
+  unsigned __int64 rgSidSY[(SECURITY_MAX_SID_SIZE + sizeof(unsigned __int64) - 1) / sizeof(unsigned __int64)] = {0};
   unsigned long cbSid = 0;
   bool fRet = FALSE;
   unsigned long dwRet = ERROR_SUCCESS;
@@ -41,15 +31,13 @@ bool InitializeCOMSecurity() {
   //
 
   // Initialize the security descriptor.
-  fRet = InitializeSecurityDescriptor(&securityDesc,
-                                        SECURITY_DESCRIPTOR_REVISION);
+  fRet = InitializeSecurityDescriptor(&securityDesc, SECURITY_DESCRIPTOR_REVISION);
   if (!fRet)
     goto exit;
 
   // Create an administrator group security identifier (SID).
   cbSid = sizeof(rgSidBA);
-  fRet =
-      CreateWellKnownSid(WinBuiltinAdministratorsSid, NULL, rgSidBA, &cbSid);
+  fRet = CreateWellKnownSid(WinBuiltinAdministratorsSid, NULL, rgSidBA, &cbSid);
   if (!fRet)
     goto exit;
 
@@ -152,10 +140,8 @@ bool InitializeCOMSecurity() {
   // CoInitializeSecurity() for your application. Note that an
   // explicit security descriptor is being passed down.
 
-  hrRet = CoInitializeSecurity(
-      &securityDesc, -1, NULL, NULL, RPC_C_AUTHN_LEVEL_PKT_PRIVACY,
-      RPC_C_IMP_LEVEL_IDENTIFY, NULL, EOAC_DISABLE_AAA | EOAC_NO_CUSTOM_MARSHAL,
-      NULL);
+  hrRet = CoInitializeSecurity(&securityDesc, -1, NULL, NULL, RPC_C_AUTHN_LEVEL_PKT_PRIVACY, RPC_C_IMP_LEVEL_IDENTIFY,
+                               NULL, EOAC_DISABLE_AAA | EOAC_NO_CUSTOM_MARSHAL, NULL);
   if (FAILED(hrRet)) {
     fRet = FALSE;
     goto exit;
@@ -173,19 +159,16 @@ exit:
 void restorepoint_prep() {
   HKEY hKey = HKEY_LOCAL_MACHINE;
 
-  result = RegCreateKeyExW(
-      hKey, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\SystemRestore", 0,
-      NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hSubKey, NULL);
+  result = RegCreateKeyExW(hKey, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\SystemRestore", 0, NULL,
+                           REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hSubKey, NULL);
 
   if (result == ERROR_SUCCESS) {
     unsigned long value = 0;
-    RegSetValueExW(hSubKey, L"SystemRestorePointCreationFrequency", 0,
-                   REG_DWORD, (const BYTE *)&value, sizeof(value));
+    RegSetValueExW(hSubKey, L"SystemRestorePointCreationFrequency", 0, REG_DWORD, (const BYTE *)&value, sizeof(value));
   }
 
-  result = RegCreateKeyExW(
-      hKey, L"SOFTWARE\\Policies\\Microsoft\\Windows NT\\SystemRestore", 0, NULL,
-      REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hSubKey, NULL);
+  result = RegCreateKeyExW(hKey, L"SOFTWARE\\Policies\\Microsoft\\Windows NT\\SystemRestore", 0, NULL,
+                           REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hSubKey, NULL);
 
   if (result == ERROR_SUCCESS) {
     RegDeleteValueW(hSubKey, L"DisableConfig");
@@ -199,9 +182,8 @@ void restorepoint_prep() {
 void restorepoint_prep_revert() {
   HKEY hKey = HKEY_LOCAL_MACHINE;
 
-  result = RegCreateKeyExW(
-      hKey, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\SystemRestore", 0,
-      NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hSubKey, NULL);
+  result = RegCreateKeyExW(hKey, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\SystemRestore", 0, NULL,
+                           REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hSubKey, NULL);
 
   if (result == ERROR_SUCCESS) {
     RegDeleteValueW(hSubKey, L"SystemRestorePointCreationFrequency");
@@ -211,6 +193,8 @@ void restorepoint_prep_revert() {
 }
 
 int create_restore_point() {
+  bool failure = FALSE;
+
   STATEMGRSTATUS SMgrStatus;
 
   // COINIT_MULTITHREADED seems to cause race conditions
@@ -226,18 +210,15 @@ int create_restore_point() {
   if (NULL == hSrClient)
     return EXIT_FAILURE;
 
-  RESTOREPOINTINFOW RestorePtInfo = {.dwEventType = BEGIN_SYSTEM_CHANGE,
-                                     .dwRestorePtType = APPLICATION_INSTALL,
-                                     .llSequenceNumber = 0};
+  RESTOREPOINTINFOW RestorePtInfo = {
+      .dwEventType = BEGIN_SYSTEM_CHANGE, .dwRestorePtType = APPLICATION_INSTALL, .llSequenceNumber = 0};
 
-  wcscpy_s(RestorePtInfo.szDescription, _countof(RestorePtInfo.szDescription),
-           L"Installed W11Boost");
+  wcscpy_s(RestorePtInfo.szDescription, _countof(RestorePtInfo.szDescription), L"Installed W11Boost");
 
-  PFN_SETRESTOREPTW fnSRSetRestorePointW =
-      (PFN_SETRESTOREPTW)GetProcAddress(hSrClient, "SRSetRestorePointW");
+  PFN_SETRESTOREPTW fnSRSetRestorePointW = (PFN_SETRESTOREPTW)GetProcAddress(hSrClient, "SRSetRestorePointW");
   if (NULL == fnSRSetRestorePointW) {
+    failure = TRUE;
     goto exit;
-    return EXIT_FAILURE;
   }
 
   restorepoint_prep();
@@ -246,8 +227,8 @@ int create_restore_point() {
   fRet = fnSRSetRestorePointW(&RestorePtInfo, &SMgrStatus);
 
   if (!fRet) { // Either SR is off, or restore point creation failed outright
+    failure = TRUE;
     goto exit;
-    return EXIT_FAILURE;
   }
 
   RestorePtInfo.dwEventType = END_SYSTEM_CHANGE;
@@ -256,8 +237,8 @@ int create_restore_point() {
   // End System Restore point
   fRet = fnSRSetRestorePointW(&RestorePtInfo, &SMgrStatus);
   if (!fRet) {
+    failure = TRUE;
     goto exit;
-    return EXIT_FAILURE;
   }
   restorepoint_prep_revert();
 
@@ -267,5 +248,8 @@ exit:
     hSrClient = NULL;
   }
 
-  return 0;
+  if (failure)
+    return EXIT_FAILURE;
+
+  return EXIT_SUCCESS;
 }

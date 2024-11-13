@@ -36,11 +36,14 @@
     <ClCompile Include="AppxSupport.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Common.cppm">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DisableSleep.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Common.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>

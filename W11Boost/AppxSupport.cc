@@ -1,4 +1,4 @@
-#include "Common.h"
+import Common;
 #include <shlobj_core.h>
 #include <curl/curl.h>
 
@@ -20,7 +20,12 @@ int install_appx_support() {
     curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS, 10000L); // 10000 miliseconds -> 10 seconds
 
     res = curl_easy_perform(curl);
-    curl_easy_cleanup(curl);
+    if (res != CURLcode::CURLE_OK) {
+      curl_easy_cleanup(curl);
+      return EXIT_FAILURE;
+    } else {
+      curl_easy_cleanup(curl);
+    }
   }
   return EXIT_SUCCESS;
 }
