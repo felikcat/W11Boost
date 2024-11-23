@@ -6,7 +6,7 @@ import Common;
 #include <stdio.h>
 #include <stdlib.h>
 
-int main_registry_edits() {
+auto main_registry_edits() -> int {
   hKey = HKEY_LOCAL_MACHINE;
 
   // If allowed (1): unused apps would be uninstalled with their user data left

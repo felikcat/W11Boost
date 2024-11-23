@@ -14,7 +14,6 @@
 #define IDC_INSTALL_MICROSOFT_STORE     203
 #define IDC_REMOVE_W11BOOST				204
 #define IDC_INSTALL_APPX_SUPPORT		205
-#define IDC_ONLINE_PRIVACY				206
 #define IDC_DISABLE_SLEEP				207
 #define IDC_STATIC                      -1
 

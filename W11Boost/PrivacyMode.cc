@@ -4,7 +4,7 @@ import Common;
 #include <windows.h> // Always first
 #include <combaseapi.h>
 
-int install_privacy_mode() {
+auto install_privacy_mode() -> int {
   HKEY hKey = HKEY_LOCAL_MACHINE;
 
   // Do not analyze apps' execution time data.

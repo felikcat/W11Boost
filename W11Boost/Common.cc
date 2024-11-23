@@ -10,8 +10,13 @@ import Common;
 #include <wchar.h>
 #include <time.h>
 #include <stdio.h>
+#include <string>
+#include <iostream>
+#include <sstream>
+#include <ShlObj.h>
+#include <ostream>
 
-wchar_t *get_log_directory() {
+auto get_log_directory() -> wchar_t* {
   wchar_t currentPath[MAX_PATH + 1];
   GetModuleFileNameW(NULL, currentPath, MAX_PATH);
 
@@ -35,7 +40,7 @@ wchar_t *get_log_directory() {
   return fullPath;
 }
 
-utf8_result wide_string_to_utf8(const wchar_t *wide_string) {
+auto wide_string_to_utf8(const wchar_t *wide_string) -> utf8_result {
   if (wide_string == NULL || *wide_string == U'\0')
     return {NULL, false};
 
@@ -60,7 +65,7 @@ utf8_result wide_string_to_utf8(const wchar_t *wide_string) {
   return {result, false}; // if SUCCESS (0), proceed
 }
 
-int log_registry(const wchar_t *subKey, const wchar_t *valueName, const char *typeName) {
+auto log_registry(const wchar_t *subKey, const wchar_t *valueName, const char *typeName) -> int {
   wchar_t *currentDir = get_log_directory();
   wchar_t logLocation[MAX_PATH + 1];
 
@@ -107,7 +112,7 @@ int log_registry(const wchar_t *subKey, const wchar_t *valueName, const char *ty
   return EXIT_SUCCESS;
 }
 
-long delete_directory_and_subfolders(LPCWSTR directory) {
+auto delete_directory_and_subfolders(LPCWSTR directory) -> long {
   wchar_t dir[MAX_PATH + 1];
   SHFILEOPSTRUCTW fos;
 
@@ -122,7 +127,7 @@ long delete_directory_and_subfolders(LPCWSTR directory) {
   return SHFileOperationW(&fos);
 }
 
-LSTATUS set_dword(HKEY hKey, const wchar_t *subKey, const wchar_t *valueName, const DWORD value) {
+auto set_dword(HKEY hKey, const wchar_t *subKey, const wchar_t *valueName, const DWORD value) -> LSTATUS {
   result = RegCreateKeyExW(hKey, subKey, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hSubKey, NULL);
 
   if (result == ERROR_SUCCESS)
@@ -135,7 +140,7 @@ LSTATUS set_dword(HKEY hKey, const wchar_t *subKey, const wchar_t *valueName, co
   return result;
 }
 
-LSTATUS set_string(HKEY hKey, const wchar_t *subKey, const wchar_t *valueName, const wchar_t *value) {
+auto set_string(HKEY hKey, const wchar_t *subKey, const wchar_t *valueName, const wchar_t *value) -> LSTATUS {
   if ((result = RegCreateKeyExW(hKey, subKey, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hSubKey, NULL)) !=
           ERROR_SUCCESS ||
       (result = RegSetValueExW(hSubKey, valueName, 0, REG_SZ, (const BYTE *)value,
@@ -149,7 +154,7 @@ LSTATUS set_string(HKEY hKey, const wchar_t *subKey, const wchar_t *valueName, c
   return result;
 }
 
-LSTATUS set_environment(HKEY hKey, const wchar_t *valueName, const wchar_t *value) {
+auto set_environment(HKEY hKey, const wchar_t *valueName, const wchar_t *value) -> LSTATUS {
   const wchar_t *subKey = L"SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment";
   result = RegOpenKeyExW(hKey, subKey, 0, KEY_ALL_ACCESS, &hSubKey);
 
@@ -164,7 +169,7 @@ LSTATUS set_environment(HKEY hKey, const wchar_t *valueName, const wchar_t *valu
   return result;
 }
 
-LSTATUS remove_subkey(HKEY hKey, const wchar_t *subKey, const wchar_t *valueName) {
+auto remove_subkey(HKEY hKey, const wchar_t *subKey, const wchar_t *valueName) -> LSTATUS {
   result = RegOpenKeyExW(hKey, subKey, 0, KEY_WRITE, &hSubKey);
 
   if (result == ERROR_SUCCESS)
@@ -177,7 +182,7 @@ LSTATUS remove_subkey(HKEY hKey, const wchar_t *subKey, const wchar_t *valueName
   return result;
 }
 
-int start_command_and_wait(wchar_t *cmdLine) {
+auto start_command_and_wait(wchar_t *cmdLine) -> int {
   STARTUPINFOW si{};
   PROCESS_INFORMATION pi{};
 
@@ -195,10 +200,30 @@ int start_command_and_wait(wchar_t *cmdLine) {
   return EXIT_SUCCESS;
 }
 
-bool append_wchar_t(const wchar_t *original, const wchar_t *append, wchar_t *_result) {
+auto append_wchar_t(const wchar_t *original, const wchar_t *append, wchar_t *_result) -> bool {
   wcscpy_s(_result, MAX_PATH, original);
   if ((PathAppendW(_result, append)) == TRUE)
     return true;
 
   return false;
-};
+}
+
+// This is for cURL
+// "char *ptr" contains the contents
+auto write_callback(char *ptr, size_t size, size_t nmemb, void *userdata) -> size_t {
+  FILE *stream = (FILE *)userdata;
+  return fwrite(ptr, size, nmemb, stream);
+}
+
+auto get_windows_path(const GUID folderID) -> std::wstring {
+  wchar_t *path = NULL;
+  HRESULT hr = SHGetKnownFolderPath(folderID, 0, NULL, &path);
+
+  if (FAILED(hr))
+    CoTaskMemFree(path);
+
+  std::wstring pathResult(path);
+  CoTaskMemFree(path);
+
+  return pathResult;
+}

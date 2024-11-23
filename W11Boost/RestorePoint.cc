@@ -5,7 +5,7 @@ import Common;
 
 typedef bool(WINAPI *PFN_SETRESTOREPTW)(PRESTOREPOINTINFOW, PSTATEMGRSTATUS);
 
-bool InitializeCOMSecurity() {
+auto InitializeCOMSecurity() -> bool {
   // Create the security descriptor explicitly as follows because
   // CoInitializeSecurity() will not accept the relative security descriptors
   // returned by ConvertStringSecurityDescriptorToSecurityDescriptor().
@@ -156,7 +156,7 @@ exit:
   return fRet;
 }
 
-void restorepoint_prep() {
+auto restorepoint_prep() -> void {
   HKEY hKey = HKEY_LOCAL_MACHINE;
 
   result = RegCreateKeyExW(hKey, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\SystemRestore", 0, NULL,
@@ -179,7 +179,7 @@ void restorepoint_prep() {
 
 // If the user disabled System Restore via Group Policies, that'll revert on its
 // own
-void restorepoint_prep_revert() {
+auto restorepoint_prep_revert() -> void {
   HKEY hKey = HKEY_LOCAL_MACHINE;
 
   result = RegCreateKeyExW(hKey, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\SystemRestore", 0, NULL,
@@ -192,7 +192,7 @@ void restorepoint_prep_revert() {
   RegCloseKey(hKey);
 }
 
-int create_restore_point() {
+auto create_restore_point() -> int {
   bool failure = FALSE;
 
   STATEMGRSTATUS SMgrStatus;

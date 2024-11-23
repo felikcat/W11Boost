@@ -110,7 +110,6 @@
     <ClCompile Include="DisableSleep.cpp" />
     <ClCompile Include="Edits.cc" />
     <ClCompile Include="PrivacyMode.cc" />
-    <ClCompile Include="Removal.cc" />
     <ClCompile Include="RestorePoint.cc" />
     <ClCompile Include="W11Boost.cc" />
   </ItemGroup>

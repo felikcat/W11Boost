@@ -38,6 +38,9 @@ int disable_sleep() {
   set_dword(hKey, LR"(Software\Policies\Microsoft\Power\PowerSettings\7bc4a2f9-d8fc-4469-b07b-33eb785aaca0)",
             L"ACSettingIndex", 0);
 
+  // Disable the Hibernate entry in the Power Menu
+  set_dword(hKey, LR"(SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings)", L"ShowHibernateOption", 0);
+
   // Disable the Sleep entry in the Power Menu
   set_dword(hKey, LR"(SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings)",
             L"ShowSleepOption", 0);
