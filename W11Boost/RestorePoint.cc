@@ -1,7 +1,4 @@
-import Common;
-#include <AccCtrl.h>
-#include <AclAPI.h>
-#include <SrRestorePtApi.h>
+#include "Common.h"
 
 typedef bool(WINAPI *PFN_SETRESTOREPTW)(PRESTOREPOINTINFOW, PSTATEMGRSTATUS);
 
@@ -10,8 +7,8 @@ auto InitializeCOMSecurity() -> bool {
   // CoInitializeSecurity() will not accept the relative security descriptors
   // returned by ConvertStringSecurityDescriptorToSecurityDescriptor().
 
-  SECURITY_DESCRIPTOR securityDesc = {0};
-  EXPLICIT_ACCESS ea[5] = {{0}};
+  SECURITY_DESCRIPTOR securityDesc = {};
+  EXPLICIT_ACCESS ea[5] = {{}};
   ACL *pAcl = NULL;
   unsigned __int64 rgSidBA[(SECURITY_MAX_SID_SIZE + sizeof(unsigned __int64) - 1) / sizeof(unsigned __int64)] = {0};
   unsigned __int64 rgSidLS[(SECURITY_MAX_SID_SIZE + sizeof(unsigned __int64) - 1) / sizeof(unsigned __int64)] = {0};
@@ -158,19 +155,20 @@ exit:
 
 auto restorepoint_prep() -> void {
   HKEY hKey = HKEY_LOCAL_MACHINE;
+  HKEY hSubKey;
 
-  result = RegCreateKeyExW(hKey, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\SystemRestore", 0, NULL,
+  long_result = RegCreateKeyExW(hKey, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\SystemRestore", 0, NULL,
                            REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hSubKey, NULL);
 
-  if (result == ERROR_SUCCESS) {
+  if (long_result == ERROR_SUCCESS) {
     unsigned long value = 0;
     RegSetValueExW(hSubKey, L"SystemRestorePointCreationFrequency", 0, REG_DWORD, (const BYTE *)&value, sizeof(value));
   }
 
-  result = RegCreateKeyExW(hKey, L"SOFTWARE\\Policies\\Microsoft\\Windows NT\\SystemRestore", 0, NULL,
+  long_result = RegCreateKeyExW(hKey, L"SOFTWARE\\Policies\\Microsoft\\Windows NT\\SystemRestore", 0, NULL,
                            REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hSubKey, NULL);
 
-  if (result == ERROR_SUCCESS) {
+  if (long_result == ERROR_SUCCESS) {
     RegDeleteValueW(hSubKey, L"DisableConfig");
     RegDeleteValueW(hSubKey, L"DisableSR");
   }
@@ -181,11 +179,12 @@ auto restorepoint_prep() -> void {
 // own
 auto restorepoint_prep_revert() -> void {
   HKEY hKey = HKEY_LOCAL_MACHINE;
+  HKEY hSubKey;
 
-  result = RegCreateKeyExW(hKey, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\SystemRestore", 0, NULL,
+  long_result = RegCreateKeyExW(hKey, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\SystemRestore", 0, NULL,
                            REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hSubKey, NULL);
 
-  if (result == ERROR_SUCCESS) {
+  if (long_result == ERROR_SUCCESS) {
     RegDeleteValueW(hSubKey, L"SystemRestorePointCreationFrequency");
   }
 
@@ -210,8 +209,10 @@ auto create_restore_point() -> int {
   if (NULL == hSrClient)
     return EXIT_FAILURE;
 
-  RESTOREPOINTINFOW RestorePtInfo = {
-      .dwEventType = BEGIN_SYSTEM_CHANGE, .dwRestorePtType = APPLICATION_INSTALL, .llSequenceNumber = 0};
+  RESTOREPOINTINFOW RestorePtInfo = {.dwEventType = BEGIN_SYSTEM_CHANGE,
+                                     .dwRestorePtType = APPLICATION_INSTALL,
+                                     .llSequenceNumber = 0,
+                                     .szDescription = L"\0"};
 
   wcscpy_s(RestorePtInfo.szDescription, _countof(RestorePtInfo.szDescription), L"Installed W11Boost");
 

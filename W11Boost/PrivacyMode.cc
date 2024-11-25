@@ -1,8 +1,4 @@
-import Common;
-#define WIN32_LEAN_AND_MEAN
-#define NTDDI_VERSION NTDDI_WIN10_RS4
-#include <windows.h> // Always first
-#include <combaseapi.h>
+#include "Common.h"
 
 auto install_privacy_mode() -> int {
   HKEY hKey = HKEY_LOCAL_MACHINE;

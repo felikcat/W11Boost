@@ -1,12 +1,4 @@
-import Common;
-#include <windows.h>
-#include <KnownFolders.h>
-#include <shlobj.h>
-#include <stdio.h>
-#include <curl/curl.h>
-#include <string>
-#include <iostream>
-#include <fstream>
+#include "Common.h"
 
 auto install_appx_support() -> int {
   CURL *curl = curl_easy_init();

@@ -1,8 +1,7 @@
-import Common;
-#include <windows.h> // Always first
+#include "Common.h"
 
 int disable_sleep() {
-  hKey = HKEY_LOCAL_MACHINE;
+  HKEY hKey = HKEY_LOCAL_MACHINE;
 
   // Globally disable hibernation
   set_dword(hKey, LR"(SYSTEM\CurrentControlSet\Control\Power)", L"HibernateEnabledDefault", 0);

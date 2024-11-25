@@ -1,23 +1,9 @@
-import Common;
-#define WIN32_LEAN_AND_MEAN
-#define NTDDI_VERSION NTDDI_WIN10_RS4
-#include <windows.h> // Always first
-#include <UserEnv.h>
-#include <Shlwapi.h>
-#include <fcntl.h>
-#include <shellapi.h>
-#include <libloaderapi.h>
-#include <wchar.h>
-#include <time.h>
-#include <stdio.h>
-#include <string>
-#include <iostream>
-#include <sstream>
-#include <ShlObj.h>
-#include <ostream>
+#include "Common.h"
+
+#define MAX_PATH_DOUBLE_NULL (MAX_PATH + 2) // accounts for double-null termination
 
 auto get_log_directory() -> wchar_t* {
-  wchar_t currentPath[MAX_PATH + 1];
+  wchar_t currentPath[MAX_PATH_DOUBLE_NULL];
   GetModuleFileNameW(NULL, currentPath, MAX_PATH);
 
   wchar_t *removeExe = wcsrchr(currentPath, L'\\');
@@ -26,13 +12,13 @@ auto get_log_directory() -> wchar_t* {
   }
 
   const wchar_t *dirName = L"W11Boost Logs";
-  wchar_t *fullPath = (wchar_t *)malloc(MAX_PATH * sizeof(wchar_t));
+  wchar_t *fullPath = static_cast<wchar_t*>(malloc(MAX_PATH_DOUBLE_NULL * sizeof(wchar_t)));
 
   if (fullPath != NULL) {
     swprintf_s(fullPath, MAX_PATH, L"%s\\%s", currentPath, dirName);
     // Ensure double-null termination
     size_t len = wcslen(fullPath);
-    if (len != NULL && len + 2 < MAX_PATH) {
+    if (len != NULL && len + 2 < MAX_PATH_DOUBLE_NULL) {
       fullPath[len + 1] = L'\0';
     }
   }
@@ -40,9 +26,9 @@ auto get_log_directory() -> wchar_t* {
   return fullPath;
 }
 
-auto wide_string_to_utf8(const wchar_t *wide_string) -> utf8_result {
+auto wide_string_to_utf8(const wchar_t* wide_string) -> utf8_result {
   if (wide_string == NULL || *wide_string == U'\0')
-    return {NULL, false};
+    return {NULL, true};
 
   int wide_length = 0;
   while (wide_string[wide_length] != U'\0')
@@ -50,11 +36,11 @@ auto wide_string_to_utf8(const wchar_t *wide_string) -> utf8_result {
 
   int size_needed = WideCharToMultiByte(CP_UTF8, 0, wide_string, wide_length, NULL, 0, NULL, NULL);
   if (size_needed <= 0)
-    return {NULL, false};
+    return {NULL, true};
 
-  char *result = (char *)malloc(size_needed + 1);
+  char* result = static_cast<char *>(malloc(size_needed + 2));
   if (result == NULL)
-    return {NULL, false};
+    return {NULL, true};
 
   int converted_result = WideCharToMultiByte(CP_UTF8, 0, wide_string, wide_length, &result[0], size_needed, NULL, NULL);
   if (converted_result <= 0) {
@@ -62,12 +48,12 @@ auto wide_string_to_utf8(const wchar_t *wide_string) -> utf8_result {
     return {NULL, true};
   }
   result[size_needed] = '\0';
-  return {result, false}; // if SUCCESS (0), proceed
+  return {result, false}; // if SUCCESS (0 / false), proceed
 }
 
-auto log_registry(const wchar_t *subKey, const wchar_t *valueName, const char *typeName) -> int {
+auto log_registry(const wchar_t* subKey, const wchar_t* valueName, const char* typeName) -> int {
   wchar_t *currentDir = get_log_directory();
-  wchar_t logLocation[MAX_PATH + 1];
+  wchar_t logLocation[MAX_PATH_DOUBLE_NULL];
 
   if (currentDir == NULL)
     return EXIT_FAILURE;
@@ -91,13 +77,13 @@ auto log_registry(const wchar_t *subKey, const wchar_t *valueName, const char *t
     struct tm timeInfo;
     localtime_s(&timeInfo, &now);
 
-    char timeString[20]; // 19 char + 1 null terminator
+    char timeString[21]; // 19 char + double null terminator
     strftime(timeString, sizeof(timeString), "%d-%m-%Y %H:%M:%S", &timeInfo);
 
     utf8_result narrow_subKey = wide_string_to_utf8(subKey);
     utf8_result narrow_valueName = wide_string_to_utf8(valueName);
 
-    if (!narrow_subKey.error && !narrow_valueName.error) {
+    if (!narrow_subKey.return_code && !narrow_valueName.return_code) {
       fprintf_s(logFile, "%s %s %s\\%s\n", timeString, typeName, narrow_subKey.string, narrow_valueName.string);
     }
 
@@ -113,7 +99,7 @@ auto log_registry(const wchar_t *subKey, const wchar_t *valueName, const char *t
 }
 
 auto delete_directory_and_subfolders(LPCWSTR directory) -> long {
-  wchar_t dir[MAX_PATH + 1];
+  wchar_t dir[MAX_PATH_DOUBLE_NULL];
   SHFILEOPSTRUCTW fos;
 
   wcscpy_s(dir, MAX_PATH, directory);
@@ -127,59 +113,65 @@ auto delete_directory_and_subfolders(LPCWSTR directory) -> long {
   return SHFileOperationW(&fos);
 }
 
-auto set_dword(HKEY hKey, const wchar_t *subKey, const wchar_t *valueName, const DWORD value) -> LSTATUS {
-  result = RegCreateKeyExW(hKey, subKey, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hSubKey, NULL);
+auto set_dword(HKEY hKey, const wchar_t* subKey, const wchar_t* valueName, const DWORD value) -> LSTATUS {
+  HKEY hSubKey;
+  long_result = RegCreateKeyExW(hKey, subKey, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hSubKey, NULL);
 
-  if (result == ERROR_SUCCESS)
-    result = RegSetValueExW(hSubKey, valueName, 0, REG_DWORD, (const BYTE *)&value, sizeof(DWORD));
+  if (long_result == ERROR_SUCCESS)
+    long_result =
+        RegSetValueExW(hSubKey, valueName, 0, REG_DWORD, std::bit_cast<const BYTE *>(&value), sizeof(DWORD));
 
   const char *typeName = " - DWORD: ";
   log_registry(subKey, valueName, typeName);
 
-  result = RegCloseKey(hSubKey);
-  return result;
+  long_result = RegCloseKey(hSubKey);
+  return long_result;
 }
 
-auto set_string(HKEY hKey, const wchar_t *subKey, const wchar_t *valueName, const wchar_t *value) -> LSTATUS {
-  if ((result = RegCreateKeyExW(hKey, subKey, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hSubKey, NULL)) !=
+auto set_string(HKEY hKey, const wchar_t* subKey, const wchar_t* valueName, const wchar_t* value) -> LSTATUS {
+  HKEY hSubKey;
+  if ((long_result = RegCreateKeyExW(hKey, subKey, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hSubKey,
+                                     NULL)) !=
           ERROR_SUCCESS ||
-      (result = RegSetValueExW(hSubKey, valueName, 0, REG_SZ, (const BYTE *)value,
+      (long_result = RegSetValueExW(hSubKey, valueName, 0, REG_SZ, (const BYTE *)value,
                                (DWORD)wcslen(value) * sizeof(wchar_t))) != ERROR_SUCCESS ||
-      (result = RegCloseKey(hSubKey)) != ERROR_SUCCESS)
+      (long_result = RegCloseKey(hSubKey)) != ERROR_SUCCESS)
     return EXCEPTION_EXECUTE_HANDLER;
   {
     const char *typeName = " - SZ: ";
     log_registry(subKey, valueName, typeName);
   }
-  return result;
+  return long_result;
 }
 
 auto set_environment(HKEY hKey, const wchar_t *valueName, const wchar_t *value) -> LSTATUS {
+  HKEY hSubKey;
   const wchar_t *subKey = L"SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment";
-  result = RegOpenKeyExW(hKey, subKey, 0, KEY_ALL_ACCESS, &hSubKey);
+  long_result = RegOpenKeyExW(hKey, subKey, 0, KEY_ALL_ACCESS, &hSubKey);
 
-  if (result == ERROR_SUCCESS)
-    result = RegSetValueExW(hSubKey, valueName, 0, REG_EXPAND_SZ, (const BYTE *)value,
+  if (long_result == ERROR_SUCCESS)
+    long_result = RegSetValueExW(hSubKey, valueName, 0, REG_EXPAND_SZ, (const BYTE *)value,
                             (DWORD)(wcslen(value) * sizeof(wchar_t)));
 
   const char *typeName = " - EXPAND_SZ: ";
   log_registry(subKey, valueName, typeName);
 
-  result = RegCloseKey(hSubKey);
-  return result;
+  long_result = RegCloseKey(hSubKey);
+  return long_result;
 }
 
 auto remove_subkey(HKEY hKey, const wchar_t *subKey, const wchar_t *valueName) -> LSTATUS {
-  result = RegOpenKeyExW(hKey, subKey, 0, KEY_WRITE, &hSubKey);
+  HKEY hSubKey;
+  long_result = RegOpenKeyExW(hKey, subKey, 0, KEY_WRITE, &hSubKey);
 
-  if (result == ERROR_SUCCESS)
-    result = RegDeleteValueW(hSubKey, valueName);
+  if (long_result == ERROR_SUCCESS)
+    long_result = RegDeleteValueW(hSubKey, valueName);
 
   const char *typeName = " - Removed subkey: ";
   log_registry(subKey, valueName, typeName);
 
-  result = RegCloseKey(hSubKey);
-  return result;
+  long_result = RegCloseKey(hSubKey);
+  return long_result;
 }
 
 auto start_command_and_wait(wchar_t *cmdLine) -> int {

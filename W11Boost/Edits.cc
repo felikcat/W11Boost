@@ -1,13 +1,7 @@
-import Common;
-#define WIN32_LEAN_AND_MEAN
-#define NTDDI_VERSION NTDDI_WIN10_RS4
-#include <windows.h> // Always first
-#include <combaseapi.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include "Common.h"
 
 auto main_registry_edits() -> int {
-  hKey = HKEY_LOCAL_MACHINE;
+  HKEY hKey = HKEY_LOCAL_MACHINE;
 
   // If allowed (1): unused apps would be uninstalled with their user data left
   // intact, then reinstalled if launched afterwards at any point in time.
