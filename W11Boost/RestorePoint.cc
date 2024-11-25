@@ -162,7 +162,8 @@ auto restorepoint_prep() -> void {
 
   if (long_result == ERROR_SUCCESS) {
     unsigned long value = 0;
-    RegSetValueExW(hSubKey, L"SystemRestorePointCreationFrequency", 0, REG_DWORD, (const BYTE *)&value, sizeof(value));
+    RegSetValueExW(hSubKey, L"SystemRestorePointCreationFrequency", 0, REG_DWORD, std::bit_cast<const BYTE *>(&value),
+                   sizeof(value));
   }
 
   long_result = RegCreateKeyExW(hKey, L"SOFTWARE\\Policies\\Microsoft\\Windows NT\\SystemRestore", 0, NULL,

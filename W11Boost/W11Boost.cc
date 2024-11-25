@@ -67,7 +67,7 @@ auto APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstanc
     }
   }
 
-  return (int)msg.wParam;
+  return static_cast<int>(msg.wParam);
 }
 
 //
@@ -120,17 +120,13 @@ auto InitInstance(HINSTANCE hInstance, int nCmdShow) -> bool {
   HMONITOR monitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
   MONITORINFO mi = {.cbSize = sizeof(mi), .rcMonitor = NULL, .rcWork = NULL, .dwFlags = NULL};
 
+  // Puts W11Boost's window in the center of the current monitor
   if (GetMonitorInfoW(monitor, &mi)) {
-    UINT screen_dpi = GetDpiForWindow(hWnd);
-    int adjusted_width = MulDiv(width, screen_dpi, USER_DEFAULT_SCREEN_DPI);
-    int adjusted_height = MulDiv(height, screen_dpi, USER_DEFAULT_SCREEN_DPI);
-
-    // Puts W11Boost's window in the center of the current monitor
     RECT rcWork = mi.rcWork;
     long x = rcWork.left + (rcWork.right - rcWork.left - width) / 2;
     long y = rcWork.top + (rcWork.bottom - rcWork.top - height) / 2;
 
-    SetWindowPos(hWnd, NULL, x, y, adjusted_width, adjusted_height, SWP_NOZORDER | SWP_NOACTIVATE);
+    SetWindowPos(hWnd, NULL, x, y, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
   }
 
   ShowWindow(hWnd, nCmdShow);
@@ -151,12 +147,12 @@ auto appx_void(HWND hWnd) -> void {
 //
 //  PURPOSE: Processes messages for the main window.
 //
-//  WM_COMMAND  - process the application menu
+//  WM_COMMAND  - Process the application menu
 //  WM_PAINT    - Paint the main window
-//  WM_DESTROY  - post a quit message and return
+//  WM_DESTROY  - Post a quit message and return
 //
 //
-LRESULT CALLBACK WndProc(HWND hWnd, unsigned int message, WPARAM wParam, LPARAM lParam) {
+auto CALLBACK WndProc(HWND hWnd, unsigned int message, WPARAM wParam, LPARAM lParam) -> LRESULT {
   switch (message) {
   case WM_CREATE: {
     struct s_font {
@@ -167,7 +163,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, unsigned int message, WPARAM wParam, LPARAM 
     font.dpi = USER_DEFAULT_SCREEN_DPI;
 
     UINT screen_dpi = GetDpiForWindow(hWnd);
-    
+
     int scale_font = MulDiv(font.size, screen_dpi, font.dpi);
 
     HFONT hFont = CreateFontW(scale_font, 0, 0, 0, FW_LIGHT, FALSE, FALSE, 0, ANSI_CHARSET, OUT_OUTLINE_PRECIS,
@@ -190,31 +186,28 @@ LRESULT CALLBACK WndProc(HWND hWnd, unsigned int message, WPARAM wParam, LPARAM 
       HWND localPrivacy, backup, store, appx, sleep;
     } checkbox;
 
-    int scale_factor = MulDiv(screen_dpi, 100, USER_DEFAULT_SCREEN_DPI);
-
-    common.left = rcClient.left + MulDiv(4, scale_factor, 100);
-    common.right = MulDiv(rcClient.right, scale_factor, 100);
+    common.left = rcClient.left + 4;
+    common.right = rcClient.right - 8;
 
     common.top = rcClient.top;
-    common.bottom = MulDiv(rcClient.bottom, scale_factor, 100);
+    common.bottom = rcClient.bottom - 4;
 
     common.centerWidth = common.right / 2;
     common.centerHeight = common.bottom / 2;
 
-    // button.width = common.centerWidth; // Use if I add "Remove W11Boost"
     button.width = common.right;
     button.height = (common.centerHeight * 4) / 10; // 40%
 
-    checkbox.width = MulDiv(rcClient.right, scale_factor, 100);
+    checkbox.width = rcClient.right;
     checkbox.height = (common.centerHeight * 2) / 10; // 20%
 
     struct s_button const aButton = {
-      .width = {},
-      .height = {},
-      .apply = CreateWindowW(L"BUTTON", L"Apply W11Boost", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_FLAT, common.left,
-                             common.bottom - button.height, button.width, button.height, hWnd,
-                             (HMENU)IDC_APPLY_W11BOOST, GetModuleHandle(NULL), NULL),
-      
+        .width = {},
+        .height = {},
+        .apply = CreateWindowW(L"BUTTON", L"Apply W11Boost", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_FLAT,
+                               common.left, common.bottom - button.height, button.width, button.height, hWnd,
+                               reinterpret_cast<HMENU>(IDC_APPLY_W11BOOST), GetModuleHandle(NULL), NULL),
+
     };
     struct s_checkbox const aCheckbox = {
         .width = {},
@@ -222,38 +215,37 @@ LRESULT CALLBACK WndProc(HWND hWnd, unsigned int message, WPARAM wParam, LPARAM 
         .localPrivacy =
             CreateWindowW(L"BUTTON", L"Reduce local data collection", WS_CHILD | WS_VISIBLE | BS_CHECKBOX | BS_FLAT,
                           common.left, common.top + (checkbox.height), checkbox.width, checkbox.height, hWnd,
-                          (HMENU)IDC_LOCAL_PRIVACY, GetModuleHandle(NULL), NULL),
+                          reinterpret_cast<HMENU>(IDC_LOCAL_PRIVACY), GetModuleHandle(NULL), NULL),
         .backup =
             CreateWindowW(L"BUTTON", L"Create a system restore point", WS_CHILD | WS_VISIBLE | BS_CHECKBOX | BS_FLAT,
                           common.left, common.top + (checkbox.height * 2), checkbox.width, checkbox.height, hWnd,
-                          (HMENU)IDC_CREATE_RESTORE_POINT, GetModuleHandle(NULL), NULL),
+                          reinterpret_cast<HMENU>(IDC_CREATE_RESTORE_POINT), GetModuleHandle(NULL), NULL),
         .store = CreateWindowW(L"BUTTON", L"Install the Microsoft Store", WS_CHILD | WS_VISIBLE | BS_CHECKBOX | BS_FLAT,
                                common.left, common.top + (checkbox.height * 3), checkbox.width, checkbox.height, hWnd,
-                               (HMENU)IDC_INSTALL_MICROSOFT_STORE, GetModuleHandle(NULL), NULL),
+                               reinterpret_cast<HMENU>(IDC_INSTALL_MICROSOFT_STORE), GetModuleHandle(NULL), NULL),
         .appx = CreateWindowW(L"BUTTON", L"Install .appx/.appxbundle support and WinGet",
                               WS_CHILD | WS_VISIBLE | BS_CHECKBOX | BS_FLAT, common.left,
                               common.top + (checkbox.height * 4), checkbox.width, checkbox.height, hWnd,
-                              (HMENU)IDC_INSTALL_APPX_SUPPORT, (GetModuleHandle(NULL)), NULL),
+                              reinterpret_cast<HMENU>(IDC_INSTALL_APPX_SUPPORT), (GetModuleHandle(NULL)), NULL),
         .sleep = CreateWindowW(L"BUTTON", L"Disable sleep and hibernate", WS_CHILD | WS_VISIBLE | BS_CHECKBOX | BS_FLAT,
-                             common.left, common.top + (checkbox.height * 5), checkbox.width, checkbox.height, hWnd,
-                               (HMENU)IDC_DISABLE_SLEEP, GetModuleHandle(NULL), NULL),
+                               common.left, common.top + (checkbox.height * 5), checkbox.width, checkbox.height, hWnd,
+                               reinterpret_cast<HMENU>(IDC_DISABLE_SLEEP), GetModuleHandle(NULL), NULL),
     };
 
     HWND hButton[] = {aButton.apply};
-    HWND hCheckbox[] = {aCheckbox.localPrivacy, aCheckbox.backup,
-                        aCheckbox.store,         aCheckbox.appx,         aCheckbox.sleep};
+    HWND hCheckbox[] = {aCheckbox.localPrivacy, aCheckbox.backup, aCheckbox.store, aCheckbox.appx, aCheckbox.sleep};
 
     HWND optionalText =
         CreateWindowW(L"STATIC", L"Optional:", WS_CHILD | WS_VISIBLE | BS_FLAT | BS_CENTER, common.left, common.top,
                       checkbox.width, checkbox.height, hWnd, NULL, ((GetModuleHandle(NULL))), NULL);
-    SendMessageW(optionalText, WM_SETFONT, (WPARAM)hFont, TRUE);
+    SendMessageW(optionalText, WM_SETFONT, std::bit_cast<WPARAM>(hFont), TRUE);
 
     for (size_t i = 0; i < sizeof hButton / sizeof aButton.apply; ++i) {
-      SendMessageW(hButton[i], WM_SETFONT, (WPARAM)hFont, TRUE);
+      SendMessageW(hButton[i], WM_SETFONT, std::bit_cast<WPARAM>(hFont), TRUE);
     }
 
     for (size_t i = 0; i < sizeof hCheckbox / sizeof aCheckbox.localPrivacy; ++i) {
-      SendMessageW(hCheckbox[i], WM_SETFONT, (WPARAM)hFont, TRUE);
+      SendMessageW(hCheckbox[i], WM_SETFONT, std::bit_cast<WPARAM>(hFont), TRUE);
     }
 
     CheckDlgButton(hWnd, IDC_LOCAL_PRIVACY, BST_CHECKED);
@@ -276,23 +268,29 @@ LRESULT CALLBACK WndProc(HWND hWnd, unsigned int message, WPARAM wParam, LPARAM 
         if (checkboxStatus.restorePoint) {
           int_result = create_restore_point();
 
-          if (int_result != 0)
+          if (int_result != 0) {
             MessageBoxW(hWnd, L"System Restore point failed to be created!", L"W11Boost -> Error", MB_OK);
+            return EXIT_FAILURE;
+          }
         }
 
         if (checkboxStatus.localPrivacy) {
           int_result = install_privacy_mode();
 
-          if (int_result != 0)
+          if (int_result != 0) {
             MessageBoxW(hWnd, L"Failed to install 'Reduce local data collection'!", L"W11Boost -> Error", MB_OK);
+            return EXIT_FAILURE;
+          }
         }
 
         if (checkboxStatus.microsoftStore) {
-          wchar_t cmdLine1[] = L"wsreset.exe -i";
-          int_result = start_command_and_wait(cmdLine1);
+          wchar_t cmdLine[] = L"wsreset.exe -i";
+          int_result = start_command_and_wait(cmdLine);
 
-          if (int_result != 0)
+          if (int_result != 0) {
             MessageBoxW(hWnd, L"Failed to install the Microsoft Store!", L"W11Boost -> Error", MB_OK);
+            return EXIT_FAILURE;
+          }
         }
 
         if (checkboxStatus.microsoftStore != TRUE && checkboxStatus.appxSupport) {
@@ -309,15 +307,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, unsigned int message, WPARAM wParam, LPARAM 
         if (checkboxStatus.disableSleep) {
           int_result = disable_sleep();
 
-          if (int_result != 0)
+          if (int_result != 0) {
             MessageBoxW(hWnd, L"Disabling sleep and hibernation failed!", L"W11Boost -> Error", MB_OK);
+            return EXIT_FAILURE;
+          }
         }
 
         if (checkboxStatus.appxSupport) {
           int_result = install_appx_support();
 
-          if (int_result != 0)
+          if (int_result != 0) {
             MessageBoxW(hWnd, L"Installing .appx support failed!", L"W11Boost -> Error", MB_OK);
+            return EXIT_FAILURE;
+          }
         }
 
         int_result = main_registry_edits();
@@ -372,7 +374,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, unsigned int message, WPARAM wParam, LPARAM 
 
     case IDC_DISABLE_SLEEP:
       checkboxStatus.disableSleep = IsDlgButtonChecked(hWnd, IDC_DISABLE_SLEEP);
-      
+
       if (checkboxStatus.disableSleep) {
         CheckDlgButton(hWnd, IDC_DISABLE_SLEEP, BST_UNCHECKED);
       } else {
@@ -395,7 +397,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, unsigned int message, WPARAM wParam, LPARAM 
       return EXIT_FAILURE;
     }
 
-    FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_MENU + 1));
+    FillRect(hdc, &ps.rcPaint, reinterpret_cast<HBRUSH>(COLOR_MENU + 1));
     EndPaint(hWnd, &ps);
   } break;
   case WM_DESTROY:

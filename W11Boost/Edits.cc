@@ -44,7 +44,7 @@ auto main_registry_edits() -> int {
   //---- Disables "Fast startup".
   set_dword(hKey, L"SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Power", L"HiberbootEnabled", 0);
 
-  const wchar_t *filePath = L"C:\\Windows\\System32\\SleepStudy\\UserNotPresentSession.etl";
+  const wchar_t* filePath = L"C:\\Windows\\System32\\SleepStudy\\UserNotPresentSession.etl";
 
   // File can't be read-only, otherwise DeleteFileW will fail
   DWORD attributes = FILE_ATTRIBUTE_NORMAL;
@@ -56,7 +56,7 @@ auto main_registry_edits() -> int {
   if (!del)
     return EXIT_FAILURE;
 
-  FILE *file = NULL;
+  FILE* file = NULL;
   errno_t err = _wfopen_s(&file, filePath, L"a");
   if (err != 0 || file == NULL)
     return EXIT_FAILURE;

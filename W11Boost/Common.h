@@ -19,6 +19,7 @@
 #include <AccCtrl.h>
 #include <AclAPI.h>
 #include <SrRestorePtApi.h>
+#include <bit>
 
 inline LONG long_result;
 
