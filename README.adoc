@@ -23,8 +23,6 @@ image:W11Boost_GUI.png[480,360]
 
 == 2. Installing W11Boost
 
-TIP: If W11Boost fails to install, clear out your group policy edits by deleting `C:\Windows\System32\GroupPolicy\Machine\Registry.pol` and `C:\Windows\System32\GroupPolicy\User\Registry.pol`, then run `gpupdate /force` in Command Prompt as Administrator.
-
 . Download and run the https://github.com/felikcat/W11Boost/releases[latest release of W11Boost]. +
 Only Windows 10 version 1803 and newer are officially supported, and your anti-virus must be disabled.
 
