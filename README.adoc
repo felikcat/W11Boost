@@ -13,9 +13,6 @@ endif::[]
 
 image:W11Boost_GUI.png[480,360]
 
-Until I readd the "Fix Windows" feature in a future release, W11Boost works best with unmodified Windows installs. +
-If you wish to know what W11Boost does, look at the source code, every change is documented and the source code should be easy to understand.
-
 == 1. If not using Enterprise or LTSC or Education, convert the Windows edition to Education
 
 . Open the Command Prompt as administrator.
