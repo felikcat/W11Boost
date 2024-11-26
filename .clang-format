@@ -1,5 +1,7 @@
-BasedOnStyle: LLVM
+BasedOnStyle: Microsoft
 ColumnLimit: 120
-# Don't screw up my includes fucker
+# Don't screw up the includes
 IncludeBlocks: Preserve
 SortIncludes: Never
+# C++ style pointer alignment
+PointerAlignment: Left

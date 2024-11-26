@@ -18,7 +18,8 @@ auto install_appx_support() -> int {
                      "https://github.com/microsoft/winget-cli/releases/latest/download/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle");
 
     curl_easy_setopt(curl, CURLOPT_USERAGENT,
-                     "Mozilla/5.0 (Windows NT 10.0; WOW64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.6556.192 Safari/537.36");
+                     "Mozilla/5.0 (Windows NT 10.0; WOW64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
+                     "Chrome/130.0.6556.192 Safari/537.36");
 
     curl_easy_setopt(curl, CURLOPT_USE_SSL, (long)CURLUSESSL_ALL);
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L); // Required due to GitHub redirecting
