@@ -10,7 +10,9 @@ ifdef::env-github[]
 endif::[]
 
 == About
+https://github.com/felikcat/W11Boost/releases/tag/v1.1.1-c[v1.1.1] is the only stable release currently, use it until the Rust rewrite is finished.
 
+The GUI for 1.2.2: + 
 image:W11Boost_GUI.png[480,360]
 
 == 1. If not using Enterprise or LTSC or Education, convert the Windows edition to Education
