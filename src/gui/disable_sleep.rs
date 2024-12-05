@@ -6,7 +6,7 @@ use crate::common::*;
 pub fn run() -> Result<(), Box<dyn Error>> {
     let hklm = HKEY::LOCAL_MACHINE;
 
-    // Globally disable hibernation
+    // Globally disable hibernation.
     set_dword(
         &hklm,
         r"SYSTEM\CurrentControlSet\Control\Power",
@@ -14,7 +14,7 @@ pub fn run() -> Result<(), Box<dyn Error>> {
         0,
     )?;
 
-    // Turn off hybrid sleep (on battery)
+    // Turn off hybrid sleep (on battery).
     set_dword(
         &hklm,
         r"Software\Policies\Microsoft\Power\PowerSettings\94ac6d29-73ce-41a6-809f-6363ba21b47e",
@@ -22,7 +22,7 @@ pub fn run() -> Result<(), Box<dyn Error>> {
         0,
     )?;
 
-    // Turn off hybrid sleep (plugged in)
+    // Turn off hybrid sleep (plugged in).
     set_dword(
         &hklm,
         r"Software\Policies\Microsoft\Power\PowerSettings\94ac6d29-73ce-41a6-809f-6363ba21b47e",
@@ -30,7 +30,7 @@ pub fn run() -> Result<(), Box<dyn Error>> {
         0,
     )?;
 
-    // Never idle to sleep (on battery)
+    // Never idle to sleep (on battery).
     set_dword(
         &hklm,
         r"Software\Policies\Microsoft\Power\PowerSettings\29F6C1DB-86DA-48C5-9FDB-F2B67B1F44DA",
@@ -38,7 +38,7 @@ pub fn run() -> Result<(), Box<dyn Error>> {
         0,
     )?;
 
-    // Never idle to sleep (plugged in)
+    // Never idle to sleep (plugged in).
     set_dword(
         &hklm,
         r"Software\Policies\Microsoft\Power\PowerSettings\29F6C1DB-86DA-48C5-9FDB-F2B67B1F44DA",
@@ -46,7 +46,7 @@ pub fn run() -> Result<(), Box<dyn Error>> {
         0,
     )?;
 
-    // Never idle to hibernate (on battery)
+    // Never idle to hibernate (on battery).
     set_dword(
         &hklm,
         r"Software\Policies\Microsoft\Power\PowerSettings\9D7815A6-7EE4-497E-8888-515A05F02364",
@@ -54,7 +54,7 @@ pub fn run() -> Result<(), Box<dyn Error>> {
         0,
     )?;
 
-    // Never idle to hibernate (plugged in)
+    // Never idle to hibernate (plugged in).
     set_dword(
         &hklm,
         r"Software\Policies\Microsoft\Power\PowerSettings\9D7815A6-7EE4-497E-8888-515A05F02364",
@@ -62,7 +62,7 @@ pub fn run() -> Result<(), Box<dyn Error>> {
         0,
     )?;
 
-    // Never unattended idle to sleep (on battery)
+    // Never unattended idle to sleep (on battery).
     set_dword(
         &hklm,
         r"Software\Policies\Microsoft\Power\PowerSettings\7bc4a2f9-d8fc-4469-b07b-33eb785aaca0",
@@ -70,7 +70,7 @@ pub fn run() -> Result<(), Box<dyn Error>> {
         0,
     )?;
 
-    // Never unattended idle to sleep (plugged in)
+    // Never unattended idle to sleep (plugged in).
     set_dword(
         &hklm,
         r"Software\Policies\Microsoft\Power\PowerSettings\7bc4a2f9-d8fc-4469-b07b-33eb785aaca0",
@@ -78,7 +78,7 @@ pub fn run() -> Result<(), Box<dyn Error>> {
         0,
     )?;
 
-    // Disable the Hibernate entry in the Power Menu
+    // Disable the Hibernate entry in the Power Menu.
     set_dword(
         &hklm,
         r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings",
@@ -86,7 +86,7 @@ pub fn run() -> Result<(), Box<dyn Error>> {
         0,
     )?;
 
-    // Disable the Sleep entry in the Power Menu
+    // Disable the Sleep entry in the Power Menu.
     set_dword(
         &hklm,
         r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings",

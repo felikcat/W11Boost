@@ -114,5 +114,43 @@ pub fn run() -> Result<(), Box<dyn Error>> {
         1
     )?;
 
+    // Don't allow Windows to sync cellular messages to Mircosoft's cloud services.
+    set_dword(&hklm, r"SOFTWARE\Policies\Microsoft\Windows\Messaging", "AllowMessageSync", 0)?;
+
+    // Disable an old virtual assistant that excessively used the internet and violated privacy.
+    set_dword(
+        &hklm,
+        r"SOFTWARE\Policies\Microsoft\Windows\Windows Search",
+        "AllowCortana",
+        0
+    )?;
+
+    // Disable Windows Search from using the "cloud" / internet.
+    set_dword(
+        &hklm,
+        r"SOFTWARE\Policies\Microsoft\Windows\Windows Search",
+        "AllowCloudSearch",
+        0
+    )?;
+    set_dword(
+        &hklm,
+        r"SOFTWARE\Policies\Microsoft\Windows\Windows Search",
+        "DisableWebSearch",
+        1
+    )?;
+    set_dword(
+        &hklm,
+        r"SOFTWARE\Policies\Microsoft\Windows\Windows Search",
+        "EnableDynamicContentInWSB",
+        1
+    )?;
+    set_dword(
+        &hklm,
+        r"SOFTWARE\Policies\Microsoft\Windows\Windows Search",
+        "ConnectedSearchUseWeb",
+        0
+    )?;
+
+
     Ok(())
 }

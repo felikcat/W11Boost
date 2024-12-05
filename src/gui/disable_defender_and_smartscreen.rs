@@ -1,7 +1,9 @@
 use crate::common::*;
-use fltk::{app, dialog};
+use fltk::dialog;
 use std::error::Error;
 use winsafe::{HKEY, prelude::advapi_Hkey};
+
+// TODO -> Make this use Group Policy Objects instead of directly modifying the registry.
 
 pub fn run() -> Result<(), Box<dyn Error>> {
     let hklm = HKEY::LOCAL_MACHINE;
@@ -35,7 +37,7 @@ pub fn run() -> Result<(), Box<dyn Error>> {
         "",
     )?;
 
-    // Disable Windows Defender.
+    // Disable Windows Defender; it's done excessively just to be sure.
     set_dword(
         &hklm,
         r"SOFTWARE\Policies\Microsoft\Windows Defender",
@@ -46,6 +48,42 @@ pub fn run() -> Result<(), Box<dyn Error>> {
         &hklm,
         r"SOFTWARE\Policies\Microsoft\Windows Defender",
         "DisableAntiVirus",
+        1,
+    )?;
+    set_dword(
+        &hklm,
+        r"SOFTWARE\Policies\Microsoft\Windows Defender",
+        "ServiceKeepAlive",
+        0,
+    )?;
+    set_dword(
+        &hklm,
+        r"SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection",
+        "DisableRealtimeMonitoring",
+        1,
+    )?;
+    set_dword(
+        &hklm,
+        r"SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection",
+        "DisableBehaviorMonitoring",
+        1,
+    )?;
+    set_dword(
+        &hklm,
+        r"SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection",
+        "DisableIOAVProtection",
+        1,
+    )?;
+    set_dword(
+        &hklm,
+        r"SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection",
+        "DisableOnAccessProtection",
+        1,
+    )?;
+    set_dword(
+        &hklm,
+        r"SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection",
+        "DisableScriptScanning",
         1,
     )?;
 

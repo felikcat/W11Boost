@@ -27,8 +27,8 @@ Although, the default checkbox selection is safe for most users as it is as clos
 . Download and run the https://github.com/felikcat/W11Boost/releases[latest release of W11Boost]. +
 Only Windows 10 version 1803 and newer are officially supported.
 - The near guarantee of breaking no program or app is only for the default checkbox (option) selection.
-- "Reduce local data collection" is very aggressive, it compromises security for ultimate local privacy. It will make forensics on your computer difficult.
-- "Reduce online data collection" is also very aggressive and will change how you use Windows; they do not affect the security of Windows.
+- "Reduce local data collection" is very aggressive, it compromises security for ultimate privacy. It will make forensics on your computer difficult.
+- "Reduce online data collection" will change how you use Windows; this does not affect the security of Windows.
 - Installing the Microsoft Store and .appx support is generally for LTSC builds of Windows, but works on any edition regardless.
 
 . Install https://winaerotweaker.com/[Winaero Tweaker] to set personal preferences.

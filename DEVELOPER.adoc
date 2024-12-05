@@ -106,6 +106,8 @@ TIP: Example gpedit.msc registry translation: +
 - W11Boost is for your PCs only, not for those owned by your company.
 - Multi-seat use cases are insecure unless it's a separate virtual machine (VM) for each user. W11Boost is only in line with the VM variant of multi-seating, and will never support Windows' native multi-seat.
 
+. Do not "nul" any of the "File" keys, it will break the File Explorer HARD: +
+-> `r"SOFTWARE\Policies\Microsoft\Windows\EventLog\Application", "File"`
 
 . Disabling CPU idle states entirely, whether through a Windows power plan or other methods.
 - Causes a 12700k CPU to go from 190W total system draw on idle to 300W for no noticeable FPS stability benefit.

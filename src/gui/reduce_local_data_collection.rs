@@ -243,8 +243,6 @@ pub fn run() -> Result<(), Box<dyn Error>> {
     )?;
 
     // Disable Event Logging.
-    // NOTE: Do not "nul" any of the "File" keys, it will break File Explorer HARD:
-    // r"SOFTWARE\Policies\Microsoft\Windows\EventLog\Application", "File"
     set_string(
         &hklm,
         r"SYSTEM\CurrentControlSet\Services\EventLog",
