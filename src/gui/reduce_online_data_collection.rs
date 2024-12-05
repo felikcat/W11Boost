@@ -2,6 +2,11 @@ use crate::common::*;
 use std::error::Error;
 use winsafe::{HKEY, prelude::advapi_Hkey};
 
+/* Ignored:
+    - Find My Device
+    - Windows Update
+*/
+
 pub fn run() -> Result<(), Box<dyn Error>> {
     let hklm = HKEY::LOCAL_MACHINE;
 
@@ -29,6 +34,14 @@ pub fn run() -> Result<(), Box<dyn Error>> {
         1,
     )?;
 
+    // Turn off account-based insights, recent, favorite, and recommended files in File Explorer.
+    set_dword(
+        &hklm,
+        r"SOFTWARE\Policies\Microsoft\Windows\Explorer",
+        "HideRecommendedSection",
+        1,
+    )?;
+
     // Prevent device metadata retrieval from the Internet.
     set_dword(
         &hklm,
@@ -51,6 +64,54 @@ pub fn run() -> Result<(), Box<dyn Error>> {
         r"SOFTWARE\Policies\Microsoft\Windows\System",
         "AllowCrossDeviceClipboard",
         0,
+    )?;
+
+    // Don't allow downloading updates to the Disk Failure Prediction Model.
+    set_dword(
+        &hklm,
+        r"SOFTWARE\Policies\Microsoft\Windows\StorageHealth",
+        "AllowDiskHealthModelUpdates",
+        0,
+    )?;
+
+    // Don't allow sideloaded apps to auto-update in the background.
+    set_dword(
+        &hklm,
+        r"SOFTWARE\Policies\Microsoft\Windows\Appx",
+        "DisableBackgroundAutoUpdates",
+        0
+    )?;
+
+    // "Cloud optimized content / Windows experiences" are used for advertising, but aren't disabled in defaults.rs to keep the OS "stock".
+    set_dword(
+        &hklm,
+        r"SOFTWARE\Policies\Microsoft\Windows\CloudContent",
+        "DisableCloudOptimizedContent",
+        1
+    )?;
+    set_dword(
+        &hklm,
+        r"SOFTWARE\Policies\Microsoft\Windows\CloudContent",
+        "DisableConsumerAccountStateContent",
+        1
+    )?;
+    set_dword(
+        &hklm,
+        r"SOFTWARE\Policies\Microsoft\Windows\CloudContent",
+        "DisableSoftLanding",
+        1
+    )?;
+    set_dword(
+        &hklm,
+        r"SOFTWARE\Policies\Microsoft\Windows\CloudContent",
+        "DisableSoftLanding",
+        1
+    )?;
+    set_dword(
+        &hklm,
+        r"SOFTWARE\Policies\Microsoft\Windows\CloudContent",
+        "DisableWindowsConsumerFeatures",
+        1
     )?;
 
     Ok(())

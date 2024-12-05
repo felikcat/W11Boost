@@ -109,6 +109,16 @@ pub fn run() -> Result<(), Box<dyn Error>> {
         0,
     )?;
 
+    // Do not require use of fast startup.
+    set_dword(
+        &hklm,
+        r"SOFTWARE\Policies\Microsoft\Windows\System",
+        "HiberbootEnabled",
+        0,
+    )?;
+
+
+
     let file_path = r"C:\Windows\System32\SleepStudy\UserNotPresentSession.etl";
 
     // Removing UserNotPresentSession.etl will fail if it is readonly.
@@ -395,6 +405,14 @@ pub fn run() -> Result<(), Box<dyn Error>> {
         r"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced",
         "HideFileExt",
         0,
+    )?;
+
+    // Allow usage of some .appx/.appxbundle apps without a Microsoft account.
+    set_dword(
+        &hklm,
+        r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System",
+        "MSAOptional",
+        1
     )?;
 
     // Random disconnection fix for specific network adapters, such as Intel's I225-V.

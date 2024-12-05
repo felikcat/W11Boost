@@ -9,8 +9,10 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
-== About
 image:W11Boost_GUI.png[480,360]
+
+W11Boost currently globally changes settings. It's not meant for shared computers, as it will change settings that may not be suitable for other users.
+Although, the default checkbox selection is safe for most users as it is as close to stock unmodified Windows as possible without being ineffective.
 
 == 1. If not using Enterprise or LTSC or Education, convert the Windows edition to Education
 
@@ -24,7 +26,9 @@ image:W11Boost_GUI.png[480,360]
 
 . Download and run the https://github.com/felikcat/W11Boost/releases[latest release of W11Boost]. +
 Only Windows 10 version 1803 and newer are officially supported.
-- Keep in mind that "Reduce local data collection" and "Reduce online data collection" are very aggressive and will change how you use Windows; they do not affect the security of Windows.
+- The near guarantee of breaking no program or app is only for the default checkbox (option) selection.
+- "Reduce local data collection" is very aggressive, it compromises security for ultimate local privacy. It will make forensics on your computer difficult.
+- "Reduce online data collection" is also very aggressive and will change how you use Windows; they do not affect the security of Windows.
 - Installing the Microsoft Store and .appx support is generally for LTSC builds of Windows, but works on any edition regardless.
 
 . Install https://winaerotweaker.com/[Winaero Tweaker] to set personal preferences.

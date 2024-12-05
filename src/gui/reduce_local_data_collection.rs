@@ -101,6 +101,38 @@ pub fn run() -> Result<(), Box<dyn Error>> {
         1,
     )?;
 
+    // API Sampling monitors the sampled collection of application programming interfaces used during system runtime to help diagnose compatibility problems.
+    set_dword(
+        &hkcu,
+        r"SOFTWARE\Policies\Microsoft\Windows\AppCompat",
+        "DisableAPISamping",
+        1,
+    )?;
+
+    // Application Footprint monitors the sampled collection of registry and file usage to help diagnose compatibility problems.
+    set_dword(
+        &hkcu,
+        r"SOFTWARE\Policies\Microsoft\Windows\AppCompat",
+        "DisableApplicationFootprint",
+        1,
+    )?;
+
+    // Install Tracing is a mechanism that tracks application installs to help diagnose compatibility problems.
+    set_dword(
+        &hkcu,
+        r"SOFTWARE\Policies\Microsoft\Windows\AppCompat",
+        "DisableInstallTracing",
+        1,
+    )?;
+
+    //The compatibility scan for backed up applications evaluates for compatibility problems in installed applications.
+    set_dword(
+        &hkcu,
+        r"SOFTWARE\Policies\Microsoft\Windows\AppCompat",
+        "DisableWin32AppBackup",
+        1,
+    )?;
+
     // Disable "Program Compatibility Assistant" service.
     set_dword(&hklm, r"SYSTEM\CurrentControlSet\Services", "PcaSvc", 4)?;
 
@@ -207,6 +239,24 @@ pub fn run() -> Result<(), Box<dyn Error>> {
         &hklm,
         r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer",
         "NoStartMenuMFUprogramsList",
+        1,
+    )?;
+
+    // Disable Event Logging.
+    // NOTE: Do not "nul" any of the "File" keys, it will break File Explorer HARD:
+    // r"SOFTWARE\Policies\Microsoft\Windows\EventLog\Application", "File"
+    set_string(
+        &hklm,
+        r"SYSTEM\CurrentControlSet\Services\EventLog",
+        "Start",
+        "4",
+    )?;
+
+    // Disable File History.
+    set_dword(
+        &hklm,
+        r"SOFTWARE\Policies\Microsoft\Windows\FileHistory",
+        "Disabled",
         1,
     )?;
 

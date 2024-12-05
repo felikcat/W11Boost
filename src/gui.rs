@@ -4,6 +4,7 @@ mod defaults;
 mod disable_sleep;
 mod reduce_local_data_collection;
 mod reduce_online_data_collection;
+mod disable_defender_and_smartscreen;
 
 use fltk::{
     app::{self, Screen}, button::{Button, CheckButton}, draw::{self}, enums::{self, Color}, frame::{self}, prelude::*, widget::Widget, window::Window
@@ -20,7 +21,7 @@ use windows::Win32::{
         HWND_TOPMOST, SWP_FRAMECHANGED, SWP_NOMOVE, SWP_NOSIZE, SWP_SHOWWINDOW, SetWindowPos,
     },
 };
-type MyCheckboxes = [CheckButton; 6];
+type MyCheckboxes = [CheckButton; 7];
 
 pub fn draw_gui() -> Result<(), Box<dyn Error>> {
     let app = app::App::default().with_scheme(app::Scheme::Gtk);
@@ -28,7 +29,7 @@ pub fn draw_gui() -> Result<(), Box<dyn Error>> {
 
     let mut wind = Window::default()
         .with_label("W11Boost")
-        .with_size(480, 360)
+        .with_size(480, 420)
         .center_screen();
 
     wind.set_border(false);
@@ -62,7 +63,7 @@ pub fn draw_gui() -> Result<(), Box<dyn Error>> {
     apply.set_label_font(enums::Font::by_name(&font));
     apply.set_label_size(16);
 
-    let checkbox_height = wind.height() / 10;
+    let checkbox_height = wind.height() / 12;
 
     let mut my_checkboxes: MyCheckboxes = [
         CheckButton::new(
@@ -74,35 +75,42 @@ pub fn draw_gui() -> Result<(), Box<dyn Error>> {
         ),
         CheckButton::new(
             0,
-            titlebar.height() + wind.height() / 10 + 2,
+            titlebar.height() + checkbox_height + 2,
             wind.width(),
             checkbox_height,
             "Reduce online data collection",
         ),
         CheckButton::new(
             0,
-            titlebar.height() + wind.height() / 10 * 2 + 4,
+            titlebar.height() + checkbox_height * 2 + 4,
             wind.width(),
             checkbox_height,
             "Create a system restore point",
         ),
         CheckButton::new(
             0,
-            titlebar.height() + wind.height() / 10 * 3 + 6,
+            titlebar.height() + checkbox_height * 3 + 6,
             wind.width(),
             checkbox_height,
             "Install the Microsoft Store",
         ),
         CheckButton::new(
             0,
-            titlebar.height() + wind.height() / 10 * 4 + 8,
+            titlebar.height() + checkbox_height * 4 + 8,
             wind.width(),
             checkbox_height,
             "Install support for .appx/.appxbundle and WinGet",
         ),
         CheckButton::new(
             0,
-            titlebar.height() + wind.height() / 10 * 5 + 10,
+            titlebar.height() + checkbox_height * 5 + 10,
+            wind.width(),
+            checkbox_height,
+            "Disable Defender and SmartScreen",
+        ),
+        CheckButton::new(
+            0,
+            titlebar.height() + checkbox_height * 6 + 12,
             wind.width(),
             checkbox_height,
             "Disable sleep and hibernate",
@@ -162,8 +170,8 @@ pub fn draw_gui() -> Result<(), Box<dyn Error>> {
     wind.resize(
         (screen.w() - wind.width()) / 2,
         (screen.h() - wind.height()) / 2,
-        480,
-        360,
+        wind.width(),
+        wind.height(),
     );
 
     wind.handle({
@@ -184,9 +192,17 @@ pub fn draw_gui() -> Result<(), Box<dyn Error>> {
         }
     });
 
+    let mut clone_apply = apply.clone();
+
     apply.set_callback(move |_| {
         frame0.show();
         frame0.top_window();
+
+        // So these aren't accidentally clicked.
+        clone_apply.hide();
+        for checkbox in &mut my_checkboxes {
+            checkbox.hide();
+        }
 
         // Force window to redraw to display frame0.
         app::flush();
@@ -196,6 +212,7 @@ pub fn draw_gui() -> Result<(), Box<dyn Error>> {
         if my_checkboxes[2].is_checked() {
             create_system_restore_point::run().expect("create_system_restore_point::run failed");
         }
+
         if my_checkboxes[0].is_checked() {
             reduce_local_data_collection::run().expect("reduce_local_data_collection::run failed");
         }
@@ -211,14 +228,23 @@ pub fn draw_gui() -> Result<(), Box<dyn Error>> {
         if my_checkboxes[4].is_checked() {
             appx_support::install().expect("appx_support::install failed");
         }
+
         if my_checkboxes[5].is_checked() {
-            disable_sleep::run().expect("disable_sleep::run failed");
+            disable_defender_and_smartscreen::run()
+                .expect("disable_defender_and_smartscreen::run failed");
         }
 
+        if my_checkboxes[6].is_checked() {
+            disable_sleep::run().expect("disable_sleep::run failed");
+        }
         defaults::run().expect("defaults::run failed");
 
         // Does not require a manual redraw.
         frame0.hide();
+        clone_apply.show();
+        for checkbox in &mut my_checkboxes {
+            checkbox.show();
+        }
     });
 
     app.run().unwrap();
