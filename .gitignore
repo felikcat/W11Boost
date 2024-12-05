@@ -1,6 +1,2 @@
-.vs
 .vscode
-.cache
-build
-x64
-vcpkg_installed
+target

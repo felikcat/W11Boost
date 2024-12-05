@@ -10,9 +10,6 @@ ifdef::env-github[]
 endif::[]
 
 == About
-https://github.com/felikcat/W11Boost/releases/tag/v1.1.1-c[v1.1.1] is the only stable release currently, use it until the Rust rewrite is finished.
-
-The GUI for 1.2.2: + 
 image:W11Boost_GUI.png[480,360]
 
 == 1. If not using Enterprise or LTSC or Education, convert the Windows edition to Education
@@ -20,13 +17,15 @@ image:W11Boost_GUI.png[480,360]
 . Open the Command Prompt as administrator.
 . `cscript.exe %windir%\system32\slmgr.vbs /upk`
 . `cscript.exe %windir%\system32\slmgr.vbs /ipk NW6C2-QMPVW-D7KKK-3GKT6-VCFB2`
-. Use https://github.com/abbodi1406/KMS_VL_ALL_AIO/releases[KMS_VL_ALL_AIO-$version.7z] to activate Windows by installing its auto-renewal.
+. Use https://github.com/massgravel/Microsoft-Activation-Scripts?tab=readme-ov-file#method-1---powershell-windows-8-and-later-%EF%B8%8F[MAS] or https://github.com/abbodi1406/KMS_VL_ALL_AIO/releases[KMS_VL_ALL_AIO] to activate Windows by installing its auto-renewal.
 - To open a .7z archive on Windows, you need https://www.7-zip.org/[7-Zip].
 
 == 2. Installing W11Boost
 
 . Download and run the https://github.com/felikcat/W11Boost/releases[latest release of W11Boost]. +
-Only Windows 10 version 1803 and newer are officially supported, and your anti-virus must be disabled.
+Only Windows 10 version 1803 and newer are officially supported.
+- Keep in mind that "Reduce local data collection" and "Reduce online data collection" are very aggressive and will change how you use Windows; they do not affect the security of Windows.
+- Installing the Microsoft Store and .appx support is generally for LTSC builds of Windows, but works on any edition regardless.
 
 . Install https://winaerotweaker.com/[Winaero Tweaker] to set personal preferences.
 
@@ -45,6 +44,8 @@ Optionally, you can also use https://www.backblaze.com/cloud-backup/personal[Bac
 === CPU
 . Install https://bitsum.com/download-process-lasso/[Process Lasso] and use `Active Power Profile -> Bitsum Highest Performance` profile. +
 Setting this power profile is not recommended for laptops, however there are other benefits to using Process Lasso.
+- This will destroy power savings for little gain, determine whether that trade-off is worth it, especially if paying for electricity.
+
 . Check if the default process priority located in "Performance Options" -> "Advanced" -> "Processor scheduling" is set to "Programs". You can search "performance of Windows" in the Start Menu to locate where to open "Performance Options".
 . Ensure Game Mode is on.
 - Also: Optimizations for windowed games.
@@ -71,10 +72,12 @@ image:nvcplui_1.png[]
 
 . Replace Consumer OEM apps with their Enterprise variant. Such as replacing Lenovo Vantage with Lenovo Commercial Vantage.
 
-. Third-party anti-malware programs provide better protection, but may have flaws such as slowing down your internet speeds. Be sure to test before and after.
+. Third-party anti-malware programs provide better protection, most notably ESET or BitDefender, but may have flaws such as slowing down your internet speeds. Be sure to test before and after.
 
 === Ethernet
 Avoid Realtek 2.5Gbit adapters, as they are much more CPU intensive than Intel 2.5Gbit adapters.
+
+Note that Intel 2.5Gbit adapters may not work for your motherboard, such is the case for Gigabyte AMD X870E motherboards.
 
 .My test results - with pictures
 [%collapsible]
@@ -99,7 +102,7 @@ I have not tested https://www.aliexpress.com/store/1101345677/search?SearchText=
 ====
 
 
-=== Using fullscreen exclusive in games
+=== (Not recommended) Using fullscreen exclusive in games
 Lowers input delay and GPU usage; potentially higher FPS, depending on the game.
 
 .Drawbacks:
