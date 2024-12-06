@@ -381,6 +381,21 @@ pub fn run() -> Result<(), Box<dyn Error>> {
         "RestrictImplicitTextCollection",
         1,
     )?;
+    // Don't send Microsoft inking and typing data to "improve suggestions".
+    set_dword(
+        &hklm,
+        r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\TextInput",
+        "AllowLinguisticDataCollection",
+        0,
+    )?;
+
+    // Disable SmartScreen's Enhanced Phishing Protection; it's akin to Microsoft's Recall functionality.
+    set_dword(
+        &hklm,
+        r"SOFTWARE\Policies\Microsoft\Windows\WTDS\Components",
+        "ServiceEnabled",
+        0,
+    )?;
 
     // Disable the language list fingerprinting method; useful for bypassing geolocation restrictions.
     set_dword(

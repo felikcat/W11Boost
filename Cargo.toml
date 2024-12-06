@@ -34,6 +34,8 @@ features = [
     "Win32_UI_WindowsAndMessaging",
     "Win32_System_Restore",
     "Win32_System_Services",
+    "Win32_System_GroupPolicy",
+    "Win32_System_Registry"
 ]
 
 [dependencies.windows-sys]

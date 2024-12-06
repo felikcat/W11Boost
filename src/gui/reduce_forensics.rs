@@ -258,5 +258,13 @@ pub fn run() -> Result<(), Box<dyn Error>> {
         1,
     )?;
 
+    // Disable PowerShell module logging.
+    set_dword(
+        &hklm,
+        r"SOFTWARE\Policies\Microsoft\Windows\PowerShell\ModuleLogging",
+        "EnableModuleLogging",
+        0,
+    )?;
+
     Ok(())
 }

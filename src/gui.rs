@@ -2,7 +2,7 @@ pub mod appx_support;
 mod create_system_restore_point;
 mod defaults;
 mod disable_sleep;
-mod reduce_local_data_collection;
+mod reduce_forensics;
 mod reduce_online_data_collection;
 mod disable_defender_and_smartscreen;
 
@@ -71,14 +71,14 @@ pub fn draw_gui() -> Result<(), Box<dyn Error>> {
             titlebar.height(),
             wind.width(),
             checkbox_height,
-            "Reduce local data collection",
+            "Reduce local data / forensics to a minimum",
         ),
         CheckButton::new(
             0,
             titlebar.height() + checkbox_height + 2,
             wind.width(),
             checkbox_height,
-            "Reduce online data collection",
+            "Reduce online activity to a minimum",
         ),
         CheckButton::new(
             0,
@@ -214,7 +214,7 @@ pub fn draw_gui() -> Result<(), Box<dyn Error>> {
         }
 
         if my_checkboxes[0].is_checked() {
-            reduce_local_data_collection::run().expect("reduce_local_data_collection::run failed");
+            reduce_forensics::run().expect("reduce_forensics::run failed");
         }
         if my_checkboxes[1].is_checked() {
             reduce_online_data_collection::run()

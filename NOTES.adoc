@@ -1,3 +1,6 @@
+== About
+These are some notes for the Rust language.
+
 == Accessing consts inside structs
 
 In Visual Studio Code you can hover over the const's value to get the hexadecimal.

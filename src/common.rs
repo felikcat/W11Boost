@@ -1,10 +1,12 @@
 use chrono::{Datelike, Timelike, Utc};
 use fltk::app;
+use windows::core::{PCWSTR, PWSTR};
+use windows::Win32::Foundation::ERROR_SUCCESS;
+use windows::Win32::System::Registry::{RegCloseKey, RegCreateKeyW, RegSetValueExW, REG_DWORD, REG_SZ};
 use std::error::Error;
 use std::fs::{self, OpenOptions};
 use std::io::Write;
 use std::path::PathBuf;
-
 use winsafe::{
     self as w, HKEY, RegistryValue,
     co::{self, KNOWNFOLDERID},
@@ -14,6 +16,55 @@ use winsafe::{
 pub fn get_windows_path(folder_id: &KNOWNFOLDERID) -> Result<String, Box<dyn Error>> {
     let the_path = w::SHGetKnownFolderPath(folder_id, co::KF::DEFAULT, None)?;
     Ok(the_path)
+}
+
+pub fn set_dword_gpo(
+    hkey: windows::Win32::System::Registry::HKEY,
+    subkey: PCWSTR,
+    value_name: PCWSTR,
+    value: u32,
+) -> Result<(), Box<dyn Error>> {
+    unsafe {
+        let mut new_key: windows::Win32::System::Registry::HKEY = hkey;
+        let result = RegCreateKeyW(new_key, subkey, &mut new_key);
+        if result != ERROR_SUCCESS {
+            return Err(format!("Failed to create key: {:?}", result).into());
+        }
+
+        let bytes = value.to_ne_bytes();
+        let set_result = RegSetValueExW(new_key, value_name, 0, REG_DWORD, Some(&bytes));
+        
+        let close_result = RegCloseKey(new_key);
+        
+        if set_result != ERROR_SUCCESS {
+            return Err(format!("Failed to set key value: {:?}", set_result).into());
+        }
+        if close_result != ERROR_SUCCESS {
+            return Err(format!("Failed to close key: {:?}", close_result).into());
+        }
+    }
+    Ok(())
+}
+
+pub fn set_string_gpo(
+    hkey: &mut windows::Win32::System::Registry::HKEY,
+    subkey: PCWSTR,
+    value_name: PCWSTR,
+    value: PCWSTR,
+) -> Result<(), Box<dyn Error>> {
+    unsafe {
+        RegCreateKeyW(*hkey, subkey, hkey);
+        
+        let bytes = value.as_wide();
+        let length = bytes.len().checked_mul(2).unwrap();
+        let bytes_cast: *const u8 = bytes.as_ptr().cast();
+        let slice = std::slice::from_raw_parts(bytes_cast, length);
+
+        RegSetValueExW(*hkey, value_name, 0, REG_SZ, Some(slice));
+
+        RegCloseKey(*hkey);
+    }
+    Ok(())
 }
 
 pub fn set_dword(

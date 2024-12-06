@@ -1,10 +1,9 @@
 use winres::WindowsResource;
 
 fn main() {
-    if cfg!(target_os = "windows") {
-        let mut res = WindowsResource::new();
+    let mut res = WindowsResource::new();
 
-        res.set_manifest(r#"<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+    res.set_manifest(r#"<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <assembly manifestVersion="1.0" xmlns="urn:schemas-microsoft-com:asm.v1" xmlns:asmv3="urn:schemas-microsoft-com:asm.v3">
   <trustInfo xmlns="urn:schemas-microsoft-com:asm.v2">
     <security>
@@ -20,6 +19,5 @@ fn main() {
     </asmv3:windowsSettings>
   </asmv3:application>
 </assembly>"#);
-        res.compile().unwrap();
-    }
+    res.compile().unwrap();
 }

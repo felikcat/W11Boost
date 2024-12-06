@@ -1,89 +1,87 @@
 use crate::common::*;
 use fltk::dialog;
 use std::error::Error;
-use winsafe::{HKEY, prelude::advapi_Hkey};
-
-// TODO -> Make this use Group Policy Objects instead of directly modifying the registry.
+use windows::{
+    core::{w, IUnknown}, Win32::System::{
+        Com::{CoCreateInstance, CoCreateInstanceEx, CLSCTX_INPROC_SERVER},
+        GroupPolicy::{CLSID_GroupPolicyObject, IGroupPolicyObject, IGroupPolicyObject_Vtbl, GPO_OPEN_LOAD_REGISTRY, GPO_SECTION_USER}, Registry::{HKEY, HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE},
+    }
+};
+use winsafe::{self as ws, CoInitializeEx, co::IID, prelude::advapi_Hkey};
 
 pub fn run() -> Result<(), Box<dyn Error>> {
-    let hklm = HKEY::LOCAL_MACHINE;
+    let mut hkcu: HKEY = HKEY_CURRENT_USER;
 
-    let tamper_disabled = check_dword(
-        &hklm,
-        r"SOFTWARE\Microsoft\Windows Defender\Features",
-        "TamperProtection",
-        4,
-    )?;
-    let realtime_disabled = check_dword(
-        &hklm,
-        r"SOFTWARE\Microsoft\Windows Defender\Real-Time Protection",
-        "DisableRealtimeMonitoring",
-        1,
-    )?;
+    // The apartment thread model is required for GPOs.
+    CoInitializeEx(ws::co::COINIT::APARTMENTTHREADED).expect("CoInitializeEx failed");
 
-    if !tamper_disabled || !realtime_disabled {
-        dialog::alert(
-            center().0,
-            center().1,
-            "Windows Defender's \"Tamper Protection\" or \"Real-time protection\" is enabled.\nDisable both now, then close this dialog.",
-        );
-    }
+    unsafe {
+        let gpo: IGroupPolicyObject =
+            CoCreateInstance(&CLSID_GroupPolicyObject, None, CLSCTX_INPROC_SERVER)
+                .expect("Failed to create GPO object");
+
+        gpo.OpenLocalMachineGPO(GPO_OPEN_LOAD_REGISTRY)
+            .expect("Failed to open local machine GPO");
+
+        gpo.GetRegistryKey(GPO_SECTION_USER, &mut hkcu).expect("GetRegistryKey failed");
+    };
 
     // Disable Windows SmartScreen.
-    set_string(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\Windows\System",
-        "**del.ShellSmartScreenLevel",
-        "",
+    /*set_string_gpo(
+        hkcu,
+        w!(r"SOFTWARE\Policies\Microsoft\Windows\System"),
+        w!("**del.ShellSmartScreenLevel"),
+        w!(""),
     )?;
+    */
 
     // Disable Windows Defender; it's done excessively just to be sure.
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\Windows Defender",
-        "DisableAntiSpyware",
+    set_dword_gpo(
+        hkcu,
+        w!(r"SOFTWARE\Policies\Microsoft\Windows Defender"),
+        w!("DisableAntiSpyware"),
         1,
     )?;
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\Windows Defender",
-        "DisableAntiVirus",
+    set_dword_gpo(
+        hkcu,
+        w!(r"SOFTWARE\Policies\Microsoft\Windows Defender"),
+        w!("DisableAntiVirus"),
         1,
     )?;
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\Windows Defender",
-        "ServiceKeepAlive",
+    set_dword_gpo(
+        hkcu,
+        w!(r"SOFTWARE\Policies\Microsoft\Windows Defender"),
+        w!("ServiceKeepAlive"),
         0,
     )?;
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection",
-        "DisableRealtimeMonitoring",
+    set_dword_gpo(
+        hkcu,
+        w!(r"SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection"),
+        w!("DisableRealtimeMonitoring"),
         1,
     )?;
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection",
-        "DisableBehaviorMonitoring",
+    set_dword_gpo(
+        hkcu,
+        w!(r"SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection"),
+        w!("DisableBehaviorMonitoring"),
         1,
     )?;
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection",
-        "DisableIOAVProtection",
+    set_dword_gpo(
+        hkcu,
+        w!(r"SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection"),
+        w!("DisableIOAVProtection"),
         1,
     )?;
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection",
-        "DisableOnAccessProtection",
+    set_dword_gpo(
+        hkcu,
+        w!(r"SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection"),
+        w!("DisableOnAccessProtection"),
         1,
     )?;
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection",
-        "DisableScriptScanning",
+    set_dword_gpo(
+        hkcu,
+        w!(r"SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection"),
+        w!("DisableScriptScanning"),
         1,
     )?;
 
