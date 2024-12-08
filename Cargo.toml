@@ -1,6 +1,6 @@
 [package]
 name = "W11Boost"
-version = "1.4.0"
+version = "1.4.1"
 edition = "2024"
 build = "build.rs"
 authors = ["felikcat"]
@@ -8,11 +8,11 @@ authors = ["felikcat"]
 [package.metadata.winres]
 CompanyName = "felikcat"
 FileDescription = "https://github.com/felikcat/W11Boost"
-FileVersion = "1.4.0.0"
+FileVersion = "1.4.1.0"
 LegalCopyright = "© 2024 felikcat, AGPL3 License"
 OriginalFilename = "W11Boost.exe"
 ProductName = "W11Boost"
-ProductVersion = "1.4.0.0"
+ProductVersion = "1.4.1.0"
 
 # Optimize for size.
 [profile.release]
