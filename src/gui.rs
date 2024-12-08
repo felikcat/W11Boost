@@ -1,20 +1,33 @@
 mod appx_support;
 mod create_system_restore_point;
 mod defaults;
+mod disable_defender_and_smartscreen;
 mod disable_sleep;
+mod disable_vbs;
 mod reduce_forensics;
 mod reduce_online_data_collection;
-mod disable_defender_and_smartscreen;
-mod disable_vbs;
+mod remove_w11boost;
 
 use fltk::{
-    app::{self, Screen}, button::{Button, CheckButton}, dialog, draw::{self}, enums::{self, Color}, frame::{self}, prelude::*, widget::Widget, window::Window
+    app::{self, Screen},
+    button::{Button, CheckButton},
+    dialog,
+    draw::{self},
+    enums::{self, Color},
+    frame::{self},
+    prelude::*,
+    widget::Widget,
+    window::Window,
 };
 use fltk_theme::{ColorTheme, color_themes};
 use std::{
+    borrow::BorrowMut,
+    cell::RefCell,
     error::Error,
     mem,
+    ops::DerefMut,
     process::{Command, exit},
+    rc::Rc,
 };
 use windows::Win32::{
     Foundation::HWND,
@@ -52,19 +65,32 @@ pub fn draw_gui() -> Result<(), Box<dyn Error>> {
     let mut apply = Button::new(
         0,
         0,
-        wind.width() - 2,
+        (wind.width() - 6) / 2,
         (wind.height() * 14) / 100,
         "Apply W11Boost",
     )
     .center_of(&wind);
 
-    apply.set_pos(
-        wind.width() - apply.width() - 1,
-        wind.height() - apply.height() - 2,
-    ); // Put button at the bottom
+    let mut remove = Button::new(
+        wind.width() / 2,
+        0,
+        (wind.width() - 6) / 2,
+        (wind.height() * 14) / 100,
+        "Remove W11Boost",
+    )
+    .center_of(&wind);
+
+    apply.set_pos(2, wind.height() - apply.height() - 2); // Put button at the bottom
+
+    remove.set_pos(
+        wind.width() - remove.width() - 2,
+        wind.height() - remove.height() - 2,
+    );
 
     apply.set_label_font(enums::Font::by_name(&font));
     apply.set_label_size(16);
+    remove.set_label_font(enums::Font::by_name(&font));
+    remove.set_label_size(16);
 
     let checkbox_height = wind.height() / 12;
 
@@ -142,11 +168,14 @@ pub fn draw_gui() -> Result<(), Box<dyn Error>> {
     my_checkboxes[2].set_value(true);
     my_checkboxes[8].set_value(true);
 
-    let mut frame0 = Widget::default()
+    let frame0 = RefCell::new(Widget::default()
         .with_size(wind.width(), wind.height() - titlebar.height())
-        .with_pos(0, titlebar.height());
-    frame0.set_frame(enums::FrameType::BorderBox);
-    frame0.draw( move |f| {
+        .with_pos(0, titlebar.height()));
+
+    let frame0_clone = frame0.clone();
+
+    frame0_clone.borrow_mut().set_frame(enums::FrameType::BorderBox);
+    frame0_clone.borrow_mut().draw(move |f| {
         let label = f.label();
         let txt = label.split("  ").nth(0).unwrap();
         let x = f.x();
@@ -161,8 +190,8 @@ pub fn draw_gui() -> Result<(), Box<dyn Error>> {
         draw::draw_text2(txt, x, y - 16, w, h, f.align());
         draw::pop_clip();
     });
-    frame0.set_label("Applying W11Boost, please wait...");
-    frame0.hide();
+    frame0_clone.borrow_mut().set_label("Applying W11Boost, please wait...");
+    frame0_clone.borrow_mut().hide();
 
     wind.end();
     wind.show();
@@ -210,71 +239,146 @@ pub fn draw_gui() -> Result<(), Box<dyn Error>> {
         }
     });
 
-    let mut clone_apply = apply.clone();
-
-    apply.set_callback(move |_| {
+    fn hide_elements(
+        frame0: &mut impl WidgetExt,
+        apply_clone: &mut impl ButtonExt,
+        my_checkboxes: &mut [impl WidgetExt],
+    ) {
         frame0.show();
         frame0.top_window();
 
         // So these aren't accidentally clicked.
-        clone_apply.hide();
-        for checkbox in &mut my_checkboxes {
+        apply_clone.hide();
+        for checkbox in my_checkboxes {
             checkbox.hide();
         }
 
         // Force window to redraw to display frame0.
         app::flush();
         app::wait();
-        
-        // Has to be first!
-        if my_checkboxes[2].is_checked() {
-            create_system_restore_point::run().expect("create_system_restore_point::run failed");
-        }
+    }
 
-        if my_checkboxes[0].is_checked() {
-            reduce_forensics::run().expect("reduce_forensics::run failed");
-        }
-        if my_checkboxes[1].is_checked() {
-            reduce_online_data_collection::run()
-                .expect("reduce_online_data_collection::run failed");
-        }
-        if my_checkboxes[3].is_checked() {
-            Command::new("wsreset.exe")
-                .output()
-                .expect("wsreset.exe failed to execute");
-        }
-        if my_checkboxes[4].is_checked() {
-            appx_support::install().expect("appx_support::install failed");
-        }
-
-        if my_checkboxes[5].is_checked() {
-            disable_defender_and_smartscreen::run()
-                .expect("disable_defender_and_smartscreen::run failed");
-        }
-
-        if my_checkboxes[6].is_checked() {
-            disable_sleep::run().expect("disable_sleep::run failed");
-        }
-
-        if my_checkboxes[7].is_checked() {
-            disable_vbs::run().expect("disable_vbs::run failed");
-        }
-
-        if my_checkboxes[8].is_checked() {
-            defaults::run().expect("defaults::run failed");
-        }
-
-       if my_checkboxes.iter().all(|checkbox| !checkbox.is_checked()) {
-            dialog::message(center().0, center().1, "No options were selected, therefore nothing has changed.");
-       } else {
-            dialog::message(center().0, center().1, "W11Boost applied your preferences successfully, please reboot.");
-       }
-
+    fn show_elements(
+        frame0: &mut impl WidgetExt,
+        apply_clone: &mut impl ButtonExt,
+        my_checkboxes: &mut [impl WidgetExt],
+    ) {
         // Does not require a manual redraw.
         frame0.hide();
-        clone_apply.show();
-        for checkbox in &mut my_checkboxes {
+        apply_clone.show();
+        for checkbox in my_checkboxes {
             checkbox.show();
+        }
+    }
+
+    let mut apply_clone = apply.clone();
+
+    apply.set_callback( move |_| {
+        let choice = dialog::choice2(
+            center().0,
+            center().1,
+            "Are you sure you want to apply W11Boost?",
+            "&Yes",
+            "&No",
+            "",
+        );
+        if choice == Some(0) {
+            hide_elements(
+                &mut *frame0_clone.borrow_mut(),
+                &mut *apply_clone.borrow_mut(),
+                &mut *my_checkboxes.borrow_mut(),
+            );
+            // Has to be first!
+            if my_checkboxes[2].is_checked() {
+                create_system_restore_point::run()
+                    .expect("create_system_restore_point::run failed");
+            }
+
+            if my_checkboxes[0].is_checked() {
+                reduce_forensics::run().expect("reduce_forensics::run failed");
+            }
+            if my_checkboxes[1].is_checked() {
+                reduce_online_data_collection::run()
+                    .expect("reduce_online_data_collection::run failed");
+            }
+            if my_checkboxes[3].is_checked() {
+                Command::new("wsreset.exe")
+                    .output()
+                    .expect("wsreset.exe failed to execute");
+            }
+            if my_checkboxes[4].is_checked() {
+                appx_support::install().expect("appx_support::install failed");
+            }
+
+            if my_checkboxes[5].is_checked() {
+                disable_defender_and_smartscreen::run()
+                    .expect("disable_defender_and_smartscreen::run failed");
+            }
+
+            if my_checkboxes[6].is_checked() {
+                disable_sleep::run().expect("disable_sleep::run failed");
+            }
+
+            if my_checkboxes[7].is_checked() {
+                disable_vbs::run().expect("disable_vbs::run failed");
+            }
+
+            if my_checkboxes[8].is_checked() {
+                defaults::run().expect("defaults::run failed");
+            }
+
+            if my_checkboxes.iter().all(|checkbox| !checkbox.is_checked()) {
+                dialog::message(
+                    center().0,
+                    center().1,
+                    "No options were selected, therefore nothing has changed.",
+                );
+            } else {
+                dialog::message(
+                    center().0,
+                    center().1,
+                    "W11Boost applied your preferences successfully, please reboot.",
+                );
+            }
+
+            show_elements(
+                &mut *frame0_clone.borrow_mut(),
+                &mut *apply_clone.borrow_mut(),
+                &mut *my_checkboxes.borrow_mut(),
+            );
+        }
+    });
+
+    remove.set_callback(move |_| {
+        let choice = dialog::choice2(
+            center().0,
+            center().1,
+            "Are you sure you want to remove W11Boost?",
+            "&Yes",
+            "&No",
+            "",
+        );
+        if choice == Some(0) {
+            hide_elements(
+                &mut *frame0_clone.borrow_mut(),
+                &mut apply_clone,
+                &mut my_checkboxes,
+            );
+            if let Ok(_) = remove_w11boost::run() {
+                dialog::message(
+                    center().0,
+                    center().1,
+                    "W11Boost applied your preferences successfully, please reboot.",
+                );
+            } else {
+                eprintln!("remove_w11boost::run failed");
+            }
+
+            show_elements(
+                &mut *frame0_clone.borrow_mut(),
+                &mut apply_clone,
+                &mut my_checkboxes,
+            );
         }
     });
 
