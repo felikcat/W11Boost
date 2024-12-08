@@ -14,8 +14,6 @@ image:W11Boost_GUI.png[480,360]
 W11Boost globally changes settings. It's not meant for shared computers. Despite this, the default checkbox selection is safe for most users as it is as close to stock unmodified Windows as possible without being ineffective.
 
 .Features that stick out:
-- All changes are easily revertable through the Group Policy Editor.
-** To quickly remove all changes by W11Boost, delete `C:\Windows\System32\GroupPolicy\Machine\Registry.pol` and `C:\Windows\System32\GroupPolicy\User\Registry.pol`, then reboot.
 - A focus on being non-intrusive. For example, we don't disable syncing to a Microsoft account, instead we suggest an alternative if that is desired.
 
 - "Disable Defender and Smartscreen" being a replacement for Sordum's Defender Control v2.1, the prior best tool for the job.
