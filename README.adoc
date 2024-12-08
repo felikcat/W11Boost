@@ -11,8 +11,22 @@ endif::[]
 
 image:W11Boost_GUI.png[480,360]
 
-W11Boost currently globally changes settings. It's not meant for shared computers, as it will change settings that may not be suitable for other users.
-Although, the default checkbox selection is safe for most users as it is as close to stock unmodified Windows as possible without being ineffective.
+W11Boost globally changes settings. It's not meant for shared computers. Despite this, the default checkbox selection is safe for most users as it is as close to stock unmodified Windows as possible without being ineffective.
+
+.Features that stick out:
+- All changes are easily revertable through the Group Policy Editor.
+** To quickly remove all changes by W11Boost, delete `C:\Windows\System32\GroupPolicy\Machine\Registry.pol` and `C:\Windows\System32\GroupPolicy\User\Registry.pol`, then reboot.
+- A focus on being non-intrusive. For example, we don't disable syncing to a Microsoft account, instead we suggest an alternative if that is desired.
+
+- "Disable Defender and Smartscreen" being a replacement for Sordum's Defender Control v2.1, the prior best tool for the job.
+
+- Optional anti-forensics.
+
+- A way to disable sleep and hibernation fully for specific use cases.
+
+- Windows Store and WinGet installers, aimed towards LTSC builds that lack both by default.
+
+- Written in Rust instead of PowerShell or Batch, meaning it is more predictable and robust.
 
 == 1. If not using Enterprise or LTSC or Education, convert the Windows edition to Education
 
@@ -32,15 +46,15 @@ Although, the default checkbox selection is safe for most users as it is as clos
 - Only Windows 10 version 1803 and newer are officially supported.
 - The near guarantee of breaking no program or app is only for the default selection of checkboxes.
 
-- "Reduce local data collection" is very aggressive, it compromises security for ultimate privacy. It will make forensics on your computer difficult.
-
-- "Reduce online data collection" will change how you use Windows; this also affects the security of Windows.
+- "Reduce local data collection" won't change how you use Windows.
 
 - Installing the Microsoft Store and .appx support is generally for LTSC builds of Windows, but works on any edition regardless.
 
-- "Disable Defender and Smartscreen" is a replacement for Sordum's Defender Control v2.1.
+- "Reduce online data collection" will change how you use Windows.
 
 - "Disable Virtualization Based Security" is meant to boost FPS in games and especially make VMs (VirtualBox & VMWare) run faster.
+
+. If you wish to reduce the amount of network traffic to and from Microsoft, use https://github.com/henrypp/simplewall[simplewall].
 
 . Install https://winaerotweaker.com/[Winaero Tweaker] to set personal preferences.
 

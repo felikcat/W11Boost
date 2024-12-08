@@ -1,320 +1,180 @@
+use windows::{core::w, Win32::System::{GroupPolicy::IGroupPolicyObject, Registry::{HKEY, HKEY_LOCAL_MACHINE}}};
+
 use crate::common::*;
 use std::error::Error;
-use winsafe::{HKEY, prelude::advapi_Hkey};
 
-/* Ignored:
+/* Ignored for security or usability reasons:
     - Find My Device
     - Windows Update
+    - Syncing to a Microsoft account
 */
 
 pub fn run() -> Result<(), Box<dyn Error>> {
-    let hklm = HKEY::LOCAL_MACHINE;
+    let (hklm, gpo_hklm): (HKEY, IGroupPolicyObject) = init_registry_gpo(HKEY_LOCAL_MACHINE)?;
 
     // Don't allow online tips.
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\AllowOnlineTips",
-        "AllowOnlineTips",
+    set_dword_gpo(
+        hklm,
+        w!(r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\AllowOnlineTips"),
+        w!("AllowOnlineTips"),
         1,
     )?;
 
     // Don't allow users to enable online speech recongition services.
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\InputPersonalization",
-        "AllowInputPersonalization",
+    set_dword_gpo(
+        hklm,
+        w!(r"SOFTWARE\Policies\Microsoft\InputPersonalization"),
+        w!("AllowInputPersonalization"),
         0,
     )?;
 
     // Remove Personalized Website Recommendations from the Recommended section in the Start Menu.
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\Windows\Explorer",
-        "HideRecommendedPersonalizedSites",
+    set_dword_gpo(
+        hklm,
+        w!(r"SOFTWARE\Policies\Microsoft\Windows\Explorer"),
+        w!("HideRecommendedPersonalizedSites"),
         1,
     )?;
 
     // Turn off account-based insights, recent, favorite, and recommended files in File Explorer.
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\Windows\Explorer",
-        "HideRecommendedSection",
+    set_dword_gpo(
+        hklm,
+        w!(r"SOFTWARE\Policies\Microsoft\Windows\Explorer"),
+        w!("HideRecommendedSection"),
         1,
     )?;
 
     // Prevent device metadata retrieval from the Internet.
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\Windows\Device Metadata",
-        "PreventDeviceMetadataFromNetwork",
+    set_dword_gpo(
+        hklm,
+        w!(r"SOFTWARE\Policies\Microsoft\Windows\Device Metadata"),
+        w!("PreventDeviceMetadataFromNetwork"),
         1,
     )?;
 
     // Turn off Search Companion content file updates.
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\SearchCompanion",
-        "DisableContentFileUpdates",
+    set_dword_gpo(
+        hklm,
+        w!(r"SOFTWARE\Policies\Microsoft\SearchCompanion"),
+        w!("DisableContentFileUpdates"),
         1,
     )?;
 
     // Don't allow Clipboard synchronization across devices.
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\Windows\System",
-        "AllowCrossDeviceClipboard",
+    set_dword_gpo(
+        hklm,
+        w!(r"SOFTWARE\Policies\Microsoft\Windows\System"),
+        w!("AllowCrossDeviceClipboard"),
         0,
     )?;
 
     // Don't allow downloading updates to the Disk Failure Prediction Model.
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\Windows\StorageHealth",
-        "AllowDiskHealthModelUpdates",
+    set_dword_gpo(
+        hklm,
+        w!(r"SOFTWARE\Policies\Microsoft\Windows\StorageHealth"),
+        w!("AllowDiskHealthModelUpdates"),
         0,
     )?;
 
     // Don't allow sideloaded apps to auto-update in the background.
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\Windows\Appx",
-        "DisableBackgroundAutoUpdates",
+    set_dword_gpo(
+        hklm,
+        w!(r"SOFTWARE\Policies\Microsoft\Windows\Appx"),
+        w!("DisableBackgroundAutoUpdates"),
         0,
     )?;
 
     // "Cloud optimized content / Windows experiences" are used for advertising, but aren't disabled in defaults.rs to keep the OS "stock".
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\Windows\CloudContent",
-        "DisableCloudOptimizedContent",
+    set_dword_gpo(
+        hklm,
+        w!(r"SOFTWARE\Policies\Microsoft\Windows\CloudContent"),
+        w!("DisableCloudOptimizedContent"),
         1,
     )?;
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\Windows\CloudContent",
-        "DisableConsumerAccountStateContent",
+    set_dword_gpo(
+        hklm,
+        w!(r"SOFTWARE\Policies\Microsoft\Windows\CloudContent"),
+        w!("DisableConsumerAccountStateContent"),
         1,
     )?;
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\Windows\CloudContent",
-        "DisableSoftLanding",
+    set_dword_gpo(
+        hklm,
+        w!(r"SOFTWARE\Policies\Microsoft\Windows\CloudContent"),
+        w!("DisableSoftLanding"),
         1,
     )?;
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\Windows\CloudContent",
-        "DisableSoftLanding",
+    set_dword_gpo(
+        hklm,
+        w!(r"SOFTWARE\Policies\Microsoft\Windows\CloudContent"),
+        w!("DisableSoftLanding"),
         1,
     )?;
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\Windows\CloudContent",
-        "DisableWindowsConsumerFeatures",
+    set_dword_gpo(
+        hklm,
+        w!(r"SOFTWARE\Policies\Microsoft\Windows\CloudContent"),
+        w!("DisableWindowsConsumerFeatures"),
         1,
     )?;
 
-    // Don't allow Windows to sync cellular messages to Mircosoft's cloud services.
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\Windows\Messaging",
-        "AllowMessageSync",
+    // Don't allow Windows to sync cellular messages to Microsoft's cloud services.
+    set_dword_gpo(
+        hklm,
+        w!(r"SOFTWARE\Policies\Microsoft\Windows\Messaging"),
+        w!("AllowMessageSync"),
         0,
     )?;
 
     // Disable an old virtual assistant that excessively used the internet and violated privacy.
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\Windows\Windows Search",
-        "AllowCortana",
+    set_dword_gpo(
+        hklm,
+        w!(r"SOFTWARE\Policies\Microsoft\Windows\Windows Search"),
+        w!("AllowCortana"),
         0,
     )?;
 
     // Disable Windows Search from using the "cloud" / internet.
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\Windows\Windows Search",
-        "AllowCloudSearch",
+    set_dword_gpo(
+        hklm,
+        w!(r"SOFTWARE\Policies\Microsoft\Windows\Windows Search"),
+        w!("AllowCloudSearch"),
         0,
     )?;
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\Windows\Windows Search",
-        "DisableWebSearch",
+    set_dword_gpo(
+        hklm,
+        w!(r"SOFTWARE\Policies\Microsoft\Windows\Windows Search"),
+        w!("DisableWebSearch"),
         1,
     )?;
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\Windows\Windows Search",
-        "EnableDynamicContentInWSB",
+    set_dword_gpo(
+        hklm,
+        w!(r"SOFTWARE\Policies\Microsoft\Windows\Windows Search"),
+        w!("EnableDynamicContentInWSB"),
         1,
     )?;
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\Windows\Windows Search",
-        "ConnectedSearchUseWeb",
+    set_dword_gpo(
+        hklm,
+        w!(r"SOFTWARE\Policies\Microsoft\Windows\Windows Search"),
+        w!("ConnectedSearchUseWeb"),
         0,
     )?;
 
     // Don't automatically download a new speech model.
-    set_dword(
-        &hklm,
-        r"Machine\SOFTWARE\Policies\Microsoft\Speech",
-        "AllowSpeechModelUpdate",
+    set_dword_gpo(
+        hklm,
+        w!(r"Machine\SOFTWARE\Policies\Microsoft\Speech"),
+        w!("AllowSpeechModelUpdate"),
         0,
-    )?;
-
-    // Don't sync any data to Microsoft.
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\Windows\SettingSync",
-        "DisableSettingSync",
-        2,
-    )?;
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\Windows\SettingSync",
-        "DisableSettingSyncUserOverride",
-        1,
-    )?;
-
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\Windows\SettingSync",
-        "DisableAccessibilitySettingSync",
-        2,
-    )?;
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\Windows\SettingSync",
-        "DisableAccessibilitySettingSyncUserOverride",
-        1,
-    )?;
-
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\Windows\SettingSync",
-        "DisableAppSyncSettingSync",
-        2,
-    )?;
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\Windows\SettingSync",
-        "DisableAppSyncSettingSyncUserOverride",
-        1,
-    )?;
-
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\Windows\SettingSync",
-        "DisableApplicationSettingSync",
-        2,
-    )?;
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\Windows\SettingSync",
-        "DisableApplicationSettingSyncUserOverride",
-        1,
-    )?;
-
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\Windows\SettingSync",
-        "DisableCredentialsSettingSync",
-        2,
-    )?;
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\Windows\SettingSync",
-        "DisableCredentialsSettingSyncUserOverride",
-        1,
-    )?;
-
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\Windows\SettingSync",
-        "DisableDesktopThemeSettingSync",
-        2,
-    )?;
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\Windows\SettingSync",
-        "DisableDesktopThemeSettingSyncUserOverride",
-        1,
-    )?;
-
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\Windows\SettingSync",
-        "DisableLanguageSettingSync",
-        2,
-    )?;
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\Windows\SettingSync",
-        "DisableLanguageSettingSyncUserOverride",
-        1,
-    )?;
-
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\Windows\SettingSync",
-        "DisablePersonalizationSettingSync",
-        2,
-    )?;
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\Windows\SettingSync",
-        "DisablePersonalizationSettingSyncUserOverride",
-        1,
-    )?;
-
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\Windows\SettingSync",
-        "DisableStartLayoutSettingSync",
-        2,
-    )?;
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\Windows\SettingSync",
-        "DisableStartLayoutSettingSyncUserOverride",
-        1,
-    )?;
-
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\Windows\SettingSync",
-        "DisableWebBrowserSettingSync",
-        2,
-    )?;
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\Windows\SettingSync",
-        "DisableWebBrowserSettingSyncUserOverride",
-        1,
-    )?;
-
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\Windows\SettingSync",
-        "DisableWindowsSettingSync",
-        2,
-    )?;
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\Windows\SettingSync",
-        "DisableWindowsSettingSyncUserOverride",
-        1,
     )?;
 
     // Don't show News and Interests or other widgets.
-    set_dword(
-        &hklm,
-        r"SOFTWARE\Policies\Microsoft\Dsh",
-        "AllowNewsAndInterests",
+    set_dword_gpo(
+        hklm,
+        w!(r"SOFTWARE\Policies\Microsoft\Dsh"),
+        w!("AllowNewsAndInterests"),
         0,
     )?;
+
+    save_registry_gpo(hklm, gpo_hklm)?;
     
     Ok(())
 }

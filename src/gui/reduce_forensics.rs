@@ -4,6 +4,11 @@ use windows::{core::w, Win32::System::{GroupPolicy::IGroupPolicyObject, Registry
 
 use crate::common::*;
 
+/* Ignored for security reasons:
+    - PowerShell module logging
+    - Event Viewer
+*/
+
 pub fn run() -> Result<(), Box<dyn Error>> {
     let (hklm, gpo_hklm): (HKEY, IGroupPolicyObject) = init_registry_gpo(HKEY_LOCAL_MACHINE)?;
     let (hkcu, gpo_hkcu): (HKEY, IGroupPolicyObject) = init_registry_gpo(HKEY_CURRENT_USER)?;
@@ -242,28 +247,12 @@ pub fn run() -> Result<(), Box<dyn Error>> {
         1,
     )?;
 
-    // Disable Event Logging.
-    set_string_gpo(
-        hklm,
-        w!(r"SYSTEM\CurrentControlSet\Services\EventLog"),
-        w!("Start"),
-        w!("4"),
-    )?;
-
     // Disable File History.
     set_dword_gpo(
         hklm,
         w!(r"SOFTWARE\Policies\Microsoft\Windows\FileHistory"),
         w!("Disabled"),
         1,
-    )?;
-
-    // Disable PowerShell module logging.
-    set_dword_gpo(
-        hklm,
-        w!(r"SOFTWARE\Policies\Microsoft\Windows\PowerShell\ModuleLogging"),
-        w!("EnableModuleLogging"),
-        0,
     )?;
 
     save_registry_gpo(hklm, gpo_hklm)?;

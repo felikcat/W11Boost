@@ -138,7 +138,7 @@ pub fn draw_gui() -> Result<(), Box<dyn Error>> {
         checkbox.set_label_font(enums::Font::by_name(&font));
         checkbox.set_label_size(16);
     }
-    let hklm_safe = HKEY::HKEY_LOCAL_MACHINE
+
     my_checkboxes[2].set_value(true);
     my_checkboxes[8].set_value(true);
 

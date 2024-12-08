@@ -300,7 +300,7 @@ pub fn center() -> (i32, i32) {
 }
 
 pub fn init_registry_gpo(
-    hkey: windows::Win32::System::Registry::HKEY,
+    mut hkey: windows::Win32::System::Registry::HKEY,
 ) -> Result<(windows::Win32::System::Registry::HKEY, IGroupPolicyObject), Box<dyn Error>> {
     unsafe {
         // The apartment thread model is required for GPOs.

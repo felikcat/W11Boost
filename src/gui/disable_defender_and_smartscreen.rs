@@ -2,20 +2,20 @@ use crate::common::*;
 //use fltk::dialog;
 use windows::{core::w, Win32::System::{GroupPolicy::IGroupPolicyObject, Registry::{HKEY, HKEY_LOCAL_MACHINE}}};
 use std::error::Error;
-//use winsafe::{HKEY as SAFE_HKEY, prelude::advapi_Hkey};
+//use winsafe::{HKEY as HKEY_SAFE, prelude::advapi_Hkey};
 
 pub fn run() -> Result<(), Box<dyn Error>> {
     let (hklm, gpo_hklm): (HKEY, IGroupPolicyObject) = init_registry_gpo(HKEY_LOCAL_MACHINE)?;
     /* Not necessary, for now.
-    let hklm = SAFE_HKEY::LOCAL_MACHINE;
+    let hklm_safe = HKEY_SAFE::LOCAL_MACHINE;
     let tamper_disabled = check_dword(
-        &hklm,
+        &hklm_safe,
         r"SOFTWARE\Microsoft\Windows Defender\Features",
         "TamperProtection",
         4,
     )?;
     let realtime_disabled = check_dword(
-        &hklm,
+        &hklm_safe,
         r"SOFTWARE\Microsoft\Windows Defender\Real-Time Protection",
         "DisableRealtimeMonitoring",
         1,
