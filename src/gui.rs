@@ -1,13 +1,14 @@
-pub mod appx_support;
+mod appx_support;
 mod create_system_restore_point;
 mod defaults;
 mod disable_sleep;
 mod reduce_forensics;
 mod reduce_online_data_collection;
 mod disable_defender_and_smartscreen;
+mod disable_vbs;
 
 use fltk::{
-    app::{self, Screen}, button::{Button, CheckButton}, draw::{self}, enums::{self, Color}, frame::{self}, prelude::*, widget::Widget, window::Window
+    app::{self, Screen}, button::{Button, CheckButton}, dialog, draw::{self}, enums::{self, Color}, frame::{self}, prelude::*, widget::Widget, window::Window
 };
 use fltk_theme::{ColorTheme, color_themes};
 use std::{
@@ -21,7 +22,9 @@ use windows::Win32::{
         HWND_TOPMOST, SWP_FRAMECHANGED, SWP_NOMOVE, SWP_NOSIZE, SWP_SHOWWINDOW, SetWindowPos,
     },
 };
-type MyCheckboxes = [CheckButton; 7];
+
+use crate::common::center;
+type MyCheckboxes = [CheckButton; 9];
 
 pub fn draw_gui() -> Result<(), Box<dyn Error>> {
     let app = app::App::default().with_scheme(app::Scheme::Gtk);
@@ -29,7 +32,7 @@ pub fn draw_gui() -> Result<(), Box<dyn Error>> {
 
     let mut wind = Window::default()
         .with_label("W11Boost")
-        .with_size(480, 420)
+        .with_size(480, 480)
         .center_screen();
 
     wind.set_border(false);
@@ -50,7 +53,7 @@ pub fn draw_gui() -> Result<(), Box<dyn Error>> {
         0,
         0,
         wind.width() - 2,
-        wind.height() / 10 * 2,
+        (wind.height() * 14) / 100,
         "Apply W11Boost",
     )
     .center_of(&wind);
@@ -115,14 +118,29 @@ pub fn draw_gui() -> Result<(), Box<dyn Error>> {
             checkbox_height,
             "Disable sleep and hibernate",
         ),
+        CheckButton::new(
+            0,
+            titlebar.height() + checkbox_height * 7 + 14,
+            wind.width(),
+            checkbox_height,
+            "Disable Virtualization Based Security",
+        ),
+        CheckButton::new(
+            0,
+            titlebar.height() + checkbox_height * 8 + 16,
+            wind.width(),
+            checkbox_height,
+            "Add in non-intrusive tweaks",
+        ),
     ];
 
     for checkbox in &mut my_checkboxes {
         checkbox.set_label_font(enums::Font::by_name(&font));
         checkbox.set_label_size(16);
     }
-
+    let hklm_safe = HKEY::HKEY_LOCAL_MACHINE
     my_checkboxes[2].set_value(true);
+    my_checkboxes[8].set_value(true);
 
     let mut frame0 = Widget::default()
         .with_size(wind.width(), wind.height() - titlebar.height())
@@ -237,7 +255,20 @@ pub fn draw_gui() -> Result<(), Box<dyn Error>> {
         if my_checkboxes[6].is_checked() {
             disable_sleep::run().expect("disable_sleep::run failed");
         }
-        defaults::run().expect("defaults::run failed");
+
+        if my_checkboxes[7].is_checked() {
+            disable_vbs::run().expect("disable_vbs::run failed");
+        }
+
+        if my_checkboxes[8].is_checked() {
+            defaults::run().expect("defaults::run failed");
+        }
+
+       if my_checkboxes.iter().all(|checkbox| !checkbox.is_checked()) {
+            dialog::message(center().0, center().1, "No options were selected, therefore nothing has changed.");
+       } else {
+            dialog::message(center().0, center().1, "W11Boost applied your preferences successfully, please reboot.");
+       }
 
         // Does not require a manual redraw.
         frame0.hide();

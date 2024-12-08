@@ -18,18 +18,29 @@ Although, the default checkbox selection is safe for most users as it is as clos
 
 . Open the Command Prompt as administrator.
 . `cscript.exe %windir%\system32\slmgr.vbs /upk`
-. `cscript.exe %windir%\system32\slmgr.vbs /ipk NW6C2-QMPVW-D7KKK-3GKT6-VCFB2`
+. `changepk.exe /ProductKey YNMGQ-8RYV3-4PGQ3-C8XTP-7CFBY`
 . Use https://github.com/massgravel/Microsoft-Activation-Scripts?tab=readme-ov-file#method-1---powershell-windows-8-and-later-%EF%B8%8F[MAS] or https://github.com/abbodi1406/KMS_VL_ALL_AIO/releases[KMS_VL_ALL_AIO] to activate Windows by installing its auto-renewal.
 - To open a .7z archive on Windows, you need https://www.7-zip.org/[7-Zip].
 
 == 2. Installing W11Boost
 
-. Download and run the https://github.com/felikcat/W11Boost/releases[latest release of W11Boost]. +
-Only Windows 10 version 1803 and newer are officially supported.
-- The near guarantee of breaking no program or app is only for the default checkbox (option) selection.
+. Install the latest https://aka.ms/vs/17/release/vc_redist.x64.exe[Visual Studio Redistributable].
+
+. Download and run the https://github.com/felikcat/W11Boost/releases[latest release of W11Boost].
+
+. W11Boost usage: 
+- Only Windows 10 version 1803 and newer are officially supported.
+- The near guarantee of breaking no program or app is only for the default selection of checkboxes.
+
 - "Reduce local data collection" is very aggressive, it compromises security for ultimate privacy. It will make forensics on your computer difficult.
-- "Reduce online data collection" will change how you use Windows; this does not affect the security of Windows.
+
+- "Reduce online data collection" will change how you use Windows; this also affects the security of Windows.
+
 - Installing the Microsoft Store and .appx support is generally for LTSC builds of Windows, but works on any edition regardless.
+
+- "Disable Defender and Smartscreen" is a replacement for Sordum's Defender Control v2.1.
+
+- "Disable Virtualization Based Security" is meant to boost FPS in games and especially make VMs (VirtualBox & VMWare) run faster.
 
 . Install https://winaerotweaker.com/[Winaero Tweaker] to set personal preferences.
 

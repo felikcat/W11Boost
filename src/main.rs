@@ -1,7 +1,7 @@
 pub mod common;
 mod gui;
 use common::center;
-use fltk::{app, dialog};
+use fltk::dialog;
 use gui::draw_gui;
 use std::error::Error;
 use std::os::raw::c_void;
