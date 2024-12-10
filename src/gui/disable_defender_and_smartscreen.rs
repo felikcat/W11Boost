@@ -1,12 +1,12 @@
 use crate::common::*;
-//use fltk::dialog;
+use fltk::dialog;
 use windows::{core::w, Win32::System::{GroupPolicy::IGroupPolicyObject, Registry::{HKEY, HKEY_LOCAL_MACHINE}}};
 use std::error::Error;
-//use winsafe::{HKEY as HKEY_SAFE, prelude::advapi_Hkey};
+use winsafe::{HKEY as HKEY_SAFE, prelude::advapi_Hkey};
 
 pub fn run() -> Result<(), Box<dyn Error>> {
     let (hklm, gpo_hklm): (HKEY, IGroupPolicyObject) = init_registry_gpo(HKEY_LOCAL_MACHINE)?;
-    /* Not necessary, for now.
+    
     let hklm_safe = HKEY_SAFE::LOCAL_MACHINE;
     let tamper_disabled = check_dword(
         &hklm_safe,
@@ -21,6 +21,7 @@ pub fn run() -> Result<(), Box<dyn Error>> {
         1,
     )?;
 
+    // Not necessary, but it will be later.
     if !tamper_disabled || !realtime_disabled {
         dialog::alert(
             center().0,
@@ -28,7 +29,6 @@ pub fn run() -> Result<(), Box<dyn Error>> {
             "Windows Defender's \"Tamper Protection\" or \"Real-time protection\" is enabled.\nDisable both now, then close this dialog.",
         );
     }
-    */
 
     // Diasble anti-tamper.
     set_dword_gpo(

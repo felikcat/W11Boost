@@ -160,7 +160,7 @@ pub fn run() -> Result<(), Box<dyn Error>> {
     // Don't automatically download a new speech model.
     set_dword(
         &hklm,
-        r"Machine\SOFTWARE\Policies\Microsoft\Speech",
+        r"SOFTWARE\Policies\Microsoft\Speech",
         "AllowSpeechModelUpdate",
         0,
     )?;
@@ -171,6 +171,14 @@ pub fn run() -> Result<(), Box<dyn Error>> {
         r"SOFTWARE\Policies\Microsoft\Dsh",
         "AllowNewsAndInterests",
         0,
+    )?;
+
+    // Disable an extra lockscreen that is mainly served to put widgets on.
+    set_dword(
+        &hklm,
+        r"Software\Policies\Microsoft\Windows\Personalization",
+        "NoLockScreen",
+        1,
     )?;
     
     Ok(())

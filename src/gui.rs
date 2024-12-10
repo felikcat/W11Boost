@@ -7,25 +7,17 @@ mod disable_vbs;
 mod reduce_forensics;
 mod reduce_online_data_collection;
 mod remove_w11boost;
+mod disable_recall;
 
 use fltk::{
-    app::{self, Screen},
-    button::{Button, CheckButton},
-    dialog,
-    draw::{self},
-    enums::{self, Color},
-    frame::{self},
-    prelude::*,
-    widget::Widget,
-    window::Window,
+    app::{self, Screen}, button::{Button, CheckButton}, dialog, draw::{self}, enums::{self, Color}, frame::{self}, prelude::*, widget::Widget, window::Window
 };
 use fltk_theme::{ColorTheme, color_themes};
 use std::{
-    borrow::{Borrow, BorrowMut},
-    cell::{Ref, RefCell},
+    borrow::BorrowMut,
+    cell::RefCell,
     error::Error,
     mem,
-    ops::DerefMut,
     process::{exit, Command},
     rc::Rc,
 };
@@ -35,9 +27,9 @@ use windows::Win32::{
         HWND_TOPMOST, SWP_FRAMECHANGED, SWP_NOMOVE, SWP_NOSIZE, SWP_SHOWWINDOW, SetWindowPos,
     },
 };
-
 use crate::common::center;
-type MyCheckboxes = [RefCell<CheckButton>; 9];
+
+type MyCheckboxes = Vec<RefCell<CheckButton>>;
 
 pub fn draw_gui() -> Result<(), Box<dyn Error>> {
     let app = app::App::default().with_scheme(app::Scheme::Gtk);
@@ -45,7 +37,7 @@ pub fn draw_gui() -> Result<(), Box<dyn Error>> {
 
     let mut wind = Window::default()
         .with_label("W11Boost")
-        .with_size(480, 480)
+        .with_size(640, 480)
         .center_screen();
 
     wind.set_border(false);
@@ -53,12 +45,12 @@ pub fn draw_gui() -> Result<(), Box<dyn Error>> {
     let widget_theme = ColorTheme::new(color_themes::BLACK_THEME);
     widget_theme.apply();
 
-    let mut titlebar = frame::Frame::new(0, 0, 480, 32, None);
+    let mut titlebar = frame::Frame::new(0, 0, wind.width(), 32, None);
+
     titlebar.set_frame(enums::FrameType::FlatBox);
     titlebar.set_color(Color::from_rgb(22, 22, 22));
 
     let mut titlebar_close = Button::new(wind.width() - 32, 0, 32, 32, "X");
-
     titlebar_close.set_frame(enums::FrameType::NoBox);
     titlebar_close.set_callback(move |_| exit(0));
 
@@ -69,13 +61,6 @@ pub fn draw_gui() -> Result<(), Box<dyn Error>> {
         (wind.height() * 14) / 100,
         "Apply W11Boost",
     ).center_of(&wind)));
-    
-    let apply = Rc::clone(&apply);
-
-    let mut apply_mut = (*apply).borrow_mut();
-
-    let apply_height = apply_mut.clone().height();
-    apply_mut.set_pos(2, wind.height() - apply_height - 2); // Put button at the bottom
 
     let remove = Rc::new(RefCell::new(Button::new(
         wind.width() / 2,
@@ -84,6 +69,12 @@ pub fn draw_gui() -> Result<(), Box<dyn Error>> {
         (wind.height() * 14) / 100,
         "Remove W11Boost",
     )));
+
+    let apply = Rc::clone(&apply);
+    let mut apply_mut = (*apply).borrow_mut();
+
+    let apply_height = apply_mut.clone().height();
+    apply_mut.set_pos(2, wind.height() - apply_height - 2); // Put the apply button at the bottom; wow!
     
     let remove = Rc::clone(&remove);
     let mut remove_mut = (*remove).borrow_mut();
@@ -105,73 +96,85 @@ pub fn draw_gui() -> Result<(), Box<dyn Error>> {
 
     let checkbox_height = wind.height() / 12;
 
-    let mut my_checkboxes: MyCheckboxes = [
+    let my_checkboxes: MyCheckboxes = [
         RefCell::new(CheckButton::new(
             0,
             titlebar.height(),
-            wind.width(),
+            wind.width() / 2,
             checkbox_height,
-            "Reduce local data / forensics to a minimum",
+            "Minimize local data / forensics",
         )),
         RefCell::new(CheckButton::new(
             0,
             titlebar.height() + checkbox_height + 2,
-            wind.width(),
+            wind.width() / 2,
             checkbox_height,
-            "Reduce online activity to a minimum",
+            "Minimize Microsoft online data",
         )),
         RefCell::new(CheckButton::new(
             0,
             titlebar.height() + checkbox_height * 2 + 4,
-            wind.width(),
+            wind.width() / 2,
             checkbox_height,
             "Create a system restore point",
         )),
         RefCell::new(CheckButton::new(
             0,
             titlebar.height() + checkbox_height * 3 + 6,
-            wind.width(),
+            wind.width() / 2,
             checkbox_height,
             "Install the Microsoft Store",
         )),
         RefCell::new(CheckButton::new(
             0,
             titlebar.height() + checkbox_height * 4 + 8,
-            wind.width(),
+            wind.width() / 2,
             checkbox_height,
-            "Install support for .appx/.appxbundle and WinGet",
+            "Install support for UWP and WinGet",
         )),
         RefCell::new(CheckButton::new(
             0,
             titlebar.height() + checkbox_height * 5 + 10,
-            wind.width(),
+            wind.width() / 2,
             checkbox_height,
             "Disable Defender and SmartScreen",
         )),
         RefCell::new(CheckButton::new(
             0,
             titlebar.height() + checkbox_height * 6 + 12,
-            wind.width(),
+            wind.width() / 2,
             checkbox_height,
             "Disable sleep and hibernate",
         )),
         RefCell::new(CheckButton::new(
             0,
             titlebar.height() + checkbox_height * 7 + 14,
-            wind.width(),
+            wind.width() / 2,
             checkbox_height,
             "Disable Virtualization Based Security",
         )),
         RefCell::new(CheckButton::new(
             0,
             titlebar.height() + checkbox_height * 8 + 16,
-            wind.width(),
+            wind.width() / 2,
             checkbox_height,
             "Add in non-intrusive tweaks",
         )),
-    ];
-
-    let my_checkboxes = my_checkboxes.clone();
+        RefCell::new(CheckButton::new(
+            wind.width() / 2,
+            titlebar.height(),
+            wind.width() / 2,
+            checkbox_height,
+            "Disable Windows Recall",
+        )),
+        RefCell::new(CheckButton::new(
+            wind.width() / 2,
+            titlebar.height() + checkbox_height,
+            wind.width() / 2,
+            checkbox_height,
+            "Disable Windows Copilot",
+        )),
+    ].to_vec();
 
     for checkbox in &my_checkboxes {
         let mut checkbox = checkbox.borrow_mut();
@@ -179,8 +182,8 @@ pub fn draw_gui() -> Result<(), Box<dyn Error>> {
         checkbox.set_label_size(16);
     }
 
-    my_checkboxes[2].borrow_mut().set_value(true);
-    my_checkboxes[8].borrow_mut().set_value(true);
+    my_checkboxes[2].borrow_mut().set_value(true); // "Create a system restore point"
+    my_checkboxes[8].borrow_mut().set_value(true); // "Add in non-intrusive tweaks"
 
     let frame0 = RefCell::new(
         Widget::default()
@@ -294,6 +297,7 @@ pub fn draw_gui() -> Result<(), Box<dyn Error>> {
             checkbox.borrow_mut().show();
         }
     }
+    
     (*apply_mut).set_callback({
         let frame0 = frame0.clone();
         let apply = apply.clone();
@@ -354,25 +358,31 @@ pub fn draw_gui() -> Result<(), Box<dyn Error>> {
                     }
                 }
 
-                if let Ok(mut checkbox) = my_checkboxes[6].try_borrow_mut() {
+                if let Ok(checkbox) = my_checkboxes[6].try_borrow_mut() {
                     if checkbox.is_checked() {
                         disable_sleep::run().expect("disable_sleep::run failed");
                     }
                 }
 
-                if let Ok(mut checkbox) = my_checkboxes[7].try_borrow_mut() {
+                if let Ok(checkbox) = my_checkboxes[7].try_borrow_mut() {
                     if checkbox.is_checked() {
                         disable_vbs::run().expect("disable_vbs::run failed");
                     }
                 }
 
-                if let Ok(mut checkbox) = my_checkboxes[8].try_borrow_mut() {
+                if let Ok(checkbox) = my_checkboxes[8].try_borrow_mut() {
                     if checkbox.is_checked() {
                         defaults::run().expect("defaults::run failed");
                     }
                 }
 
-                if my_checkboxes.iter().all(|checkbox| checkbox.try_borrow_mut().map_or(false, |mut cb| !cb.is_checked())) {
+                if let Ok(checkbox) = my_checkboxes[9].try_borrow_mut() {
+                    if checkbox.is_checked() {
+                        disable_recall::run().expect("disable_recall::run failed");
+                    }
+                }
+
+                if my_checkboxes.iter().all(|checkbox| checkbox.try_borrow_mut().map_or(false, | cb| !cb.is_checked())) {
                     dialog::message(
                         center().0,
                         center().1,
@@ -438,5 +448,6 @@ pub fn draw_gui() -> Result<(), Box<dyn Error>> {
     });
 
     app.run().unwrap();
+    
     Ok(())
 }

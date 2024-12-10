@@ -1,6 +1,5 @@
 use std::error::Error;
 use windows::{core::w, Win32::System::{GroupPolicy::IGroupPolicyObject, Registry::{HKEY, HKEY_LOCAL_MACHINE}}};
-
 use crate::common::*;
 
 pub fn run() -> Result<(), Box<dyn Error>> {
