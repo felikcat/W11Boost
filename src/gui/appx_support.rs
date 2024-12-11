@@ -34,13 +34,14 @@ pub fn install() -> Result<(), Box<dyn Error>> {
     easy.perform()
         .expect("appx_support::install -> Failed to curl perform");
 
-    Command::new("powershell.exe")
+    let mut child = Command::new("powershell.exe")
         .args([
             "-Command",
-            r#"Add-AppxPackage ([Environment]::GetFolderPath("CommonDesktopDirectory") + "\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle""#
+            r#"Add-AppxPackage ([Environment]::GetFolderPath("CommonDesktopDirectory") + "\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle")"#
         ])
-        .output()
+        .spawn()
         .expect("appx_support::install -> Failed to install the msixbundle");
 
+        child.wait().expect("appx_support::install -> Failed to wait for the child process");
     Ok(())
 }

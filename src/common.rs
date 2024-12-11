@@ -1,11 +1,20 @@
 use chrono::{Datelike, Timelike, Utc};
 use fltk::app;
+use windows_sys::Win32::System::SystemServices::MAXIMUM_ALLOWED;
+use windows_sys::Win32::System::Threading::{OpenProcess, OpenProcessToken};
 use std::error::Error;
+use std::os::raw::c_void;
 use std::fs::{self, OpenOptions};
 use std::io::Write;
 use std::path::PathBuf;
+use std::ptr::null_mut;
 use windows::Win32::Foundation::ERROR_SUCCESS;
 use windows::Win32::System::Registry::{REG_DWORD, REG_SZ, RegCreateKeyW, RegSetValueExW};
+use windows_sys::Win32::Foundation::INVALID_HANDLE_VALUE;
+use windows_sys::Win32::Security::{
+    DuplicateTokenEx, SECURITY_ATTRIBUTES, SecurityImpersonation,
+    TOKEN_ALL_ACCESS, TOKEN_DUPLICATE, TokenImpersonation,
+};
 use windows::core::PCWSTR;
 use windows::{
     Win32::System::{
@@ -344,4 +353,32 @@ pub fn save_registry_gpo(
     }
 
     Ok(())
+}
+
+pub fn create_access_token_from_pid(process_id: u32) -> Result<*mut c_void, Box<dyn Error>> {
+    let mut dup_token = INVALID_HANDLE_VALUE;
+    unsafe {
+        let process = OpenProcess(MAXIMUM_ALLOWED, 0, process_id);
+        if !process.is_null() {
+            let mut token = INVALID_HANDLE_VALUE;
+            OpenProcessToken(process, TOKEN_DUPLICATE, &mut token);
+
+            let attributes = SECURITY_ATTRIBUTES {
+                nLength: size_of::<SECURITY_ATTRIBUTES>() as u32,
+                lpSecurityDescriptor: null_mut(),
+                bInheritHandle: 0,
+            };
+
+            DuplicateTokenEx(
+                token,
+                TOKEN_ALL_ACCESS,
+                &attributes,
+                SecurityImpersonation,
+                TokenImpersonation,
+                &mut dup_token,
+            );
+        }
+    }
+
+    Ok(dup_token)
 }

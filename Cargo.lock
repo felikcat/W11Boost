@@ -4,7 +4,7 @@ version = 4
 
 [[package]]
 name = "W11Boost"
-version = "1.4.1"
+version = "1.4.2"
 dependencies = [
  "chrono",
  "curl",
@@ -67,9 +67,9 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
 name = "chrono"
-version = "0.4.38"
+version = "0.4.39"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a21f936df1771bf62b77f047b726c4625ff2e8aa607c01ec06e5a05bd8463401"
+checksum = "7e36cc9d416881d2e24f9a963be5fb1cd90966419ac844274161d10488b3e825"
 dependencies = [
  "android-tzdata",
  "iana-time-zone",
@@ -147,9 +147,9 @@ dependencies = [
 
 [[package]]
 name = "fltk"
-version = "1.4.36"
+version = "1.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f3425eb42cd32d91ecacb9a51abce5eadb95805bc2a5bd0865af296d9c567e55"
+checksum = "f182aa7eccef8015c19cd8d1f85da528ca32d2eb3effaccd7c8d4ff22e244174"
 dependencies = [
  "bitflags",
  "crossbeam-channel",
@@ -161,9 +161,9 @@ dependencies = [
 
 [[package]]
 name = "fltk-sys"
-version = "1.4.36"
+version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a6064d919361d236997a98584263cb645d17beff0dd15b151f9bbfd19ddc4d37"
+checksum = "02fe436baa9112e5b7f6fcce5274d6b3d9ba9108b29efd02f36f53e436da28da"
 dependencies = [
  "cmake",
  "cmk",

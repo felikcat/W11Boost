@@ -1,30 +1,26 @@
 pub mod common;
 mod gui;
-use common::center;
+use common::{center, create_access_token_from_pid};
 use fltk::dialog;
 use gui::draw_gui;
+use windows_sys::Win32::Security::ImpersonateLoggedOnUser;
 use std::error::Error;
-use std::os::raw::c_void;
 use std::ptr::null_mut;
 use std::time::Duration;
 use std::{mem, thread};
+use windows_sys::Win32::Foundation::CloseHandle;
 use windows::Win32::System::Services::{
     CloseServiceHandle, OpenSCManagerW, OpenServiceW, QueryServiceStatusEx, SC_MANAGER_CONNECT,
     SC_STATUS_PROCESS_INFO, SERVICE_QUERY_STATUS, SERVICE_RUNNING, SERVICE_START,
     SERVICE_STATUS_PROCESS, SERVICE_STOPPED, StartServiceW,
 };
 use windows::core::w;
-use windows_sys::Win32::Foundation::{CloseHandle, INVALID_HANDLE_VALUE};
-use windows_sys::Win32::Security::{
-    DuplicateTokenEx, ImpersonateLoggedOnUser, SECURITY_ATTRIBUTES, SecurityImpersonation,
-    TOKEN_ALL_ACCESS, TOKEN_DUPLICATE, TokenImpersonation,
-};
 use windows_sys::Win32::System::SystemServices::MAXIMUM_ALLOWED;
 use windows_sys::Win32::System::Threading::{
     CREATE_UNICODE_ENVIRONMENT, CreateProcessWithTokenW, LOGON_WITH_PROFILE, OpenProcessToken,
     PROCESS_INFORMATION, STARTUPINFOW,
 };
-use windows_sys::Win32::System::Threading::{GetCurrentProcess, OpenProcess};
+use windows_sys::Win32::System::Threading::GetCurrentProcess;
 use winsafe::{self as ws, co, prelude::*};
 
 fn get_pid_from_process_name(process_name: &str) -> Result<u32, Box<dyn Error>> {
@@ -61,34 +57,6 @@ fn impersonate_as_system() -> Result<bool, Box<dyn Error>> {
     }
 
     Ok(success)
-}
-
-fn create_access_token_from_pid(process_id: u32) -> Result<*mut c_void, Box<dyn Error>> {
-    let mut dup_token = INVALID_HANDLE_VALUE;
-    unsafe {
-        let process = OpenProcess(MAXIMUM_ALLOWED, 0, process_id);
-        if !process.is_null() {
-            let mut token = INVALID_HANDLE_VALUE;
-            OpenProcessToken(process, TOKEN_DUPLICATE, &mut token);
-
-            let attributes = SECURITY_ATTRIBUTES {
-                nLength: size_of::<SECURITY_ATTRIBUTES>() as u32,
-                lpSecurityDescriptor: null_mut(),
-                bInheritHandle: 0,
-            };
-
-            DuplicateTokenEx(
-                token,
-                TOKEN_ALL_ACCESS,
-                &attributes,
-                SecurityImpersonation,
-                TokenImpersonation,
-                &mut dup_token,
-            );
-        }
-    }
-
-    Ok(dup_token)
 }
 
 fn start_trusted_installer_service() -> Result<u32, Box<dyn Error>> {
