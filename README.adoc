@@ -9,6 +9,8 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
+== Use https://atlasos.net/[AtlasOS] instead, this project isn't being worked on anymore.
+
 image:W11Boost_GUI.png[480,360]
 
 W11Boost globally changes settings. It's not meant for shared computers. Despite this, the default checkbox selection is safe for most users as it is as close to stock unmodified Windows as possible without being ineffective.
