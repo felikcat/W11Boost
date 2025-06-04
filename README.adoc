@@ -9,15 +9,19 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
+NOTE: Next release (1.5.0) will use the C++ (majority C) programming language. I noticed with a different Rust written private project that I kept wanting to write C-like code, and loathed OOP-like structuring that Rust mandates to satisfy its borrow checker in a 'good' way.
+
+W11Boost will be less popular due to this decision because of the tremendous hype and longing for the Rust language. I'm sick of it however, completely and utterly sick of writing in it.
+
 == What's different about this compared to other optimizers / debloaters?
 . The number one focus of breaking nothing.
 . Being very easy to use, and requiring no reading of instructions.
-. (WORK IN PROGRESS) Changes can be rolled back without a system restore point or any other form of backups.
 . Specific use cases are covered, such as fully installing .appx and WinGet support on Windows LTSC builds.
-. (WORK IN PROGRESS) Changes are by a per user basis.
 . No false claims that this will boost performance in video games. It is only to improve the responsiveness and usability of the Windows operating system, to make it feel better than it was prior.
 - However, it can greatly boost virtualized environments such as VirtualBox and VMWare if you turn off Virtualization Based Security.
-. Written in the Rust programming language. In the past W11Boost used Batch, then PowerShell, then C, then C++; Rust made it easier to spot problems, and made W11Boost more robust. Rust's safety makes it easy to write quality applications, even if you're bad at using Rust.
+. (WORK IN PROGRESS) Changes can be rolled back without a system restore point or any other form of backups.
+. (WORK IN PROGRESS) Changes are by a per user basis.
+. (WORK IN PROGRESS) Administrator is not required, W11Boost can run on nearly every Windows PC.
 
 image:W11Boost_GUI.png[480,360]
 
