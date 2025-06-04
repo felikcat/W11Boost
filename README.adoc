@@ -9,50 +9,19 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
+== What's different about this compared to other optimizers / debloaters?
+. The number one focus of breaking nothing.
+. Being very easy to use, and requiring no reading of instructions.
+. (WORK IN PROGRESS) Changes can be rolled back without a system restore point or any other form of backups.
+. Specific use cases are covered, such as fully installing .appx and WinGet support on Windows LTSC builds.
+. (WORK IN PROGRESS) Changes are by a per user basis.
+. No false claims that this will boost performance in video games. It is only to improve the responsiveness and usability of the Windows operating system, to make it feel better than it was prior.
+- However, it can greatly boost virtualized environments such as VirtualBox and VMWare if you turn off Virtualization Based Security.
+. Written in the Rust programming language. In the past W11Boost used Batch, then PowerShell, then C, then C++; Rust made it easier to spot problems, and made W11Boost more robust. Rust's safety makes it easy to write quality applications, even if you're bad at using Rust.
+
 image:W11Boost_GUI.png[480,360]
 
-W11Boost globally changes settings. It's not meant for shared computers. Despite this, the default checkbox selection is safe for most users as it is as close to stock unmodified Windows as possible without being ineffective.
-
-.Features that stick out:
-- A focus on being non-intrusive. For example, we don't disable syncing to a Microsoft account, instead we suggest an alternative if that is desired.
-
-- "Disable Defender and Smartscreen" being a replacement for Sordum's Defender Control v2.1, the prior best tool for the job.
-
-- Optional anti-forensics.
-
-- A way to disable sleep and hibernation fully for specific use cases.
-
-- Windows Store and WinGet installers, aimed towards LTSC builds that lack both by default.
-
-- Written in Rust instead of PowerShell or Batch, meaning it is more predictable and robust.
-
-== 1. If not using Enterprise or LTSC or Education, convert the Windows edition to Education
-
-. Open the Command Prompt as administrator.
-. `cscript.exe %windir%\system32\slmgr.vbs /upk`
-. `changepk.exe /ProductKey YNMGQ-8RYV3-4PGQ3-C8XTP-7CFBY`
-. Use https://github.com/massgravel/Microsoft-Activation-Scripts?tab=readme-ov-file#method-1---powershell-windows-8-and-later-%EF%B8%8F[MAS] or https://github.com/abbodi1406/KMS_VL_ALL_AIO/releases[KMS_VL_ALL_AIO] to activate Windows by installing its auto-renewal.
-- To open a .7z archive on Windows, you need https://www.7-zip.org/[7-Zip].
-
-== 2. Installing W11Boost
-
-. Install the latest https://aka.ms/vs/17/release/vc_redist.x64.exe[Visual Studio Redistributable].
-
-. Download and run the https://github.com/felikcat/W11Boost/releases[latest release of W11Boost].
-
-. W11Boost usage: 
-- Only Windows 10 version 1803 and newer are officially supported.
-- The near guarantee of breaking no program or app is only for the default selection of checkboxes.
-
-- "Reduce local data collection" won't change how you use Windows.
-
-- Installing the Microsoft Store and .appx support is generally for LTSC builds of Windows, but works on any edition regardless.
-
-- "Reduce online data collection" will change how you use Windows.
-
-- "Disable Virtualization Based Security" is meant to boost FPS in games and especially make VMs (VirtualBox & VMWare) run faster.
-
-. If you wish to reduce the amount of network traffic to and from Microsoft, use https://github.com/henrypp/simplewall[simplewall].
+== Recommendations
 
 . Install https://winaerotweaker.com/[Winaero Tweaker] to set personal preferences.
 
@@ -61,7 +30,7 @@ W11Boost globally changes settings. It's not meant for shared computers. Despite
 - `.\topout_directory\examples\toptout_pwsh.ps1 -Env -Exec`
 - `Set-ExecutionPolicy -ExecutionPolicy Restricted -Scope CurrentUser`
 
-== 3. Recommendations
+. If you wish to reduce the amount of network traffic to and from Microsoft, use https://github.com/henrypp/simplewall[simplewall].
 
 === Backups
 Use https://www.urbackup.org[UrBackup]. You will need another computer to store backups on, but this will end up costing less long-term than services such as Backblaze, plus you completely own your data. 
