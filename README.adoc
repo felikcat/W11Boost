@@ -9,10 +9,6 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
-NOTE: Next release (1.5.0) will use the C++ (majority C) programming language. I noticed with a different Rust written private project that I kept wanting to write C-like code, and loathed OOP-like structuring that Rust mandates to satisfy its borrow checker in a 'good' way.
-
-W11Boost will be less popular due to this decision because of the tremendous hype and longing for the Rust language. I'm sick of it however, completely and utterly sick of writing in it.
-
 == What's different about this compared to other optimizers / debloaters?
 . The number one focus of breaking nothing.
 . Being very easy to use, and requiring no reading of instructions.
