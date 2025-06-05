@@ -1,0 +1,4 @@
+# x86_64-pc-windows-gnu sadly has issues with the winsafe crate
+[toolchain]
+channel = "stable"
+targets = ["x86_64-pc-windows-msvc"]
