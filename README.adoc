@@ -10,19 +10,26 @@ ifdef::env-github[]
 endif::[]
 
 == What's different about this compared to other optimizers / debloaters?
-. The number one focus of breaking nothing.
+. The number one focus of breaking nothing by default. +
+If you use any of the other options, this is not guaranteed.
 . Being very easy to use, and requiring no reading of instructions.
 . Specific use cases are covered, such as fully installing .appx and WinGet support on Windows LTSC builds.
 . No false claims that this will boost performance in video games. It is only to improve the responsiveness and usability of the Windows operating system, to make it feel better than it was prior.
 - However, it can greatly boost virtualized environments such as VirtualBox and VMWare if you turn off Virtualization Based Security.
-. (WORK IN PROGRESS) Changes can be rolled back without a system restore point or any other form of backups.
-. (WORK IN PROGRESS) Changes are by a per user basis.
-. (WORK IN PROGRESS) Administrator is not required, W11Boost can run on nearly every Windows PC.
+. Changes can be rolled back without a system restore point or any other form of backups.
 
 image:W11Boost_GUI.png[480,360]
 
 == Recommendations
 
+.Convert from Home or Pro to the Education edition for better control over Windows 10 & 11.
+. Open the Command Prompt as administrator.
+. `cscript.exe %windir%\system32\slmgr.vbs /upk`
+. `changepk.exe /ProductKey YNMGQ-8RYV3-4PGQ3-C8XTP-7CFBY`
+. Use https://github.com/massgravel/Microsoft-Activation-Scripts?tab=readme-ov-file#method-1---powershell-windows-8-and-later-%EF%B8%8F[MAS] or https://github.com/abbodi1406/KMS_VL_ALL_AIO/releases[KMS_VL_ALL_AIO] to activate Windows by installing its auto-renewal.
+- To open a .7z archive on Windows, you need https://www.7-zip.org/[7-Zip].
+
+.Other
 . Install https://winaerotweaker.com/[Winaero Tweaker] to set personal preferences.
 
 . Download https://github.com/beatcracker/toptout/archive/refs/heads/master.zip[toptout] and open PowerShell as administrator:
@@ -32,8 +39,11 @@ image:W11Boost_GUI.png[480,360]
 
 . If you wish to reduce the amount of network traffic to and from Microsoft, use https://github.com/henrypp/simplewall[simplewall].
 
+
 === Backups
-Use https://www.urbackup.org[UrBackup]. You will need another computer to store backups on, but this will end up costing less long-term than services such as Backblaze, plus you completely own your data. 
+Use the https://www.veeam.com/products/free/microsoft-windows.html[Veeam Agent] (free), it backs up both your files and Windows itself, so if you break Windows you can recover it to a previous state.
+
+A free alternative (that doesn't backup Windows) is https://www.urbackup.org[UrBackup]. You will need another computer to store backups on, but this will end up costing less long-term than services such as Backblaze, plus you completely own your data.
 
 Optionally, you can also use https://www.backblaze.com/cloud-backup/personal[Backblaze] for extra redundancy in case of sudden natural disasters, or other situations where you cannot move your backups into a safe location in time.
 

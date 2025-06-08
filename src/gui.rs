@@ -1,9 +1,10 @@
+mod appx_support;
 mod defaults;
+mod disable_defender_and_smartscreen;
 mod disable_recall;
 mod disable_sleep;
-mod disable_vbs;
-mod reduce_forensics;
-mod reduce_online_data_collection;
+mod minimize_forensics;
+mod minimize_online_data_collection;
 mod remove_w11boost;
 
 use crate::common::center;
@@ -20,10 +21,12 @@ use fltk::{
         window::Window,
 };
 use fltk_theme::{ColorTheme, color_themes};
-use std::{error::Error, mem, process::exit, thread::sleep, time::Duration};
+use std::{collections::HashMap, error::Error, mem, process::exit, thread::sleep, time::Duration};
 use windows::Win32::{
         Foundation::HWND,
-        UI::WindowsAndMessaging::{HWND_TOPMOST, SWP_FRAMECHANGED, SWP_NOMOVE, SWP_NOSIZE, SWP_SHOWWINDOW, SetWindowPos},
+        UI::WindowsAndMessaging::{
+                HWND_TOPMOST, SWP_FRAMECHANGED, SWP_NOMOVE, SWP_NOSIZE, SWP_SHOWWINDOW, SetWindowPos,
+        },
 };
 
 const WINDOW_WIDTH: i32 = 640;
@@ -37,21 +40,30 @@ enum ViewState {
         Applying,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+enum CheckboxType {
+        MinimizeForensics,
+        MinimizeOnlineData,
+        DisableDefenderAndSmartscreen,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+enum ButtonType {
+        Apply,
+        Uninstall,
+}
+
 struct GuiViewModel {
-        minimize_forensics: Option<CheckButton>,
-        minimize_online_data: Option<CheckButton>,
-        apply_btn: Option<Button>,
-        remove_btn: Option<Button>,
+        checkboxes: HashMap<CheckboxType, CheckButton>,
+        buttons: HashMap<ButtonType, Button>,
         status_display: Option<Frame>,
         current_view: ViewState,
 }
 impl GuiViewModel {
         fn new() -> Self {
                 Self {
-                        minimize_forensics: None,
-                        minimize_online_data: None,
-                        apply_btn: None,
-                        remove_btn: None,
+                        checkboxes: HashMap::new(),
+                        buttons: HashMap::new(),
                         status_display: None,
                         current_view: ViewState::MainMenu,
                 }
@@ -70,25 +82,27 @@ impl GuiViewModel {
         }
 
         fn toggle_main_screen(&mut self, visible: bool) {
-                if let (Some(apply), Some(remove), Some(minimize_forensics), Some(minimize_online_data), Some(status)) = (
-                        self.apply_btn.as_mut(),
-                        self.remove_btn.as_mut(),
-                        self.minimize_forensics.as_mut(),
-                        self.minimize_online_data.as_mut(),
-                        self.status_display.as_mut(),
-                ) {
+                if let (Some(status),) = (self.status_display.as_mut(),) {
                         // This is implicit, since there are no other use cases
+                        for button in self.buttons.values_mut() {
+                                if visible {
+                                        button.show();
+                                } else {
+                                        button.hide();
+                                }
+                        }
+
+                        for checkbox in self.checkboxes.values_mut() {
+                                if visible {
+                                        checkbox.show();
+                                } else {
+                                        checkbox.hide();
+                                }
+                        }
+
                         if visible {
-                                apply.show();
-                                remove.show();
-                                minimize_forensics.show();
-                                minimize_online_data.show();
                                 status.hide();
                         } else {
-                                apply.hide();
-                                remove.hide();
-                                minimize_forensics.hide();
-                                minimize_online_data.hide();
                                 status.show();
                         }
                         app::redraw(); // Screen changed
@@ -131,65 +145,85 @@ impl GuiViewModel {
 
         fn set_ui_elements(
                 &mut self,
-                minimize_forensics: CheckButton,
-                minimize_online_data: CheckButton,
-                apply_btn: Button,
-                remove_btn: Button,
+                checkboxes: HashMap<CheckboxType, CheckButton>,
+                buttons: HashMap<ButtonType, Button>,
                 status_display: Frame,
         ) {
-                self.minimize_forensics = Some(minimize_forensics);
-                self.minimize_online_data = Some(minimize_online_data);
-                self.apply_btn = Some(apply_btn);
-                self.remove_btn = Some(remove_btn);
+                self.checkboxes = checkboxes;
+                self.buttons = buttons;
                 self.status_display = Some(status_display);
         }
 
         fn apply(&mut self, _btn: &Button) {
-                let choice = dialog::choice2(center().0, center().1, "Are you sure you want to apply W11Boost?", "&Yes", "&No", "");
+                let choice = dialog::choice2(
+                        center().0,
+                        center().1,
+                        "Are you sure you want to apply W11Boost?",
+                        "&Yes",
+                        "&No",
+                        "",
+                );
 
                 if choice == Some(0) {
-                        let (forensics_checked, online_data_checked) = {
-                                if let (Some(minimize_forensics), Some(minimize_online_data)) =
-                                        (self.minimize_forensics.as_mut(), self.minimize_online_data.as_mut())
-                                {
-                                        (minimize_forensics.is_checked(), minimize_online_data.is_checked())
-                                } else {
-                                        return;
-                                }
-                        };
+                        let minimize_forensics_checked = self
+                                .checkboxes
+                                .get(&CheckboxType::MinimizeForensics)
+                                .map(|cb| cb.is_checked())
+                                .unwrap_or(false);
+
+                        let minimize_online_data_collection_checked = self
+                                .checkboxes
+                                .get(&CheckboxType::MinimizeOnlineData)
+                                .map(|cb| cb.is_checked())
+                                .unwrap_or(false);
+
+                        let disable_defender_and_smartscreen_checked = self
+                                .checkboxes
+                                .get(&CheckboxType::DisableDefenderAndSmartscreen)
+                                .map(|cb| cb.is_checked())
+                                .unwrap_or(false);
 
                         self.set_view(ViewState::Applying);
 
-                        if forensics_checked {
-                                if let Err(e) = reduce_forensics::run() {
-                                        self.show_error_screen(format!("reduce_forensics failed: {}", e));
-                                } else {
-                                        self.set_view(ViewState::MainMenu);
-                                }
-                        }
-                        if online_data_checked {
-                                if let Err(e) = reduce_online_data_collection::run() {
-                                        self.show_error_screen(format!("reduce_online_data_collection failed: {}", e));
-                                }
-                                else {
-                                        self.set_view(ViewState::MainMenu);
-                                }
+                        if let Err(e) = defaults::run() {
+                                self.show_error_screen(format!("defaults failed: {}", e));
                         }
 
-                        
+                        if minimize_forensics_checked {
+                                if let Err(e) = minimize_forensics::run() {
+                                        self.show_error_screen(format!("minimize_forensics failed: {}", e));
+                                }
+                        }
+                        if minimize_online_data_collection_checked {
+                                if let Err(e) = minimize_online_data_collection::run() {
+                                        self.show_error_screen(format!(
+                                                "minimize_online_data_collection failed: {}",
+                                                e
+                                        ));
+                                }
+                        }
+                        if disable_defender_and_smartscreen_checked {
+                                if let Err(e) = disable_defender_and_smartscreen::run() {
+                                        self.show_error_screen(format!(
+                                                "disable_defender_and_smartscreen failed: {}",
+                                                e
+                                        ));
+                                }
+                        }
                 }
         }
 }
 struct GuiView {
-        apply: Button,
-        remove: Button,
-        minimize_forensics: CheckButton,
-        minimize_online_data: CheckButton,
+        buttons: HashMap<ButtonType, Button>,
+        checkboxes: HashMap<CheckboxType, CheckButton>,
         status_display: Frame,
 }
 impl GuiView {
         fn new() -> Self {
-                let mut wind = Window::default().with_label("W11Boost").with_size(WINDOW_WIDTH, WINDOW_HEIGHT).center_screen();
+                let mut wind = Window::default()
+                        .with_label("W11Boost")
+                        .with_size(WINDOW_WIDTH, WINDOW_HEIGHT)
+                        .center_screen();
 
                 wind.set_border(false);
 
@@ -202,9 +236,21 @@ impl GuiView {
                 titlebar_close.set_frame(enums::FrameType::NoBox);
                 titlebar_close.set_callback(move |_| exit(0));
 
-                let mut apply = Button::new(0, 0, (WINDOW_WIDTH - 6) / 2, (WINDOW_HEIGHT * 14) / 100, "Apply W11Boost");
+                let mut apply = Button::new(
+                        0,
+                        0,
+                        (WINDOW_WIDTH - 6) / 2,
+                        (WINDOW_HEIGHT * 14) / 100,
+                        "Apply W11Boost",
+                );
 
-                let mut remove = Button::new(WINDOW_WIDTH / 2, 0, (WINDOW_WIDTH - 6) / 2, (WINDOW_HEIGHT * 14) / 100, "Remove W11Boost");
+                let mut remove = Button::new(
+                        WINDOW_WIDTH / 2,
+                        0,
+                        (WINDOW_WIDTH - 6) / 2,
+                        (WINDOW_HEIGHT * 14) / 100,
+                        "Remove W11Boost",
+                );
 
                 let apply_height = apply.height();
                 apply.set_pos(2, WINDOW_HEIGHT - apply_height - 2);
@@ -219,8 +265,15 @@ impl GuiView {
 
                 let checkbox_height = WINDOW_HEIGHT / 12;
 
-                let mut minimize_forensics = CheckButton::new(0, TITLEBAR_HEIGHT, WINDOW_WIDTH / 2, checkbox_height, "Minimize local data / forensics");
-                let mut minimize_online_data = CheckButton::new(
+                let mut minimize_forensics_btn = CheckButton::new(
+                        0,
+                        TITLEBAR_HEIGHT,
+                        WINDOW_WIDTH / 2,
+                        checkbox_height,
+                        "Minimize local data / forensics",
+                );
+
+                let mut minimize_online_data_btn = CheckButton::new(
                         0,
                         TITLEBAR_HEIGHT + checkbox_height + 2,
                         WINDOW_WIDTH / 2,
@@ -228,7 +281,19 @@ impl GuiView {
                         "Minimize Microsoft online data",
                 );
 
-                let mut my_checkboxes = [&mut minimize_forensics, &mut minimize_online_data];
+                let mut disable_defender_and_smartscreen_btn = CheckButton::new(
+                        0,
+                        TITLEBAR_HEIGHT + checkbox_height * 2 + 4,
+                        WINDOW_WIDTH / 2,
+                        checkbox_height,
+                        "Disable Defender and Smartscreen",
+                );
+
+                let mut my_checkboxes = [
+                        &mut minimize_forensics_btn,
+                        &mut minimize_online_data_btn,
+                        &mut disable_defender_and_smartscreen_btn,
+                ];
 
                 for checkbox in &mut my_checkboxes {
                         checkbox.set_label_font(enums::Font::by_name(FONT_PATH));
@@ -239,6 +304,18 @@ impl GuiView {
                 status_display.set_label_size(24);
                 status_display.set_align(Align::Center | Align::Inside | Align::Wrap);
                 status_display.hide();
+
+                let mut buttons = HashMap::new();
+                buttons.insert(ButtonType::Apply, apply);
+                buttons.insert(ButtonType::Uninstall, remove);
+
+                let mut checkboxes = HashMap::new();
+                checkboxes.insert(CheckboxType::MinimizeForensics, minimize_forensics_btn);
+                checkboxes.insert(CheckboxType::MinimizeOnlineData, minimize_online_data_btn);
+                checkboxes.insert(
+                        CheckboxType::DisableDefenderAndSmartscreen,
+                        disable_defender_and_smartscreen_btn,
+                );
 
                 wind.end();
                 wind.show();
@@ -262,7 +339,12 @@ impl GuiView {
 
                 // Only accounts for the primary monitor
                 let screen = Screen::new(0).expect("Could not find screen");
-                wind.resize((screen.w() - wind.width()) / 2, (screen.h() - wind.height()) / 2, wind.width(), wind.height());
+                wind.resize(
+                        (screen.w() - wind.width()) / 2,
+                        (screen.h() - wind.height()) / 2,
+                        wind.width(),
+                        wind.height(),
+                );
 
                 wind.handle({
                         let (mut x, mut y) = (0, 0);
@@ -282,10 +364,8 @@ impl GuiView {
                 });
 
                 Self {
-                        apply,
-                        remove,
-                        minimize_forensics,
-                        minimize_online_data,
+                        checkboxes,
+                        buttons,
                         status_display,
                 }
         }
@@ -297,7 +377,10 @@ struct GuiApp {
 impl GuiApp {
         fn new() -> Self {
                 use fltk_observe::{Runner, WidgetObserver};
-                let app = app::App::default().with_scheme(app::Scheme::Gtk).use_state(|| GuiViewModel::new()).unwrap();
+                let app = app::App::default()
+                        .with_scheme(app::Scheme::Gtk)
+                        .use_state(|| GuiViewModel::new())
+                        .unwrap();
 
                 app.load_font("C:\\Windows\\Fonts\\segoeui.ttf").unwrap();
 
@@ -306,10 +389,12 @@ impl GuiApp {
 
                 let mut gv = GuiView::new();
 
-                gv.apply.set_action(GuiViewModel::apply);
+                if let Some(apply_btn) = gv.buttons.get_mut(&ButtonType::Apply) {
+                        apply_btn.set_action(GuiViewModel::apply);
+                }
 
                 fltk_observe::with_state_mut(|state: &mut GuiViewModel| {
-                        state.set_ui_elements(gv.minimize_forensics, gv.minimize_online_data, gv.apply, gv.remove, gv.status_display);
+                        state.set_ui_elements(gv.checkboxes, gv.buttons, gv.status_display);
                 });
                 Self { app }
         }
