@@ -1,46 +1,40 @@
 use chrono::{Datelike, Timelike, Utc};
 use fltk::app;
-use windows_sys::Win32::System::SystemServices::MAXIMUM_ALLOWED;
-use windows_sys::Win32::System::Threading::{OpenProcess, OpenProcessToken};
 use std::error::Error;
-use std::os::raw::c_void;
 use std::fs::{self, OpenOptions};
 use std::io::Write;
 use std::path::PathBuf;
-use std::ptr::null_mut;
 use windows::Win32::Foundation::ERROR_SUCCESS;
 use windows::Win32::System::Registry::{REG_DWORD, REG_SZ, RegCreateKeyW, RegSetValueExW};
-use windows_sys::Win32::Foundation::INVALID_HANDLE_VALUE;
-use windows_sys::Win32::Security::{
-    DuplicateTokenEx, SECURITY_ATTRIBUTES, SecurityImpersonation,
-    TOKEN_ALL_ACCESS, TOKEN_DUPLICATE, TokenImpersonation,
-};
 use windows::core::PCWSTR;
 use windows::{
-    Win32::System::{
-        Com::{CLSCTX_INPROC_SERVER, COINIT_APARTMENTTHREADED, CoCreateInstance, CoInitializeEx},
-        GroupPolicy::{
-            CLSID_GroupPolicyObject, GPO_OPEN_LOAD_REGISTRY, GPO_SECTION_MACHINE,
-            IGroupPolicyObject, REGISTRY_EXTENSION_GUID,
+        Win32::System::{
+                Com::{CLSCTX_INPROC_SERVER, COINIT_APARTMENTTHREADED, CoCreateInstance, CoInitializeEx},
+                GroupPolicy::{
+                        CLSID_GroupPolicyObject, GPO_OPEN_LOAD_REGISTRY, GPO_SECTION_MACHINE, IGroupPolicyObject,
+                        REGISTRY_EXTENSION_GUID,
+                },
+                Registry::RegCloseKey,
         },
-        Registry::RegCloseKey,
-    },
-    core::GUID,
+        core::GUID,
 };
 use winsafe::{
-    self as w, HKEY, RegistryValue,
-    co::{self, KNOWNFOLDERID},
-    prelude::*,
+        self as w, HKEY, RegistryValue,
+        co::{self, KNOWNFOLDERID},
+        prelude::*,
 };
 
-pub fn get_windows_path(folder_id: &KNOWNFOLDERID) -> Result<String, Box<dyn Error>>
-{
+pub fn get_windows_path(folder_id: &KNOWNFOLDERID) -> Result<String, Box<dyn Error>> {
         let the_path = w::SHGetKnownFolderPath(folder_id, co::KF::DEFAULT, None)?;
         Ok(the_path)
 }
 
-pub fn set_dword_gpo(hkey: windows::Win32::System::Registry::HKEY, subkey: PCWSTR, value_name: PCWSTR, value: u32) -> Result<(), Box<dyn Error>>
-{
+pub fn set_dword_gpo(
+        hkey: windows::Win32::System::Registry::HKEY,
+        subkey: PCWSTR,
+        value_name: PCWSTR,
+        value: u32,
+) -> Result<(), Box<dyn Error>> {
         unsafe {
                 let mut new_key: windows::Win32::System::Registry::HKEY = hkey;
 
@@ -64,8 +58,12 @@ pub fn set_dword_gpo(hkey: windows::Win32::System::Registry::HKEY, subkey: PCWST
         Ok(())
 }
 
-pub fn set_string_gpo(hkey: windows::Win32::System::Registry::HKEY, subkey: PCWSTR, value_name: PCWSTR, value: PCWSTR) -> Result<(), Box<dyn Error>>
-{
+pub fn set_string_gpo(
+        hkey: windows::Win32::System::Registry::HKEY,
+        subkey: PCWSTR,
+        value_name: PCWSTR,
+        value: PCWSTR,
+) -> Result<(), Box<dyn Error>> {
         unsafe {
                 let mut new_key: windows::Win32::System::Registry::HKEY = hkey;
 
@@ -92,17 +90,26 @@ pub fn set_string_gpo(hkey: windows::Win32::System::Registry::HKEY, subkey: PCWS
         Ok(())
 }
 
-pub fn set_dword(hkey: &HKEY, subkey: &str, value_name: &str, value: u32) -> Result<(), Box<dyn Error>>
-{
+pub fn set_dword(hkey: &HKEY, subkey: &str, value_name: &str, value: u32) -> Result<(), Box<dyn Error>> {
         let o_subkey = subkey;
         let hkey_text = get_hkey_text(hkey)?;
 
         let (subkey, _) = hkey
                 .RegCreateKeyEx(subkey, None, co::REG_OPTION::NON_VOLATILE, co::KEY::WRITE, None)
-                .map_err(|e| format!("Failed to open a DWORD in key: {}\\{}\\{} - Error: {}", hkey_text, o_subkey, value_name, e))?;
+                .map_err(|e| {
+                        format!(
+                                "Failed to open a DWORD in key: {}\\{}\\{} - Error: {}",
+                                hkey_text, o_subkey, value_name, e
+                        )
+                })?;
 
         subkey.RegSetValueEx(Some(value_name), RegistryValue::Dword(value))
-                .map_err(|e| format!("Failed to set DWORD value in key: {}\\{}\\{} - Error: {}", hkey_text, o_subkey, value_name, e))?;
+                .map_err(|e| {
+                        format!(
+                                "Failed to set DWORD value in key: {}\\{}\\{} - Error: {}",
+                                hkey_text, o_subkey, value_name, e
+                        )
+                })?;
 
         match log_registry(hkey, o_subkey, value_name, &value.to_string(), "DWORD") {
                 Ok(_) => Ok(()),
@@ -112,21 +119,30 @@ pub fn set_dword(hkey: &HKEY, subkey: &str, value_name: &str, value: u32) -> Res
                 )),
         }?;
 
-    Ok(())
+        Ok(())
 }
 
-pub fn set_string(hkey: &HKEY, subkey: &str, value_name: &str, value: &str) -> Result<(), Box<dyn Error>>
-{
+pub fn set_string(hkey: &HKEY, subkey: &str, value_name: &str, value: &str) -> Result<(), Box<dyn Error>> {
         let o_subkey = subkey;
         let hkey_text = get_hkey_text(hkey).unwrap();
 
         let (subkey, _) = hkey
                 .RegCreateKeyEx(subkey, None, co::REG_OPTION::NON_VOLATILE, co::KEY::WRITE, None)
-                .map_err(|e| format!("Failed to open a Sz in key: {}\\{}\\{} - Error: {}", hkey_text, o_subkey, value_name, e))?;
+                .map_err(|e| {
+                        format!(
+                                "Failed to open a Sz in key: {}\\{}\\{} - Error: {}",
+                                hkey_text, o_subkey, value_name, e
+                        )
+                })?;
 
         let value = value.to_string();
         subkey.RegSetValueEx(Some(value_name), RegistryValue::Sz(value.clone()))
-                .map_err(|e| format!("Failed to set Sz value in key: {}\\{}\\{} - Error: {}", hkey_text, o_subkey, value_name, e))?;
+                .map_err(|e| {
+                        format!(
+                                "Failed to set Sz value in key: {}\\{}\\{} - Error: {}",
+                                hkey_text, o_subkey, value_name, e
+                        )
+                })?;
 
         match log_registry(hkey, o_subkey, value_name, &value, "String") {
                 Ok(_) => Ok(()),
@@ -139,8 +155,7 @@ pub fn set_string(hkey: &HKEY, subkey: &str, value_name: &str, value: &str) -> R
         Ok(())
 }
 
-pub fn remove_subkey(hkey: &HKEY, subkey: &str) -> Result<(), Box<dyn Error>>
-{
+pub fn remove_subkey(hkey: &HKEY, subkey: &str) -> Result<(), Box<dyn Error>> {
         let o_subkey = subkey;
         let hkey_text = get_hkey_text(hkey).unwrap();
 
@@ -152,17 +167,17 @@ pub fn remove_subkey(hkey: &HKEY, subkey: &str) -> Result<(), Box<dyn Error>>
         .map_err(|e| format!("Failed to delete subkey: {}\\{} - Error: {}", hkey_text, o_subkey, e))?;
 
         match log_registry(hkey, o_subkey, "->", "", "Removed") {
-            Ok(_) => Ok(()),
-            Err(e) => Err(format!(
-                "Failed to log removal of key: {}\\{} - Error: {}", hkey_text, o_subkey, e
-            ))
+                Ok(_) => Ok(()),
+                Err(e) => Err(format!(
+                        "Failed to log removal of key: {}\\{} - Error: {}",
+                        hkey_text, o_subkey, e
+                )),
         }?;
         log_registry(hkey, o_subkey, "->", "", "Removed")?;
         Ok(())
 }
 
-pub fn check_dword(hkey: &HKEY, subkey: &str, value_name: &str, expected_value: u32) -> Result<bool, Box<dyn Error>>
-{
+pub fn check_dword(hkey: &HKEY, subkey: &str, value_name: &str, expected_value: u32) -> Result<bool, Box<dyn Error>> {
         let o_subkey = subkey;
         let hkey_text = get_hkey_text(hkey).unwrap();
 
@@ -185,8 +200,7 @@ pub fn check_dword(hkey: &HKEY, subkey: &str, value_name: &str, expected_value: 
         }
 }
 
-fn get_hkey_text(hkey: &HKEY) -> Result<&str, Box<dyn Error>>
-{
+fn get_hkey_text(hkey: &HKEY) -> Result<&str, Box<dyn Error>> {
         let result = if *hkey == HKEY::LOCAL_MACHINE {
                 "HKEY_LOCAL_MACHINE"
         } else if *hkey == HKEY::CURRENT_USER {
@@ -198,8 +212,13 @@ fn get_hkey_text(hkey: &HKEY) -> Result<&str, Box<dyn Error>>
         Ok(result)
 }
 
-fn log_registry(hkey: &HKEY, subkey: &str, value_name: &str, value: &str, type_name: &str) -> Result<(), Box<dyn Error>>
-{
+fn log_registry(
+        hkey: &HKEY,
+        subkey: &str,
+        value_name: &str,
+        value: &str,
+        type_name: &str,
+) -> Result<(), Box<dyn Error>> {
         let hkey_text = get_hkey_text(hkey)?;
 
         // Can't use &KNOWNFOLDERID::Desktop because we're running as TrustedInstaller.
@@ -208,7 +227,8 @@ fn log_registry(hkey: &HKEY, subkey: &str, value_name: &str, value: &str, type_n
         log_path.push("W11Boost Logs");
 
         if !log_path.exists() {
-                fs::create_dir_all(&log_path).map_err(|e| format!("Failed to create log directory: {} - {}", log_path.display(), e))?;
+                fs::create_dir_all(&log_path)
+                        .map_err(|e| format!("Failed to create log directory: {} - {}", log_path.display(), e))?;
         }
 
         let now = Utc::now();
@@ -222,7 +242,10 @@ fn log_registry(hkey: &HKEY, subkey: &str, value_name: &str, value: &str, type_n
                 now.second()
         );
 
-        let log_entry = format!("{} -> {}\\{}\\{}\\{} -> {}\n", time_info, hkey_text, subkey, value_name, type_name, value);
+        let log_entry = format!(
+                "{} -> {}\\{}\\{}\\{} -> {}\n",
+                time_info, hkey_text, subkey, value_name, type_name, value
+        );
 
         log_path.push("Registry.log");
 
@@ -239,33 +262,36 @@ fn log_registry(hkey: &HKEY, subkey: &str, value_name: &str, value: &str, type_n
         Ok(())
 }
 
-pub fn center() -> (i32, i32)
-{
+pub fn center() -> (i32, i32) {
         ((app::screen_size().0 / 2.0) as i32, (app::screen_size().1 / 2.0) as i32)
 }
 
 pub fn init_registry_gpo(
         mut hkey: windows::Win32::System::Registry::HKEY,
-) -> Result<(windows::Win32::System::Registry::HKEY, IGroupPolicyObject), Box<dyn Error>>
-{
+) -> Result<(windows::Win32::System::Registry::HKEY, IGroupPolicyObject), Box<dyn Error>> {
         unsafe {
                 // The apartment thread model is required for GPOs.
                 let result = CoInitializeEx(None, COINIT_APARTMENTTHREADED);
                 if result.is_err() {
                         return Err(format!("Failed to run CoInitalizeEx: {:?}", result).into());
                 }
-                let gpo: IGroupPolicyObject = CoCreateInstance(&CLSID_GroupPolicyObject, None, CLSCTX_INPROC_SERVER).expect("Failed to create GPO object");
+                let gpo: IGroupPolicyObject = CoCreateInstance(&CLSID_GroupPolicyObject, None, CLSCTX_INPROC_SERVER)
+                        .expect("Failed to create GPO object");
 
-                gpo.OpenLocalMachineGPO(GPO_OPEN_LOAD_REGISTRY).expect("Failed to open local machine GPO");
+                gpo.OpenLocalMachineGPO(GPO_OPEN_LOAD_REGISTRY)
+                        .expect("Failed to open local machine GPO");
 
-                gpo.GetRegistryKey(GPO_SECTION_MACHINE, &mut hkey).expect("GetRegistryKey failed");
+                gpo.GetRegistryKey(GPO_SECTION_MACHINE, &mut hkey)
+                        .expect("GetRegistryKey failed");
 
                 Ok((hkey, gpo))
         }
 }
 
-pub fn save_registry_gpo(hkey: windows::Win32::System::Registry::HKEY, gpo: IGroupPolicyObject) -> Result<(), Box<dyn Error>>
-{
+pub fn save_registry_gpo(
+        hkey: windows::Win32::System::Registry::HKEY,
+        gpo: IGroupPolicyObject,
+) -> Result<(), Box<dyn Error>> {
         let mut snap_guid = GUID::from_u128(0x0f6b957e_509e_11d1_a7cc_0000f87571e3);
         let mut registry_guid = REGISTRY_EXTENSION_GUID;
         unsafe {
@@ -279,32 +305,4 @@ pub fn save_registry_gpo(hkey: windows::Win32::System::Registry::HKEY, gpo: IGro
         }
 
         Ok(())
-}
-
-pub fn create_access_token_from_pid(process_id: u32) -> Result<*mut c_void, Box<dyn Error>> {
-    let mut dup_token = INVALID_HANDLE_VALUE;
-    unsafe {
-        let process = OpenProcess(MAXIMUM_ALLOWED, 0, process_id);
-        if !process.is_null() {
-            let mut token = INVALID_HANDLE_VALUE;
-            OpenProcessToken(process, TOKEN_DUPLICATE, &mut token);
-
-            let attributes = SECURITY_ATTRIBUTES {
-                nLength: size_of::<SECURITY_ATTRIBUTES>() as u32,
-                lpSecurityDescriptor: null_mut(),
-                bInheritHandle: 0,
-            };
-
-            DuplicateTokenEx(
-                token,
-                TOKEN_ALL_ACCESS,
-                &attributes,
-                SecurityImpersonation,
-                TokenImpersonation,
-                &mut dup_token,
-            );
-        }
-    }
-
-    Ok(dup_token)
 }

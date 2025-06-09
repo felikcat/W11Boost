@@ -1,27 +1,27 @@
-mod appx_support;
-mod defaults;
 mod disable_defender_and_smartscreen;
 mod disable_recall;
 mod disable_sleep;
+mod disable_vbs;
+mod install_appx_support;
 mod minimize_forensics;
 mod minimize_online_data_collection;
+mod non_intrusive_tweaks;
 mod remove_w11boost;
+mod reset_windows_store;
 
 use crate::common::center;
 use fltk::{
-        app::{self, Screen},
+        app::{self},
         button::{Button, CheckButton},
         dialog,
-        draw::{self},
         enums::{self, Align, Color},
         frame::Frame,
-        prelude::{DisplayExt, GroupExt, WidgetBase, WidgetExt, WindowExt},
-        text::{TextBuffer, TextDisplay},
-        widget::Widget,
+        prelude::{GroupExt, WidgetBase, WidgetExt, WindowExt},
         window::Window,
 };
 use fltk_theme::{ColorTheme, color_themes};
-use std::{collections::HashMap, error::Error, mem, process::exit, thread::sleep, time::Duration};
+use std::sync::OnceLock;
+use std::{collections::HashMap, error::Error, mem, process::exit};
 use windows::Win32::{
         Foundation::HWND,
         UI::WindowsAndMessaging::{
@@ -38,6 +38,17 @@ const FONT_PATH: &str = "C:\\Windows\\Fonts\\segoeui.ttf";
 enum ViewState {
         MainMenu,
         Applying,
+        Uninstalling,
+}
+
+struct CheckboxConfig {
+        label: &'static str,
+        run_fn: fn() -> Result<(), Box<dyn std::error::Error>>,
+        error_name: &'static str,
+        x: i32,
+        y: i32,
+        width: i32,
+        height: i32,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -45,7 +56,15 @@ enum CheckboxType {
         MinimizeForensics,
         MinimizeOnlineData,
         DisableDefenderAndSmartscreen,
+        DisableRecall,
+        DisableSleepAndHibernate,
+        DisableVbs,
+        InstallMicrosoftStore,
+        NonIntrusiveTweaks,
+        InstallAppxSupport,
 }
+
+static CHECKBOX_CONFIGS: OnceLock<HashMap<CheckboxType, CheckboxConfig>> = OnceLock::new();
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 enum ButtonType {
@@ -73,6 +92,7 @@ impl GuiViewModel {
                 match self.current_view {
                         ViewState::MainMenu => self.toggle_main_screen(true),
                         ViewState::Applying => self.show_applying_screen(),
+                        ViewState::Uninstalling => self.show_uninstalling_screen(),
                 }
         }
 
@@ -119,7 +139,6 @@ impl GuiViewModel {
                                 "W11Boost encountered an error, read its log file for more information.\n\n{}",
                                 message
                         ));
-                        status.set_label_size(16);
                         status.redraw();
                 }
 
@@ -139,6 +158,17 @@ impl GuiViewModel {
                 if let Some(status) = self.status_display.as_mut() {
                         status.show();
                         status.set_label("Applying W11Boost, please wait...");
+                        status.redraw();
+                }
+        }
+
+        fn show_uninstalling_screen(&mut self) {
+                app::wait();
+                self.toggle_main_screen(false);
+
+                if let Some(status) = self.status_display.as_mut() {
+                        status.show();
+                        status.set_label("Uninstalling W11Boost, please wait...");
                         status.redraw();
                 }
         }
@@ -165,50 +195,46 @@ impl GuiViewModel {
                 );
 
                 if choice == Some(0) {
-                        let minimize_forensics_checked = self
-                                .checkboxes
-                                .get(&CheckboxType::MinimizeForensics)
-                                .map(|cb| cb.is_checked())
-                                .unwrap_or(false);
-
-                        let minimize_online_data_collection_checked = self
-                                .checkboxes
-                                .get(&CheckboxType::MinimizeOnlineData)
-                                .map(|cb| cb.is_checked())
-                                .unwrap_or(false);
-
-                        let disable_defender_and_smartscreen_checked = self
-                                .checkboxes
-                                .get(&CheckboxType::DisableDefenderAndSmartscreen)
-                                .map(|cb| cb.is_checked())
-                                .unwrap_or(false);
+                        let checkbox_configs = GuiApp::get_checkbox_configs();
 
                         self.set_view(ViewState::Applying);
 
-                        if let Err(e) = defaults::run() {
-                                self.show_error_screen(format!("defaults failed: {}", e));
+                        for (checkbox_type, checkbox_config) in checkbox_configs {
+                                let Some(checkbox) = self.checkboxes.get(checkbox_type) else {
+                                        continue;
+                                };
+
+                                if !checkbox.is_checked() {
+                                        continue;
+                                }
+
+                                if let Err(e) = (checkbox_config.run_fn)() {
+                                        self.show_error_screen(format!("{} failed: {}", checkbox_config.error_name, e));
+                                        return;
+                                }
                         }
 
-                        if minimize_forensics_checked {
-                                if let Err(e) = minimize_forensics::run() {
-                                        self.show_error_screen(format!("minimize_forensics failed: {}", e));
-                                }
-                        }
-                        if minimize_online_data_collection_checked {
-                                if let Err(e) = minimize_online_data_collection::run() {
-                                        self.show_error_screen(format!(
-                                                "minimize_online_data_collection failed: {}",
-                                                e
-                                        ));
-                                }
-                        }
-                        if disable_defender_and_smartscreen_checked {
-                                if let Err(e) = disable_defender_and_smartscreen::run() {
-                                        self.show_error_screen(format!(
-                                                "disable_defender_and_smartscreen failed: {}",
-                                                e
-                                        ));
-                                }
+                        self.set_view(ViewState::MainMenu);
+                }
+        }
+
+        fn remove(&mut self, _btn: &Button) {
+                let choice = dialog::choice2(
+                        center().0,
+                        center().1,
+                        "Are you sure you want to uninstall W11Boost?",
+                        "&Yes",
+                        "&No",
+                        "",
+                );
+
+                if choice == Some(0) {
+                        self.set_view(ViewState::Uninstalling);
+
+                        if let Err(e) = remove_w11boost::run() {
+                                self.show_error_screen(format!("remove_w11boost failed: {}", e));
+                        } else {
+                                self.set_view(ViewState::MainMenu);
                         }
                 }
         }
@@ -263,41 +289,20 @@ impl GuiView {
                 remove.set_label_font(enums::Font::by_name(FONT_PATH));
                 remove.set_label_size(16);
 
-                let checkbox_height = WINDOW_HEIGHT / 12;
+                let checkbox_configs = GuiApp::get_checkbox_configs();
+                let mut checkboxes = HashMap::new();
 
-                let mut minimize_forensics_btn = CheckButton::new(
-                        0,
-                        TITLEBAR_HEIGHT,
-                        WINDOW_WIDTH / 2,
-                        checkbox_height,
-                        "Minimize local data / forensics",
-                );
+                for (checkbox_type, config) in checkbox_configs {
+                        let mut checkbox =
+                                CheckButton::new(config.x, config.y, config.width, config.height, config.label);
 
-                let mut minimize_online_data_btn = CheckButton::new(
-                        0,
-                        TITLEBAR_HEIGHT + checkbox_height + 2,
-                        WINDOW_WIDTH / 2,
-                        checkbox_height,
-                        "Minimize Microsoft online data",
-                );
-
-                let mut disable_defender_and_smartscreen_btn = CheckButton::new(
-                        0,
-                        TITLEBAR_HEIGHT + checkbox_height * 2 + 4,
-                        WINDOW_WIDTH / 2,
-                        checkbox_height,
-                        "Disable Defender and Smartscreen",
-                );
-
-                let mut my_checkboxes = [
-                        &mut minimize_forensics_btn,
-                        &mut minimize_online_data_btn,
-                        &mut disable_defender_and_smartscreen_btn,
-                ];
-
-                for checkbox in &mut my_checkboxes {
                         checkbox.set_label_font(enums::Font::by_name(FONT_PATH));
                         checkbox.set_label_size(16);
+                        checkboxes.insert(checkbox_type.clone(), checkbox);
+                }
+
+                if let Some(checkbox) = checkboxes.get_mut(&CheckboxType::NonIntrusiveTweaks) {
+                        checkbox.set_checked(true);
                 }
 
                 let mut status_display = Frame::new(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, None);
@@ -308,14 +313,6 @@ impl GuiView {
                 let mut buttons = HashMap::new();
                 buttons.insert(ButtonType::Apply, apply);
                 buttons.insert(ButtonType::Uninstall, remove);
-
-                let mut checkboxes = HashMap::new();
-                checkboxes.insert(CheckboxType::MinimizeForensics, minimize_forensics_btn);
-                checkboxes.insert(CheckboxType::MinimizeOnlineData, minimize_online_data_btn);
-                checkboxes.insert(
-                        CheckboxType::DisableDefenderAndSmartscreen,
-                        disable_defender_and_smartscreen_btn,
-                );
 
                 wind.end();
                 wind.show();
@@ -337,15 +334,6 @@ impl GuiView {
                         .unwrap();
                 }
 
-                // Only accounts for the primary monitor
-                let screen = Screen::new(0).expect("Could not find screen");
-                wind.resize(
-                        (screen.w() - wind.width()) / 2,
-                        (screen.h() - wind.height()) / 2,
-                        wind.width(),
-                        wind.height(),
-                );
-
                 wind.handle({
                         let (mut x, mut y) = (0, 0);
                         move |w, ev| match ev {
@@ -362,6 +350,8 @@ impl GuiView {
                                 _ => false,
                         }
                 });
+
+                wind.center_screen();
 
                 Self {
                         checkboxes,
@@ -393,6 +383,10 @@ impl GuiApp {
                         apply_btn.set_action(GuiViewModel::apply);
                 }
 
+                if let Some(remove_btn) = gv.buttons.get_mut(&ButtonType::Uninstall) {
+                        remove_btn.set_action(GuiViewModel::remove);
+                }
+
                 fltk_observe::with_state_mut(|state: &mut GuiViewModel| {
                         state.set_ui_elements(gv.checkboxes, gv.buttons, gv.status_display);
                 });
@@ -401,6 +395,133 @@ impl GuiApp {
 
         fn run(&self) {
                 self.app.run().unwrap();
+        }
+
+        fn get_checkbox_configs() -> &'static HashMap<CheckboxType, CheckboxConfig> {
+                let checkbox_height = WINDOW_HEIGHT / 12;
+
+                CHECKBOX_CONFIGS.get_or_init(|| {
+                        let mut map = HashMap::new();
+
+                        map.insert(
+                                CheckboxType::MinimizeForensics,
+                                CheckboxConfig {
+                                        label: "Minimize forensics / local data",
+                                        run_fn: minimize_forensics::run,
+                                        error_name: "minimize_forensics",
+                                        x: 0,
+                                        y: TITLEBAR_HEIGHT,
+                                        width: WINDOW_WIDTH / 2,
+                                        height: checkbox_height,
+                                },
+                        );
+
+                        map.insert(
+                                CheckboxType::MinimizeOnlineData,
+                                CheckboxConfig {
+                                        label: "Minimize Microsoft online data",
+                                        run_fn: minimize_online_data_collection::run,
+                                        error_name: "minimize_online_data_collection",
+                                        x: 0,
+                                        y: TITLEBAR_HEIGHT + checkbox_height + 2,
+                                        width: WINDOW_WIDTH / 2,
+                                        height: checkbox_height,
+                                },
+                        );
+
+                        map.insert(
+                                CheckboxType::DisableDefenderAndSmartscreen,
+                                CheckboxConfig {
+                                        label: "Disable Defender and Smartscreen",
+                                        run_fn: disable_defender_and_smartscreen::run,
+                                        error_name: "disable_defender_and_smartscreen",
+                                        x: 0,
+                                        y: TITLEBAR_HEIGHT + checkbox_height * 2 + 4,
+                                        width: WINDOW_WIDTH / 2,
+                                        height: checkbox_height,
+                                },
+                        );
+
+                        map.insert(
+                                CheckboxType::DisableRecall,
+                                CheckboxConfig {
+                                        label: "Disable Windows Recall",
+                                        run_fn: disable_recall::run,
+                                        error_name: "disable_recall",
+                                        x: 0,
+                                        y: TITLEBAR_HEIGHT + checkbox_height * 3 + 6,
+                                        width: WINDOW_WIDTH / 2,
+                                        height: checkbox_height,
+                                },
+                        );
+
+                        map.insert(
+                                CheckboxType::DisableVbs,
+                                CheckboxConfig {
+                                        label: "Disable Virtualization Based Security",
+                                        run_fn: disable_vbs::run,
+                                        error_name: "disable_vbs",
+                                        x: 0,
+                                        y: TITLEBAR_HEIGHT + checkbox_height * 4 + 8,
+                                        width: WINDOW_WIDTH / 2,
+                                        height: checkbox_height,
+                                },
+                        );
+
+                        map.insert(
+                                CheckboxType::DisableSleepAndHibernate,
+                                CheckboxConfig {
+                                        label: "Disable sleep and hibernate",
+                                        run_fn: disable_sleep::run,
+                                        error_name: "disable_sleep",
+                                        x: 0,
+                                        y: TITLEBAR_HEIGHT + checkbox_height * 5 + 10,
+                                        width: WINDOW_WIDTH / 2,
+                                        height: checkbox_height,
+                                },
+                        );
+
+                        map.insert(
+                                CheckboxType::InstallMicrosoftStore,
+                                CheckboxConfig {
+                                        label: "Install Microsoft Store",
+                                        run_fn: reset_windows_store::run,
+                                        error_name: "reset_windows_store",
+                                        x: 0,
+                                        y: TITLEBAR_HEIGHT + checkbox_height * 6 + 12,
+                                        width: WINDOW_WIDTH / 2,
+                                        height: checkbox_height,
+                                },
+                        );
+
+                        map.insert(
+                                CheckboxType::NonIntrusiveTweaks,
+                                CheckboxConfig {
+                                        label: "Use non-intrusive tweaks",
+                                        run_fn: non_intrusive_tweaks::run,
+                                        error_name: "non_intrusive_tweaks",
+                                        x: 0,
+                                        y: TITLEBAR_HEIGHT + checkbox_height * 7 + 14,
+                                        width: WINDOW_WIDTH / 2,
+                                        height: checkbox_height,
+                                },
+                        );
+
+                        map.insert(
+                                CheckboxType::InstallAppxSupport,
+                                CheckboxConfig {
+                                        label: "Install support for UWP and WinGet",
+                                        run_fn: install_appx_support::run,
+                                        error_name: "install_appx_support",
+                                        x: 0,
+                                        y: TITLEBAR_HEIGHT + checkbox_height * 8 + 16,
+                                        width: WINDOW_WIDTH / 2,
+                                        height: checkbox_height,
+                                },
+                        );
+
+                        map
+                })
         }
 }
 

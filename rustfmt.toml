@@ -2,3 +2,4 @@
 max_width = 120
 tab_spaces = 8
 brace_style = "AlwaysNextLine"
+newline_style = "Unix"
