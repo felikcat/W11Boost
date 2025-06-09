@@ -1,0 +1,5 @@
+# Not actually 120 characters long, see: https://rust-lang.github.io/rustfmt/?version=v1.8.0&search=#use_small_heuristics
+max_width = 120
+tab_spaces = 8
+brace_style = "AlwaysNextLine"
+newline_style = "Unix"
