@@ -34,16 +34,6 @@ static_vcruntime = "2.0.0"
 version = "0.0.24"
 features = ["user", "shell", "advapi", "kernel"]
 
-[dependencies.windows]
-version = "0.61.1"
-features = [
-    "Win32_System_Registry",
-    "Win32_System_GroupPolicy",
-    "Win32_System_Com",
-    "Win32_UI",
-    "Win32_UI_WindowsAndMessaging",
-]
-
 [dependencies.fltk]
 version = "^1.5"
 features = ["use-ninja"]

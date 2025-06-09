@@ -1,7 +1,5 @@
-mod disable_defender_and_smartscreen;
 mod disable_recall;
 mod disable_sleep;
-mod disable_vbs;
 mod install_appx_support;
 mod minimize_forensics;
 mod minimize_online_data_collection;
@@ -14,24 +12,18 @@ use fltk::{
         app::{self},
         button::{Button, CheckButton},
         dialog,
-        enums::{self, Align, Color},
+        enums::{self, Align},
         frame::Frame,
         prelude::{GroupExt, WidgetBase, WidgetExt, WindowExt},
         window::Window,
 };
 use fltk_theme::{ColorTheme, color_themes};
 use std::sync::OnceLock;
-use std::{collections::HashMap, error::Error, mem, process::exit};
-use windows::Win32::{
-        Foundation::HWND,
-        UI::WindowsAndMessaging::{
-                HWND_TOPMOST, SWP_FRAMECHANGED, SWP_NOMOVE, SWP_NOSIZE, SWP_SHOWWINDOW, SetWindowPos,
-        },
-};
+use std::{collections::HashMap, error::Error};
 
 const WINDOW_WIDTH: i32 = 640;
 const WINDOW_HEIGHT: i32 = 480;
-const TITLEBAR_HEIGHT: i32 = 32;
+const TOP_PADDING: i32 = 4;
 const FONT_PATH: &str = "C:\\Windows\\Fonts\\segoeui.ttf";
 
 #[derive(Debug, Clone, PartialEq)]
@@ -39,6 +31,7 @@ enum ViewState {
         MainMenu,
         Applying,
         Uninstalling,
+        Success,
 }
 
 struct CheckboxConfig {
@@ -55,10 +48,8 @@ struct CheckboxConfig {
 enum CheckboxType {
         MinimizeForensics,
         MinimizeOnlineData,
-        DisableDefenderAndSmartscreen,
         DisableRecall,
         DisableSleepAndHibernate,
-        DisableVbs,
         InstallMicrosoftStore,
         NonIntrusiveTweaks,
         InstallAppxSupport,
@@ -93,6 +84,7 @@ impl GuiViewModel {
                         ViewState::MainMenu => self.toggle_main_screen(true),
                         ViewState::Applying => self.show_applying_screen(),
                         ViewState::Uninstalling => self.show_uninstalling_screen(),
+                        ViewState::Success => self.show_success_screen(),
                 }
         }
 
@@ -129,6 +121,26 @@ impl GuiViewModel {
                 }
         }
 
+        fn show_success_screen(&mut self) {
+                app::wait();
+                self.toggle_main_screen(false);
+
+                if let Some(status) = self.status_display.as_mut() {
+                        status.show();
+                        status.set_label(&format!(
+                                "W11Boost has successfully finished applying changes. Reboot for them to take full effect."
+                        ));
+                        status.redraw();
+                }
+
+                app::flush();
+                app::add_timeout3(5.0, |_| {
+                        fltk_observe::with_state_mut(|state: &mut GuiViewModel| {
+                                state.set_view(ViewState::MainMenu);
+                        });
+                });
+        }
+
         fn show_error_screen(&mut self, message: String) {
                 app::wait();
                 self.toggle_main_screen(false);
@@ -144,7 +156,7 @@ impl GuiViewModel {
 
                 // Force GUI to process all pending events and render
                 app::flush();
-                // Could draw a visual timer at some point
+
                 app::add_timeout3(10.0, |_| {
                         fltk_observe::with_state_mut(|state: &mut GuiViewModel| {
                                 state.set_view(ViewState::MainMenu);
@@ -160,6 +172,8 @@ impl GuiViewModel {
                         status.set_label("Applying W11Boost, please wait...");
                         status.redraw();
                 }
+
+                app::flush();
         }
 
         fn show_uninstalling_screen(&mut self) {
@@ -171,6 +185,8 @@ impl GuiViewModel {
                         status.set_label("Uninstalling W11Boost, please wait...");
                         status.redraw();
                 }
+
+                app::flush();
         }
 
         fn set_ui_elements(
@@ -213,8 +229,8 @@ impl GuiViewModel {
                                         return;
                                 }
                         }
-
-                        self.set_view(ViewState::MainMenu);
+                        
+                        self.set_view(ViewState::Success);
                 }
         }
 
@@ -234,7 +250,7 @@ impl GuiViewModel {
                         if let Err(e) = remove_w11boost::run() {
                                 self.show_error_screen(format!("remove_w11boost failed: {}", e));
                         } else {
-                                self.set_view(ViewState::MainMenu);
+                                self.set_view(ViewState::Success);
                         }
                 }
         }
@@ -251,16 +267,7 @@ impl GuiView {
                         .with_size(WINDOW_WIDTH, WINDOW_HEIGHT)
                         .center_screen();
 
-                wind.set_border(false);
-
-                let mut titlebar = Frame::new(0, 0, WINDOW_WIDTH, 32, None);
-
-                titlebar.set_frame(enums::FrameType::FlatBox);
-                titlebar.set_color(Color::from_rgb(22, 22, 22));
-
-                let mut titlebar_close = Button::new(WINDOW_WIDTH - 32, 0, 32, 32, "X");
-                titlebar_close.set_frame(enums::FrameType::NoBox);
-                titlebar_close.set_callback(move |_| exit(0));
+                wind.set_border(true);
 
                 let mut apply = Button::new(
                         0,
@@ -316,23 +323,6 @@ impl GuiView {
 
                 wind.end();
                 wind.show();
-
-                let hwnd = wind.raw_handle();
-                let hwnd: HWND = unsafe { mem::transmute(hwnd) };
-
-                unsafe {
-                        // Always on top
-                        SetWindowPos(
-                                hwnd,
-                                Some(HWND_TOPMOST),
-                                0,
-                                0,
-                                0,
-                                0,
-                                SWP_SHOWWINDOW | SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE,
-                        )
-                        .unwrap();
-                }
 
                 wind.handle({
                         let (mut x, mut y) = (0, 0);
@@ -410,7 +400,7 @@ impl GuiApp {
                                         run_fn: minimize_forensics::run,
                                         error_name: "minimize_forensics",
                                         x: 0,
-                                        y: TITLEBAR_HEIGHT,
+                                        y: TOP_PADDING,
                                         width: WINDOW_WIDTH / 2,
                                         height: checkbox_height,
                                 },
@@ -423,20 +413,7 @@ impl GuiApp {
                                         run_fn: minimize_online_data_collection::run,
                                         error_name: "minimize_online_data_collection",
                                         x: 0,
-                                        y: TITLEBAR_HEIGHT + checkbox_height + 2,
-                                        width: WINDOW_WIDTH / 2,
-                                        height: checkbox_height,
-                                },
-                        );
-
-                        map.insert(
-                                CheckboxType::DisableDefenderAndSmartscreen,
-                                CheckboxConfig {
-                                        label: "Disable Defender and Smartscreen",
-                                        run_fn: disable_defender_and_smartscreen::run,
-                                        error_name: "disable_defender_and_smartscreen",
-                                        x: 0,
-                                        y: TITLEBAR_HEIGHT + checkbox_height * 2 + 4,
+                                        y: TOP_PADDING + checkbox_height + 2,
                                         width: WINDOW_WIDTH / 2,
                                         height: checkbox_height,
                                 },
@@ -449,20 +426,7 @@ impl GuiApp {
                                         run_fn: disable_recall::run,
                                         error_name: "disable_recall",
                                         x: 0,
-                                        y: TITLEBAR_HEIGHT + checkbox_height * 3 + 6,
-                                        width: WINDOW_WIDTH / 2,
-                                        height: checkbox_height,
-                                },
-                        );
-
-                        map.insert(
-                                CheckboxType::DisableVbs,
-                                CheckboxConfig {
-                                        label: "Disable Virtualization Based Security",
-                                        run_fn: disable_vbs::run,
-                                        error_name: "disable_vbs",
-                                        x: 0,
-                                        y: TITLEBAR_HEIGHT + checkbox_height * 4 + 8,
+                                        y: TOP_PADDING + checkbox_height * 2 + 4,
                                         width: WINDOW_WIDTH / 2,
                                         height: checkbox_height,
                                 },
@@ -475,7 +439,7 @@ impl GuiApp {
                                         run_fn: disable_sleep::run,
                                         error_name: "disable_sleep",
                                         x: 0,
-                                        y: TITLEBAR_HEIGHT + checkbox_height * 5 + 10,
+                                        y: TOP_PADDING + checkbox_height * 3 + 6,
                                         width: WINDOW_WIDTH / 2,
                                         height: checkbox_height,
                                 },
@@ -488,7 +452,7 @@ impl GuiApp {
                                         run_fn: reset_windows_store::run,
                                         error_name: "reset_windows_store",
                                         x: 0,
-                                        y: TITLEBAR_HEIGHT + checkbox_height * 6 + 12,
+                                        y: TOP_PADDING + checkbox_height * 4 + 8,
                                         width: WINDOW_WIDTH / 2,
                                         height: checkbox_height,
                                 },
@@ -501,7 +465,7 @@ impl GuiApp {
                                         run_fn: non_intrusive_tweaks::run,
                                         error_name: "non_intrusive_tweaks",
                                         x: 0,
-                                        y: TITLEBAR_HEIGHT + checkbox_height * 7 + 14,
+                                        y: TOP_PADDING + checkbox_height * 5 + 10,
                                         width: WINDOW_WIDTH / 2,
                                         height: checkbox_height,
                                 },
@@ -514,7 +478,7 @@ impl GuiApp {
                                         run_fn: install_appx_support::run,
                                         error_name: "install_appx_support",
                                         x: 0,
-                                        y: TITLEBAR_HEIGHT + checkbox_height * 8 + 16,
+                                        y: TOP_PADDING + checkbox_height * 6 + 12,
                                         width: WINDOW_WIDTH / 2,
                                         height: checkbox_height,
                                 },

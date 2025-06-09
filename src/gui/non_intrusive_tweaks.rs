@@ -1,8 +1,6 @@
 use crate::common::*;
 use std::{
-        error::Error,
-        fs::{self, File},
-        process::Command,
+        error::Error, fs::{self, File}, path::Path, process::Command
 };
 use winsafe::{HKEY, SetFileAttributes, co::FILE_ATTRIBUTE, prelude::advapi_Hkey};
 
@@ -111,15 +109,15 @@ pub fn run() -> Result<(), Box<dyn Error>> {
 
         let file_path = r"C:\Windows\System32\SleepStudy\UserNotPresentSession.etl";
 
-        // Removing UserNotPresentSession.etl will fail if it is readonly.
-        SetFileAttributes(file_path, FILE_ATTRIBUTE::NORMAL).expect("SetFileAttributes 1 failed");
+        if Path::new(file_path).exists() {
+                // Removing UserNotPresentSession.etl will fail if it is readonly.
+                SetFileAttributes(file_path, FILE_ATTRIBUTE::NORMAL)?;
+                fs::remove_file(file_path)?;
+        }
 
-        fs::remove_file(file_path).expect("Failed to remove the UserNotPresentSession.etl file");
+        File::create(file_path)?;
 
-        File::create(file_path).expect("UserNotPresentSession.etl file creation failed");
-
-        SetFileAttributes(file_path, FILE_ATTRIBUTE::ARCHIVE | FILE_ATTRIBUTE::READONLY)
-                .expect("SetFileAttributes 2 failed");
+        SetFileAttributes(file_path, FILE_ATTRIBUTE::ARCHIVE | FILE_ATTRIBUTE::READONLY)?;
 
         // Visual Studio 2017 up to 2022: PerfWatson2 (VSCEIP; telemetry) is intensive on resources, disable it.
         set_dword(&hklm, r"SOFTWARE\Wow6432Node\Microsoft\VSCommon\15.0\SQM", "OptIn", 0)?;
@@ -184,10 +182,6 @@ pub fn run() -> Result<(), Box<dyn Error>> {
                 1,
         )?;
         set_dword(&hklm, r"SYSTEM\CurrentControlSet\Services\DiagTrack", "Start", 4)?;
-
-        // Disable "Diagnostic Policy Service"
-        // Logs tons of information to be sent off and analyzed by Microsoft, and in some cases caused noticeable performance slowdown.
-        set_dword(&hklm, r"SYSTEM\CurrentControlSet\Services\DPS", "Start", 4)?;
 
         // Disable "Customer Experience Improvement Program"; also implies turning off the Inventory Collector.
         set_dword(&hklm, r"SOFTWARE\Policies\Microsoft\AppV\CEIP", "CEIPEnable", 0)?;

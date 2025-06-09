@@ -4,20 +4,6 @@ use std::error::Error;
 use std::fs::{self, OpenOptions};
 use std::io::Write;
 use std::path::PathBuf;
-use windows::Win32::Foundation::ERROR_SUCCESS;
-use windows::Win32::System::Registry::{REG_DWORD, REG_SZ, RegCreateKeyW, RegSetValueExW};
-use windows::core::PCWSTR;
-use windows::{
-        Win32::System::{
-                Com::{CLSCTX_INPROC_SERVER, COINIT_APARTMENTTHREADED, CoCreateInstance, CoInitializeEx},
-                GroupPolicy::{
-                        CLSID_GroupPolicyObject, GPO_OPEN_LOAD_REGISTRY, GPO_SECTION_MACHINE, IGroupPolicyObject,
-                        REGISTRY_EXTENSION_GUID,
-                },
-                Registry::RegCloseKey,
-        },
-        core::GUID,
-};
 use winsafe::{
         self as w, HKEY, RegistryValue,
         co::{self, KNOWNFOLDERID},
@@ -27,67 +13,6 @@ use winsafe::{
 pub fn get_windows_path(folder_id: &KNOWNFOLDERID) -> Result<String, Box<dyn Error>> {
         let the_path = w::SHGetKnownFolderPath(folder_id, co::KF::DEFAULT, None)?;
         Ok(the_path)
-}
-
-pub fn set_dword_gpo(
-        hkey: windows::Win32::System::Registry::HKEY,
-        subkey: PCWSTR,
-        value_name: PCWSTR,
-        value: u32,
-) -> Result<(), Box<dyn Error>> {
-        unsafe {
-                let mut new_key: windows::Win32::System::Registry::HKEY = hkey;
-
-                let result = RegCreateKeyW(new_key, subkey, &mut new_key);
-                if result != ERROR_SUCCESS {
-                        return Err(format!("[set_dword_gpo] Failed to create key: {:?}", result).into());
-                }
-
-                let bytes = value.to_ne_bytes();
-
-                let result = RegSetValueExW(new_key, value_name, Some(0), REG_DWORD, Some(&bytes));
-                if result != ERROR_SUCCESS {
-                        return Err(format!("[set_dword_gpo] Failed to set key value: {:?}", result).into());
-                }
-
-                let result = RegCloseKey(new_key);
-                if result != ERROR_SUCCESS {
-                        return Err(format!("[set_dword_gpo] Failed to close key: {:?}", result).into());
-                }
-        }
-        Ok(())
-}
-
-pub fn set_string_gpo(
-        hkey: windows::Win32::System::Registry::HKEY,
-        subkey: PCWSTR,
-        value_name: PCWSTR,
-        value: PCWSTR,
-) -> Result<(), Box<dyn Error>> {
-        unsafe {
-                let mut new_key: windows::Win32::System::Registry::HKEY = hkey;
-
-                let result = RegCreateKeyW(new_key, subkey, &mut new_key);
-                if result != ERROR_SUCCESS {
-                        return Err(format!("[set_string_gpo] Failed to create key: {:?}", result).into());
-                }
-
-                let bytes = value.as_wide();
-                let length = bytes.len().checked_mul(2).unwrap();
-                let bytes_cast: *const u8 = bytes.as_ptr().cast();
-                let slice = std::slice::from_raw_parts(bytes_cast, length);
-
-                let result = RegSetValueExW(new_key, value_name, Some(0), REG_SZ, Some(slice));
-                if result.is_err() {
-                        return Err(format!("[set_string_gpo] Failed to set key: {:?}", result).into());
-                }
-
-                let result = RegCloseKey(new_key);
-                if result.is_err() {
-                        return Err(format!("[set_string_gpo] Failed to close key: {:?}", result).into());
-                }
-        }
-        Ok(())
 }
 
 pub fn set_dword(hkey: &HKEY, subkey: &str, value_name: &str, value: u32) -> Result<(), Box<dyn Error>> {
@@ -242,10 +167,14 @@ fn log_registry(
                 now.second()
         );
 
-        let log_entry = format!(
-                "{} -> {}\\{}\\{}\\{} -> {}\n",
-                time_info, hkey_text, subkey, value_name, type_name, value
-        );
+        let log_entry = if type_name == "Removed" {
+                format!("{} -> {}: {}\\{}\n", time_info, type_name, hkey_text, subkey)
+        } else {
+                format!(
+                        "{} -> {}\\{}\\{}\\{} -> {}\n",
+                        time_info, hkey_text, subkey, value_name, type_name, value
+                )
+        };
 
         log_path.push("Registry.log");
 
@@ -264,45 +193,4 @@ fn log_registry(
 
 pub fn center() -> (i32, i32) {
         ((app::screen_size().0 / 2.0) as i32, (app::screen_size().1 / 2.0) as i32)
-}
-
-pub fn init_registry_gpo(
-        mut hkey: windows::Win32::System::Registry::HKEY,
-) -> Result<(windows::Win32::System::Registry::HKEY, IGroupPolicyObject), Box<dyn Error>> {
-        unsafe {
-                // The apartment thread model is required for GPOs.
-                let result = CoInitializeEx(None, COINIT_APARTMENTTHREADED);
-                if result.is_err() {
-                        return Err(format!("Failed to run CoInitalizeEx: {:?}", result).into());
-                }
-                let gpo: IGroupPolicyObject = CoCreateInstance(&CLSID_GroupPolicyObject, None, CLSCTX_INPROC_SERVER)
-                        .expect("Failed to create GPO object");
-
-                gpo.OpenLocalMachineGPO(GPO_OPEN_LOAD_REGISTRY)
-                        .expect("Failed to open local machine GPO");
-
-                gpo.GetRegistryKey(GPO_SECTION_MACHINE, &mut hkey)
-                        .expect("GetRegistryKey failed");
-
-                Ok((hkey, gpo))
-        }
-}
-
-pub fn save_registry_gpo(
-        hkey: windows::Win32::System::Registry::HKEY,
-        gpo: IGroupPolicyObject,
-) -> Result<(), Box<dyn Error>> {
-        let mut snap_guid = GUID::from_u128(0x0f6b957e_509e_11d1_a7cc_0000f87571e3);
-        let mut registry_guid = REGISTRY_EXTENSION_GUID;
-        unsafe {
-                gpo.Save(true.into(), false.into(), &mut registry_guid, &mut snap_guid)
-                        .expect("Failed to save GPO changes");
-        }
-
-        let result = unsafe { RegCloseKey(hkey) };
-        if result.is_err() {
-                eprintln!("RegCloseKey failed");
-        }
-
-        Ok(())
 }

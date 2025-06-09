@@ -11,28 +11,22 @@ endif::[]
 
 == What's different about this compared to other optimizers / debloaters?
 . The number one focus of breaking nothing by default. +
-If you use any of the other options, this is not guaranteed.
-. Being very easy to use, and requiring no reading of instructions.
+Not guaranteed for: Minimize forensics / local data, and Minimize Microsoft online data.
+. Being very easy to use.
+. Easy to read and heavily documented source code (only for the registry changes).
 . Specific use cases are covered, such as fully installing .appx and WinGet support on Windows LTSC builds.
-. No false claims that this will boost performance in video games. It is only to improve the responsiveness and usability of the Windows operating system, to make it feel better than it was prior.
-- However, it can greatly boost virtualized environments such as VirtualBox and VMWare if you turn off Virtualization Based Security.
+. No false claims that this will boost performance in video games, except for those that have issues with FTH such as Assetto Corsa. 
+- Primarily it is only to improve the responsiveness and usability of the Windows operating system, to make it feel better than it was prior.
 . Changes can be rolled back without a system restore point or any other form of backups.
 
 image:W11Boost_GUI.png[480,360]
 
 == Recommendations
 
-.Convert from Home or Pro to the Education edition for better control over Windows 10 & 11.
-. Open the Command Prompt as administrator.
-. `cscript.exe %windir%\system32\slmgr.vbs /upk`
-. `changepk.exe /ProductKey YNMGQ-8RYV3-4PGQ3-C8XTP-7CFBY`
-. Use https://github.com/massgravel/Microsoft-Activation-Scripts?tab=readme-ov-file#method-1---powershell-windows-8-and-later-%EF%B8%8F[MAS] or https://github.com/abbodi1406/KMS_VL_ALL_AIO/releases[KMS_VL_ALL_AIO] to activate Windows by installing its auto-renewal.
-- To open a .7z archive on Windows, you need https://www.7-zip.org/[7-Zip].
-
 .Other
 . Install https://winaerotweaker.com/[Winaero Tweaker] to set personal preferences.
 
-. Download https://github.com/beatcracker/toptout/archive/refs/heads/master.zip[toptout] and open PowerShell as administrator:
+. To reduce third-party program telemetry, download https://github.com/beatcracker/toptout/archive/refs/heads/master.zip[toptout] and open PowerShell as administrator:
 - `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`
 - `.\topout_directory\examples\toptout_pwsh.ps1 -Env -Exec`
 - `Set-ExecutionPolicy -ExecutionPolicy Restricted -Scope CurrentUser`

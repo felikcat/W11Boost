@@ -4,6 +4,11 @@ use winsafe::{HKEY, prelude::advapi_Hkey};
 
 pub fn run() -> Result<(), Box<dyn Error>> {
         let hklm = HKEY::LOCAL_MACHINE;
+        enable_sleep(&hklm)?;
+        Ok(())
+}
+
+fn enable_sleep(hklm: &HKEY) -> Result<(), Box<dyn Error>> {
         remove_subkey(&hklm, r"SYSTEM\CurrentControlSet\Control\Power\HibernateEnabledDefault")?;
 
         remove_subkey(
@@ -47,7 +52,7 @@ pub fn run() -> Result<(), Box<dyn Error>> {
                 r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings\ShowHibernateOption",
         )?;
         remove_subkey(
-                &hklm,
+                hklm,
                 r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings\ShowSleepOption",
         )?;
 
