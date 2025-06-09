@@ -28,7 +28,6 @@ curl = "0.4.48"
 
 [build-dependencies]
 winresource = "0.1.22"
-static_vcruntime = "2.0.0"
 
 [dependencies.winsafe]
 version = "0.0.24"

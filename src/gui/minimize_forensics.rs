@@ -1,5 +1,5 @@
 use crate::common::*;
-use std::error::Error;
+use std::{error::Error, os::windows::process::CommandExt};
 use std::process::Command;
 use winsafe::{HKEY, prelude::advapi_Hkey};
 
@@ -49,6 +49,7 @@ pub fn run() -> Result<(), Box<dyn Error>> {
         // explicitly update these timestamps for themself.
         Command::new("fsutil.exe")
                 .args(["behavior", "set", "disablelastaccess", "3"])
+                .creation_flags(CREATE_NO_WINDOW)
                 .output()
                 .expect("fsutil.exe failed to execute");
 

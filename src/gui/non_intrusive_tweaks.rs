@@ -1,6 +1,6 @@
 use crate::common::*;
 use std::{
-        error::Error, fs::{self, File}, path::Path, process::Command
+        error::Error, fs::{self, File}, os::windows::process::CommandExt, path::Path, process::Command
 };
 use winsafe::{HKEY, SetFileAttributes, co::FILE_ATTRIBUTE, prelude::advapi_Hkey};
 
@@ -73,14 +73,17 @@ pub fn run() -> Result<(), Box<dyn Error>> {
                 1,
         )?;
 
+        // Double the RAM used for caching NTFS metadata.
         Command::new("fsutil.exe")
                 .args(["behavior", "set", "memoryusage", "2"])
+                .creation_flags(CREATE_NO_WINDOW)
                 .output()?;
 
         // Disable automatic repair to instead ask for a repair.
         // Does not disable Windows' Recovery environment thankfully.
         Command::new("bcdedit.exe")
                 .args(["/set", "{default}", "recoveryenabled", "no"])
+                .creation_flags(CREATE_NO_WINDOW)
                 .output()?;
 
         // Do not page drivers and other system code to a disk, keep it in memory.
@@ -360,6 +363,7 @@ pub fn run() -> Result<(), Box<dyn Error>> {
                         "-Command",
                         "Set-NetAdapterAdvancedProperty -Name '*' -DisplayName 'Wait for Link' -RegistryValue 0",
                 ])
+                .creation_flags(CREATE_NO_WINDOW)
                 .output()
                 .expect("Setting network adapter advanced property failed");
 

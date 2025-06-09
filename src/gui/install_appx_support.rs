@@ -3,6 +3,7 @@ use curl::easy::Easy;
 use std::error::Error;
 use std::fs::File;
 use std::io::Write;
+use std::os::windows::process::CommandExt;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::time::Duration;
@@ -37,6 +38,7 @@ pub fn run() -> Result<(), Box<dyn Error>> {
             "-Command",
             r#"Add-AppxPackage ([Environment]::GetFolderPath("CommonDesktopDirectory") + "\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle")"#
         ])
+        .creation_flags(CREATE_NO_WINDOW)
         .spawn()
         .expect("appx_support::install -> Failed to install the msixbundle");
 

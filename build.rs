@@ -2,11 +2,9 @@ extern crate winresource;
 use winresource::WindowsResource;
 
 fn main() {
-        // So the user doesn't have to install the 2022 Visual Studio redistributables
-        static_vcruntime::metabuild();
-
         let mut res = WindowsResource::new();
 
+        // Allowing for native DPI scaling and setting the Administrator requirement
         res.set_manifest(
                 r#"<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <assembly manifestVersion="1.0" xmlns="urn:schemas-microsoft-com:asm.v1" xmlns:asmv3="urn:schemas-microsoft-com:asm.v3">

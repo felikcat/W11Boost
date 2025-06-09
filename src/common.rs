@@ -1,4 +1,4 @@
-use chrono::{Datelike, Timelike, Utc};
+use chrono::{Datelike, Local, Timelike};
 use fltk::app;
 use std::error::Error;
 use std::fs::{self, OpenOptions};
@@ -9,6 +9,8 @@ use winsafe::{
         co::{self, KNOWNFOLDERID},
         prelude::*,
 };
+
+pub const CREATE_NO_WINDOW: u32 = 0x08000000;
 
 pub fn get_windows_path(folder_id: &KNOWNFOLDERID) -> Result<String, Box<dyn Error>> {
         let the_path = w::SHGetKnownFolderPath(folder_id, co::KF::DEFAULT, None)?;
@@ -146,8 +148,7 @@ fn log_registry(
 ) -> Result<(), Box<dyn Error>> {
         let hkey_text = get_hkey_text(hkey)?;
 
-        // Can't use &KNOWNFOLDERID::Desktop because we're running as TrustedInstaller.
-        let desktop_dir = get_windows_path(&KNOWNFOLDERID::PublicDesktop)?;
+        let desktop_dir = get_windows_path(&KNOWNFOLDERID::Desktop)?;
         let mut log_path = PathBuf::from(desktop_dir);
         log_path.push("W11Boost Logs");
 
@@ -156,7 +157,7 @@ fn log_registry(
                         .map_err(|e| format!("Failed to create log directory: {} - {}", log_path.display(), e))?;
         }
 
-        let now = Utc::now();
+        let now = Local::now();
         let time_info = format!(
                 "{:02}/{:02}/{} {:02}:{:02}:{:02}",
                 now.day(),
@@ -171,8 +172,8 @@ fn log_registry(
                 format!("{} -> {}: {}\\{}\n", time_info, type_name, hkey_text, subkey)
         } else {
                 format!(
-                        "{} -> {}\\{}\\{}\\{} -> {}\n",
-                        time_info, hkey_text, subkey, value_name, type_name, value
+                        "{} -> {} -> {}\\{}\\{} -> {}\n",
+                        time_info, type_name, hkey_text, subkey, value_name, value
                 )
         };
 

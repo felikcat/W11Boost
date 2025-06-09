@@ -4,7 +4,6 @@ mod install_appx_support;
 mod minimize_forensics;
 mod minimize_online_data_collection;
 mod non_intrusive_tweaks;
-mod remove_w11boost;
 mod reset_windows_store;
 
 use crate::common::center;
@@ -30,7 +29,6 @@ const FONT_PATH: &str = "C:\\Windows\\Fonts\\segoeui.ttf";
 enum ViewState {
         MainMenu,
         Applying,
-        Uninstalling,
         Success,
 }
 
@@ -60,7 +58,6 @@ static CHECKBOX_CONFIGS: OnceLock<HashMap<CheckboxType, CheckboxConfig>> = OnceL
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 enum ButtonType {
         Apply,
-        Uninstall,
 }
 
 struct GuiViewModel {
@@ -83,7 +80,6 @@ impl GuiViewModel {
                 match self.current_view {
                         ViewState::MainMenu => self.toggle_main_screen(true),
                         ViewState::Applying => self.show_applying_screen(),
-                        ViewState::Uninstalling => self.show_uninstalling_screen(),
                         ViewState::Success => self.show_success_screen(),
                 }
         }
@@ -176,19 +172,6 @@ impl GuiViewModel {
                 app::flush();
         }
 
-        fn show_uninstalling_screen(&mut self) {
-                app::wait();
-                self.toggle_main_screen(false);
-
-                if let Some(status) = self.status_display.as_mut() {
-                        status.show();
-                        status.set_label("Uninstalling W11Boost, please wait...");
-                        status.redraw();
-                }
-
-                app::flush();
-        }
-
         fn set_ui_elements(
                 &mut self,
                 checkboxes: HashMap<CheckboxType, CheckButton>,
@@ -233,27 +216,6 @@ impl GuiViewModel {
                         self.set_view(ViewState::Success);
                 }
         }
-
-        fn remove(&mut self, _btn: &Button) {
-                let choice = dialog::choice2(
-                        center().0,
-                        center().1,
-                        "Are you sure you want to uninstall W11Boost?",
-                        "&Yes",
-                        "&No",
-                        "",
-                );
-
-                if choice == Some(0) {
-                        self.set_view(ViewState::Uninstalling);
-
-                        if let Err(e) = remove_w11boost::run() {
-                                self.show_error_screen(format!("remove_w11boost failed: {}", e));
-                        } else {
-                                self.set_view(ViewState::Success);
-                        }
-                }
-        }
 }
 struct GuiView {
         buttons: HashMap<ButtonType, Button>,
@@ -272,29 +234,15 @@ impl GuiView {
                 let mut apply = Button::new(
                         0,
                         0,
-                        (WINDOW_WIDTH - 6) / 2,
+                        WINDOW_WIDTH - 4,
                         (WINDOW_HEIGHT * 14) / 100,
                         "Apply W11Boost",
-                );
-
-                let mut remove = Button::new(
-                        WINDOW_WIDTH / 2,
-                        0,
-                        (WINDOW_WIDTH - 6) / 2,
-                        (WINDOW_HEIGHT * 14) / 100,
-                        "Remove W11Boost",
                 );
 
                 let apply_height = apply.height();
                 apply.set_pos(2, WINDOW_HEIGHT - apply_height - 2);
                 apply.set_label_font(enums::Font::by_name(FONT_PATH));
                 apply.set_label_size(16);
-
-                let remove_width = remove.width();
-                let remove_height = remove.height();
-                remove.set_pos(WINDOW_WIDTH - remove_width - 2, WINDOW_HEIGHT - remove_height - 2);
-                remove.set_label_font(enums::Font::by_name(FONT_PATH));
-                remove.set_label_size(16);
 
                 let checkbox_configs = GuiApp::get_checkbox_configs();
                 let mut checkboxes = HashMap::new();
@@ -319,7 +267,6 @@ impl GuiView {
 
                 let mut buttons = HashMap::new();
                 buttons.insert(ButtonType::Apply, apply);
-                buttons.insert(ButtonType::Uninstall, remove);
 
                 wind.end();
                 wind.show();
@@ -371,10 +318,6 @@ impl GuiApp {
 
                 if let Some(apply_btn) = gv.buttons.get_mut(&ButtonType::Apply) {
                         apply_btn.set_action(GuiViewModel::apply);
-                }
-
-                if let Some(remove_btn) = gv.buttons.get_mut(&ButtonType::Uninstall) {
-                        remove_btn.set_action(GuiViewModel::remove);
                 }
 
                 fltk_observe::with_state_mut(|state: &mut GuiViewModel| {
