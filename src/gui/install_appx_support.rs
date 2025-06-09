@@ -23,26 +23,22 @@ pub fn run() -> Result<(), Box<dyn Error>> {
         easy.connect_timeout(Duration::from_secs(10))?;
 
         path.push("Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle");
-        let mut file = File::create(Path::new(&path)).expect("appx_support::install -> Failed to create file");
+        let mut file = File::create(Path::new(&path))?;
 
         easy.write_function(move |data| {
                 file.write_all(data).unwrap();
                 Ok(data.len())
-        })
-        .expect("appx_support::install -> Failed to write data");
+        })?;
 
-        easy.perform().expect("appx_support::install -> Failed to curl perform");
+        easy.perform()?;
 
-        let mut child = Command::new("powershell.exe")
+        Command::new("powershell.exe")
         .args([
             "-Command",
             r#"Add-AppxPackage ([Environment]::GetFolderPath("CommonDesktopDirectory") + "\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle")"#
         ])
         .creation_flags(CREATE_NO_WINDOW)
-        .spawn()
-        .expect("appx_support::install -> Failed to install the msixbundle");
+        .output()?;
 
-        child.wait()
-                .expect("appx_support::install -> Failed to wait for the child process");
         Ok(())
 }

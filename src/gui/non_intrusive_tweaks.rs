@@ -35,8 +35,7 @@ pub fn run() -> Result<(), Box<dyn Error>> {
                 0,
         )?;
 
-        // Power Throttling causes severe performance reduction for VMWare.
-        // Workstation 17
+        // Power Throttling causes severe performance reduction for VMWare Workstation 17.
         set_dword(
                 &hklm,
                 r"SYSTEM\CurrentControlSet\Control\Power\PowerThrottling",
@@ -110,6 +109,7 @@ pub fn run() -> Result<(), Box<dyn Error>> {
                 0,
         )?;
 
+        // We're going to ensure this file is empty, read-only, and archived so that hiberboot cannot work.
         let file_path = r"C:\Windows\System32\SleepStudy\UserNotPresentSession.etl";
 
         if Path::new(file_path).exists() {
@@ -364,8 +364,7 @@ pub fn run() -> Result<(), Box<dyn Error>> {
                         "Set-NetAdapterAdvancedProperty -Name '*' -DisplayName 'Wait for Link' -RegistryValue 0",
                 ])
                 .creation_flags(CREATE_NO_WINDOW)
-                .output()
-                .expect("Setting network adapter advanced property failed");
+                .output()?;
 
         Ok(())
 }

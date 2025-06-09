@@ -50,8 +50,7 @@ pub fn run() -> Result<(), Box<dyn Error>> {
         Command::new("fsutil.exe")
                 .args(["behavior", "set", "disablelastaccess", "3"])
                 .creation_flags(CREATE_NO_WINDOW)
-                .output()
-                .expect("fsutil.exe failed to execute");
+                .output()?;
 
         // Disable "Application Impact Telemetry".
         set_dword(&hklm, r"SOFTWARE\Policies\Microsoft\Windows\AppCompat", "AITEnable", 0)?;

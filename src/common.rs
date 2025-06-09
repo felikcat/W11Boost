@@ -25,7 +25,7 @@ pub fn set_dword(hkey: &HKEY, subkey: &str, value_name: &str, value: u32) -> Res
                 .RegCreateKeyEx(subkey, None, co::REG_OPTION::NON_VOLATILE, co::KEY::WRITE, None)
                 .map_err(|e| {
                         format!(
-                                "Failed to open a DWORD in key: {}\\{}\\{} - Error: {}",
+                                "Failed to open a DWORD in key: {}\\{}\\{}\nError: {}",
                                 hkey_text, o_subkey, value_name, e
                         )
                 })?;
@@ -33,7 +33,7 @@ pub fn set_dword(hkey: &HKEY, subkey: &str, value_name: &str, value: u32) -> Res
         subkey.RegSetValueEx(Some(value_name), RegistryValue::Dword(value))
                 .map_err(|e| {
                         format!(
-                                "Failed to set DWORD value in key: {}\\{}\\{} - Error: {}",
+                                "Failed to set DWORD value in key: {}\\{}\\{}\nError: {}",
                                 hkey_text, o_subkey, value_name, e
                         )
                 })?;
@@ -41,7 +41,7 @@ pub fn set_dword(hkey: &HKEY, subkey: &str, value_name: &str, value: u32) -> Res
         match log_registry(hkey, o_subkey, value_name, &value.to_string(), "DWORD") {
                 Ok(_) => Ok(()),
                 Err(e) => Err(format!(
-                        "Failed to log DWORD change for key: {}\\{}\\{} -> {} -> Error: {}",
+                        "Failed to log DWORD change for key: {}\\{}\\{} -> {}\nError: {}",
                         hkey_text, o_subkey, value_name, value, e
                 )),
         }?;
@@ -57,7 +57,7 @@ pub fn set_string(hkey: &HKEY, subkey: &str, value_name: &str, value: &str) -> R
                 .RegCreateKeyEx(subkey, None, co::REG_OPTION::NON_VOLATILE, co::KEY::WRITE, None)
                 .map_err(|e| {
                         format!(
-                                "Failed to open a Sz in key: {}\\{}\\{} - Error: {}",
+                                "Failed to open a Sz in key: {}\\{}\\{}\nError: {}",
                                 hkey_text, o_subkey, value_name, e
                         )
                 })?;
@@ -66,7 +66,7 @@ pub fn set_string(hkey: &HKEY, subkey: &str, value_name: &str, value: &str) -> R
         subkey.RegSetValueEx(Some(value_name), RegistryValue::Sz(value.clone()))
                 .map_err(|e| {
                         format!(
-                                "Failed to set Sz value in key: {}\\{}\\{} - Error: {}",
+                                "Failed to set Sz value in key: {}\\{}\\{}\nError: {}",
                                 hkey_text, o_subkey, value_name, e
                         )
                 })?;
@@ -74,7 +74,7 @@ pub fn set_string(hkey: &HKEY, subkey: &str, value_name: &str, value: &str) -> R
         match log_registry(hkey, o_subkey, value_name, &value, "String") {
                 Ok(_) => Ok(()),
                 Err(e) => Err(format!(
-                        "Failed to log Sz change for key: {}\\{}\\{} -> {} -> Error: {}",
+                        "Failed to log Sz change for key: {}\\{}\\{} -> {}\nError: {}",
                         hkey_text, o_subkey, value_name, value, e
                 )),
         }?;
@@ -89,18 +89,16 @@ pub fn remove_subkey(hkey: &HKEY, subkey: &str) -> Result<(), Box<dyn Error>> {
         match hkey.RegDeleteTree(Some(subkey)) {
                 Ok(_) => Ok(()),
                 Err(e) if e == w::co::ERROR::FILE_NOT_FOUND => Ok(()),
-                Err(e) => Err(Box::new(e)),
-        }
-        .map_err(|e| format!("Failed to delete subkey: {}\\{} - Error: {}", hkey_text, o_subkey, e))?;
+                Err(e) => Err(format!("Failed to delete subkey: {}\\{} - Error: {}", hkey_text, o_subkey, e)),
+        }?;
 
         match log_registry(hkey, o_subkey, "->", "", "Removed") {
                 Ok(_) => Ok(()),
                 Err(e) => Err(format!(
-                        "Failed to log removal of key: {}\\{} - Error: {}",
+                        "Failed to log removal of key: {}\\{}\nError: {}",
                         hkey_text, o_subkey, e
                 )),
         }?;
-        log_registry(hkey, o_subkey, "->", "", "Removed")?;
         Ok(())
 }
 
@@ -113,7 +111,7 @@ pub fn check_dword(hkey: &HKEY, subkey: &str, value_name: &str, expected_value: 
                 Err(e) if e == w::co::ERROR::FILE_NOT_FOUND => return Ok(false),
                 Err(e) => {
                         return Err(format!(
-                                "Failed to open key for DWORD check: {}\\{}\\{} -> Error: {}",
+                                "Failed to open key for DWORD check: {}\\{}\\{}\nError: {}",
                                 hkey_text, o_subkey, value_name, e
                         )
                         .into());
@@ -123,7 +121,7 @@ pub fn check_dword(hkey: &HKEY, subkey: &str, value_name: &str, expected_value: 
         if let RegistryValue::Dword(value) = subkey {
                 if value != expected_value { Ok(false) } else { Ok(true) }
         } else {
-                Err("Expected DWORD value".into())
+                return Err(format!("Expected DWORD value for: {}\\{}\\{}", hkey_text, o_subkey, value_name).into())
         }
 }
 
@@ -154,7 +152,7 @@ fn log_registry(
 
         if !log_path.exists() {
                 fs::create_dir_all(&log_path)
-                        .map_err(|e| format!("Failed to create log directory: {} - {}", log_path.display(), e))?;
+                        .map_err(|e| format!("Failed to create log directory: {}\nError: {}", log_path.display(), e))?;
         }
 
         let now = Local::now();
@@ -172,7 +170,7 @@ fn log_registry(
                 format!("{} -> {}: {}\\{}\n", time_info, type_name, hkey_text, subkey)
         } else {
                 format!(
-                        "{} -> {} -> {}\\{}\\{} -> {}\n",
+                        "{} -> {}: {}\\{}\\{} -> {}\n",
                         time_info, type_name, hkey_text, subkey, value_name, value
                 )
         };
@@ -183,11 +181,10 @@ fn log_registry(
                 .create(true)
                 .append(true)
                 .open(&log_path)
-                .map_err(|e| format!("Failed to open/create log file: {} - {}", log_path.display(), e))?;
+                .map_err(|e| format!("Failed to open/create log file: {}\nError: {}", log_path.display(), e))?;
 
-        // Write log entry with explicit error handling
         file.write_all(log_entry.as_bytes())
-                .map_err(|e| format!("Failed to write to log file: {} - {}", log_path.display(), e))?;
+                .map_err(|e| format!("Failed to write to log file: {}\nError: {}", log_path.display(), e))?;
 
         Ok(())
 }

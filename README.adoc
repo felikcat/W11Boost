@@ -22,6 +22,8 @@ image:W11Boost_GUI.png[480,360]
 
 Before installing W11Boost, use the https://www.veeam.com/send_license/backup-agent-windows-free/[Veeam Agent] (free); if that link doesn't download then try https://www.veeam.com/backup-agent-windows-free/alt_download.html[this one]. It backs up both your files and Windows itself, so if you decide W11Boost is not for you then you can recover Windows to a previous state (in other words: uninstalling it).
 
+I recommend checking "Minimize Microsoft online data" if you don't care if the way you use Windows is changed, it makes Windows feel less bloated.
+
 == Recommendations
 
 .Other

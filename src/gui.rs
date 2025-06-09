@@ -144,7 +144,7 @@ impl GuiViewModel {
                 if let Some(status) = self.status_display.as_mut() {
                         status.show();
                         status.set_label(&format!(
-                                "W11Boost encountered an error, read its log file for more information.\n\n{}",
+                                "W11Boost encountered an error, take a screenshot of this and post an issue.\n\n{}",
                                 message
                         ));
                         status.redraw();
