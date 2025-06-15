@@ -4,7 +4,7 @@ use crate::common::CREATE_NO_WINDOW;
 
 pub fn run() -> Result<(), Box<dyn Error>> {
         Command::new("wsreset.exe")
-                .args(&["-i"])
+                .args(["-i"])
                 .creation_flags(CREATE_NO_WINDOW)
                 .output()?;
 

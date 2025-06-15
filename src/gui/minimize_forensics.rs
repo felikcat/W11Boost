@@ -84,7 +84,7 @@ pub fn run() -> Result<(), Box<dyn Error>> {
         set_dword(
                 &hkcu,
                 r"SOFTWARE\Policies\Microsoft\Windows\AppCompat",
-                "DisableAPISamping",
+                "DisableAPISampling",
                 1,
         )?;
 

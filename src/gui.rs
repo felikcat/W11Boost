@@ -13,19 +13,22 @@ use fltk::{
         dialog,
         enums::{self, Align},
         frame::Frame,
-        prelude::{GroupExt, WidgetBase, WidgetExt, WindowExt},
+        prelude::{FltkError, GroupExt, WidgetBase, WidgetExt, WindowExt},
         window::Window,
 };
 use fltk_theme::{ColorTheme, color_themes};
 use std::sync::OnceLock;
 use std::{collections::HashMap, error::Error};
+use strum::IntoEnumIterator;
+use strum_macros::EnumIter;
+use thiserror::Error;
 
 const WINDOW_WIDTH: i32 = 640;
 const WINDOW_HEIGHT: i32 = 480;
 const TOP_PADDING: i32 = 4;
 const FONT_PATH: &str = "C:\\Windows\\Fonts\\segoeui.ttf";
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Clone, PartialEq)]
 enum ViewState {
         MainMenu,
         Applying,
@@ -42,7 +45,7 @@ struct CheckboxConfig {
         height: i32,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Clone, PartialEq, Eq, Hash, EnumIter)]
 enum CheckboxType {
         MinimizeForensics,
         MinimizeOnlineData,
@@ -53,12 +56,96 @@ enum CheckboxType {
         InstallAppxSupport,
 }
 
+#[derive(Error, Debug)]
+pub enum AppError {
+        #[error("GUI initialization failed.\nReason: {reason}")]
+        GuiInit { reason: String },
+
+        #[error("GUI runtime failed.\nError: {0}")]
+        GuiRuntime(#[from] FltkError),
+}
+
+impl CheckboxType {
+        fn config(&self) -> CheckboxConfig {
+                let checkbox_height = WINDOW_HEIGHT / 12;
+
+                match self {
+                        CheckboxType::MinimizeForensics => CheckboxConfig {
+                                label: "Minimize forensics / local data",
+                                run_fn: minimize_forensics::run,
+                                error_name: "minimize_forensics",
+                                x: 0,
+                                y: TOP_PADDING,
+                                width: WINDOW_WIDTH / 2,
+                                height: checkbox_height,
+                        },
+                        CheckboxType::MinimizeOnlineData => CheckboxConfig {
+                                label: "Minimize Microsoft online data",
+                                run_fn: minimize_online_data_collection::run,
+                                error_name: "minimize_online_data_collection",
+                                x: 0,
+                                y: TOP_PADDING + checkbox_height + 2,
+                                width: WINDOW_WIDTH / 2,
+                                height: checkbox_height,
+                        },
+                        CheckboxType::DisableRecall => CheckboxConfig {
+                                label: "Disable Windows Recall",
+                                run_fn: disable_recall::run,
+                                error_name: "disable_recall",
+                                x: 0,
+                                y: TOP_PADDING + checkbox_height * 2 + 4,
+                                width: WINDOW_WIDTH / 2,
+                                height: checkbox_height,
+                        },
+                        CheckboxType::DisableSleepAndHibernate => CheckboxConfig {
+                                label: "Disable sleep and hibernate",
+                                run_fn: disable_sleep::run,
+                                error_name: "disable_sleep",
+                                x: 0,
+                                y: TOP_PADDING + checkbox_height * 3 + 6,
+                                width: WINDOW_WIDTH / 2,
+                                height: checkbox_height,
+                        },
+                        CheckboxType::InstallMicrosoftStore => CheckboxConfig {
+                                label: "Install Microsoft Store",
+                                run_fn: reset_windows_store::run,
+                                error_name: "reset_windows_store",
+                                x: 0,
+                                y: TOP_PADDING + checkbox_height * 4 + 8,
+                                width: WINDOW_WIDTH / 2,
+                                height: checkbox_height,
+                        },
+                        CheckboxType::NonIntrusiveTweaks => CheckboxConfig {
+                                label: "Use non-intrusive tweaks",
+                                run_fn: non_intrusive_tweaks::run,
+                                error_name: "non_intrusive_tweaks",
+                                x: 0,
+                                y: TOP_PADDING + checkbox_height * 5 + 10,
+                                width: WINDOW_WIDTH / 2,
+                                height: checkbox_height,
+                        },
+                        CheckboxType::InstallAppxSupport => CheckboxConfig {
+                                label: "Install support for UWP and WinGet",
+                                run_fn: install_appx_support::run,
+                                error_name: "install_appx_support",
+                                x: 0,
+                                y: TOP_PADDING + checkbox_height * 6 + 12,
+                                width: WINDOW_WIDTH / 2,
+                                height: checkbox_height,
+                        },
+                }
+        }
+}
+
 static CHECKBOX_CONFIGS: OnceLock<HashMap<CheckboxType, CheckboxConfig>> = OnceLock::new();
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Clone, PartialEq, Eq, Hash)]
 enum ButtonType {
         Apply,
 }
+
+const DISPLAY_TIMEOUT_SUCCESS: f64 = 5.0;
+const DISPLAY_TIMEOUT_ERROR: f64 = 10.0;
 
 struct GuiViewModel {
         checkboxes: HashMap<CheckboxType, CheckButton>,
@@ -123,14 +210,12 @@ impl GuiViewModel {
 
                 if let Some(status) = self.status_display.as_mut() {
                         status.show();
-                        status.set_label(&format!(
-                                "W11Boost has successfully finished applying changes. Reboot for them to take full effect."
-                        ));
+                        status.set_label("W11Boost has successfully finished applying changes. Reboot for them to take full effect.");
                         status.redraw();
                 }
 
                 app::flush();
-                app::add_timeout3(5.0, |_| {
+                app::add_timeout3(DISPLAY_TIMEOUT_SUCCESS, |_| {
                         fltk_observe::with_state_mut(|state: &mut GuiViewModel| {
                                 state.set_view(ViewState::MainMenu);
                         });
@@ -153,7 +238,7 @@ impl GuiViewModel {
                 // Force GUI to process all pending events and render
                 app::flush();
 
-                app::add_timeout3(10.0, |_| {
+                app::add_timeout3(DISPLAY_TIMEOUT_ERROR, |_| {
                         fltk_observe::with_state_mut(|state: &mut GuiViewModel| {
                                 state.set_view(ViewState::MainMenu);
                         });
@@ -212,7 +297,7 @@ impl GuiViewModel {
                                         return;
                                 }
                         }
-                        
+
                         self.set_view(ViewState::Success);
                 }
         }
@@ -223,7 +308,7 @@ struct GuiView {
         status_display: Frame,
 }
 impl GuiView {
-        fn new() -> Self {
+        fn new() -> Result<Self, AppError> {
                 let mut wind = Window::default()
                         .with_label("W11Boost")
                         .with_size(WINDOW_WIDTH, WINDOW_HEIGHT)
@@ -231,13 +316,7 @@ impl GuiView {
 
                 wind.set_border(true);
 
-                let mut apply = Button::new(
-                        0,
-                        0,
-                        WINDOW_WIDTH - 4,
-                        (WINDOW_HEIGHT * 14) / 100,
-                        "Apply W11Boost",
-                );
+                let mut apply = Button::new(0, 0, WINDOW_WIDTH - 4, (WINDOW_HEIGHT * 14) / 100, "Apply W11Boost");
 
                 let apply_height = apply.height();
                 apply.set_pos(2, WINDOW_HEIGHT - apply_height - 2);
@@ -290,11 +369,11 @@ impl GuiView {
 
                 wind.center_screen();
 
-                Self {
+                Ok(Self {
                         checkboxes,
                         buttons,
                         status_display,
-                }
+                })
         }
 }
 
@@ -302,19 +381,23 @@ struct GuiApp {
         app: app::App,
 }
 impl GuiApp {
-        fn new() -> Self {
+        fn new() -> Result<Self, AppError> {
                 use fltk_observe::{Runner, WidgetObserver};
                 let app = app::App::default()
                         .with_scheme(app::Scheme::Gtk)
-                        .use_state(|| GuiViewModel::new())
-                        .unwrap();
+                        .use_state(GuiViewModel::new)
+                        .ok_or_else(|| AppError::GuiInit {
+                                reason: "Failed to initialize app with state".to_string(),
+                        })?;
 
-                app.load_font("C:\\Windows\\Fonts\\segoeui.ttf").unwrap();
+                app.load_font("C:\\Windows\\Fonts\\segoeui.ttf")?;
 
                 let widget_theme = ColorTheme::new(color_themes::BLACK_THEME);
                 widget_theme.apply();
 
-                let mut gv = GuiView::new();
+                let mut gv = GuiView::new().map_err(|e| AppError::GuiInit {
+                        reason: format!("Failed to initalize GuiView in GuiApp.\nError: {}", e),
+                })?;
 
                 if let Some(apply_btn) = gv.buttons.get_mut(&ButtonType::Apply) {
                         apply_btn.set_action(GuiViewModel::apply);
@@ -323,118 +406,23 @@ impl GuiApp {
                 fltk_observe::with_state_mut(|state: &mut GuiViewModel| {
                         state.set_ui_elements(gv.checkboxes, gv.buttons, gv.status_display);
                 });
-                Self { app }
+
+                Ok(Self { app })
         }
 
-        fn run(&self) {
-                self.app.run().unwrap();
+        fn run(&self) -> Result<(), AppError> {
+                self.app.run()?;
+                Ok(())
         }
 
         fn get_checkbox_configs() -> &'static HashMap<CheckboxType, CheckboxConfig> {
-                let checkbox_height = WINDOW_HEIGHT / 12;
-
-                CHECKBOX_CONFIGS.get_or_init(|| {
-                        let mut map = HashMap::new();
-
-                        map.insert(
-                                CheckboxType::MinimizeForensics,
-                                CheckboxConfig {
-                                        label: "Minimize forensics / local data",
-                                        run_fn: minimize_forensics::run,
-                                        error_name: "minimize_forensics",
-                                        x: 0,
-                                        y: TOP_PADDING,
-                                        width: WINDOW_WIDTH / 2,
-                                        height: checkbox_height,
-                                },
-                        );
-
-                        map.insert(
-                                CheckboxType::MinimizeOnlineData,
-                                CheckboxConfig {
-                                        label: "Minimize Microsoft online data",
-                                        run_fn: minimize_online_data_collection::run,
-                                        error_name: "minimize_online_data_collection",
-                                        x: 0,
-                                        y: TOP_PADDING + checkbox_height + 2,
-                                        width: WINDOW_WIDTH / 2,
-                                        height: checkbox_height,
-                                },
-                        );
-
-                        map.insert(
-                                CheckboxType::DisableRecall,
-                                CheckboxConfig {
-                                        label: "Disable Windows Recall",
-                                        run_fn: disable_recall::run,
-                                        error_name: "disable_recall",
-                                        x: 0,
-                                        y: TOP_PADDING + checkbox_height * 2 + 4,
-                                        width: WINDOW_WIDTH / 2,
-                                        height: checkbox_height,
-                                },
-                        );
-
-                        map.insert(
-                                CheckboxType::DisableSleepAndHibernate,
-                                CheckboxConfig {
-                                        label: "Disable sleep and hibernate",
-                                        run_fn: disable_sleep::run,
-                                        error_name: "disable_sleep",
-                                        x: 0,
-                                        y: TOP_PADDING + checkbox_height * 3 + 6,
-                                        width: WINDOW_WIDTH / 2,
-                                        height: checkbox_height,
-                                },
-                        );
-
-                        map.insert(
-                                CheckboxType::InstallMicrosoftStore,
-                                CheckboxConfig {
-                                        label: "Install Microsoft Store",
-                                        run_fn: reset_windows_store::run,
-                                        error_name: "reset_windows_store",
-                                        x: 0,
-                                        y: TOP_PADDING + checkbox_height * 4 + 8,
-                                        width: WINDOW_WIDTH / 2,
-                                        height: checkbox_height,
-                                },
-                        );
-
-                        map.insert(
-                                CheckboxType::NonIntrusiveTweaks,
-                                CheckboxConfig {
-                                        label: "Use non-intrusive tweaks",
-                                        run_fn: non_intrusive_tweaks::run,
-                                        error_name: "non_intrusive_tweaks",
-                                        x: 0,
-                                        y: TOP_PADDING + checkbox_height * 5 + 10,
-                                        width: WINDOW_WIDTH / 2,
-                                        height: checkbox_height,
-                                },
-                        );
-
-                        map.insert(
-                                CheckboxType::InstallAppxSupport,
-                                CheckboxConfig {
-                                        label: "Install support for UWP and WinGet",
-                                        run_fn: install_appx_support::run,
-                                        error_name: "install_appx_support",
-                                        x: 0,
-                                        y: TOP_PADDING + checkbox_height * 6 + 12,
-                                        width: WINDOW_WIDTH / 2,
-                                        height: checkbox_height,
-                                },
-                        );
-
-                        map
-                })
+                CHECKBOX_CONFIGS.get_or_init(|| CheckboxType::iter().map(|ct| (ct.clone(), ct.config())).collect())
         }
 }
 
 pub fn draw_gui() -> Result<(), Box<dyn Error>> {
-        let ga = GuiApp::new();
-        ga.run();
+        let ga = GuiApp::new()?;
+        ga.run()?;
 
         Ok(())
 }

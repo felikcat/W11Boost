@@ -1,20 +1,87 @@
 use chrono::{Datelike, Local, Timelike};
-use fltk::app;
+use fltk::{app, dialog};
+use thiserror::Error;
 use std::error::Error;
 use std::fs::{self, OpenOptions};
 use std::io::Write;
 use std::path::PathBuf;
+use std::sync::OnceLock;
+use winsafe::co::ERROR;
 use winsafe::{
         self as w, HKEY, RegistryValue,
         co::{self, KNOWNFOLDERID},
         prelude::*,
 };
 
+static CACHE: Cache = Cache::new();
+
 pub const CREATE_NO_WINDOW: u32 = 0x08000000;
+
+struct Cache {
+        cache: OnceLock<PathBuf>,
+}
+
+impl Cache {
+        const fn new() -> Self {
+                Self { cache: OnceLock::new() }
+        }
+
+        fn lp(&self) -> &PathBuf {
+                self.cache.get_or_init(log_path)
+        }
+}
+
+fn log_path() -> PathBuf {
+        let desktop_dir = get_windows_path(&KNOWNFOLDERID::Desktop).unwrap_or_else(|e| {
+                dialog::alert(
+                        center().0,
+                        center().1,
+                        &format!(
+                                "Failed to get the Desktop Windows path, W11Boost will close.\nError: {}",
+                                e
+                        ),
+                );
+                // We want the program to force close in this case.
+                panic!("Windows path failure")
+        });
+
+        let mut log_path = PathBuf::from(desktop_dir);
+        log_path.push(r"W11Boost Logs");
+
+        log_path
+}
 
 pub fn get_windows_path(folder_id: &KNOWNFOLDERID) -> Result<String, Box<dyn Error>> {
         let the_path = w::SHGetKnownFolderPath(folder_id, co::KF::DEFAULT, None)?;
         Ok(the_path)
+}
+
+#[derive(Debug, Error)]
+pub enum RegistryError {
+        #[error("Failed to open registry key: {hkey}\\{subkey}\\{value_name}\nError: {source}")]
+        KeyOpenFailed {
+                hkey: String,
+                subkey: String,
+                value_name: String,
+                #[source]
+                source: ERROR,
+        },
+        #[error("Failed to set registry value: {hkey}\\{subkey}\\{value_name} = {value}\nError: {source}")]
+        ValueSetFailed {
+                hkey: String,
+                subkey: String,
+                value_name: String,
+                value: String,
+                #[source]
+                source: ERROR,
+        },
+        #[error("Failed to delete subkey: {hkey}\\{subkey}\nError: {source}")]
+        SubkeyRemoveFailed {
+                hkey: String,
+                subkey: String,
+                #[source]
+                source: ERROR,
+        },
 }
 
 pub fn set_dword(hkey: &HKEY, subkey: &str, value_name: &str, value: u32) -> Result<(), Box<dyn Error>> {
@@ -23,88 +90,92 @@ pub fn set_dword(hkey: &HKEY, subkey: &str, value_name: &str, value: u32) -> Res
 
         let (subkey, _) = hkey
                 .RegCreateKeyEx(subkey, None, co::REG_OPTION::NON_VOLATILE, co::KEY::WRITE, None)
-                .map_err(|e| {
-                        format!(
-                                "Failed to open a DWORD in key: {}\\{}\\{}\nError: {}",
-                                hkey_text, o_subkey, value_name, e
-                        )
+                .map_err(|source| RegistryError::KeyOpenFailed {
+                        hkey: hkey_text.to_string(),
+                        subkey: subkey.to_string(),
+                        value_name: value_name.to_string(),
+                        source,
                 })?;
 
         subkey.RegSetValueEx(Some(value_name), RegistryValue::Dword(value))
-                .map_err(|e| {
-                        format!(
-                                "Failed to set DWORD value in key: {}\\{}\\{}\nError: {}",
-                                hkey_text, o_subkey, value_name, e
-                        )
+                .map_err(|source| RegistryError::ValueSetFailed {
+                        hkey: hkey_text.to_string(),
+                        subkey: subkey.to_string(),
+                        value_name: value_name.to_string(),
+                        value: value.to_string(),
+                        source,
                 })?;
 
-        match log_registry(hkey, o_subkey, value_name, &value.to_string(), "DWORD") {
-                Ok(_) => Ok(()),
-                Err(e) => Err(format!(
+        log_registry(hkey, o_subkey, value_name, &value.to_string(), "DWORD").map_err(|e| {
+                format!(
                         "Failed to log DWORD change for key: {}\\{}\\{} -> {}\nError: {}",
                         hkey_text, o_subkey, value_name, value, e
-                )),
-        }?;
+                )
+        })?;
 
         Ok(())
 }
 
 pub fn set_string(hkey: &HKEY, subkey: &str, value_name: &str, value: &str) -> Result<(), Box<dyn Error>> {
         let o_subkey = subkey;
-        let hkey_text = get_hkey_text(hkey).unwrap();
+        let hkey_text = get_hkey_text(hkey)?;
 
         let (subkey, _) = hkey
                 .RegCreateKeyEx(subkey, None, co::REG_OPTION::NON_VOLATILE, co::KEY::WRITE, None)
-                .map_err(|e| {
-                        format!(
-                                "Failed to open a Sz in key: {}\\{}\\{}\nError: {}",
-                                hkey_text, o_subkey, value_name, e
-                        )
+                .map_err(|source| RegistryError::KeyOpenFailed {
+                        hkey: hkey_text.to_string(),
+                        subkey: subkey.to_string(),
+                        value_name: value_name.to_string(),
+                        source,
                 })?;
 
         let value = value.to_string();
         subkey.RegSetValueEx(Some(value_name), RegistryValue::Sz(value.clone()))
-                .map_err(|e| {
-                        format!(
-                                "Failed to set Sz value in key: {}\\{}\\{}\nError: {}",
-                                hkey_text, o_subkey, value_name, e
-                        )
+                .map_err(|source| RegistryError::ValueSetFailed {
+                        hkey: hkey_text.to_string(),
+                        subkey: subkey.to_string(),
+                        value_name: value_name.to_string(),
+                        value: value.to_string(),
+                        source,
                 })?;
 
-        match log_registry(hkey, o_subkey, value_name, &value, "String") {
-                Ok(_) => Ok(()),
-                Err(e) => Err(format!(
+        log_registry(hkey, o_subkey, value_name, &value, "String").map_err(|e| {
+                format!(
                         "Failed to log Sz change for key: {}\\{}\\{} -> {}\nError: {}",
                         hkey_text, o_subkey, value_name, value, e
-                )),
-        }?;
+                )
+        })?;
 
         Ok(())
 }
 
 pub fn remove_subkey(hkey: &HKEY, subkey: &str) -> Result<(), Box<dyn Error>> {
         let o_subkey = subkey;
-        let hkey_text = get_hkey_text(hkey).unwrap();
+        let hkey_text = get_hkey_text(hkey)?;
 
         match hkey.RegDeleteTree(Some(subkey)) {
                 Ok(_) => Ok(()),
-                Err(e) if e == w::co::ERROR::FILE_NOT_FOUND => Ok(()),
-                Err(e) => Err(format!("Failed to delete subkey: {}\\{} - Error: {}", hkey_text, o_subkey, e)),
+                Err(e) if e == ERROR::FILE_NOT_FOUND => Ok(()),
+                Err(source) => Err(RegistryError::SubkeyRemoveFailed {
+                        hkey: hkey_text.to_string(),
+                        subkey: o_subkey.to_string(),
+                        source,
+                })
+                .into(),
         }?;
 
-        match log_registry(hkey, o_subkey, "->", "", "Removed") {
-                Ok(_) => Ok(()),
-                Err(e) => Err(format!(
+        log_registry(hkey, o_subkey, "->", "", "Removed").map_err(|e| {
+                format!(
                         "Failed to log removal of key: {}\\{}\nError: {}",
                         hkey_text, o_subkey, e
-                )),
-        }?;
+                )
+        })?;
         Ok(())
 }
 
 pub fn check_dword(hkey: &HKEY, subkey: &str, value_name: &str, expected_value: u32) -> Result<bool, Box<dyn Error>> {
         let o_subkey = subkey;
-        let hkey_text = get_hkey_text(hkey).unwrap();
+        let hkey_text = get_hkey_text(hkey)?;
 
         let subkey = match hkey.RegGetValue(Some(subkey), Some(value_name), co::RRF::RT_DWORD) {
                 Ok(value) => value,
@@ -121,7 +192,7 @@ pub fn check_dword(hkey: &HKEY, subkey: &str, value_name: &str, expected_value: 
         if let RegistryValue::Dword(value) = subkey {
                 if value != expected_value { Ok(false) } else { Ok(true) }
         } else {
-                return Err(format!("Expected DWORD value for: {}\\{}\\{}", hkey_text, o_subkey, value_name).into())
+                Err(format!("Expected DWORD value for: {}\\{}\\{}", hkey_text, o_subkey, value_name).into())
         }
 }
 
@@ -145,13 +216,10 @@ fn log_registry(
         type_name: &str,
 ) -> Result<(), Box<dyn Error>> {
         let hkey_text = get_hkey_text(hkey)?;
-
-        let desktop_dir = get_windows_path(&KNOWNFOLDERID::Desktop)?;
-        let mut log_path = PathBuf::from(desktop_dir);
-        log_path.push("W11Boost Logs");
+        let log_path = CACHE.lp();
 
         if !log_path.exists() {
-                fs::create_dir_all(&log_path)
+                fs::create_dir_all(log_path.as_path())
                         .map_err(|e| format!("Failed to create log directory: {}\nError: {}", log_path.display(), e))?;
         }
 
@@ -175,16 +243,29 @@ fn log_registry(
                 )
         };
 
-        log_path.push("Registry.log");
+        let log_file = log_path.join("Registry.log");
 
         let mut file = OpenOptions::new()
                 .create(true)
                 .append(true)
-                .open(&log_path)
-                .map_err(|e| format!("Failed to open/create log file: {}\nError: {}", log_path.display(), e))?;
+                .open(log_file.as_path())
+                .map_err(|e| {
+                        format!(
+                                "Failed to open/create log file: {}{}\nError: {}",
+                                log_path.display(),
+                                log_file.display(),
+                                e
+                        )
+                })?;
 
-        file.write_all(log_entry.as_bytes())
-                .map_err(|e| format!("Failed to write to log file: {}\nError: {}", log_path.display(), e))?;
+        file.write_all(log_entry.as_bytes()).map_err(|e| {
+                format!(
+                        "Failed to write to log file: {}{}\nError: {}",
+                        log_path.display(),
+                        log_file.display(),
+                        e
+                )
+        })?;
 
         Ok(())
 }

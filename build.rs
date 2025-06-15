@@ -1,7 +1,9 @@
 extern crate winresource;
+use std::error::Error;
+
 use winresource::WindowsResource;
 
-fn main() {
+fn main() -> Result<(), Box<dyn Error>> {
         let mut res = WindowsResource::new();
 
         // Allowing for native DPI scaling and setting the Administrator requirement
@@ -23,5 +25,6 @@ fn main() {
   </asmv3:application>
 </assembly>"#,
         );
-        res.compile().unwrap();
+        res.compile()?;
+        Ok(())
 }
