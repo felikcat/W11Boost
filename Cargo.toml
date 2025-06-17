@@ -26,13 +26,13 @@ fltk-observe = "0.1.7"
 chrono = "0.4.41"
 curl = "0.4.48"
 strum_macros = "0.27.1"
-thiserror = "2.0.12"
+anyhow = "1.0.98"
 
 [build-dependencies]
 winresource = "0.1.22"
 
 [dependencies.strum]
-version ="0.27.1"
+version = "0.27.1"
 features = ["derive"]
 
 [dependencies.winsafe]

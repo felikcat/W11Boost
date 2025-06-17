@@ -7,21 +7,21 @@ mod non_intrusive_tweaks;
 mod reset_windows_store;
 
 use crate::common::center;
+use anyhow::anyhow;
 use fltk::{
         app::{self},
         button::{Button, CheckButton},
         dialog,
         enums::{self, Align},
         frame::Frame,
-        prelude::{FltkError, GroupExt, WidgetBase, WidgetExt, WindowExt},
+        prelude::{GroupExt, WidgetBase, WidgetExt, WindowExt},
         window::Window,
 };
 use fltk_theme::{ColorTheme, color_themes};
+use std::collections::HashMap;
 use std::sync::OnceLock;
-use std::{collections::HashMap, error::Error};
 use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
-use thiserror::Error;
 
 const WINDOW_WIDTH: i32 = 640;
 const WINDOW_HEIGHT: i32 = 480;
@@ -29,15 +29,17 @@ const TOP_PADDING: i32 = 4;
 const FONT_PATH: &str = "C:\\Windows\\Fonts\\segoeui.ttf";
 
 #[derive(Clone, PartialEq)]
-enum ViewState {
+enum ViewState
+{
         MainMenu,
         Applying,
         Success,
 }
 
-struct CheckboxConfig {
+struct CheckboxConfig
+{
         label: &'static str,
-        run_fn: fn() -> Result<(), Box<dyn std::error::Error>>,
+        run_fn: fn() -> anyhow::Result<()>,
         error_name: &'static str,
         x: i32,
         y: i32,
@@ -46,7 +48,8 @@ struct CheckboxConfig {
 }
 
 #[derive(Clone, PartialEq, Eq, Hash, EnumIter)]
-enum CheckboxType {
+enum CheckboxType
+{
         MinimizeForensics,
         MinimizeOnlineData,
         DisableRecall,
@@ -56,17 +59,10 @@ enum CheckboxType {
         InstallAppxSupport,
 }
 
-#[derive(Error, Debug)]
-pub enum AppError {
-        #[error("GUI initialization failed.\nReason: {reason}")]
-        GuiInit { reason: String },
-
-        #[error("GUI runtime failed.\nError: {0}")]
-        GuiRuntime(#[from] FltkError),
-}
-
-impl CheckboxType {
-        fn config(&self) -> CheckboxConfig {
+impl CheckboxType
+{
+        fn config(&self) -> CheckboxConfig
+        {
                 let checkbox_height = WINDOW_HEIGHT / 12;
 
                 match self {
@@ -140,21 +136,25 @@ impl CheckboxType {
 static CHECKBOX_CONFIGS: OnceLock<HashMap<CheckboxType, CheckboxConfig>> = OnceLock::new();
 
 #[derive(Clone, PartialEq, Eq, Hash)]
-enum ButtonType {
+enum ButtonType
+{
         Apply,
 }
 
 const DISPLAY_TIMEOUT_SUCCESS: f64 = 5.0;
 const DISPLAY_TIMEOUT_ERROR: f64 = 10.0;
 
-struct GuiViewModel {
+struct GuiViewModel
+{
         checkboxes: HashMap<CheckboxType, CheckButton>,
         buttons: HashMap<ButtonType, Button>,
         status_display: Option<Frame>,
         current_view: ViewState,
 }
-impl GuiViewModel {
-        fn new() -> Self {
+impl GuiViewModel
+{
+        fn new() -> Self
+        {
                 Self {
                         checkboxes: HashMap::new(),
                         buttons: HashMap::new(),
@@ -163,7 +163,8 @@ impl GuiViewModel {
                 }
         }
 
-        fn update_ui(&mut self) {
+        fn update_ui(&mut self)
+        {
                 match self.current_view {
                         ViewState::MainMenu => self.toggle_main_screen(true),
                         ViewState::Applying => self.show_applying_screen(),
@@ -171,12 +172,14 @@ impl GuiViewModel {
                 }
         }
 
-        fn set_view(&mut self, view: ViewState) {
+        fn set_view(&mut self, view: ViewState)
+        {
                 self.current_view = view;
                 self.update_ui();
         }
 
-        fn toggle_main_screen(&mut self, visible: bool) {
+        fn toggle_main_screen(&mut self, visible: bool)
+        {
                 if let (Some(status),) = (self.status_display.as_mut(),) {
                         // This is implicit, since there are no other use cases
                         for button in self.buttons.values_mut() {
@@ -204,7 +207,8 @@ impl GuiViewModel {
                 }
         }
 
-        fn show_success_screen(&mut self) {
+        fn show_success_screen(&mut self)
+        {
                 app::wait();
                 self.toggle_main_screen(false);
 
@@ -222,15 +226,15 @@ impl GuiViewModel {
                 });
         }
 
-        fn show_error_screen(&mut self, message: String) {
+        fn show_error_screen(&mut self, message: String)
+        {
                 app::wait();
                 self.toggle_main_screen(false);
 
                 if let Some(status) = self.status_display.as_mut() {
                         status.show();
                         status.set_label(&format!(
-                                "W11Boost encountered an error, take a screenshot of this and post an issue.\n\n{}",
-                                message
+                                "W11Boost encountered an error, take a screenshot of this and post an issue.\n\n{message}"
                         ));
                         status.redraw();
                 }
@@ -244,7 +248,8 @@ impl GuiViewModel {
                         });
                 });
         }
-        fn show_applying_screen(&mut self) {
+        fn show_applying_screen(&mut self)
+        {
                 app::wait(); // Applying view won't render correctly otherwise
                 self.toggle_main_screen(false);
 
@@ -262,13 +267,15 @@ impl GuiViewModel {
                 checkboxes: HashMap<CheckboxType, CheckButton>,
                 buttons: HashMap<ButtonType, Button>,
                 status_display: Frame,
-        ) {
+        )
+        {
                 self.checkboxes = checkboxes;
                 self.buttons = buttons;
                 self.status_display = Some(status_display);
         }
 
-        fn apply(&mut self, _btn: &Button) {
+        fn apply(&mut self, _btn: &Button)
+        {
                 let choice = dialog::choice2(
                         center().0,
                         center().1,
@@ -293,7 +300,8 @@ impl GuiViewModel {
                                 }
 
                                 if let Err(e) = (checkbox_config.run_fn)() {
-                                        self.show_error_screen(format!("{} failed: {}", checkbox_config.error_name, e));
+                                        self.show_error_screen(format!("{} failed: {e}", checkbox_config.error_name));
+                                        
                                         return;
                                 }
                         }
@@ -302,13 +310,16 @@ impl GuiViewModel {
                 }
         }
 }
-struct GuiView {
+struct GuiView
+{
         buttons: HashMap<ButtonType, Button>,
         checkboxes: HashMap<CheckboxType, CheckButton>,
         status_display: Frame,
 }
-impl GuiView {
-        fn new() -> Result<Self, AppError> {
+impl GuiView
+{
+        fn new() -> anyhow::Result<Self>
+        {
                 let mut wind = Window::default()
                         .with_label("W11Boost")
                         .with_size(WINDOW_WIDTH, WINDOW_HEIGHT)
@@ -377,27 +388,27 @@ impl GuiView {
         }
 }
 
-struct GuiApp {
+struct GuiApp
+{
         app: app::App,
 }
-impl GuiApp {
-        fn new() -> Result<Self, AppError> {
+impl GuiApp
+{
+        fn new() -> anyhow::Result<Self>
+        {
                 use fltk_observe::{Runner, WidgetObserver};
                 let app = app::App::default()
                         .with_scheme(app::Scheme::Gtk)
                         .use_state(GuiViewModel::new)
-                        .ok_or_else(|| AppError::GuiInit {
-                                reason: "Failed to initialize app with state".to_string(),
-                        })?;
+                        .ok_or_else(|| anyhow!("Failed to initialize app with state."))?;
 
                 app.load_font("C:\\Windows\\Fonts\\segoeui.ttf")?;
 
                 let widget_theme = ColorTheme::new(color_themes::BLACK_THEME);
                 widget_theme.apply();
 
-                let mut gv = GuiView::new().map_err(|e| AppError::GuiInit {
-                        reason: format!("Failed to initalize GuiView in GuiApp.\nError: {}", e),
-                })?;
+                let mut gv = GuiView::new()
+                        .map_err(|e| anyhow!("Failed to create a new GuiView inside of GuiApp.\nError: {}", e))?;
 
                 if let Some(apply_btn) = gv.buttons.get_mut(&ButtonType::Apply) {
                         apply_btn.set_action(GuiViewModel::apply);
@@ -410,18 +421,22 @@ impl GuiApp {
                 Ok(Self { app })
         }
 
-        fn run(&self) -> Result<(), AppError> {
-                self.app.run()?;
+        fn run(&self) -> anyhow::Result<()>
+        {
+                self.app.run()
+                        .map_err(|e| anyhow!("Failed to run GuiApp.\nError: {}", e))?;
                 Ok(())
         }
 
-        fn get_checkbox_configs() -> &'static HashMap<CheckboxType, CheckboxConfig> {
+        fn get_checkbox_configs() -> &'static HashMap<CheckboxType, CheckboxConfig>
+        {
                 CHECKBOX_CONFIGS.get_or_init(|| CheckboxType::iter().map(|ct| (ct.clone(), ct.config())).collect())
         }
 }
 
-pub fn draw_gui() -> Result<(), Box<dyn Error>> {
-        let ga = GuiApp::new()?;
+pub fn draw_gui() -> anyhow::Result<()>
+{
+        let ga = GuiApp::new().map_err(|e| anyhow!("Failed to initialize GuiApp in draw_gui.\nError: {}", e))?;
         ga.run()?;
 
         Ok(())

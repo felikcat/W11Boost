@@ -1,5 +1,4 @@
 use crate::common::*;
-use std::error::Error;
 use winsafe::{HKEY, prelude::advapi_Hkey};
 
 /* Ignored for security or usability reasons:
@@ -8,7 +7,8 @@ use winsafe::{HKEY, prelude::advapi_Hkey};
     - Syncing to a Microsoft account
 */
 
-pub fn run() -> Result<(), Box<dyn Error>> {
+pub fn run() -> anyhow::Result<()>
+{
         let hklm = HKEY::LOCAL_MACHINE;
 
         // Don't allow online tips.

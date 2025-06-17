@@ -1,5 +1,5 @@
 use crate::common::*;
-use std::{error::Error, os::windows::process::CommandExt};
+use std::os::windows::process::CommandExt;
 use std::process::Command;
 use winsafe::{HKEY, prelude::advapi_Hkey};
 
@@ -8,7 +8,8 @@ use winsafe::{HKEY, prelude::advapi_Hkey};
     - Event Viewer
 */
 
-pub fn run() -> Result<(), Box<dyn Error>> {
+pub fn run() -> anyhow::Result<()>
+{
         let hklm = HKEY::LOCAL_MACHINE;
         let hkcu = HKEY::CURRENT_USER;
 

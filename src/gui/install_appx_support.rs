@@ -1,6 +1,5 @@
 use crate::common::*;
 use curl::easy::Easy;
-use std::error::Error;
 use std::fs::File;
 use std::io::Write;
 use std::os::windows::process::CommandExt;
@@ -9,7 +8,8 @@ use std::process::Command;
 use std::time::Duration;
 use winsafe::co::KNOWNFOLDERID;
 
-pub fn run() -> Result<(), Box<dyn Error>> {
+pub fn run() -> anyhow::Result<()>
+{
         let desktop_dir = get_windows_path(&KNOWNFOLDERID::PublicDesktop)?;
         let mut path = PathBuf::from(desktop_dir);
 

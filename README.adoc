@@ -26,15 +26,23 @@ I recommend checking "Minimize Microsoft online data" if you don't care if the w
 
 == Recommendations
 
-.Other
-. Install https://winaerotweaker.com/[Winaero Tweaker] to set personal preferences.
+=== Windows
+. Install the following: 
+- https://winaerotweaker.com/[Winaero Tweaker] to set personal preferences.
+- https://www.startallback.com/[StartAllBack] to speed up Windows 11, and also restore old interface elements from Windows 7 or 10.
+- https://github.com/Xanashi/Icaros[Icaros] for better and faster image & video thumbnails. Be sure to activate "Thumbnailing", "Properties", and "Cache" (use Dynamic) in IcarosConfig. You can set the locations for "Cache" to all your disks/drives and build the cache for them in advance.
+- https://github.com/tnodir/fort[Fort Firewall] to reduce the amount of network traffic to and from Microsoft.
 
 . To reduce third-party program telemetry, download https://github.com/beatcracker/toptout/archive/refs/heads/master.zip[toptout] and open PowerShell as administrator:
 - `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`
-- `.\topout_directory\examples\toptout_pwsh.ps1 -Env -Exec`
+- `.\toptout-master\examples\toptout_pwsh.ps1 -Env -Exec`
 - `Set-ExecutionPolicy -ExecutionPolicy Restricted -Scope CurrentUser`
 
-. If you wish to reduce the amount of network traffic to and from Microsoft, use https://github.com/henrypp/simplewall[simplewall].
+. Replace Consumer OEM apps with their Enterprise variant. Such as replacing Lenovo Vantage with Lenovo Commercial Vantage.
+
+. Third-party anti-malware programs provide better protection, most notably for Kaspersky, ESET, BitDefender, or Sophos, but may have flaws such as slowing down your internet speeds. Be sure to test before and after.
+
+. Keep the number of apps installed to a minimum, and remove unused apps. This reduces your chances of being impacted by https://www.bleepingcomputer.com/news/security/hackers-compromise-3cx-desktop-app-in-a-supply-chain-attack/[supply chain attacks], prevents causing Windows more issues, and might improve FPS stability.
 
 
 === Backups
@@ -63,17 +71,6 @@ image:nvcplui_1.png[]
 . Above 4G Decoding and Resizable BAR.
 ** On ASRock motherboards: C.A.M. (Clever Access Memory)
 . HPET (High Precision Event Timer)
-
-=== Windows
-. Keep the number of apps installed to a minimum, and remove unused apps. This reduces your chances of being impacted by https://www.bleepingcomputer.com/news/security/hackers-compromise-3cx-desktop-app-in-a-supply-chain-attack/[supply chain attacks], prevents causing Windows more issues, and might improve FPS stability.
-
-. If you're okay with installing more software:
-- Install https://www.startallback.com/[StartAllBack] to speed up Windows 11, and also restore old interface elements from Windows 7 or 10.
-- Install https://github.com/Xanashi/Icaros[Icaros] for better and faster image & video thumbnails.
-
-. Replace Consumer OEM apps with their Enterprise variant. Such as replacing Lenovo Vantage with Lenovo Commercial Vantage.
-
-. Third-party anti-malware programs provide better protection, most notably ESET or BitDefender, but may have flaws such as slowing down your internet speeds. Be sure to test before and after.
 
 === Ethernet
 Avoid Realtek 2.5Gbit adapters, as they are much more CPU intensive than Intel 2.5Gbit adapters.

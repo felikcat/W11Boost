@@ -1,9 +1,9 @@
 use crate::common::*;
-use std::error::Error;
 use winsafe::HKEY;
 use winsafe::prelude::*;
 
-pub fn run() -> Result<(), Box<dyn Error>> {
+pub fn run() -> anyhow::Result<()>
+{
         let hklm = HKEY::LOCAL_MACHINE;
 
         // Globally disable hibernation

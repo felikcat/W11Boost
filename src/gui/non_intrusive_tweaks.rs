@@ -1,10 +1,14 @@
 use crate::common::*;
 use std::{
-        error::Error, fs::{self, File}, os::windows::process::CommandExt, path::Path, process::Command
+        fs::{self, File},
+        os::windows::process::CommandExt,
+        path::Path,
+        process::Command,
 };
 use winsafe::{HKEY, SetFileAttributes, co::FILE_ATTRIBUTE, prelude::advapi_Hkey};
 
-pub fn run() -> Result<(), Box<dyn Error>> {
+pub fn run() -> anyhow::Result<()>
+{
         let hklm = HKEY::LOCAL_MACHINE;
         let hkcu = HKEY::CURRENT_USER;
 

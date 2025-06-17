@@ -3,7 +3,8 @@ use std::error::Error;
 
 use winresource::WindowsResource;
 
-fn main() -> Result<(), Box<dyn Error>> {
+fn main() -> Result<(), Box<dyn Error>>
+{
         let mut res = WindowsResource::new();
 
         // Allowing for native DPI scaling and setting the Administrator requirement
