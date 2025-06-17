@@ -1,8 +1,9 @@
 use winsafe::{HKEY, prelude::advapi_Hkey};
+use anyhow::Result;
 
 use crate::common::*;
 
-pub fn run() -> anyhow::Result<()>
+pub fn run() -> Result<()>
 {
         let hklm = HKEY::LOCAL_MACHINE;
 

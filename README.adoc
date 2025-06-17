@@ -10,6 +10,7 @@ ifdef::env-github[]
 endif::[]
 
 == What's different about this compared to other optimizers / debloaters?
+. Can be fully uninstalled without any form of backups.
 . The number one focus of breaking nothing by default, and not assuming what the user wants. +
 Not guaranteed for: Minimize forensics / local data, and Minimize Microsoft online data.
 . Very easy to use.
@@ -19,8 +20,6 @@ Not guaranteed for: Minimize forensics / local data, and Minimize Microsoft onli
 - Primarily it is only to improve the responsiveness and usability of the Windows operating system, to make it feel better than it was prior.
 
 image:W11Boost_GUI.png[480,360]
-
-Before installing W11Boost, use the https://www.veeam.com/send_license/backup-agent-windows-free/[Veeam Agent] (free); if that link doesn't download then try https://www.veeam.com/backup-agent-windows-free/alt_download.html[this one]. It backs up both your files and Windows itself, so if you decide W11Boost is not for you then you can recover Windows to a previous state (in other words: uninstalling it).
 
 I recommend checking "Minimize Microsoft online data" if you don't care if the way you use Windows is changed, it makes Windows feel less bloated.
 
@@ -46,7 +45,7 @@ I recommend checking "Minimize Microsoft online data" if you don't care if the w
 
 
 === Backups
-A free alternative to Veeam Agent is https://www.urbackup.org[UrBackup]; downside is that it doesn't allow you to restore your PC to a previous state. You will need another computer to store backups on, but this will end up costing less long-term than services such as Backblaze, plus you completely own your data.
+Use https://www.veeam.com/send_license/backup-agent-windows-free/[Veeam Agent]. An alternative is https://www.urbackup.org[UrBackup]; downside is that it doesn't allow you to restore your PC to a previous state, and you will need another computer to store backups on. Veeam Agent or UrBackup will end up costing less long-term than services such as Backblaze, and you completely own your data.
 
 Optionally, you can also use https://www.backblaze.com/cloud-backup/personal[Backblaze] for extra redundancy in case of sudden natural disasters, or other situations where you cannot move your backups into a safe location in time.
 

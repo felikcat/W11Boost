@@ -1,8 +1,9 @@
 use std::{os::windows::process::CommandExt, process::Command};
+use anyhow::Result;
 
 use crate::common::CREATE_NO_WINDOW;
 
-pub fn run() -> anyhow::Result<()>
+pub fn run() -> Result<()>
 {
         Command::new("wsreset.exe")
                 .args(["-i"])

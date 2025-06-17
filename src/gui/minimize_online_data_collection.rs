@@ -1,5 +1,6 @@
 use crate::common::*;
 use winsafe::{HKEY, prelude::advapi_Hkey};
+use anyhow::Result;
 
 /* Ignored for security or usability reasons:
     - Find My Device
@@ -7,7 +8,7 @@ use winsafe::{HKEY, prelude::advapi_Hkey};
     - Syncing to a Microsoft account
 */
 
-pub fn run() -> anyhow::Result<()>
+pub fn run() -> Result<()>
 {
         let hklm = HKEY::LOCAL_MACHINE;
 

@@ -7,10 +7,11 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::time::Duration;
 use winsafe::co::KNOWNFOLDERID;
+use anyhow::Result;
 
-pub fn run() -> anyhow::Result<()>
+pub fn run() -> Result<()>
 {
-        let desktop_dir = get_windows_path(&KNOWNFOLDERID::PublicDesktop)?;
+        let desktop_dir = get_windows_path(&KNOWNFOLDERID::Desktop)?;
         let mut path = PathBuf::from(desktop_dir);
 
         let mut easy = Easy::new();
@@ -35,7 +36,7 @@ pub fn run() -> anyhow::Result<()>
         Command::new("powershell.exe")
         .args([
             "-Command",
-            r#"Add-AppxPackage ([Environment]::GetFolderPath("CommonDesktopDirectory") + "\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle")"#
+            r#"Add-AppxPackage ([Environment]::GetFolderPath("DesktopDirectory") + "\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle")"#
         ])
         .creation_flags(CREATE_NO_WINDOW)
         .output()?;

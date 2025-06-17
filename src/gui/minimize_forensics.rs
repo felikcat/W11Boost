@@ -2,13 +2,14 @@ use crate::common::*;
 use std::os::windows::process::CommandExt;
 use std::process::Command;
 use winsafe::{HKEY, prelude::advapi_Hkey};
+use anyhow::Result;
 
 /* Ignored for security reasons:
     - PowerShell module logging
     - Event Viewer
 */
 
-pub fn run() -> anyhow::Result<()>
+pub fn run() -> Result<()>
 {
         let hklm = HKEY::LOCAL_MACHINE;
         let hkcu = HKEY::CURRENT_USER;

@@ -5,12 +5,13 @@ use std::fs::{self, OpenOptions};
 use std::io::Write;
 use std::path::PathBuf;
 use std::sync::OnceLock;
-use winsafe::co::ERROR;
+use winsafe::co::{ERROR, REG};
 use winsafe::{
         self as w, HKEY, RegistryValue,
         co::{self, KNOWNFOLDERID},
         prelude::*,
 };
+use anyhow::Result;
 
 static CACHE: Cache = Cache::new();
 
@@ -36,7 +37,7 @@ impl Cache
 
 fn log_path() -> PathBuf
 {
-        let desktop_dir = get_windows_path(&KNOWNFOLDERID::Desktop).unwrap_or_else(|e| {
+        let documents_dir = get_windows_path(&KNOWNFOLDERID::Documents).unwrap_or_else(|e| {
                 dialog::alert(
                         center().0,
                         center().1,
@@ -46,22 +47,246 @@ fn log_path() -> PathBuf
                 panic!("Windows path failure")
         });
 
-        let mut log_path = PathBuf::from(desktop_dir);
-        log_path.push(r"W11Boost Logs");
+        let mut log_path = PathBuf::from(documents_dir);
+        log_path.push(r"W11Boost - do not remove");
+
+        if !log_path.exists() {
+                let _ = fs::create_dir_all(log_path.as_path())
+                        .map_err(|e| panic!("Failed to create log path.\nError: {e}"));
+        }
 
         log_path
 }
 
-pub fn get_windows_path(folder_id: &KNOWNFOLDERID) -> anyhow::Result<String>
+pub fn get_windows_path(folder_id: &KNOWNFOLDERID) -> Result<String>
 {
         let the_path = w::SHGetKnownFolderPath(folder_id, co::KF::DEFAULT, None)?;
         Ok(the_path)
 }
 
-pub fn set_dword(hkey: &HKEY, subkey: &str, value_name: &str, value: u32) -> anyhow::Result<()>
+pub fn registry_backup(hkey: &HKEY, subkey: &str, value_name: &str, is_removal: bool) -> Result<()>
+{
+        let hkey_text = get_hkey_text(hkey)?;
+        let log_path = CACHE.lp();
+        let backup_file = log_path.join("Registry Backup.log");
+
+        if is_removal {
+                return registry_recursive_backup(hkey, subkey, &backup_file, hkey_text);
+        }
+
+        if backup_file.exists() {
+                let content = fs::read_to_string(&backup_file)?;
+                let key_identifier = format!("{hkey_text}|{subkey}|{value_name}");
+
+                // Skip already backed up registry keys.
+                if content.lines().any(|line| line.starts_with(&key_identifier)) {
+                        return Ok(());
+                }
+        }
+
+        let backup_line = match hkey.RegOpenKeyEx(Some(subkey), co::REG_OPTION::NON_VOLATILE, co::KEY::READ) {
+                Ok(key) => {
+                        // Find the specific value and get its type.
+                        let mut found_value = None;
+                        for value_result in key.RegEnumValue()? {
+                                let (name, reg_type) = value_result?;
+                                if name == value_name {
+                                        found_value = Some(reg_type);
+                                        break;
+                                }
+                        }
+
+                        match found_value {
+                                Some(REG::DWORD) => match key.RegGetValue(None, Some(value_name), co::RRF::RT_DWORD) {
+                                        Ok(RegistryValue::Dword(val)) => {
+                                                format!("{hkey_text}|{subkey}|{value_name}|DWORD:{val}\n")
+                                        }
+                                        _ => anyhow!("Failed to read DWORD value").to_string(),
+                                },
+                                Some(REG::SZ) => match key.RegGetValue(None, Some(value_name), co::RRF::RT_REG_SZ) {
+                                        Ok(RegistryValue::Sz(val)) => {
+                                                format!("{hkey_text}|{subkey}|{value_name}|SZ:{val}\n")
+                                        }
+                                        _ => anyhow!("Failed to read SZ value").to_string(),
+                                },
+                                None => {
+                                        // Key exists, its value doesn't.
+                                        format!("{hkey_text}|{subkey}|{value_name}|KEY_CREATED_BY_APP\n")
+                                }
+                                _ => anyhow!("Unsupported registry type").to_string(),
+                        }
+                }
+                Err(e) if e == ERROR::FILE_NOT_FOUND => {
+                        // Key doesn't exist, mark for subkey removal during restoration.
+                        format!("{hkey_text}|{subkey}|SUBKEY|KEY_CREATED_BY_APP\n")
+                }
+                Err(e) => anyhow!("Failed to open registry key: {e}\n").to_string(),
+        };
+
+        let mut content = if backup_file.exists() {
+                fs::read_to_string(&backup_file)?
+        } else {
+                String::new()
+        };
+
+        if !content.contains(&backup_line) {
+                content.push_str(&backup_line);
+                fs::write(&backup_file, content)?;
+        }
+
+        Ok(())
+}
+
+pub fn registry_recursive_backup(
+        hkey: &HKEY,
+        subkey: &str,
+        backup_file: &PathBuf,
+        hkey_text: &str,
+) -> Result<()>
+{
+        let key = match hkey.RegOpenKeyEx(Some(subkey), co::REG_OPTION::NoValue, co::KEY::READ) {
+                Ok(key) => key,
+                Err(e) if e == ERROR::FILE_NOT_FOUND => {
+                        let backup_line = format!("{hkey_text}|{subkey}|SUBKEY|NOT_FOUND\n");
+                        let mut content = if backup_file.exists() {
+                                fs::read_to_string(backup_file)?
+                        } else {
+                                String::new()
+                        };
+                        content.push_str(&backup_line);
+                        fs::write(backup_file, content)?;
+                        return Ok(());
+                }
+                Err(e) => {
+                        return Err(anyhow!(
+                                "Failed to open subkey for backup: {hkey_text}\\{subkey}\nError: {e}"
+                        ));
+                }
+        };
+
+        let mut content = if backup_file.exists() {
+                fs::read_to_string(backup_file)?
+        } else {
+                String::new()
+        };
+
+        content.push_str(&format!("{hkey_text}|{subkey}|SUBKEY|BEGIN_SUBKEY\n"));
+
+        for value_result in key.RegEnumValue()? {
+                let (value_name, reg_type) = value_result?;
+                let value_line = match reg_type {
+                        REG::DWORD => match key.RegGetValue(None, Some(&value_name), co::RRF::RT_DWORD) {
+                                Ok(RegistryValue::Dword(val)) => {
+                                        format!("{hkey_text}|{subkey}|{value_name}|DWORD:{val}\n")
+                                }
+                                _ => {
+                                        return Err(anyhow!("{hkey_text}|{subkey}|{value_name}|DWORD:ERROR_READING_VALUE\n"))
+                                }
+                        },
+                        REG::SZ => match key.RegGetValue(None, Some(&value_name), co::RRF::RT_REG_SZ) {
+                                Ok(RegistryValue::Sz(val)) => {
+                                        format!("{hkey_text}|{subkey}|{value_name}|SZ:{val}\n")
+                                }
+                                _ => {
+                                        return Err(anyhow!("{hkey_text}|{subkey}|{value_name}|SZ:ERROR_READING_VALUE\n"))
+                                }
+                        },
+                        _ => {
+                                return Err(anyhow!("{hkey_text}|{subkey}|{value_name}|UNKNOWN_TYPE\n"))
+                        }
+                };
+                content.push_str(&value_line);
+        }
+
+        content.push_str(&format!("{hkey_text}|{subkey}|SUBKEY|END_SUBKEY\n"));
+        fs::write(backup_file, content)?;
+        Ok(())
+}
+
+pub fn restore_from_backup() -> Result<()>
+{
+        let log_path = CACHE.lp();
+        let backup_file = log_path.join("Registry Backup.log");
+
+        if !backup_file.exists() {
+                return Err(anyhow!("No backup file found!"));
+        }
+
+        let content = fs::read_to_string(&backup_file)?;
+        let mut restored = 0;
+        let mut skipped = 0;
+
+        for line in content.lines() {
+                if line.trim().is_empty() {
+                        continue;
+                }
+
+                match restore_single_line(line) {
+                        Ok(true) => restored += 1,
+                        Ok(false) => skipped += 1,
+                        Err(e) => return Err(anyhow!("Failed to restore: {line}\nError: {e}")),
+                }
+        }
+
+        println!("Uninstall complete!\nRestored {restored} registry keys, skipped {skipped} registry keys.");
+        Ok(())
+}
+
+// Expected behavior:
+// - Delete subkey if created by W11Boost.
+// - Set the values back if the key originally existed before W11Boost.
+// - Create the subkey (if BEGIN_SUBKEY) so that keys inside that subkey can also be created. Can think of it like creating a directory.
+fn restore_single_line(line: &str) -> Result<bool>
+{
+        let parts: Vec<&str> = line.split('|').collect();
+
+        let hkey = match parts[0] {
+                "HKEY_LOCAL_MACHINE" => HKEY::LOCAL_MACHINE,
+                "HKEY_CURRENT_USER" => HKEY::CURRENT_USER,
+                _ => return Err(anyhow!("Unknown HKEY: {}", parts[0])),
+        };
+
+        let subkey = parts[1];
+        let value_name = parts[2];
+        let value_info = parts[3];
+
+        match value_info {
+                "NOT_FOUND" => return Ok(false),
+                "KEY_CREATED_BY_APP" => {
+                        match hkey.RegDeleteTree(Some(subkey)) {
+                                Ok(_) => return Ok(true),
+                                Err(_) => return Ok(false),
+                        };
+                }
+                "BEGIN_SUBKEY" => {
+                        match hkey.RegCreateKeyEx(subkey, None, co::REG_OPTION::NON_VOLATILE, co::KEY::WRITE, None) {
+                                Ok(_) => return Ok(true),
+                                Err(_) => return Ok(false),
+                        }
+                }
+                "END_SUBKEY" => return Ok(false),
+                _ => {}
+        }
+
+        // strip_prefix instead of strip_suffix since "DWORD:" is not the end of the string.
+        if let Some(dword_str) = value_info.strip_prefix("DWORD:") {
+                let value: u32 = dword_str.parse()?;
+                set_dword(&hkey, subkey, value_name, value)?;
+                Ok(true)
+        } else if let Some(string_str) = value_info.strip_prefix("SZ:") {
+                set_string(&hkey, subkey, value_name, string_str)?;
+                Ok(true)
+        } else {
+                Err(anyhow!("Unknown registry value format: {value_info}"))
+        }
+}
+
+pub fn set_dword(hkey: &HKEY, subkey: &str, value_name: &str, value: u32) -> Result<()>
 {
         let o_subkey = subkey;
         let hkey_text = get_hkey_text(hkey)?;
+
+        registry_backup(hkey, subkey, value_name, false)?;
 
         let (subkey, _) = hkey
                 .RegCreateKeyEx(subkey, None, co::REG_OPTION::NON_VOLATILE, co::KEY::WRITE, None)
@@ -101,10 +326,12 @@ pub fn set_dword(hkey: &HKEY, subkey: &str, value_name: &str, value: u32) -> any
         Ok(())
 }
 
-pub fn set_string(hkey: &HKEY, subkey: &str, value_name: &str, value: &str) -> anyhow::Result<()>
+pub fn set_string(hkey: &HKEY, subkey: &str, value_name: &str, value: &str) -> Result<()>
 {
         let o_subkey = subkey;
         let hkey_text = get_hkey_text(hkey)?;
+
+        registry_backup(hkey, subkey, value_name, false)?;
 
         let (subkey, _) = hkey
                 .RegCreateKeyEx(subkey, None, co::REG_OPTION::NON_VOLATILE, co::KEY::WRITE, None)
@@ -145,10 +372,12 @@ pub fn set_string(hkey: &HKEY, subkey: &str, value_name: &str, value: &str) -> a
         Ok(())
 }
 
-pub fn remove_subkey(hkey: &HKEY, subkey: &str) -> anyhow::Result<()>
+pub fn remove_subkey(hkey: &HKEY, subkey: &str) -> Result<()>
 {
         let o_subkey = subkey;
         let hkey_text = get_hkey_text(hkey)?;
+
+        registry_backup(hkey, subkey, "", true)?;
 
         match hkey.RegDeleteTree(Some(subkey)) {
                 Ok(_) => Ok(()),
@@ -172,7 +401,7 @@ pub fn remove_subkey(hkey: &HKEY, subkey: &str) -> anyhow::Result<()>
         Ok(())
 }
 
-pub fn check_dword(hkey: &HKEY, subkey: &str, value_name: &str, expected_value: u32) -> anyhow::Result<bool>
+pub fn check_dword(hkey: &HKEY, subkey: &str, value_name: &str, expected_value: u32) -> Result<bool>
 {
         let o_subkey = subkey;
         let hkey_text = get_hkey_text(hkey)?;
@@ -203,7 +432,7 @@ pub fn check_dword(hkey: &HKEY, subkey: &str, value_name: &str, expected_value: 
         }
 }
 
-fn get_hkey_text(hkey: &HKEY) -> anyhow::Result<&str>
+fn get_hkey_text(hkey: &HKEY) -> Result<&str>
 {
         let result = if *hkey == HKEY::LOCAL_MACHINE {
                 "HKEY_LOCAL_MACHINE"
@@ -216,7 +445,7 @@ fn get_hkey_text(hkey: &HKEY) -> anyhow::Result<&str>
         Ok(result)
 }
 
-fn log_registry(hkey: &HKEY, subkey: &str, value_name: &str, value: &str, type_name: &str) -> anyhow::Result<()>
+fn log_registry(hkey: &HKEY, subkey: &str, value_name: &str, value: &str, type_name: &str) -> Result<()>
 {
         let hkey_text = get_hkey_text(hkey)?;
         let log_path = CACHE.lp();

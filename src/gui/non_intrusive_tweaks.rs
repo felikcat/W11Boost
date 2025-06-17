@@ -6,8 +6,9 @@ use std::{
         process::Command,
 };
 use winsafe::{HKEY, SetFileAttributes, co::FILE_ATTRIBUTE, prelude::advapi_Hkey};
+use anyhow::Result;
 
-pub fn run() -> anyhow::Result<()>
+pub fn run() -> Result<()>
 {
         let hklm = HKEY::LOCAL_MACHINE;
         let hkcu = HKEY::CURRENT_USER;

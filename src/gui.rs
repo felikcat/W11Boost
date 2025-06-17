@@ -6,7 +6,7 @@ mod minimize_online_data_collection;
 mod non_intrusive_tweaks;
 mod reset_windows_store;
 
-use crate::common::center;
+use crate::common::{center, restore_from_backup};
 use anyhow::anyhow;
 use fltk::{
         app::{self},
@@ -22,6 +22,7 @@ use std::collections::HashMap;
 use std::sync::OnceLock;
 use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
+use anyhow::Result;
 
 const WINDOW_WIDTH: i32 = 640;
 const WINDOW_HEIGHT: i32 = 480;
@@ -39,7 +40,7 @@ enum ViewState
 struct CheckboxConfig
 {
         label: &'static str,
-        run_fn: fn() -> anyhow::Result<()>,
+        run_fn: fn() -> Result<()>,
         error_name: &'static str,
         x: i32,
         y: i32,
@@ -139,6 +140,7 @@ static CHECKBOX_CONFIGS: OnceLock<HashMap<CheckboxType, CheckboxConfig>> = OnceL
 enum ButtonType
 {
         Apply,
+        Remove,
 }
 
 const DISPLAY_TIMEOUT_SUCCESS: f64 = 5.0;
@@ -301,12 +303,37 @@ impl GuiViewModel
 
                                 if let Err(e) = (checkbox_config.run_fn)() {
                                         self.show_error_screen(format!("{} failed: {e}", checkbox_config.error_name));
-                                        
                                         return;
                                 }
                         }
 
                         self.set_view(ViewState::Success);
+                }
+        }
+
+        fn remove(&mut self, _btn: &Button)
+        {
+                let choice = dialog::choice2(
+                        center().0,
+                        center().1,
+                        "Are you sure you want to uninstall W11Boost?",
+                        "&Yes",
+                        "&No",
+                        "",
+                );
+
+                if choice == Some(0) {
+                        self.set_view(ViewState::Applying);
+
+                        match restore_from_backup() {
+                                Ok(_) => {
+                                        self.set_view(ViewState::Success);
+                                }
+                                Err(e) => {
+                                        self.show_error_screen(format!("restore_from_backup failed: {e}"));
+                                        return;
+                                }
+                        }
                 }
         }
 }
@@ -318,7 +345,7 @@ struct GuiView
 }
 impl GuiView
 {
-        fn new() -> anyhow::Result<Self>
+        fn new() -> Result<Self>
         {
                 let mut wind = Window::default()
                         .with_label("W11Boost")
@@ -327,12 +354,19 @@ impl GuiView
 
                 wind.set_border(true);
 
-                let mut apply = Button::new(0, 0, WINDOW_WIDTH - 4, (WINDOW_HEIGHT * 14) / 100, "Apply W11Boost");
+                let mut apply = Button::new(0, 0, (WINDOW_WIDTH - 4) / 2, (WINDOW_HEIGHT * 14) / 100, "Apply W11Boost");
 
                 let apply_height = apply.height();
                 apply.set_pos(2, WINDOW_HEIGHT - apply_height - 2);
                 apply.set_label_font(enums::Font::by_name(FONT_PATH));
                 apply.set_label_size(16);
+
+                let mut remove = Button::new(WINDOW_WIDTH / 2, 0,(WINDOW_WIDTH - 4) / 2, (WINDOW_HEIGHT * 14) / 100, "Remove W11Boost");
+                let remove_width = remove.width();
+                let remove_height = remove.height();
+                remove.set_pos(WINDOW_WIDTH - remove_width - 2, WINDOW_HEIGHT - remove_height - 2);
+                remove.set_label_font(enums::Font::by_name(FONT_PATH));
+                remove.set_label_size(16);
 
                 let checkbox_configs = GuiApp::get_checkbox_configs();
                 let mut checkboxes = HashMap::new();
@@ -351,12 +385,13 @@ impl GuiView
                 }
 
                 let mut status_display = Frame::new(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, None);
-                status_display.set_label_size(24);
+                status_display.set_label_size(16);
                 status_display.set_align(Align::Center | Align::Inside | Align::Wrap);
                 status_display.hide();
 
                 let mut buttons = HashMap::new();
                 buttons.insert(ButtonType::Apply, apply);
+                buttons.insert(ButtonType::Remove, remove);
 
                 wind.end();
                 wind.show();
@@ -394,7 +429,7 @@ struct GuiApp
 }
 impl GuiApp
 {
-        fn new() -> anyhow::Result<Self>
+        fn new() -> Result<Self>
         {
                 use fltk_observe::{Runner, WidgetObserver};
                 let app = app::App::default()
@@ -414,6 +449,10 @@ impl GuiApp
                         apply_btn.set_action(GuiViewModel::apply);
                 }
 
+                if let Some(remove_btn) = gv.buttons.get_mut(&ButtonType::Remove) {
+                        remove_btn.set_action(GuiViewModel::remove);
+                }
+
                 fltk_observe::with_state_mut(|state: &mut GuiViewModel| {
                         state.set_ui_elements(gv.checkboxes, gv.buttons, gv.status_display);
                 });
@@ -421,7 +460,7 @@ impl GuiApp
                 Ok(Self { app })
         }
 
-        fn run(&self) -> anyhow::Result<()>
+        fn run(&self) -> Result<()>
         {
                 self.app.run()
                         .map_err(|e| anyhow!("Failed to run GuiApp.\nError: {}", e))?;
@@ -434,7 +473,7 @@ impl GuiApp
         }
 }
 
-pub fn draw_gui() -> anyhow::Result<()>
+pub fn draw_gui() -> Result<()>
 {
         let ga = GuiApp::new().map_err(|e| anyhow!("Failed to initialize GuiApp in draw_gui.\nError: {}", e))?;
         ga.run()?;
