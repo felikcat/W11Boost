@@ -1,12 +1,15 @@
 mod disable_recall;
+mod disable_copilot;
 mod disable_sleep;
 mod install_appx_support;
 mod minimize_forensics;
 mod minimize_online_data_collection;
 mod non_intrusive_tweaks;
+mod remove_w11boost;
 mod reset_windows_store;
 
 use crate::common::{center, restore_from_backup};
+use anyhow::Result;
 use anyhow::anyhow;
 use fltk::{
         app::{self},
@@ -22,7 +25,6 @@ use std::collections::HashMap;
 use std::sync::OnceLock;
 use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
-use anyhow::Result;
 
 const WINDOW_WIDTH: i32 = 640;
 const WINDOW_HEIGHT: i32 = 480;
@@ -54,6 +56,7 @@ enum CheckboxType
         MinimizeForensics,
         MinimizeOnlineData,
         DisableRecall,
+        DisableCopilot,
         DisableSleepAndHibernate,
         InstallMicrosoftStore,
         NonIntrusiveTweaks,
@@ -94,12 +97,21 @@ impl CheckboxType
                                 width: WINDOW_WIDTH / 2,
                                 height: checkbox_height,
                         },
+                        CheckboxType::DisableCopilot => CheckboxConfig {
+                                label: "Disable Windows Copilot",
+                                run_fn: disable_copilot::run,
+                                error_name: "disable_recall",
+                                x: 0,
+                                y: TOP_PADDING + checkbox_height * 3 + 6,
+                                width: WINDOW_WIDTH / 2,
+                                height: checkbox_height,
+                        },
                         CheckboxType::DisableSleepAndHibernate => CheckboxConfig {
                                 label: "Disable sleep and hibernate",
                                 run_fn: disable_sleep::run,
                                 error_name: "disable_sleep",
                                 x: 0,
-                                y: TOP_PADDING + checkbox_height * 3 + 6,
+                                y: TOP_PADDING + checkbox_height * 4 + 8,
                                 width: WINDOW_WIDTH / 2,
                                 height: checkbox_height,
                         },
@@ -108,7 +120,7 @@ impl CheckboxType
                                 run_fn: reset_windows_store::run,
                                 error_name: "reset_windows_store",
                                 x: 0,
-                                y: TOP_PADDING + checkbox_height * 4 + 8,
+                                y: TOP_PADDING + checkbox_height * 5 + 10,
                                 width: WINDOW_WIDTH / 2,
                                 height: checkbox_height,
                         },
@@ -117,7 +129,7 @@ impl CheckboxType
                                 run_fn: non_intrusive_tweaks::run,
                                 error_name: "non_intrusive_tweaks",
                                 x: 0,
-                                y: TOP_PADDING + checkbox_height * 5 + 10,
+                                y: TOP_PADDING + checkbox_height * 6 + 12,
                                 width: WINDOW_WIDTH / 2,
                                 height: checkbox_height,
                         },
@@ -126,7 +138,7 @@ impl CheckboxType
                                 run_fn: install_appx_support::run,
                                 error_name: "install_appx_support",
                                 x: 0,
-                                y: TOP_PADDING + checkbox_height * 6 + 12,
+                                y: TOP_PADDING + checkbox_height * 7 + 14,
                                 width: WINDOW_WIDTH / 2,
                                 height: checkbox_height,
                         },
@@ -325,6 +337,14 @@ impl GuiViewModel
                 if choice == Some(0) {
                         self.set_view(ViewState::Applying);
 
+                        match remove_w11boost::run() {
+                                Ok(_) => {},
+                                Err(e) => {
+                                        self.show_error_screen(format!("remove_w11boost::run failed: {e}"));
+                                        return;
+                                }
+                        }
+
                         match restore_from_backup() {
                                 Ok(_) => {
                                         self.set_view(ViewState::Success);
@@ -354,14 +374,26 @@ impl GuiView
 
                 wind.set_border(true);
 
-                let mut apply = Button::new(0, 0, (WINDOW_WIDTH - 4) / 2, (WINDOW_HEIGHT * 14) / 100, "Apply W11Boost");
+                let mut apply = Button::new(
+                        0,
+                        0,
+                        (WINDOW_WIDTH - 4) / 2,
+                        (WINDOW_HEIGHT * 14) / 100,
+                        "Apply W11Boost",
+                );
 
                 let apply_height = apply.height();
                 apply.set_pos(2, WINDOW_HEIGHT - apply_height - 2);
                 apply.set_label_font(enums::Font::by_name(FONT_PATH));
                 apply.set_label_size(16);
 
-                let mut remove = Button::new(WINDOW_WIDTH / 2, 0,(WINDOW_WIDTH - 4) / 2, (WINDOW_HEIGHT * 14) / 100, "Remove W11Boost");
+                let mut remove = Button::new(
+                        WINDOW_WIDTH / 2,
+                        0,
+                        (WINDOW_WIDTH - 4) / 2,
+                        (WINDOW_HEIGHT * 14) / 100,
+                        "Remove W11Boost",
+                );
                 let remove_width = remove.width();
                 let remove_height = remove.height();
                 remove.set_pos(WINDOW_WIDTH - remove_width - 2, WINDOW_HEIGHT - remove_height - 2);
