@@ -1,9 +1,12 @@
+use anyhow::Result;
 use anyhow::anyhow;
-use chrono::{Datelike, Local, Timelike};
+use chrono::{Datelike as _, Local, Timelike as _};
 use fltk::{app, dialog};
 use std::fs::{self, OpenOptions};
-use std::io::Write;
+use std::io::Write as _;
+use std::os::windows::process::CommandExt as _;
 use std::path::PathBuf;
+use std::process::Command;
 use std::sync::OnceLock;
 use winsafe::co::{ERROR, REG};
 use winsafe::{
@@ -11,11 +14,11 @@ use winsafe::{
         co::{self, KNOWNFOLDERID},
         prelude::*,
 };
-use anyhow::Result;
+use core::fmt::Write as _;
 
 static CACHE: Cache = Cache::new();
 
-pub const CREATE_NO_WINDOW: u32 = 0x08000000;
+pub const CREATE_NO_WINDOW: u32 = 0x0800_0000;
 
 struct Cache
 {
@@ -48,7 +51,7 @@ fn log_path() -> PathBuf
         });
 
         let mut log_path = PathBuf::from(documents_dir);
-        log_path.push(r"W11Boost - do not remove");
+        log_path.push("W11Boost - do not remove");
 
         if !log_path.exists() {
                 let _ = fs::create_dir_all(log_path.as_path())
@@ -66,7 +69,7 @@ pub fn get_windows_path(folder_id: &KNOWNFOLDERID) -> Result<String>
 
 pub fn registry_backup(hkey: &HKEY, subkey: &str, value_name: &str, is_removal: bool) -> Result<()>
 {
-        let hkey_text = get_hkey_text(hkey)?;
+        let hkey_text = get_hkey_text(hkey);
         let log_path = CACHE.lp();
         let backup_file = log_path.join("Registry Backup.log");
 
@@ -137,12 +140,7 @@ pub fn registry_backup(hkey: &HKEY, subkey: &str, value_name: &str, is_removal: 
         Ok(())
 }
 
-pub fn registry_recursive_backup(
-        hkey: &HKEY,
-        subkey: &str,
-        backup_file: &PathBuf,
-        hkey_text: &str,
-) -> Result<()>
+pub fn registry_recursive_backup(hkey: &HKEY, subkey: &str, backup_file: &PathBuf, hkey_text: &str) -> Result<()>
 {
         let key = match hkey.RegOpenKeyEx(Some(subkey), co::REG_OPTION::NoValue, co::KEY::READ) {
                 Ok(key) => key,
@@ -170,7 +168,7 @@ pub fn registry_recursive_backup(
                 String::new()
         };
 
-        content.push_str(&format!("{hkey_text}|{subkey}|SUBKEY|BEGIN_SUBKEY\n"));
+        writeln!(content, "{hkey_text}|{subkey}|SUBKEY|BEGIN_SUBKEY\n")?;
 
         for value_result in key.RegEnumValue()? {
                 let (value_name, reg_type) = value_result?;
@@ -180,25 +178,24 @@ pub fn registry_recursive_backup(
                                         format!("{hkey_text}|{subkey}|{value_name}|DWORD:{val}\n")
                                 }
                                 _ => {
-                                        return Err(anyhow!("{hkey_text}|{subkey}|{value_name}|DWORD:ERROR_READING_VALUE\n"))
+                                        return Err(anyhow!(
+                                                "{hkey_text}|{subkey}|{value_name}|DWORD:ERROR_READING_VALUE\n"
+                                        ));
                                 }
                         },
                         REG::SZ => match key.RegGetValue(None, Some(&value_name), co::RRF::RT_REG_SZ) {
                                 Ok(RegistryValue::Sz(val)) => {
                                         format!("{hkey_text}|{subkey}|{value_name}|SZ:{val}\n")
                                 }
-                                _ => {
-                                        return Err(anyhow!("{hkey_text}|{subkey}|{value_name}|SZ:ERROR_READING_VALUE\n"))
-                                }
+                                _ => return Err(anyhow!("{hkey_text}|{subkey}|{value_name}|SZ:ERROR_READING_VALUE\n")),
                         },
-                        _ => {
-                                return Err(anyhow!("{hkey_text}|{subkey}|{value_name}|UNKNOWN_TYPE\n"))
-                        }
+                        _ => return Err(anyhow!("{hkey_text}|{subkey}|{value_name}|UNKNOWN_TYPE\n")),
                 };
                 content.push_str(&value_line);
         }
 
-        content.push_str(&format!("{hkey_text}|{subkey}|SUBKEY|END_SUBKEY\n"));
+        writeln!(content, "{hkey_text}|{subkey}|SUBKEY|END_SUBKEY\n")?;
+        
         fs::write(backup_file, content)?;
         Ok(())
 }
@@ -251,10 +248,10 @@ fn restore_single_line(line: &str) -> Result<bool>
         let value_info = parts[3];
 
         match value_info {
-                "NOT_FOUND" => return Ok(false),
+                "NOT_FOUND" | "END_SUBKEY" => return Ok(false),
                 "KEY_CREATED_BY_APP" => {
                         match hkey.RegDeleteTree(Some(subkey)) {
-                                Ok(_) => return Ok(true),
+                                Ok(()) => return Ok(true),
                                 Err(_) => return Ok(false),
                         };
                 }
@@ -264,7 +261,6 @@ fn restore_single_line(line: &str) -> Result<bool>
                                 Err(_) => return Ok(false),
                         }
                 }
-                "END_SUBKEY" => return Ok(false),
                 _ => {}
         }
 
@@ -284,7 +280,7 @@ fn restore_single_line(line: &str) -> Result<bool>
 pub fn set_dword(hkey: &HKEY, subkey: &str, value_name: &str, value: u32) -> Result<()>
 {
         let o_subkey = subkey;
-        let hkey_text = get_hkey_text(hkey)?;
+        let hkey_text = get_hkey_text(hkey);
 
         registry_backup(hkey, subkey, value_name, false)?;
 
@@ -329,7 +325,7 @@ pub fn set_dword(hkey: &HKEY, subkey: &str, value_name: &str, value: u32) -> Res
 pub fn set_string(hkey: &HKEY, subkey: &str, value_name: &str, value: &str) -> Result<()>
 {
         let o_subkey = subkey;
-        let hkey_text = get_hkey_text(hkey)?;
+        let hkey_text = get_hkey_text(hkey);
 
         registry_backup(hkey, subkey, value_name, false)?;
 
@@ -345,7 +341,7 @@ pub fn set_string(hkey: &HKEY, subkey: &str, value_name: &str, value: &str) -> R
                         )
                 })?;
 
-        let value = value.to_string();
+        let value = value.to_owned();
         subkey.RegSetValueEx(Some(value_name), RegistryValue::Sz(value.clone()))
                 .map_err(|source| {
                         anyhow!(
@@ -375,12 +371,12 @@ pub fn set_string(hkey: &HKEY, subkey: &str, value_name: &str, value: &str) -> R
 pub fn remove_subkey(hkey: &HKEY, subkey: &str) -> Result<()>
 {
         let o_subkey = subkey;
-        let hkey_text = get_hkey_text(hkey)?;
+        let hkey_text = get_hkey_text(hkey);
 
         registry_backup(hkey, subkey, "", true)?;
 
         match hkey.RegDeleteTree(Some(subkey)) {
-                Ok(_) => Ok(()),
+                Ok(()) => Ok(()),
                 Err(e) if e == ERROR::FILE_NOT_FOUND => Ok(()),
                 Err(e) => Err(anyhow!(
                         "Failed to delete subkey: {}\\{}\nError: {}",
@@ -404,7 +400,7 @@ pub fn remove_subkey(hkey: &HKEY, subkey: &str) -> Result<()>
 pub fn check_dword(hkey: &HKEY, subkey: &str, value_name: &str, expected_value: u32) -> Result<bool>
 {
         let o_subkey = subkey;
-        let hkey_text = get_hkey_text(hkey)?;
+        let hkey_text = get_hkey_text(hkey);
 
         let subkey = match hkey.RegGetValue(Some(subkey), Some(value_name), co::RRF::RT_DWORD) {
                 Ok(value) => value,
@@ -420,34 +416,37 @@ pub fn check_dword(hkey: &HKEY, subkey: &str, value_name: &str, expected_value: 
                 }
         };
 
-        if let RegistryValue::Dword(value) = subkey {
-                if value != expected_value { Ok(false) } else { Ok(true) }
-        } else {
-                Err(anyhow!(
-                        "Expected DWORD value for: {}\\{}\\{}",
-                        hkey_text,
-                        o_subkey,
-                        value_name
-                ))
+        match subkey {
+        	RegistryValue::Dword(value) => {
+        		if value == expected_value {
+        			Ok(true)
+        		} else {
+        			Ok(false)
+        		}
+        	}
+        	_ => Err(anyhow!(
+        		"Expected DWORD value but found different type for: {}\\{}\\{}",
+        		hkey_text,
+        		o_subkey,
+        		value_name
+        	)),
         }
 }
 
-fn get_hkey_text(hkey: &HKEY) -> Result<&str>
+fn get_hkey_text(hkey: &HKEY) -> &str
 {
-        let result = if *hkey == HKEY::LOCAL_MACHINE {
+        if *hkey == HKEY::LOCAL_MACHINE {
                 "HKEY_LOCAL_MACHINE"
         } else if *hkey == HKEY::CURRENT_USER {
                 "HKEY_CURRENT_USER"
         } else {
                 "UNKNOWN_HKEY"
-        };
-
-        Ok(result)
+        }
 }
 
 fn log_registry(hkey: &HKEY, subkey: &str, value_name: &str, value: &str, type_name: &str) -> Result<()>
 {
-        let hkey_text = get_hkey_text(hkey)?;
+        let hkey_text = get_hkey_text(hkey);
         let log_path = CACHE.lp();
 
         if !log_path.exists() {
@@ -498,7 +497,54 @@ fn log_registry(hkey: &HKEY, subkey: &str, value_name: &str, value: &str, type_n
         Ok(())
 }
 
+#[must_use]
+#[expect(clippy::cast_possible_truncation)]
 pub fn center() -> (i32, i32)
 {
         ((app::screen_size().0 / 2.0) as i32, (app::screen_size().1 / 2.0) as i32)
 }
+
+pub fn run_system_command(program: &str, args: &[&str]) -> Result<()>
+{
+        Command::new(program)
+        .args(args)
+        .creation_flags(CREATE_NO_WINDOW)
+        .output()
+        .map_err(|e| anyhow!("Failed to execute {program}.\nError: {e}"))?;
+
+        Ok(())
+}
+
+// Barrett reduction constants for different divisors.
+// For 32-bit integers: m = floor((2^k) / d) where k=35
+pub struct BarrettConstants
+{
+        m: u64,
+        k: u32,
+}
+
+pub const BARRETT_DIV_12: BarrettConstants = BarrettConstants {
+        m: 2_863_311_530, // floor(2^35 / 12) = floor(34359738368 / 12) = 2863311530
+        k: 35,
+};
+
+pub const BARRETT_DIV_100: BarrettConstants = BarrettConstants {
+        m: 343_597_383, // floor(2^35 / 100) = floor(34359738368 / 100) = 343597383
+        k: 35,
+};
+
+/// Generic Barrett reduction for constant-time division.
+/// Replaces "n / divisor" with multiplication and bit shifts for better security & performance.
+#[inline] #[must_use]
+pub fn barrett_div(n: i32, constants: &BarrettConstants) -> i32
+{
+        // Barrett reduction: q = floor((n * m) >> k)
+        // where m and k are precomputed constants.
+        let n_u64 = n as u64;
+        let product = n_u64 * constants.m;
+        i32::try_from(product >> constants.k).unwrap_or_else(|_| {
+                // Fallback to direct casting if try_from fails (it shouldn't).
+                (product >> constants.k) as i32
+        })
+}
+

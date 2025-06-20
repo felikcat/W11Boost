@@ -1,7 +1,7 @@
-use winsafe::{HKEY, prelude::advapi_Hkey};
+use winsafe::{HKEY, prelude::advapi_Hkey as _};
 use anyhow::Result;
 
-use crate::common::*;
+use crate::common::set_dword;
 
 pub fn run() -> Result<()>
 {

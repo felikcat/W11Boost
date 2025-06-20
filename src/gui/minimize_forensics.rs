@@ -1,7 +1,5 @@
-use crate::common::*;
-use std::os::windows::process::CommandExt;
-use std::process::Command;
-use winsafe::{HKEY, prelude::advapi_Hkey};
+use crate::common::{run_system_command, set_dword};
+use winsafe::{HKEY, prelude::advapi_Hkey as _};
 use anyhow::Result;
 
 /* Ignored for security reasons:
@@ -49,10 +47,7 @@ pub fn run() -> Result<()>
 
         // Do not use "Last Access Time Stamp Updates" by default; apps can still
         // explicitly update these timestamps for themself.
-        Command::new("fsutil.exe")
-                .args(["behavior", "set", "disablelastaccess", "3"])
-                .creation_flags(CREATE_NO_WINDOW)
-                .output()?;
+        run_system_command("fsutil.exe", &["behavior", "set", "disablelastaccess", "3"])?;
 
         // Disable "Application Impact Telemetry".
         set_dword(&hklm, r"SOFTWARE\Policies\Microsoft\Windows\AppCompat", "AITEnable", 0)?;

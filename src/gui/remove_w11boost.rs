@@ -1,24 +1,15 @@
-use crate::common::CREATE_NO_WINDOW;
+use crate::common::run_system_command;
 use anyhow::Result;
 use winsafe::{co::FILE_ATTRIBUTE, SetFileAttributes};
-use std::{fs::{self, File}, os::windows::process::CommandExt, path::Path, process::Command};
+use std::{fs::{self, File}, path::Path};
 
 pub fn run() -> Result<()>
 {
-        Command::new("fsutil.exe")
-                .args(["behavior", "set", "memoryusage", "1"])
-                .creation_flags(CREATE_NO_WINDOW)
-                .output()?;
+        run_system_command("fsutil.exe", &["behavior", "set", "memoryusage", "1"])?;
 
-        Command::new("fsutil.exe")
-                .args(["behavior", "set", "disablelastaccess", "2"])
-                .creation_flags(CREATE_NO_WINDOW)
-                .output()?;
+        run_system_command("fsutil.exe", &["behavior", "set", "disablelastaccess", "2"])?;
 
-        Command::new("bcdedit.exe")
-                .args(["/set", "{default}", "recoveryenabled", "yes"])
-                .creation_flags(CREATE_NO_WINDOW)
-                .output()?;
+        run_system_command("bcdedit.exe", &["/set", "{default}", "recoveryenabled", "yes"])?;
 
         let file_path = r"C:\Windows\System32\SleepStudy\UserNotPresentSession.etl";
 

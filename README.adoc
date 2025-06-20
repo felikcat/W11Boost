@@ -10,7 +10,7 @@ ifdef::env-github[]
 endif::[]
 
 == What's different about this compared to other optimizers / debloaters?
-. Can be fully uninstalled without any form of backups.
+. Can be fully uninstalled without resorting to: system restore, backups, reinstalling Windows.
 . The number one focus of breaking nothing by default, and not assuming what the user wants. +
 Not guaranteed for: Minimize forensics / local data, and Minimize Microsoft online data.
 . Very easy to use.
@@ -21,7 +21,7 @@ Not guaranteed for: Minimize forensics / local data, and Minimize Microsoft onli
 
 image:W11Boost_GUI.png[480,360]
 
-I recommend checking "Minimize Microsoft online data" if you don't care if the way you use Windows is changed, it makes Windows feel less bloated.
+I recommend checking "Minimize Microsoft online data" if you don't care if the way you use Windows is changed, it makes Windows less bloated.
 
 == Recommendations
 

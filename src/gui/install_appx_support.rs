@@ -1,13 +1,11 @@
-use crate::common::*;
+use crate::common::{run_system_command, get_windows_path};
+use anyhow::Result;
+use core::time::Duration;
 use curl::easy::Easy;
 use std::fs::File;
-use std::io::Write;
-use std::os::windows::process::CommandExt;
+use std::io::Write as _;
 use std::path::{Path, PathBuf};
-use std::process::Command;
-use std::time::Duration;
 use winsafe::co::KNOWNFOLDERID;
-use anyhow::Result;
 
 pub fn run() -> Result<()>
 {
@@ -33,13 +31,13 @@ pub fn run() -> Result<()>
 
         easy.perform()?;
 
-        Command::new("powershell.exe")
-        .args([
-            "-Command",
-            r#"Add-AppxPackage ([Environment]::GetFolderPath("DesktopDirectory") + "\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle")"#
-        ])
-        .creation_flags(CREATE_NO_WINDOW)
-        .output()?;
+        run_system_command(
+                "powershell.exe",
+                &[
+                        "-Command",
+                        r#"Add-AppxPackage ([Environment]::GetFolderPath("DesktopDirectory") + "\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle")"#,
+                ],
+        )?;
 
         Ok(())
 }

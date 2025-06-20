@@ -1,5 +1,5 @@
-mod disable_recall;
 mod disable_copilot;
+mod disable_recall;
 mod disable_sleep;
 mod install_appx_support;
 mod minimize_forensics;
@@ -8,6 +8,7 @@ mod non_intrusive_tweaks;
 mod remove_w11boost;
 mod reset_windows_store;
 
+use crate::common::{barrett_div, BARRETT_DIV_100, BARRETT_DIV_12};
 use crate::common::{center, restore_from_backup};
 use anyhow::Result;
 use anyhow::anyhow;
@@ -17,13 +18,13 @@ use fltk::{
         dialog,
         enums::{self, Align},
         frame::Frame,
-        prelude::{GroupExt, WidgetBase, WidgetExt, WindowExt},
+        prelude::{GroupExt as _, WidgetBase as _, WidgetExt as _, WindowExt as _},
         window::Window,
 };
 use fltk_theme::{ColorTheme, color_themes};
 use std::collections::HashMap;
 use std::sync::OnceLock;
-use strum::IntoEnumIterator;
+use strum::IntoEnumIterator as _;
 use strum_macros::EnumIter;
 
 const WINDOW_WIDTH: i32 = 640;
@@ -34,8 +35,8 @@ const FONT_PATH: &str = "C:\\Windows\\Fonts\\segoeui.ttf";
 #[derive(Clone, PartialEq)]
 enum ViewState
 {
-        MainMenu,
         Applying,
+        MainMenu,
         Success,
 }
 
@@ -50,96 +51,97 @@ struct CheckboxConfig
         height: i32,
 }
 
-#[derive(Clone, PartialEq, Eq, Hash, EnumIter)]
+#[derive(Clone, PartialEq, Eq, Hash, EnumIter, PartialOrd, Ord)]
 enum CheckboxType
 {
+        DisableCopilot,
+        DisableRecall,
+        DisableSleepAndHibernate,
+        InstallAppxSupport,
+        InstallMicrosoftStore,
         MinimizeForensics,
         MinimizeOnlineData,
-        DisableRecall,
-        DisableCopilot,
-        DisableSleepAndHibernate,
-        InstallMicrosoftStore,
         NonIntrusiveTweaks,
-        InstallAppxSupport,
 }
 
 impl CheckboxType
 {
         fn config(&self) -> CheckboxConfig
         {
-                let checkbox_height = WINDOW_HEIGHT / 12;
+                let checkbox_height = barrett_div(WINDOW_HEIGHT, &BARRETT_DIV_12);
+                let checkbox_width = WINDOW_WIDTH >> 1_i32; // 50% of window.
 
                 match self {
-                        CheckboxType::MinimizeForensics => CheckboxConfig {
+                        Self::MinimizeForensics => CheckboxConfig {
                                 label: "Minimize forensics / local data",
                                 run_fn: minimize_forensics::run,
                                 error_name: "minimize_forensics",
                                 x: 0,
                                 y: TOP_PADDING,
-                                width: WINDOW_WIDTH / 2,
+                                width: checkbox_width,
                                 height: checkbox_height,
                         },
-                        CheckboxType::MinimizeOnlineData => CheckboxConfig {
+                        Self::MinimizeOnlineData => CheckboxConfig {
                                 label: "Minimize Microsoft online data",
                                 run_fn: minimize_online_data_collection::run,
                                 error_name: "minimize_online_data_collection",
                                 x: 0,
                                 y: TOP_PADDING + checkbox_height + 2,
-                                width: WINDOW_WIDTH / 2,
+                                width: checkbox_width,
                                 height: checkbox_height,
                         },
-                        CheckboxType::DisableRecall => CheckboxConfig {
+                        Self::DisableRecall => CheckboxConfig {
                                 label: "Disable Windows Recall",
                                 run_fn: disable_recall::run,
                                 error_name: "disable_recall",
                                 x: 0,
                                 y: TOP_PADDING + checkbox_height * 2 + 4,
-                                width: WINDOW_WIDTH / 2,
+                                width: checkbox_width,
                                 height: checkbox_height,
                         },
-                        CheckboxType::DisableCopilot => CheckboxConfig {
+                        Self::DisableCopilot => CheckboxConfig {
                                 label: "Disable Windows Copilot",
                                 run_fn: disable_copilot::run,
                                 error_name: "disable_recall",
                                 x: 0,
                                 y: TOP_PADDING + checkbox_height * 3 + 6,
-                                width: WINDOW_WIDTH / 2,
+                                width: checkbox_width,
                                 height: checkbox_height,
                         },
-                        CheckboxType::DisableSleepAndHibernate => CheckboxConfig {
+                        Self::DisableSleepAndHibernate => CheckboxConfig {
                                 label: "Disable sleep and hibernate",
                                 run_fn: disable_sleep::run,
                                 error_name: "disable_sleep",
                                 x: 0,
                                 y: TOP_PADDING + checkbox_height * 4 + 8,
-                                width: WINDOW_WIDTH / 2,
+                                width: checkbox_width,
                                 height: checkbox_height,
                         },
-                        CheckboxType::InstallMicrosoftStore => CheckboxConfig {
+                        Self::InstallMicrosoftStore => CheckboxConfig {
                                 label: "Install Microsoft Store",
                                 run_fn: reset_windows_store::run,
                                 error_name: "reset_windows_store",
                                 x: 0,
                                 y: TOP_PADDING + checkbox_height * 5 + 10,
-                                width: WINDOW_WIDTH / 2,
+                                width: checkbox_width,
                                 height: checkbox_height,
                         },
-                        CheckboxType::NonIntrusiveTweaks => CheckboxConfig {
+                        Self::NonIntrusiveTweaks => CheckboxConfig {
                                 label: "Use non-intrusive tweaks",
                                 run_fn: non_intrusive_tweaks::run,
                                 error_name: "non_intrusive_tweaks",
                                 x: 0,
                                 y: TOP_PADDING + checkbox_height * 6 + 12,
-                                width: WINDOW_WIDTH / 2,
+                                width: checkbox_width,
                                 height: checkbox_height,
                         },
-                        CheckboxType::InstallAppxSupport => CheckboxConfig {
+                        Self::InstallAppxSupport => CheckboxConfig {
                                 label: "Install support for UWP and WinGet",
                                 run_fn: install_appx_support::run,
                                 error_name: "install_appx_support",
                                 x: 0,
                                 y: TOP_PADDING + checkbox_height * 7 + 14,
-                                width: WINDOW_WIDTH / 2,
+                                width: checkbox_width,
                                 height: checkbox_height,
                         },
                 }
@@ -160,10 +162,10 @@ const DISPLAY_TIMEOUT_ERROR: f64 = 10.0;
 
 struct GuiViewModel
 {
-        checkboxes: HashMap<CheckboxType, CheckButton>,
         buttons: HashMap<ButtonType, Button>,
-        status_display: Option<Frame>,
+        checkboxes: HashMap<CheckboxType, CheckButton>,
         current_view: ViewState,
+        status_display: Option<Frame>,
 }
 impl GuiViewModel
 {
@@ -234,13 +236,13 @@ impl GuiViewModel
 
                 app::flush();
                 app::add_timeout3(DISPLAY_TIMEOUT_SUCCESS, |_| {
-                        fltk_observe::with_state_mut(|state: &mut GuiViewModel| {
+                        fltk_observe::with_state_mut(|state: &mut Self| {
                                 state.set_view(ViewState::MainMenu);
                         });
                 });
         }
 
-        fn show_error_screen(&mut self, message: String)
+        fn show_error_screen(&mut self, message: &str)
         {
                 app::wait();
                 self.toggle_main_screen(false);
@@ -257,7 +259,7 @@ impl GuiViewModel
                 app::flush();
 
                 app::add_timeout3(DISPLAY_TIMEOUT_ERROR, |_| {
-                        fltk_observe::with_state_mut(|state: &mut GuiViewModel| {
+                        fltk_observe::with_state_mut(|state: &mut Self| {
                                 state.set_view(ViewState::MainMenu);
                         });
                 });
@@ -299,13 +301,16 @@ impl GuiViewModel
                         "",
                 );
 
-                if choice == Some(0) {
+                if choice == Some(0_i32) {
                         let checkbox_configs = GuiApp::get_checkbox_configs();
+                        let mut checkbox_types = checkbox_configs.keys().cloned().collect::<Vec<_>>();
+                        checkbox_types.sort();
 
                         self.set_view(ViewState::Applying);
 
-                        for (checkbox_type, checkbox_config) in checkbox_configs {
-                                let Some(checkbox) = self.checkboxes.get(checkbox_type) else {
+                        for checkbox_type in checkbox_types {
+                                let checkbox_config = &checkbox_configs[&checkbox_type];
+                                let Some(checkbox) = self.checkboxes.get(&checkbox_type) else {
                                         continue;
                                 };
 
@@ -314,7 +319,7 @@ impl GuiViewModel
                                 }
 
                                 if let Err(e) = (checkbox_config.run_fn)() {
-                                        self.show_error_screen(format!("{} failed: {e}", checkbox_config.error_name));
+                                        self.show_error_screen(&format!("{} failed: {e}", checkbox_config.error_name));
                                         return;
                                 }
                         }
@@ -334,24 +339,23 @@ impl GuiViewModel
                         "",
                 );
 
-                if choice == Some(0) {
+                if choice == Some(0_i32) {
                         self.set_view(ViewState::Applying);
 
                         match remove_w11boost::run() {
-                                Ok(_) => {},
+                                Ok(()) => {}
                                 Err(e) => {
-                                        self.show_error_screen(format!("remove_w11boost::run failed: {e}"));
+                                        self.show_error_screen(&format!("remove_w11boost::run failed: {e}"));
                                         return;
                                 }
                         }
 
                         match restore_from_backup() {
-                                Ok(_) => {
+                                Ok(()) => {
                                         self.set_view(ViewState::Success);
                                 }
                                 Err(e) => {
-                                        self.show_error_screen(format!("restore_from_backup failed: {e}"));
-                                        return;
+                                        self.show_error_screen(&format!("restore_from_backup failed: {e}"));
                                 }
                         }
                 }
@@ -365,7 +369,7 @@ struct GuiView
 }
 impl GuiView
 {
-        fn new() -> Result<Self>
+        fn new() -> Self
         {
                 let mut wind = Window::default()
                         .with_label("W11Boost")
@@ -377,8 +381,8 @@ impl GuiView
                 let mut apply = Button::new(
                         0,
                         0,
-                        (WINDOW_WIDTH - 4) / 2,
-                        (WINDOW_HEIGHT * 14) / 100,
+                        (WINDOW_WIDTH - 4) >> 1_i32,
+                        barrett_div(WINDOW_HEIGHT * 14, &BARRETT_DIV_100),
                         "Apply W11Boost",
                 );
 
@@ -388,10 +392,10 @@ impl GuiView
                 apply.set_label_size(16);
 
                 let mut remove = Button::new(
-                        WINDOW_WIDTH / 2,
+                        WINDOW_WIDTH >> 1_i32,
                         0,
-                        (WINDOW_WIDTH - 4) / 2,
-                        (WINDOW_HEIGHT * 14) / 100,
+                        (WINDOW_WIDTH - 4) >> 1_i32,
+                        barrett_div(WINDOW_HEIGHT * 14, &BARRETT_DIV_100),
                         "Remove W11Boost",
                 );
                 let remove_width = remove.width();
@@ -429,7 +433,7 @@ impl GuiView
                 wind.show();
 
                 wind.handle({
-                        let (mut x, mut y) = (0, 0);
+                        let (mut x, mut y) = (0_i32, 0_i32);
                         move |w, ev| match ev {
                                 enums::Event::Push => {
                                         let coords = app::event_coords();
@@ -447,11 +451,11 @@ impl GuiView
 
                 wind.center_screen();
 
-                Ok(Self {
-                        checkboxes,
+                Self {
                         buttons,
+                        checkboxes,
                         status_display,
-                })
+                }
         }
 }
 
@@ -463,7 +467,7 @@ impl GuiApp
 {
         fn new() -> Result<Self>
         {
-                use fltk_observe::{Runner, WidgetObserver};
+                use fltk_observe::{Runner as _, WidgetObserver as _};
                 let app = app::App::default()
                         .with_scheme(app::Scheme::Gtk)
                         .use_state(GuiViewModel::new)
@@ -474,8 +478,7 @@ impl GuiApp
                 let widget_theme = ColorTheme::new(color_themes::BLACK_THEME);
                 widget_theme.apply();
 
-                let mut gv = GuiView::new()
-                        .map_err(|e| anyhow!("Failed to create a new GuiView inside of GuiApp.\nError: {}", e))?;
+                let mut gv = GuiView::new();
 
                 if let Some(apply_btn) = gv.buttons.get_mut(&ButtonType::Apply) {
                         apply_btn.set_action(GuiViewModel::apply);

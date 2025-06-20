@@ -1,12 +1,10 @@
-use crate::common::*;
+use crate::common::{remove_subkey, run_system_command, set_dword, set_string};
+use anyhow::Result;
 use std::{
         fs::{self, File},
-        os::windows::process::CommandExt,
         path::Path,
-        process::Command,
 };
-use winsafe::{HKEY, SetFileAttributes, co::FILE_ATTRIBUTE, prelude::advapi_Hkey};
-use anyhow::Result;
+use winsafe::{HKEY, SetFileAttributes, co::FILE_ATTRIBUTE, prelude::advapi_Hkey as _};
 
 pub fn run() -> Result<()>
 {
@@ -78,17 +76,11 @@ pub fn run() -> Result<()>
         )?;
 
         // Double the RAM used for caching NTFS metadata.
-        Command::new("fsutil.exe")
-                .args(["behavior", "set", "memoryusage", "2"])
-                .creation_flags(CREATE_NO_WINDOW)
-                .output()?;
+        run_system_command("fsutil.exe", &["behavior", "set", "memoryusage", "2"])?;
 
         // Disable automatic repair to instead ask for a repair.
         // Does not disable Windows' Recovery environment thankfully.
-        Command::new("bcdedit.exe")
-                .args(["/set", "{default}", "recoveryenabled", "no"])
-                .creation_flags(CREATE_NO_WINDOW)
-                .output()?;
+        run_system_command("bcdedit.exe", &["/set", "{default}", "recoveryenabled", "no"])?;
 
         // Do not page drivers and other system code to a disk, keep it in memory.
         set_dword(
@@ -363,13 +355,12 @@ pub fn run() -> Result<()>
         )?;
 
         // Random disconnection fix for specific network adapters, such as Intel's I225-V.
-        Command::new("powershell.exe")
-                .args([
+        run_system_command(
+                "powershell.exe",
+                &[
                         "-Command",
                         "Set-NetAdapterAdvancedProperty -Name '*' -DisplayName 'Wait for Link' -RegistryValue 0",
-                ])
-                .creation_flags(CREATE_NO_WINDOW)
-                .output()?;
-
+                ],
+        )?;
         Ok(())
 }
