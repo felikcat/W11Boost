@@ -26,6 +26,8 @@ I recommend checking "Minimize Microsoft online data" if you don't care if the w
 == Recommendations
 
 === Windows
+NOTE: Third-party anti-malware programs can provide better protection, but can seriously screw up your Windows installation, as Kaspersky would even after uninstalling it.
+
 . Install the following: 
 - https://winaerotweaker.com/[Winaero Tweaker] to set personal preferences.
 - https://www.startallback.com/[StartAllBack] to speed up Windows 11, and also restore old interface elements from Windows 7 or 10.
@@ -38,8 +40,6 @@ I recommend checking "Minimize Microsoft online data" if you don't care if the w
 - `Set-ExecutionPolicy -ExecutionPolicy Restricted -Scope CurrentUser`
 
 . Replace Consumer OEM apps with their Enterprise variant. Such as replacing Lenovo Vantage with Lenovo Commercial Vantage.
-
-. Third-party anti-malware programs provide better protection, most notably for Kaspersky, ESET, BitDefender, or Sophos, but may have flaws such as slowing down your internet speeds. Be sure to test before and after.
 
 . Keep the number of apps installed to a minimum, and remove unused apps. This reduces your chances of being impacted by https://www.bleepingcomputer.com/news/security/hackers-compromise-3cx-desktop-app-in-a-supply-chain-attack/[supply chain attacks], prevents causing Windows more issues, and might improve FPS stability.
 
