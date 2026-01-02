@@ -1,4 +1,4 @@
-use winsafe::{HKEY, prelude::advapi_Hkey as _};
+use winsafe::HKEY;
 use anyhow::Result;
 
 use crate::common::set_dword;

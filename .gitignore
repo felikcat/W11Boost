@@ -1,4 +1,7 @@
-.idea
-.vscode
-target
+/.idea
+/.vscode
+/target
 *.lock
+/.claude
+CLAUDE.md
+/resources

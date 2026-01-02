@@ -1,6 +1,6 @@
 [package]
 name = "W11Boost"
-version = "1.6.2"
+version = "1.7.0"
 edition = "2024"
 build = "build.rs"
 authors = ["felikcat"]
@@ -34,7 +34,7 @@ keywords = [
 [package.metadata.winresource]
 CompanyName = "felikcat"
 FileDescription = "https://github.com/felikcat/W11Boost"
-LegalCopyright = "© 2025 felikcat, AGPL3 License"
+LegalCopyright = "© 2026 felikcat, AGPL3 License"
 OriginalFilename = "W11Boost.exe"
 ProductName = "W11Boost"
 
@@ -49,22 +49,24 @@ panic = "abort"
 [dependencies]
 fltk-theme = "0.7.9"
 fltk-observe = "0.1.7"
-chrono = "0.4.41"
-curl = "0.4.48"
-strum_macros = "0.27.1"
-anyhow = "1.0.98"
+chrono = "0.4.42"
+strum_macros = "0.27.2"
+anyhow = "1.0.100"
 
 [build-dependencies]
-winresource = "0.1.22"
+winresource = "0.1.28"
 
 [dependencies.strum]
-version = "0.27.1"
+version = "0.27.2"
 features = ["derive"]
 
 [dependencies.winsafe]
-version = "0.0.24"
+version = "0.0.27"
 features = ["user", "shell", "advapi", "kernel"]
 
 [dependencies.fltk]
-version = "^1.5"
+version = "1.5.22"
 features = ["use-ninja"]
+
+[dev-dependencies]
+tempfile = "3.24.0"

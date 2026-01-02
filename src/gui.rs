@@ -1,17 +1,15 @@
+// Feature modules
 mod disable_copilot;
 mod disable_recall;
 mod disable_sleep;
-mod install_appx_support;
 mod minimize_forensics;
 mod minimize_online_data_collection;
 mod non_intrusive_tweaks;
 mod remove_w11boost;
 mod reset_windows_store;
 
-use crate::common::{barrett_div, BARRETT_DIV_100, BARRETT_DIV_12};
-use crate::common::{center, restore_from_backup};
-use anyhow::Result;
-use anyhow::anyhow;
+use crate::common::{barrett_div, center, restore_from_backup, BARRETT_DIV_100, BARRETT_DIV_12};
+use anyhow::{anyhow, Result};
 use fltk::{
         app::{self},
         button::{Button, CheckButton},
@@ -21,153 +19,111 @@ use fltk::{
         prelude::{GroupExt as _, WidgetBase as _, WidgetExt as _, WindowExt as _},
         window::Window,
 };
-use fltk_theme::{ColorTheme, color_themes};
+use fltk_theme::{color_themes, ColorTheme};
 use std::collections::HashMap;
-use std::sync::OnceLock;
 use strum::IntoEnumIterator as _;
 use strum_macros::EnumIter;
+
+// =============================================================================
+// Constants
+// =============================================================================
 
 const WINDOW_WIDTH: i32 = 640;
 const WINDOW_HEIGHT: i32 = 480;
 const TOP_PADDING: i32 = 4;
 const FONT_PATH: &str = "C:\\Windows\\Fonts\\segoeui.ttf";
+const DISPLAY_TIMEOUT_SUCCESS: f64 = 5.0;
+const DISPLAY_TIMEOUT_ERROR: f64 = 10.0;
 
-#[derive(Clone, PartialEq)]
+// =============================================================================
+// Model: Application state and feature definitions
+// =============================================================================
+
+#[derive(Clone, Debug, PartialEq)]
 enum ViewState
 {
-        Applying,
         MainMenu,
+        Applying,
         Success,
 }
 
-struct CheckboxConfig
+#[derive(Clone, Debug, PartialEq, Eq, Hash, EnumIter, PartialOrd, Ord)]
+enum FeatureType
+{
+        MinimizeForensics,
+        MinimizeOnlineData,
+        DisableRecall,
+        DisableCopilot,
+        DisableSleepAndHibernate,
+        InstallMicrosoftStore,
+}
+
+struct FeatureDefinition
 {
         label: &'static str,
         run_fn: fn() -> Result<()>,
         error_name: &'static str,
-        x: i32,
-        y: i32,
-        width: i32,
-        height: i32,
 }
 
-#[derive(Clone, PartialEq, Eq, Hash, EnumIter, PartialOrd, Ord)]
-enum CheckboxType
+impl FeatureType
 {
-        DisableCopilot,
-        DisableRecall,
-        DisableSleepAndHibernate,
-        InstallAppxSupport,
-        InstallMicrosoftStore,
-        MinimizeForensics,
-        MinimizeOnlineData,
-        NonIntrusiveTweaks,
-}
-
-impl CheckboxType
-{
-        fn config(&self) -> CheckboxConfig
+        fn definition(&self) -> FeatureDefinition
         {
-                let checkbox_height = barrett_div(WINDOW_HEIGHT, &BARRETT_DIV_12);
-                let checkbox_width = WINDOW_WIDTH >> 1_i32; // 50% of window.
-
                 match self {
-                        Self::MinimizeForensics => CheckboxConfig {
+                        Self::MinimizeForensics => FeatureDefinition {
                                 label: "Minimize forensics / local data",
                                 run_fn: minimize_forensics::run,
                                 error_name: "minimize_forensics",
-                                x: 0,
-                                y: TOP_PADDING,
-                                width: checkbox_width,
-                                height: checkbox_height,
                         },
-                        Self::MinimizeOnlineData => CheckboxConfig {
+                        Self::MinimizeOnlineData => FeatureDefinition {
                                 label: "Minimize Microsoft online data",
                                 run_fn: minimize_online_data_collection::run,
                                 error_name: "minimize_online_data_collection",
-                                x: 0,
-                                y: TOP_PADDING + checkbox_height + 2,
-                                width: checkbox_width,
-                                height: checkbox_height,
                         },
-                        Self::DisableRecall => CheckboxConfig {
+                        Self::DisableRecall => FeatureDefinition {
                                 label: "Disable Windows Recall",
                                 run_fn: disable_recall::run,
                                 error_name: "disable_recall",
-                                x: 0,
-                                y: TOP_PADDING + checkbox_height * 2 + 4,
-                                width: checkbox_width,
-                                height: checkbox_height,
                         },
-                        Self::DisableCopilot => CheckboxConfig {
+                        Self::DisableCopilot => FeatureDefinition {
                                 label: "Disable Windows Copilot",
                                 run_fn: disable_copilot::run,
-                                error_name: "disable_recall",
-                                x: 0,
-                                y: TOP_PADDING + checkbox_height * 3 + 6,
-                                width: checkbox_width,
-                                height: checkbox_height,
+                                error_name: "disable_copilot",
                         },
-                        Self::DisableSleepAndHibernate => CheckboxConfig {
+                        Self::DisableSleepAndHibernate => FeatureDefinition {
                                 label: "Disable sleep and hibernate",
                                 run_fn: disable_sleep::run,
                                 error_name: "disable_sleep",
-                                x: 0,
-                                y: TOP_PADDING + checkbox_height * 4 + 8,
-                                width: checkbox_width,
-                                height: checkbox_height,
                         },
-                        Self::InstallMicrosoftStore => CheckboxConfig {
+                        Self::InstallMicrosoftStore => FeatureDefinition {
                                 label: "Install Microsoft Store",
                                 run_fn: reset_windows_store::run,
                                 error_name: "reset_windows_store",
-                                x: 0,
-                                y: TOP_PADDING + checkbox_height * 5 + 10,
-                                width: checkbox_width,
-                                height: checkbox_height,
-                        },
-                        Self::NonIntrusiveTweaks => CheckboxConfig {
-                                label: "Use non-intrusive tweaks",
-                                run_fn: non_intrusive_tweaks::run,
-                                error_name: "non_intrusive_tweaks",
-                                x: 0,
-                                y: TOP_PADDING + checkbox_height * 6 + 12,
-                                width: checkbox_width,
-                                height: checkbox_height,
-                        },
-                        Self::InstallAppxSupport => CheckboxConfig {
-                                label: "Install support for UWP and WinGet",
-                                run_fn: install_appx_support::run,
-                                error_name: "install_appx_support",
-                                x: 0,
-                                y: TOP_PADDING + checkbox_height * 7 + 14,
-                                width: checkbox_width,
-                                height: checkbox_height,
                         },
                 }
         }
 }
 
-static CHECKBOX_CONFIGS: OnceLock<HashMap<CheckboxType, CheckboxConfig>> = OnceLock::new();
-
-#[derive(Clone, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 enum ButtonType
 {
         Apply,
         Remove,
 }
 
-const DISPLAY_TIMEOUT_SUCCESS: f64 = 5.0;
-const DISPLAY_TIMEOUT_ERROR: f64 = 10.0;
+// =============================================================================
+// ViewModel: State management and business logic
+// =============================================================================
 
-struct GuiViewModel
+struct ViewModel
 {
         buttons: HashMap<ButtonType, Button>,
-        checkboxes: HashMap<CheckboxType, CheckButton>,
-        current_view: ViewState,
+        checkboxes: HashMap<FeatureType, CheckButton>,
         status_display: Option<Frame>,
+        current_view: ViewState,
 }
-impl GuiViewModel
+
+impl ViewModel
 {
         fn new() -> Self
         {
@@ -179,13 +135,16 @@ impl GuiViewModel
                 }
         }
 
-        fn update_ui(&mut self)
+        fn set_ui_elements(
+                &mut self,
+                checkboxes: HashMap<FeatureType, CheckButton>,
+                buttons: HashMap<ButtonType, Button>,
+                status_display: Frame,
+        )
         {
-                match self.current_view {
-                        ViewState::MainMenu => self.toggle_main_screen(true),
-                        ViewState::Applying => self.show_applying_screen(),
-                        ViewState::Success => self.show_success_screen(),
-                }
+                self.checkboxes = checkboxes;
+                self.buttons = buttons;
+                self.status_display = Some(status_display);
         }
 
         fn set_view(&mut self, view: ViewState)
@@ -194,47 +153,68 @@ impl GuiViewModel
                 self.update_ui();
         }
 
-        fn toggle_main_screen(&mut self, visible: bool)
+        fn update_ui(&mut self)
         {
-                if let (Some(status),) = (self.status_display.as_mut(),) {
-                        // This is implicit, since there are no other use cases
-                        for button in self.buttons.values_mut() {
-                                if visible {
-                                        button.show();
-                                } else {
-                                        button.hide();
-                                }
-                        }
-
-                        for checkbox in self.checkboxes.values_mut() {
-                                if visible {
-                                        checkbox.show();
-                                } else {
-                                        checkbox.hide();
-                                }
-                        }
-
-                        if visible {
-                                status.hide();
-                        } else {
-                                status.show();
-                        }
-                        app::redraw(); // Screen changed
+                match self.current_view {
+                        ViewState::MainMenu => self.show_main_menu(),
+                        ViewState::Applying => self.show_applying_screen(),
+                        ViewState::Success => self.show_success_screen(),
                 }
+        }
+
+        fn show_main_menu(&mut self)
+        {
+                for button in self.buttons.values_mut() {
+                        button.show();
+                }
+                for checkbox in self.checkboxes.values_mut() {
+                        checkbox.show();
+                }
+                if let Some(status) = self.status_display.as_mut() {
+                        status.hide();
+                }
+                app::redraw();
+        }
+
+        fn hide_main_menu(&mut self)
+        {
+                for button in self.buttons.values_mut() {
+                        button.hide();
+                }
+                for checkbox in self.checkboxes.values_mut() {
+                        checkbox.hide();
+                }
+                if let Some(status) = self.status_display.as_mut() {
+                        status.show();
+                }
+                app::redraw();
+        }
+
+        fn show_applying_screen(&mut self)
+        {
+                app::wait();
+                self.hide_main_menu();
+
+                if let Some(status) = self.status_display.as_mut() {
+                        status.set_label("Applying W11Boost, please wait...");
+                        status.redraw();
+                }
+                app::flush();
         }
 
         fn show_success_screen(&mut self)
         {
                 app::wait();
-                self.toggle_main_screen(false);
+                self.hide_main_menu();
 
                 if let Some(status) = self.status_display.as_mut() {
-                        status.show();
-                        status.set_label("W11Boost has successfully finished applying changes. Reboot for them to take full effect.");
+                        status.set_label(
+                                "W11Boost has successfully finished applying changes. Reboot for them to take full effect.",
+                        );
                         status.redraw();
                 }
-
                 app::flush();
+
                 app::add_timeout3(DISPLAY_TIMEOUT_SUCCESS, |_| {
                         fltk_observe::with_state_mut(|state: &mut Self| {
                                 state.set_view(ViewState::MainMenu);
@@ -245,17 +225,14 @@ impl GuiViewModel
         fn show_error_screen(&mut self, message: &str)
         {
                 app::wait();
-                self.toggle_main_screen(false);
+                self.hide_main_menu();
 
                 if let Some(status) = self.status_display.as_mut() {
-                        status.show();
                         status.set_label(&format!(
                                 "W11Boost encountered an error, take a screenshot of this and post an issue.\n\n{message}"
                         ));
                         status.redraw();
                 }
-
-                // Force GUI to process all pending events and render
                 app::flush();
 
                 app::add_timeout3(DISPLAY_TIMEOUT_ERROR, |_| {
@@ -263,31 +240,6 @@ impl GuiViewModel
                                 state.set_view(ViewState::MainMenu);
                         });
                 });
-        }
-        fn show_applying_screen(&mut self)
-        {
-                app::wait(); // Applying view won't render correctly otherwise
-                self.toggle_main_screen(false);
-
-                if let Some(status) = self.status_display.as_mut() {
-                        status.show();
-                        status.set_label("Applying W11Boost, please wait...");
-                        status.redraw();
-                }
-
-                app::flush();
-        }
-
-        fn set_ui_elements(
-                &mut self,
-                checkboxes: HashMap<CheckboxType, CheckButton>,
-                buttons: HashMap<ButtonType, Button>,
-                status_display: Frame,
-        )
-        {
-                self.checkboxes = checkboxes;
-                self.buttons = buttons;
-                self.status_display = Some(status_display);
         }
 
         fn apply(&mut self, _btn: &Button)
@@ -301,31 +253,38 @@ impl GuiViewModel
                         "",
                 );
 
-                if choice == Some(0_i32) {
-                        let checkbox_configs = GuiApp::get_checkbox_configs();
-                        let mut checkbox_types = checkbox_configs.keys().cloned().collect::<Vec<_>>();
-                        checkbox_types.sort();
+                if choice != Some(0_i32) {
+                        return;
+                }
 
-                        self.set_view(ViewState::Applying);
+                self.set_view(ViewState::Applying);
 
-                        for checkbox_type in checkbox_types {
-                                let checkbox_config = &checkbox_configs[&checkbox_type];
-                                let Some(checkbox) = self.checkboxes.get(&checkbox_type) else {
-                                        continue;
-                                };
+                // Always run non-intrusive tweaks first
+                if let Err(e) = non_intrusive_tweaks::run() {
+                        self.show_error_screen(&format!("non_intrusive_tweaks failed: {e}"));
+                        return;
+                }
 
-                                if !checkbox.is_checked() {
-                                        continue;
-                                }
+                let mut feature_types: Vec<FeatureType> = FeatureType::iter().collect();
+                feature_types.sort();
 
-                                if let Err(e) = (checkbox_config.run_fn)() {
-                                        self.show_error_screen(&format!("{} failed: {e}", checkbox_config.error_name));
-                                        return;
-                                }
+                for feature_type in feature_types {
+                        let Some(checkbox) = self.checkboxes.get(&feature_type) else {
+                                continue;
+                        };
+
+                        if !checkbox.is_checked() {
+                                continue;
                         }
 
-                        self.set_view(ViewState::Success);
+                        let definition = feature_type.definition();
+                        if let Err(e) = (definition.run_fn)() {
+                                self.show_error_screen(&format!("{} failed: {e}", definition.error_name));
+                                return;
+                        }
                 }
+
+                self.set_view(ViewState::Success);
         }
 
         fn remove(&mut self, _btn: &Button)
@@ -339,100 +298,114 @@ impl GuiViewModel
                         "",
                 );
 
-                if choice == Some(0_i32) {
-                        self.set_view(ViewState::Applying);
+                if choice != Some(0_i32) {
+                        return;
+                }
 
-                        match remove_w11boost::run() {
-                                Ok(()) => {}
-                                Err(e) => {
-                                        self.show_error_screen(&format!("remove_w11boost::run failed: {e}"));
-                                        return;
-                                }
-                        }
+                self.set_view(ViewState::Applying);
 
-                        match restore_from_backup() {
-                                Ok(()) => {
-                                        self.set_view(ViewState::Success);
-                                }
-                                Err(e) => {
-                                        self.show_error_screen(&format!("restore_from_backup failed: {e}"));
-                                }
-                        }
+                if let Err(e) = remove_w11boost::run() {
+                        self.show_error_screen(&format!("remove_w11boost::run failed: {e}"));
+                        return;
+                }
+
+                match restore_from_backup() {
+                        Ok(()) => self.set_view(ViewState::Success),
+                        Err(e) => self.show_error_screen(&format!("restore_from_backup failed: {e}")),
                 }
         }
 }
-struct GuiView
+
+// =============================================================================
+// View: UI element creation and layout
+// =============================================================================
+
+struct View
 {
         buttons: HashMap<ButtonType, Button>,
-        checkboxes: HashMap<CheckboxType, CheckButton>,
+        checkboxes: HashMap<FeatureType, CheckButton>,
         status_display: Frame,
 }
-impl GuiView
+
+impl View
 {
         fn new() -> Self
         {
-                let mut wind = Window::default()
+                let mut window = Window::default()
                         .with_label("W11Boost")
                         .with_size(WINDOW_WIDTH, WINDOW_HEIGHT)
                         .center_screen();
+                window.set_border(true);
 
-                wind.set_border(true);
+                let checkboxes = Self::create_checkboxes();
+                let buttons = Self::create_buttons();
+                let status_display = Self::create_status_display();
 
-                let mut apply = Button::new(
-                        0,
-                        0,
-                        (WINDOW_WIDTH - 4) >> 1_i32,
-                        barrett_div(WINDOW_HEIGHT * 14, &BARRETT_DIV_100),
-                        "Apply W11Boost",
-                );
+                Self::setup_window_drag(&mut window);
+                window.end();
+                window.show();
+                window.center_screen();
 
-                let apply_height = apply.height();
-                apply.set_pos(2, WINDOW_HEIGHT - apply_height - 2);
+                Self {
+                        buttons,
+                        checkboxes,
+                        status_display,
+                }
+        }
+
+        fn create_checkboxes() -> HashMap<FeatureType, CheckButton>
+        {
+                let checkbox_height = barrett_div(WINDOW_HEIGHT, &BARRETT_DIV_12);
+                let checkbox_width = WINDOW_WIDTH >> 1;
+                let mut checkboxes = HashMap::new();
+
+                for (index, feature_type) in FeatureType::iter().enumerate() {
+                        let definition = feature_type.definition();
+                        let y = TOP_PADDING + checkbox_height * (index as i32) + (index as i32 * 2);
+
+                        let mut checkbox = CheckButton::new(0, y, checkbox_width, checkbox_height, definition.label);
+                        checkbox.set_label_font(enums::Font::by_name(FONT_PATH));
+                        checkbox.set_label_size(16);
+
+                        checkboxes.insert(feature_type, checkbox);
+                }
+
+                checkboxes
+        }
+
+        fn create_buttons() -> HashMap<ButtonType, Button>
+        {
+                let button_height = barrett_div(WINDOW_HEIGHT * 14, &BARRETT_DIV_100);
+                let button_width = (WINDOW_WIDTH - 4) >> 1;
+
+                let mut apply = Button::new(0, 0, button_width, button_height, "Apply W11Boost");
+                apply.set_pos(2, WINDOW_HEIGHT - button_height - 2);
                 apply.set_label_font(enums::Font::by_name(FONT_PATH));
                 apply.set_label_size(16);
 
-                let mut remove = Button::new(
-                        WINDOW_WIDTH >> 1_i32,
-                        0,
-                        (WINDOW_WIDTH - 4) >> 1_i32,
-                        barrett_div(WINDOW_HEIGHT * 14, &BARRETT_DIV_100),
-                        "Remove W11Boost",
-                );
-                let remove_width = remove.width();
-                let remove_height = remove.height();
-                remove.set_pos(WINDOW_WIDTH - remove_width - 2, WINDOW_HEIGHT - remove_height - 2);
+                let mut remove = Button::new(0, 0, button_width, button_height, "Remove W11Boost");
+                remove.set_pos(WINDOW_WIDTH - button_width - 2, WINDOW_HEIGHT - button_height - 2);
                 remove.set_label_font(enums::Font::by_name(FONT_PATH));
                 remove.set_label_size(16);
-
-                let checkbox_configs = GuiApp::get_checkbox_configs();
-                let mut checkboxes = HashMap::new();
-
-                for (checkbox_type, config) in checkbox_configs {
-                        let mut checkbox =
-                                CheckButton::new(config.x, config.y, config.width, config.height, config.label);
-
-                        checkbox.set_label_font(enums::Font::by_name(FONT_PATH));
-                        checkbox.set_label_size(16);
-                        checkboxes.insert(checkbox_type.clone(), checkbox);
-                }
-
-                if let Some(checkbox) = checkboxes.get_mut(&CheckboxType::NonIntrusiveTweaks) {
-                        checkbox.set_checked(true);
-                }
-
-                let mut status_display = Frame::new(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, None);
-                status_display.set_label_size(16);
-                status_display.set_align(Align::Center | Align::Inside | Align::Wrap);
-                status_display.hide();
 
                 let mut buttons = HashMap::new();
                 buttons.insert(ButtonType::Apply, apply);
                 buttons.insert(ButtonType::Remove, remove);
+                buttons
+        }
 
-                wind.end();
-                wind.show();
+        fn create_status_display() -> Frame
+        {
+                let mut status_display = Frame::new(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, None);
+                status_display.set_label_size(16);
+                status_display.set_align(Align::Center | Align::Inside | Align::Wrap);
+                status_display.hide();
+                status_display
+        }
 
-                wind.handle({
+        fn setup_window_drag(window: &mut Window)
+        {
+                window.handle({
                         let (mut x, mut y) = (0_i32, 0_i32);
                         move |w, ev| match ev {
                                 enums::Event::Push => {
@@ -448,48 +421,46 @@ impl GuiView
                                 _ => false,
                         }
                 });
-
-                wind.center_screen();
-
-                Self {
-                        buttons,
-                        checkboxes,
-                        status_display,
-                }
         }
 }
 
-struct GuiApp
+// =============================================================================
+// Application: Orchestrates View and ViewModel
+// =============================================================================
+
+struct Application
 {
         app: app::App,
 }
-impl GuiApp
+
+impl Application
 {
         fn new() -> Result<Self>
         {
                 use fltk_observe::{Runner as _, WidgetObserver as _};
+
                 let app = app::App::default()
                         .with_scheme(app::Scheme::Gtk)
-                        .use_state(GuiViewModel::new)
+                        .use_state(ViewModel::new)
                         .ok_or_else(|| anyhow!("Failed to initialize app with state."))?;
 
-                app.load_font("C:\\Windows\\Fonts\\segoeui.ttf")?;
+                app.load_font(FONT_PATH)?;
 
                 let widget_theme = ColorTheme::new(color_themes::BLACK_THEME);
                 widget_theme.apply();
 
-                let mut gv = GuiView::new();
+                let mut view = View::new();
 
-                if let Some(apply_btn) = gv.buttons.get_mut(&ButtonType::Apply) {
-                        apply_btn.set_action(GuiViewModel::apply);
+                if let Some(apply_btn) = view.buttons.get_mut(&ButtonType::Apply) {
+                        apply_btn.set_action(ViewModel::apply);
                 }
 
-                if let Some(remove_btn) = gv.buttons.get_mut(&ButtonType::Remove) {
-                        remove_btn.set_action(GuiViewModel::remove);
+                if let Some(remove_btn) = view.buttons.get_mut(&ButtonType::Remove) {
+                        remove_btn.set_action(ViewModel::remove);
                 }
 
-                fltk_observe::with_state_mut(|state: &mut GuiViewModel| {
-                        state.set_ui_elements(gv.checkboxes, gv.buttons, gv.status_display);
+                fltk_observe::with_state_mut(|state: &mut ViewModel| {
+                        state.set_ui_elements(view.checkboxes, view.buttons, view.status_display);
                 });
 
                 Ok(Self { app })
@@ -497,21 +468,19 @@ impl GuiApp
 
         fn run(&self) -> Result<()>
         {
-                self.app.run()
-                        .map_err(|e| anyhow!("Failed to run GuiApp.\nError: {}", e))?;
+                self.app
+                        .run()
+                        .map_err(|e| anyhow!("Failed to run Application.\nError: {}", e))?;
                 Ok(())
-        }
-
-        fn get_checkbox_configs() -> &'static HashMap<CheckboxType, CheckboxConfig>
-        {
-                CHECKBOX_CONFIGS.get_or_init(|| CheckboxType::iter().map(|ct| (ct.clone(), ct.config())).collect())
         }
 }
 
+// =============================================================================
+// Public API
+// =============================================================================
+
 pub fn draw_gui() -> Result<()>
 {
-        let ga = GuiApp::new().map_err(|e| anyhow!("Failed to initialize GuiApp in draw_gui.\nError: {}", e))?;
-        ga.run()?;
-
-        Ok(())
+        let app = Application::new().map_err(|e| anyhow!("Failed to initialize Application.\nError: {}", e))?;
+        app.run()
 }

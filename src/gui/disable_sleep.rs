@@ -1,6 +1,5 @@
 use crate::common::set_dword;
 use winsafe::HKEY;
-use winsafe::prelude::*;
 use anyhow::Result;
 
 pub fn run() -> Result<()>

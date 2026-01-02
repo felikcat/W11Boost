@@ -4,7 +4,7 @@ use std::{
         fs::{self, File},
         path::Path,
 };
-use winsafe::{HKEY, SetFileAttributes, co::FILE_ATTRIBUTE, prelude::advapi_Hkey as _};
+use winsafe::{HKEY, SetFileAttributes, co::FILE_ATTRIBUTE};
 
 pub fn run() -> Result<()>
 {
@@ -362,5 +362,89 @@ pub fn run() -> Result<()>
                         "Set-NetAdapterAdvancedProperty -Name '*' -DisplayName 'Wait for Link' -RegistryValue 0",
                 ],
         )?;
+
+        // ============================================================================
+        // Disable Windows advertisements and suggestions
+        // ============================================================================
+
+        // Disable all Windows Spotlight features (lock screen suggestions, tips, etc.)
+        set_dword(
+                &hkcu,
+                r"Software\Policies\Microsoft\Windows\CloudContent",
+                "DisableWindowsSpotlightFeatures",
+                1,
+        )?;
+
+        // Do not use diagnostic data for tailored experiences (personalized ads).
+        set_dword(
+                &hkcu,
+                r"Software\Policies\Microsoft\Windows\CloudContent",
+                "DisableTailoredExperiencesWithDiagnosticData",
+                1,
+        )?;
+
+        // Do not suggest third-party content in Windows Spotlight.
+        set_dword(
+                &hkcu,
+                r"Software\Policies\Microsoft\Windows\CloudContent",
+                "DisableThirdPartySuggestions",
+                1,
+        )?;
+
+        // Disable sync provider notifications (OneDrive ads in File Explorer).
+        set_dword(
+                &hkcu,
+                r"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced",
+                "ShowSyncProviderNotifications",
+                0,
+        )?;
+
+        // ContentDeliveryManager controls various Windows advertisements.
+        let cdm = r"SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager";
+
+        // Master switch for content delivery.
+        set_dword(&hkcu, cdm, "ContentDeliveryAllowed", 0)?;
+
+        // Disable silent app installations.
+        set_dword(&hkcu, cdm, "SilentInstalledAppsEnabled", 0)?;
+
+        // Disable suggestions in Settings app.
+        set_dword(&hkcu, cdm, "SystemPaneSuggestionsEnabled", 0)?;
+
+        // Disable "soft landing" promotional content.
+        set_dword(&hkcu, cdm, "SoftLandingEnabled", 0)?;
+
+        // Disable rotating lock screen images (Spotlight).
+        set_dword(&hkcu, cdm, "RotatingLockScreenEnabled", 0)?;
+        set_dword(&hkcu, cdm, "RotatingLockScreenOverlayEnabled", 0)?;
+
+        // Disable OEM and pre-installed app suggestions.
+        set_dword(&hkcu, cdm, "OemPreInstalledAppsEnabled", 0)?;
+        set_dword(&hkcu, cdm, "PreInstalledAppsEnabled", 0)?;
+        set_dword(&hkcu, cdm, "PreInstalledAppsEverEnabled", 0)?;
+
+        // Disable feature management (used for A/B testing and feature rollouts).
+        set_dword(&hkcu, cdm, "FeatureManagementEnabled", 0)?;
+
+        // Disable "Get tips, tricks, and suggestions" notifications.
+        set_dword(&hkcu, cdm, "SubscribedContent-338389Enabled", 0)?;
+
+        // Disable "Show me the Windows welcome experience" after updates.
+        set_dword(&hkcu, cdm, "SubscribedContent-310093Enabled", 0)?;
+
+        // Disable suggestions in Start menu.
+        set_dword(&hkcu, cdm, "SubscribedContent-338388Enabled", 0)?;
+
+        // Disable suggestions in timeline.
+        set_dword(&hkcu, cdm, "SubscribedContent-338393Enabled", 0)?;
+
+        // Disable suggested content in Settings app.
+        set_dword(&hkcu, cdm, "SubscribedContent-353694Enabled", 0)?;
+        set_dword(&hkcu, cdm, "SubscribedContent-353696Enabled", 0)?;
+        set_dword(&hkcu, cdm, "SubscribedContent-353698Enabled", 0)?;
+
+        // Disable "Suggest ways to get the most out of Windows" notification.
+        set_dword(&hkcu, cdm, "SubscribedContent-88000326Enabled", 0)?;
+
         Ok(())
 }

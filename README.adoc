@@ -10,18 +10,36 @@ ifdef::env-github[]
 endif::[]
 
 == What's different about this compared to other optimizers / debloaters?
-. Can be fully uninstalled without resorting to: system restore, backups, reinstalling Windows.
-. The number one focus of breaking nothing by default, and not assuming what the user wants. +
-Not guaranteed for: Minimize forensics / local data, and Minimize Microsoft online data.
+. Can be fully uninstalled without resorting to: system restore, backups, or reinstalling Windows.
+. The number one focus of breaking nothing by default.
 . Very easy to use.
 . Heavily documented source code (only for the Windows changes).
-. Specific use cases are covered, such as fully installing .appx and WinGet support on Windows LTSC builds.
 . No false claims that this will boost performance in video games, except for those that have issues with FTH such as Assetto Corsa. 
-- Primarily it is only to improve the responsiveness and usability of the Windows operating system, to make it feel better than it was prior.
+- Primarily it's to make Windows feel better than it was prior, and reduce the amount of privacy violations occuring or advertisements from showing up.
+. Has a fleshed out optional anti-forensics feature. This is meant for people running programs they don't trust with their privacy, such as anti-cheats.
 
 image:W11Boost_GUI.png[480,360]
 
 I recommend checking "Minimize Microsoft online data" if you don't care if the way you use Windows is changed, it makes Windows less bloated.
+
+== For developers
+[%collapsible]
+====
+
+.Building
+. Install MSYS2 and Git via running `winget install -eh MSYS2.MSYS2; winget install -eh Git.Git` in PowerShell.
+
+. Open MSYS UCRT64, then run `pacman -S mingw-w64-x86_64-gcc`; this will include the Resource (.rc file) compiler that W11Boost needs to use Rust's GCC toolchain.
+
+. Have a PowerShell open that is inside of W11Boost's main directory.
+
+. Install Rust's nightly GCC compiler: `rustup +nightly target add x86_64-pc-windows-gnu`
+
+. In Git Bash, run `chmod +x build_release.sh` then `./build_release.sh` to compile W11Boost in Release mode.
+- You can run tests using `./tests_run.sh`, note however that this script requires Git Bash to be ran with Administrator privileges.
+
+
+====
 
 == Recommendations
 

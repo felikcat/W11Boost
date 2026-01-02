@@ -12,7 +12,6 @@ use winsafe::co::{ERROR, REG};
 use winsafe::{
         self as w, HKEY, RegistryValue,
         co::{self, KNOWNFOLDERID},
-        prelude::*,
 };
 use core::fmt::Write as _;
 

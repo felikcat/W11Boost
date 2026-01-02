@@ -1,5 +1,5 @@
 use crate::common::set_dword;
-use winsafe::{HKEY, prelude::advapi_Hkey as _};
+use winsafe::HKEY;
 use anyhow::Result;
 
 /* Ignored for security or usability reasons:
@@ -95,12 +95,6 @@ pub fn run() -> Result<()>
                 &hklm,
                 r"SOFTWARE\Policies\Microsoft\Windows\CloudContent",
                 "DisableConsumerAccountStateContent",
-                1,
-        )?;
-        set_dword(
-                &hklm,
-                r"SOFTWARE\Policies\Microsoft\Windows\CloudContent",
-                "DisableSoftLanding",
                 1,
         )?;
         set_dword(
