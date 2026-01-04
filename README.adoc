@@ -14,7 +14,7 @@ endif::[]
 
 . Has a fleshed out anti-forensics feature. This is meant for people running invasive programs they don't trust with their privacy, such as anti-cheats.
 
-. Insanely light-weight and only 212KB in file size.
+. Insanely light-weight; only 320KB in file size.
 
 . Can be fully uninstalled without resorting to: system restore, backups, or reinstalling Windows.
 
