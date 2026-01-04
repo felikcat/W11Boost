@@ -9,39 +9,25 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
-== What's different about this compared to other optimizers / debloaters?
+== W11Boost compared to other optimizers & debloaters
+. Comprehensive third-party program telemetry disabling; 202 environment variables set to do so, and a few registry tweaks.
+
+. Has a fleshed out anti-forensics feature. This is meant for people running invasive programs they don't trust with their privacy, such as anti-cheats.
+
+. Insanely light-weight and only 212KB in file size.
+
 . Can be fully uninstalled without resorting to: system restore, backups, or reinstalling Windows.
+
 . The number one focus of breaking nothing by default.
+
 . Very easy to use.
-. Heavily documented source code (only for the Windows changes).
-. No false claims that this will boost performance in video games, except for those that have issues with FTH such as Assetto Corsa. 
-- Primarily it's to make Windows feel better than it was prior, and reduce the amount of privacy violations occuring or advertisements from showing up.
-. Has a fleshed out optional anti-forensics feature. This is meant for people running programs they don't trust with their privacy, such as anti-cheats.
 
 image:W11Boost_GUI.png[480,360]
 
 I recommend checking "Minimize Microsoft online data" if you don't care if the way you use Windows is changed, it makes Windows less bloated.
 
-== For developers
-[%collapsible]
-====
 
-.Building
-. Install MSYS2 and Git via running `winget install -eh MSYS2.MSYS2; winget install -eh Git.Git` in PowerShell.
-
-. Open MSYS UCRT64, then run `pacman -S mingw-w64-x86_64-gcc`; this will include the Resource (.rc file) compiler that W11Boost needs to use Rust's GCC toolchain.
-
-. Have a PowerShell open that is inside of W11Boost's main directory.
-
-. Install Rust's nightly GCC compiler: `rustup +nightly target add x86_64-pc-windows-gnu`
-
-. In Git Bash, run `chmod +x build_release.sh` then `./build_release.sh` to compile W11Boost in Release mode.
-- You can run tests using `./tests_run.sh`, note however that this script requires Git Bash to be ran with Administrator privileges.
-
-
-====
-
-== Recommendations
+== Additional recommendations
 
 === Windows
 NOTE: Third-party anti-malware programs can provide better protection, but can seriously screw up your Windows installation, as Kaspersky would even after uninstalling it.
@@ -50,12 +36,7 @@ NOTE: Third-party anti-malware programs can provide better protection, but can s
 - https://winaerotweaker.com/[Winaero Tweaker] to set personal preferences.
 - https://www.startallback.com/[StartAllBack] to speed up Windows 11, and also restore old interface elements from Windows 7 or 10.
 - https://github.com/Xanashi/Icaros[Icaros] for better and faster image & video thumbnails. Be sure to activate "Thumbnailing", "Properties", and "Cache" (use Dynamic) in IcarosConfig. You can set the locations for "Cache" to all your disks/drives and build the cache for them in advance.
-- https://github.com/tnodir/fort[Fort Firewall] to reduce the amount of network traffic to and from Microsoft.
-
-. To reduce third-party program telemetry, download https://github.com/beatcracker/toptout/archive/refs/heads/master.zip[toptout] and open PowerShell as administrator:
-- `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`
-- `.\toptout-master\examples\toptout_pwsh.ps1 -Env -Exec`
-- `Set-ExecutionPolicy -ExecutionPolicy Restricted -Scope CurrentUser`
+- https://github.com/tnodir/fort[Fort Firewall] to reduce the amount of network traffic to and from Microsoft or other software.
 
 . Replace Consumer OEM apps with their Enterprise variant. Such as replacing Lenovo Vantage with Lenovo Commercial Vantage.
 

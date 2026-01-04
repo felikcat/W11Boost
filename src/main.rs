@@ -1,17 +1,13 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-#![forbid(unsafe_code)]
 #![deny(
         clippy::cargo,
         clippy::complexity,
         clippy::correctness,
         clippy::perf,
         clippy::style,
-        clippy::suspicious,
+        clippy::suspicious
 )]
-#![warn(
-        clippy::pedantic,
-        clippy::nursery,
-)]
+#![warn(clippy::pedantic, clippy::nursery)]
 #![allow(
         clippy::too_many_lines,
         clippy::missing_errors_doc,
@@ -24,20 +20,18 @@
         clippy::question_mark_used
 )]
 
-pub mod common;
 mod gui;
-use common::center;
-use fltk::dialog;
 use gui::draw_gui;
+use winsafe::prelude::*;
+use winsafe::{HWND, co::MB};
 
 fn main()
 {
         match draw_gui() {
-                Ok(()) => println!("draw_gui() exited successfully"),
-                Err(e) => dialog::alert(
-                        center().0,
-                        center().1,
-                        &format!("W11Boost -> draw_gui() failed.\nError:{e}"),
-                ),
+                Ok(()) => {}
+                Err(e) => {
+                        let msg = format!("W11Boost -> draw_gui() failed.\nError: {e}");
+                        let _ = HWND::NULL.MessageBox(&msg, "W11Boost Error", MB::OK | MB::ICONERROR);
+                }
         }
 }

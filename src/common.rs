@@ -1,19 +1,19 @@
 use anyhow::Result;
 use anyhow::anyhow;
-use chrono::{Datelike as _, Local, Timelike as _};
-use fltk::{app, dialog};
+use core::fmt::Write as _;
 use std::fs::{self, OpenOptions};
 use std::io::Write as _;
 use std::os::windows::process::CommandExt as _;
 use std::path::PathBuf;
 use std::process::Command;
 use std::sync::OnceLock;
-use winsafe::co::{ERROR, REG};
+use winsafe::co::{ERROR, MB, REG};
+use winsafe::prelude::*;
 use winsafe::{
-        self as w, HKEY, RegistryValue,
+        self as w, GetLocalTime, HKEY, HWND, RegistryValue,
         co::{self, KNOWNFOLDERID},
 };
-use core::fmt::Write as _;
+use windows::Win32::System::Registry::{RegSetValueExW, REG_SZ};
 
 static CACHE: Cache = Cache::new();
 
@@ -40,12 +40,8 @@ impl Cache
 fn log_path() -> PathBuf
 {
         let documents_dir = get_windows_path(&KNOWNFOLDERID::Documents).unwrap_or_else(|e| {
-                dialog::alert(
-                        center().0,
-                        center().1,
-                        &format!("Failed to get the Desktop Windows path, W11Boost will close.\nError: {e}"),
-                );
-                // We want the program to force close in this case.
+                let msg = format!("Failed to get the Documents path, W11Boost will close.\nError: {e}");
+                let _ = HWND::NULL.MessageBox(&msg, "W11Boost Error", MB::OK | MB::ICONERROR);
                 panic!("Windows path failure")
         });
 
@@ -86,11 +82,13 @@ pub fn registry_backup(hkey: &HKEY, subkey: &str, value_name: &str, is_removal: 
                 }
         }
 
-        let backup_line = match hkey.RegOpenKeyEx(Some(subkey), co::REG_OPTION::NON_VOLATILE, co::KEY::READ) {
+        let backup_line = match hkey.RegOpenKeyEx(Some(subkey), co::REG_OPTION::NoValue, co::KEY::READ) {
                 Ok(key) => {
                         // Find the specific value and get its type.
+                        // Collect iterator results first to release the iterator before reading values.
+                        let values: Vec<_> = key.RegEnumValue()?.collect();
                         let mut found_value = None;
-                        for value_result in key.RegEnumValue()? {
+                        for value_result in values {
                                 let (name, reg_type) = value_result?;
                                 if name == value_name {
                                         found_value = Some(reg_type);
@@ -98,7 +96,7 @@ pub fn registry_backup(hkey: &HKEY, subkey: &str, value_name: &str, is_removal: 
                                 }
                         }
 
-                        match found_value {
+                        let result = match found_value {
                                 Some(REG::DWORD) => match key.RegGetValue(None, Some(value_name), co::RRF::RT_DWORD) {
                                         Ok(RegistryValue::Dword(val)) => {
                                                 format!("{hkey_text}|{subkey}|{value_name}|DWORD:{val}\n")
@@ -116,7 +114,9 @@ pub fn registry_backup(hkey: &HKEY, subkey: &str, value_name: &str, is_removal: 
                                         format!("{hkey_text}|{subkey}|{value_name}|KEY_CREATED_BY_APP\n")
                                 }
                                 _ => anyhow!("Unsupported registry type").to_string(),
-                        }
+                        };
+                        drop(key); // Explicitly close handle
+                        result
                 }
                 Err(e) if e == ERROR::FILE_NOT_FOUND => {
                         // Key doesn't exist, mark for subkey removal during restoration.
@@ -169,7 +169,9 @@ pub fn registry_recursive_backup(hkey: &HKEY, subkey: &str, backup_file: &PathBu
 
         writeln!(content, "{hkey_text}|{subkey}|SUBKEY|BEGIN_SUBKEY\n")?;
 
-        for value_result in key.RegEnumValue()? {
+        // Collect iterator results first to release the iterator before reading values.
+        let values: Vec<_> = key.RegEnumValue()?.collect();
+        for value_result in values {
                 let (value_name, reg_type) = value_result?;
                 let value_line = match reg_type {
                         REG::DWORD => match key.RegGetValue(None, Some(&value_name), co::RRF::RT_DWORD) {
@@ -193,8 +195,9 @@ pub fn registry_recursive_backup(hkey: &HKEY, subkey: &str, backup_file: &PathBu
                 content.push_str(&value_line);
         }
 
+        drop(key); // Explicitly close handle
         writeln!(content, "{hkey_text}|{subkey}|SUBKEY|END_SUBKEY\n")?;
-        
+
         fs::write(backup_file, content)?;
         Ok(())
 }
@@ -278,40 +281,41 @@ fn restore_single_line(line: &str) -> Result<bool>
 
 pub fn set_dword(hkey: &HKEY, subkey: &str, value_name: &str, value: u32) -> Result<()>
 {
-        let o_subkey = subkey;
         let hkey_text = get_hkey_text(hkey);
 
         registry_backup(hkey, subkey, value_name, false)?;
 
-        let (subkey, _) = hkey
+        let (key, _) = hkey
                 .RegCreateKeyEx(subkey, None, co::REG_OPTION::NON_VOLATILE, co::KEY::WRITE, None)
                 .map_err(|source| {
                         anyhow!(
                                 "Failed to open DWORD registry key: {}\\{}\\{}\nError: {}",
                                 hkey_text,
-                                o_subkey,
+                                subkey,
                                 value_name,
                                 source
                         )
                 })?;
 
-        subkey.RegSetValueEx(Some(value_name), RegistryValue::Dword(value))
-                .map_err(|source| {
-                        anyhow!(
-                                "Failed to set DWORD registry value: {}\\{}\\{} = {}\nError: {}",
-                                hkey_text,
-                                o_subkey,
-                                value_name,
-                                value,
-                                source
-                        )
-                })?;
+        let result = key.RegSetValueEx(Some(value_name), RegistryValue::Dword(value));
+        drop(key); // Explicitly close handle before continuing
 
-        log_registry(hkey, o_subkey, value_name, &value.to_string(), "DWORD").map_err(|e| {
+        result.map_err(|source| {
+                anyhow!(
+                        "Failed to set DWORD registry value: {}\\{}\\{} = {}\nError: {}",
+                        hkey_text,
+                        subkey,
+                        value_name,
+                        value,
+                        source
+                )
+        })?;
+
+        log_registry(hkey, subkey, value_name, &value.to_string(), "DWORD").map_err(|e| {
                 anyhow!(
                         "Failed to log DWORD change for key: {}\\{}\\{} -> {}\nError: {}",
                         hkey_text,
-                        o_subkey,
+                        subkey,
                         value_name,
                         value,
                         e
@@ -323,41 +327,56 @@ pub fn set_dword(hkey: &HKEY, subkey: &str, value_name: &str, value: u32) -> Res
 
 pub fn set_string(hkey: &HKEY, subkey: &str, value_name: &str, value: &str) -> Result<()>
 {
-        let o_subkey = subkey;
         let hkey_text = get_hkey_text(hkey);
 
         registry_backup(hkey, subkey, value_name, false)?;
 
-        let (subkey, _) = hkey
+        let (key, _) = hkey
                 .RegCreateKeyEx(subkey, None, co::REG_OPTION::NON_VOLATILE, co::KEY::WRITE, None)
                 .map_err(|source| {
                         anyhow!(
                                 "Failed to open Sz registry key: {}\\{}\\{}\nError: {}",
                                 hkey_text,
-                                o_subkey,
+                                subkey,
                                 value_name,
                                 source
                         )
                 })?;
 
-        let value = value.to_owned();
-        subkey.RegSetValueEx(Some(value_name), RegistryValue::Sz(value.clone()))
-                .map_err(|source| {
-                        anyhow!(
-                                "Failed to set Sz registry value: {}\\{}\\{} = {}\nError: {}",
-                                hkey_text,
-                                o_subkey,
-                                value_name,
-                                value,
-                                source
-                        )
-                })?;
+        // Use raw Windows API for all strings to handle empty strings correctly.
+        // winsafe's RegistryValue::Sz doesn't handle empty strings (ERROR 998).
+        let wide_value_name: Vec<u16> = value_name.encode_utf16().chain(std::iter::once(0)).collect();
+        let wide_value: Vec<u16> = value.encode_utf16().chain(std::iter::once(0)).collect();
+        let byte_len = wide_value.len() * 2;
 
-        log_registry(hkey, o_subkey, value_name, &value, "String").map_err(|e| {
+        let result = unsafe {
+                RegSetValueExW(
+                        windows::Win32::System::Registry::HKEY(key.ptr() as *mut _),
+                        windows::core::PCWSTR(wide_value_name.as_ptr()),
+                        None,
+                        REG_SZ,
+                        Some(std::slice::from_raw_parts(wide_value.as_ptr() as *const u8, byte_len)),
+                )
+        };
+
+        drop(key);
+
+        if result.is_err() {
+                return Err(anyhow!(
+                        "Failed to set Sz registry value: {}\\{}\\{} = {}\nError: {}",
+                        hkey_text,
+                        subkey,
+                        value_name,
+                        value,
+                        result.0
+                ));
+        }
+
+        log_registry(hkey, subkey, value_name, value, "String").map_err(|e| {
                 anyhow!(
                         "Failed to log Sz change for key: {}\\{}\\{} -> {}\nError: {}",
                         hkey_text,
-                        o_subkey,
+                        subkey,
                         value_name,
                         value,
                         e
@@ -369,7 +388,6 @@ pub fn set_string(hkey: &HKEY, subkey: &str, value_name: &str, value: &str) -> R
 
 pub fn remove_subkey(hkey: &HKEY, subkey: &str) -> Result<()>
 {
-        let o_subkey = subkey;
         let hkey_text = get_hkey_text(hkey);
 
         registry_backup(hkey, subkey, "", true)?;
@@ -380,55 +398,77 @@ pub fn remove_subkey(hkey: &HKEY, subkey: &str) -> Result<()>
                 Err(e) => Err(anyhow!(
                         "Failed to delete subkey: {}\\{}\nError: {}",
                         hkey_text,
-                        o_subkey,
+                        subkey,
                         e
                 )),
         }?;
 
-        log_registry(hkey, o_subkey, "->", "", "Removed").map_err(|e| {
-                anyhow!(
-                        "Failed to log removal of key: {}\\{}\nError: {}",
-                        hkey_text,
-                        o_subkey,
-                        e
-                )
-        })?;
+        log_registry(hkey, subkey, "->", "", "Removed")
+                .map_err(|e| anyhow!("Failed to log removal of key: {}\\{}\nError: {}", hkey_text, subkey, e))?;
         Ok(())
+}
+
+// Deletes a single value from a registry key without affecting other values or the key itself.
+// Returns Ok(()) if value was deleted or didn't exist.
+pub fn delete_value(hkey: &HKEY, subkey: &str, value_name: &str) -> Result<()>
+{
+        let hkey_text = get_hkey_text(hkey);
+
+        let key = match hkey.RegOpenKeyEx(Some(subkey), co::REG_OPTION::NoValue, co::KEY::SET_VALUE) {
+                Ok(k) => k,
+                Err(e) if e == ERROR::FILE_NOT_FOUND => return Ok(()), // Key doesn't exist = value doesn't exist
+                Err(e) => {
+                        return Err(anyhow!(
+                                "Failed to open key for value deletion: {}\\{}\nError: {}",
+                                hkey_text,
+                                subkey,
+                                e
+                        ))
+                }
+        };
+
+        let result = key.RegDeleteValue(Some(value_name));
+        drop(key); // Explicitly close handle before returning
+
+        match result {
+                Ok(()) => Ok(()),
+                Err(e) if e == ERROR::FILE_NOT_FOUND => Ok(()), // Value doesn't exist = success
+                Err(e) => Err(anyhow!(
+                        "Failed to delete value: {}\\{}\\{}\nError: {}",
+                        hkey_text,
+                        subkey,
+                        value_name,
+                        e
+                )),
+        }
 }
 
 pub fn check_dword(hkey: &HKEY, subkey: &str, value_name: &str, expected_value: u32) -> Result<bool>
 {
-        let o_subkey = subkey;
         let hkey_text = get_hkey_text(hkey);
 
-        let subkey = match hkey.RegGetValue(Some(subkey), Some(value_name), co::RRF::RT_DWORD) {
+        let reg_value = match hkey.RegGetValue(Some(subkey), Some(value_name), co::RRF::RT_DWORD) {
                 Ok(value) => value,
                 Err(e) if e == w::co::ERROR::FILE_NOT_FOUND => return Ok(false),
                 Err(e) => {
                         return Err(anyhow!(
                                 "Failed to open key for DWORD check: {}\\{}\\{}\nError: {}",
                                 hkey_text,
-                                o_subkey,
+                                subkey,
                                 value_name,
                                 e
                         ));
                 }
         };
 
-        match subkey {
-        	RegistryValue::Dword(value) => {
-        		if value == expected_value {
-        			Ok(true)
-        		} else {
-        			Ok(false)
-        		}
-        	}
-        	_ => Err(anyhow!(
-        		"Expected DWORD value but found different type for: {}\\{}\\{}",
-        		hkey_text,
-        		o_subkey,
-        		value_name
-        	)),
+        match reg_value {
+                RegistryValue::Dword(value) => Ok(value == expected_value),
+                _ => Err(anyhow!(
+                        "Expected DWORD value but found different type for: {}\\{}\\{}",
+                        hkey_text,
+                        subkey,
+                        value_name
+                )),
         }
 }
 
@@ -453,15 +493,10 @@ fn log_registry(hkey: &HKEY, subkey: &str, value_name: &str, value: &str, type_n
                         .map_err(|e| anyhow!("Failed to create log directory: {}\nError: {e}", log_path.display()))?;
         }
 
-        let now = Local::now();
+        let now = GetLocalTime();
         let time_info = format!(
                 "{:02}/{:02}/{} {:02}:{:02}:{:02}",
-                now.day(),
-                now.month(),
-                now.year(),
-                now.hour(),
-                now.minute(),
-                now.second()
+                now.wDay, now.wMonth, now.wYear, now.wHour, now.wMinute, now.wSecond
         );
 
         let log_entry = if type_name == "Removed" {
@@ -496,54 +531,13 @@ fn log_registry(hkey: &HKEY, subkey: &str, value_name: &str, value: &str, type_n
         Ok(())
 }
 
-#[must_use]
-#[expect(clippy::cast_possible_truncation)]
-pub fn center() -> (i32, i32)
-{
-        ((app::screen_size().0 / 2.0) as i32, (app::screen_size().1 / 2.0) as i32)
-}
-
 pub fn run_system_command(program: &str, args: &[&str]) -> Result<()>
 {
         Command::new(program)
-        .args(args)
-        .creation_flags(CREATE_NO_WINDOW)
-        .output()
-        .map_err(|e| anyhow!("Failed to execute {program}.\nError: {e}"))?;
+                .args(args)
+                .creation_flags(CREATE_NO_WINDOW)
+                .output()
+                .map_err(|e| anyhow!("Failed to execute {program}.\nError: {e}"))?;
 
         Ok(())
 }
-
-// Barrett reduction constants for different divisors.
-// For 32-bit integers: m = floor((2^k) / d) where k=35
-pub struct BarrettConstants
-{
-        m: u64,
-        k: u32,
-}
-
-pub const BARRETT_DIV_12: BarrettConstants = BarrettConstants {
-        m: 2_863_311_530, // floor(2^35 / 12) = floor(34359738368 / 12) = 2863311530
-        k: 35,
-};
-
-pub const BARRETT_DIV_100: BarrettConstants = BarrettConstants {
-        m: 343_597_383, // floor(2^35 / 100) = floor(34359738368 / 100) = 343597383
-        k: 35,
-};
-
-/// Generic Barrett reduction for constant-time division.
-/// Replaces "n / divisor" with multiplication and bit shifts for better security & performance.
-#[inline] #[must_use]
-pub fn barrett_div(n: i32, constants: &BarrettConstants) -> i32
-{
-        // Barrett reduction: q = floor((n * m) >> k)
-        // where m and k are precomputed constants.
-        let n_u64 = n as u64;
-        let product = n_u64 * constants.m;
-        i32::try_from(product >> constants.k).unwrap_or_else(|_| {
-                // Fallback to direct casting if try_from fails (it shouldn't).
-                (product >> constants.k) as i32
-        })
-}
-

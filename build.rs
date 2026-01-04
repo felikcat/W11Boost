@@ -1,11 +1,38 @@
 extern crate winresource;
 use std::error::Error;
+use std::path::Path;
 
 use winresource::WindowsResource;
+
+// A workaround for my setup specifically
+fn find_windows_sdk_bin() -> Option<String>
+{
+        let sdk_root = Path::new(r"C:\Program Files (x86)\Windows Kits\10\bin");
+        if !sdk_root.exists() {
+                return None;
+        }
+
+        // Find the latest SDK version
+        let mut versions: Vec<_> = std::fs::read_dir(sdk_root)
+                .ok()?
+                .filter_map(|e| e.ok())
+                .filter(|e| e.path().is_dir())
+                .filter(|e| e.file_name().to_str().map(|s| s.starts_with("10.")).unwrap_or(false))
+                .collect();
+        versions.sort_by(|a, b| b.file_name().cmp(&a.file_name()));
+
+        versions.first()
+                .map(|v| v.path().join("x64").to_string_lossy().into_owned())
+}
 
 fn main() -> Result<(), Box<dyn Error>>
 {
         let mut res = WindowsResource::new();
+
+        // Set Windows SDK path if found
+        if let Some(sdk_path) = find_windows_sdk_bin() {
+                res.set_toolkit_path(&sdk_path);
+        }
 
         // Allowing for native DPI scaling and setting the Administrator requirement
         res.set_manifest(

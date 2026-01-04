@@ -1,7 +1,7 @@
-use winsafe::HKEY;
 use anyhow::Result;
+use winsafe::HKEY;
 
-use crate::common::set_dword;
+use w11boost::set_dword;
 
 pub fn run() -> Result<()>
 {

@@ -3,5 +3,6 @@
 /target
 *.lock
 /.claude
+/.claude-trace
 CLAUDE.md
 /resources

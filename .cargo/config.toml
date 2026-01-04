@@ -1,6 +1,10 @@
 [build]
-target = "x86_64-pc-windows-gnu"
+target = "x86_64-pc-windows-msvc"
 
-[target.x86_64-pc-windows-gnu]
-linker = "x86_64-w64-mingw32-gcc"
-ar = "x86_64-w64-mingw32-gcc-ar"
+[unstable]
+build-std = ["std"]
+build-std-features = ["optimize_for_size"]
+
+[env]
+# Tests must run serially - they share registry keys and can interfere
+RUST_TEST_THREADS = "1"
