@@ -317,29 +317,11 @@ fn check_operation(category: &str, op: &RegistryOp, results: &mut Results)
         }
 }
 
-fn main()
+fn generate_report(results: &Results, timestamp: &str) -> String
 {
-        let mut results = Results::default();
-
-        println!("W11Boost Registry Verification\nChecking registry entries...\n");
-
-        let tweaks = get_all_tweaks();
-
-        for tweak in tweaks {
-                for op in tweak.enabled_ops {
-                        check_operation(tweak.category, op, &mut results);
-                }
-        }
-
-        // Generate report
-        let documents = get_documents_path();
-        let timestamp = get_timestamp();
-        let log_path = documents.join(format!("registry-dump-{}.log", timestamp));
-
         let total = results.ok + results.fail;
-
-        // Build report content
         let mut report = String::new();
+
         report.push_str("==============================================\n");
         report.push_str("W11Boost Registry Verification Report\n");
         report.push_str(&format!("Generated: {}\n", timestamp.replace("_", " ")));
@@ -359,7 +341,6 @@ fn main()
 
         report.push_str("\n==============================================\n\n");
 
-        // Group by category
         let mut current_cat = String::new();
         for (cat, _, message) in &results.entries {
                 if cat != &current_cat {
@@ -376,10 +357,14 @@ fn main()
         report.push_str("END OF REPORT\n");
         report.push_str("==============================================\n");
 
-        // Write to file
-        match File::create(&log_path) {
+        report
+}
+
+fn save_report(path: &std::path::Path, content: &str)
+{
+        match File::create(path) {
                 Ok(mut file) => {
-                        if let Err(e) = file.write_all(report.as_bytes()) {
+                        if let Err(e) = file.write_all(content.as_bytes()) {
                                 eprintln!("Failed to write report: {}", e);
                         }
                 }
@@ -387,8 +372,12 @@ fn main()
                         eprintln!("Failed to create log file: {}", e);
                 }
         }
+}
 
-        // Print summary
+fn print_summary(results: &Results, log_path: &std::path::Path)
+{
+        let total = results.ok + results.fail;
+
         println!("SUMMARY:");
         println!(
                 "  Total Ops Checked: {}  |  Stock: {}  |  Modified: {}",
@@ -404,6 +393,29 @@ fn main()
 
         println!();
         println!("Report saved to: {}", log_path.display());
+}
+
+fn main()
+{
+        println!("W11Boost Registry Verification\nChecking registry entries...\n");
+
+        let mut results = Results::default();
+        let tweaks = get_all_tweaks();
+
+        for tweak in tweaks {
+                for op in tweak.enabled_ops {
+                        check_operation(tweak.category, op, &mut results);
+                }
+        }
+
+        let documents = get_documents_path();
+        let timestamp = get_timestamp();
+        let log_path = documents.join(format!("registry-dump-{}.log", timestamp));
+
+        let report_content = generate_report(&results, &timestamp);
+        save_report(&log_path, &report_content);
+        print_summary(&results, &log_path);
+
         println!("\nPress Enter to exit...");
         let _ = std::io::stdin().read_line(&mut String::new());
 }

@@ -832,15 +832,8 @@ impl W11BoostApp
                 }
         }
 
-        fn render_tweak_detail(&mut self, ui: &mut egui::Ui, tweak_id: &str)
+        fn render_tweak_header(&mut self, ui: &mut egui::Ui, tweak: &'static Tweak)
         {
-                let tweak = get_all_tweaks().into_iter().find(|t| t.id == tweak_id);
-
-                let Some(tweak) = tweak else {
-                        ui.label("Tweak not found");
-                        return;
-                };
-
                 if ui.button(RichText::new("\u{2190}  Back to category").strong())
                         .clicked()
                 {
@@ -866,113 +859,75 @@ impl W11BoostApp
                 ui.add_space(12.0);
                 ui.separator();
                 ui.add_space(12.0);
+        }
 
-                self.render_tweak_metadata_panel(ui, tweak);
-
+        fn render_tweak_custom_input(&mut self, ui: &mut egui::Ui, tweak: &'static Tweak)
+        {
                 ui.add_space(12.0);
-                self.render_tweak_technical_details(ui, tweak);
+                ui.separator();
+                ui.add_space(12.0);
 
-                if tweak.has_custom_input {
-                        ui.add_space(12.0);
-                        ui.separator();
-                        ui.add_space(12.0);
+                ui.horizontal(|ui| {
+                        ui.label(RichText::new("Configuration:").strong().size(16.0));
 
-                        ui.horizontal(|ui| {
-                                ui.label(RichText::new("Configuration:").strong().size(16.0));
-
-                                // Toggle search with button
-                                if ui.small_button("🔍 Find").clicked() {
-                                        self.input_search_visible = !self.input_search_visible;
-                                        if self.input_search_visible {
-                                                // Focus usually requires an ID, but we can't easily grab focus here without storing ID
-                                        }
-                                }
-
-                                // Handle Ctrl+F
-                                if ui.input_mut(|i| i.consume_key(egui::Modifiers::COMMAND, egui::Key::F)) {
-                                        self.input_search_visible = true;
-                                }
-                        });
-
-                        if self.input_search_visible {
-                                ui.horizontal(|ui| {
-                                        ui.label("Find:");
-                                        ui.text_edit_singleline(&mut self.input_search_query);
-                                        if ui.button("X").clicked() {
-                                                self.input_search_visible = false;
-                                                self.input_search_query.clear();
-                                        }
-                                });
+                        // Toggle search with button
+                        if ui.small_button("🔍 Find").clicked() {
+                                self.input_search_visible = !self.input_search_visible;
                         }
 
-                        ui.add_space(4.0);
+                        // Handle Ctrl+F
+                        if ui.input_mut(|i| i.consume_key(egui::Modifiers::COMMAND, egui::Key::F)) {
+                                self.input_search_visible = true;
+                        }
+                });
 
-                        let mut value = self
-                                .tweak_states
-                                .input_values
-                                .get(tweak.id)
-                                .cloned()
-                                .unwrap_or_else(|| String::from(tweak.default_text.unwrap_or("")));
+                if self.input_search_visible {
+                        ui.horizontal(|ui| {
+                                ui.label("Find:");
+                                ui.text_edit_singleline(&mut self.input_search_query);
+                                if ui.button("X").clicked() {
+                                        self.input_search_visible = false;
+                                        self.input_search_query.clear();
+                                }
+                        });
+                }
 
-                        let search_query = self.input_search_query.clone();
-                        let theme_color = ui.visuals().text_color();
+                ui.add_space(4.0);
 
-                        let mut layouter = move |ui: &egui::Ui, string: &dyn egui::TextBuffer, wrap_width: f32| {
-                                let string = string.as_str();
-                                let mut layout_job = egui::text::LayoutJob::default();
-                                layout_job.wrap.max_width = wrap_width;
+                let mut value = self
+                        .tweak_states
+                        .input_values
+                        .get(tweak.id)
+                        .cloned()
+                        .unwrap_or_else(|| String::from(tweak.default_text.unwrap_or("")));
 
-                                if search_query.is_empty() {
-                                        layout_job.append(
-                                                string,
-                                                0.0,
-                                                egui::TextFormat {
-                                                        font_id: egui::FontId::monospace(14.0),
-                                                        color: theme_color,
-                                                        ..Default::default()
-                                                },
-                                        );
-                                } else {
-                                        let haystack = string.to_lowercase();
-                                        let needle = search_query.to_lowercase();
-                                        let mut last_end = 0;
+                let search_query = self.input_search_query.clone();
+                let theme_color = ui.visuals().text_color();
 
-                                        for (start, part) in haystack.match_indices(&needle) {
-                                                // Append text before match (using original string slice)
-                                                if start > last_end {
-                                                        layout_job.append(
-                                                                &string[last_end..start],
-                                                                0.0,
-                                                                egui::TextFormat {
-                                                                        font_id: egui::FontId::monospace(14.0),
-                                                                        color: theme_color,
-                                                                        ..Default::default()
-                                                                },
-                                                        );
-                                                }
+                let mut layouter = move |ui: &egui::Ui, string: &dyn egui::TextBuffer, wrap_width: f32| {
+                        let string = string.as_str();
+                        let mut layout_job = egui::text::LayoutJob::default();
+                        layout_job.wrap.max_width = wrap_width;
 
-                                                // Append match with highlight
-                                                // WARNING: This assumes to_lowercase() didn't change byte lengths relative to match indices.
-                                                // For simple ASCII/process names this is fine. specialized localized chars might break this alignment.
-                                                let match_end = start + part.len();
+                        if search_query.is_empty() {
+                                layout_job.append(
+                                        string,
+                                        0.0,
+                                        egui::TextFormat {
+                                                font_id: egui::FontId::monospace(14.0),
+                                                color: theme_color,
+                                                ..Default::default()
+                                        },
+                                );
+                        } else {
+                                let haystack = string.to_lowercase();
+                                let needle = search_query.to_lowercase();
+                                let mut last_end = 0;
+
+                                for (start, part) in haystack.match_indices(&needle) {
+                                        if start > last_end {
                                                 layout_job.append(
-                                                        &string[start..match_end],
-                                                        0.0,
-                                                        egui::TextFormat {
-                                                                font_id: egui::FontId::monospace(14.0),
-                                                                background: Color32::from_rgb(255, 255, 0), // Yellow background
-                                                                color: Color32::BLACK, // Black text
-                                                                ..Default::default()
-                                                        },
-                                                );
-
-                                                last_end = match_end;
-                                        }
-
-                                        // Append remaining
-                                        if last_end < string.len() {
-                                                layout_job.append(
-                                                        &string[last_end..],
+                                                        &string[last_end..start],
                                                         0.0,
                                                         egui::TextFormat {
                                                                 font_id: egui::FontId::monospace(14.0),
@@ -981,24 +936,70 @@ impl W11BoostApp
                                                         },
                                                 );
                                         }
-                                }
-                                ui.painter().layout_job(layout_job)
-                        };
 
-                        // Show input box
-                        if ui.add(egui::TextEdit::multiline(&mut value)
+                                        let match_end = start + part.len();
+                                        layout_job.append(
+                                                &string[start..match_end],
+                                                0.0,
+                                                egui::TextFormat {
+                                                        font_id: egui::FontId::monospace(14.0),
+                                                        background: Color32::from_rgb(255, 255, 0),
+                                                        color: Color32::BLACK,
+                                                        ..Default::default()
+                                                },
+                                        );
+
+                                        last_end = match_end;
+                                }
+
+                                if last_end < string.len() {
+                                        layout_job.append(
+                                                &string[last_end..],
+                                                0.0,
+                                                egui::TextFormat {
+                                                        font_id: egui::FontId::monospace(14.0),
+                                                        color: theme_color,
+                                                        ..Default::default()
+                                                },
+                                        );
+                                }
+                        }
+                        ui.painter().layout_job(layout_job)
+                };
+
+                if ui.add(
+                        egui::TextEdit::multiline(&mut value)
                                 .hint_text(tweak.default_text.unwrap_or("Enter value..."))
                                 .desired_width(f32::INFINITY)
-                                .layouter(&mut layouter))
-                                .changed()
-                        {
-                                self.tweak_states.input_values.insert(tweak.id.to_string(), value);
-                                self.autosave();
-                        }
-                        ui.add_space(4.0);
-                        ui.label(RichText::new("Use semicolons to separate multiple entries")
-                                .small()
-                                .weak());
+                                .layouter(&mut layouter),
+                )
+                .changed()
+                {
+                        self.tweak_states.input_values.insert(tweak.id.to_string(), value);
+                        self.autosave();
+                }
+                ui.add_space(4.0);
+                ui.label(RichText::new("Use semicolons to separate multiple entries").small().weak());
+        }
+
+        fn render_tweak_detail(&mut self, ui: &mut egui::Ui, tweak_id: &str)
+        {
+                let tweak = get_all_tweaks().into_iter().find(|t| t.id == tweak_id);
+
+                let Some(tweak) = tweak else {
+                        ui.label("Tweak not found");
+                        return;
+                };
+
+                self.render_tweak_header(ui, tweak);
+
+                self.render_tweak_metadata_panel(ui, tweak);
+
+                ui.add_space(12.0);
+                self.render_tweak_technical_details(ui, tweak);
+
+                if tweak.has_custom_input {
+                        self.render_tweak_custom_input(ui, tweak);
                 }
 
                 ui.add_space(12.0);
