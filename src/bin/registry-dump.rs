@@ -8,7 +8,7 @@ use std::path::PathBuf;
 use winsafe::co::{self, KNOWNFOLDERID};
 use winsafe::{GetLocalTime, HKEY, RegistryValue, SHGetKnownFolderPath};
 
-use w11boost::gui::tweaks::{RegistryValue as TweakValue, get_all_tweaks};
+use w11boost::gui::tweaks::{RegistryOp, RegistryValue as TweakValue, get_all_tweaks};
 
 #[derive(Default)]
 struct Results
@@ -108,6 +108,215 @@ fn get_documents_path() -> PathBuf
                 .unwrap_or_else(|_| PathBuf::from("."))
 }
 
+fn check_delete_key(category: &str, hkey: &HKEY, subkey: &str, path: &str, results: &mut Results)
+{
+        if subkey_exists(hkey, subkey) {
+                results.add(
+                        category,
+                        false,
+                        format!("FAIL {}  |  Expected: Subkey not present", path),
+                );
+        } else {
+                results.add(category, true, format!("OK   {}  |  Not present (expected)", path));
+        }
+}
+
+fn check_delete_value(category: &str, hkey: &HKEY, subkey: &str, value_name: &str, path: &str, results: &mut Results)
+{
+        if value_exists(hkey, subkey, value_name) {
+                let current = read_dword(hkey, subkey, value_name)
+                        .map(|v| v.to_string())
+                        .or_else(|| read_string(hkey, subkey, value_name).map(|s| format!("\"{}\"", s)))
+                        .unwrap_or_else(|| "exists".to_string());
+                results.add(
+                        category,
+                        false,
+                        format!("FAIL {}  |  Current: {}  |  Expected: Value not present", path, current),
+                );
+        } else {
+                results.add(category, true, format!("OK   {}  |  Not present (expected)", path));
+        }
+}
+
+fn check_dword(
+        category: &str,
+        hkey: &HKEY,
+        subkey: &str,
+        value_name: &str,
+        expected: u32,
+        path: &str,
+        results: &mut Results,
+)
+{
+        match read_dword(hkey, subkey, value_name) {
+                Some(current) if current == expected => {
+                        results.add(
+                                category,
+                                true,
+                                format!("OK   {}  |  Value: {} (matches stock)", path, current),
+                        );
+                }
+                Some(current) => {
+                        results.add(
+                                category,
+                                false,
+                                format!(
+                                        "FAIL {}  |  Current: {}  |  Expected: {} (stock)",
+                                        path, current, expected
+                                ),
+                        );
+                }
+                None => {
+                        results.add(
+                                category,
+                                false,
+                                format!("FAIL {}  |  Not found  |  Expected: {} (stock)", path, expected),
+                        );
+                }
+        }
+}
+
+fn check_string(
+        category: &str,
+        hkey: &HKEY,
+        subkey: &str,
+        value_name: &str,
+        expected: &str,
+        path: &str,
+        results: &mut Results,
+)
+{
+        match read_string(hkey, subkey, value_name) {
+                Some(current) if current == expected => {
+                        results.add(
+                                category,
+                                true,
+                                format!("OK   {}  |  Value: \"{}\" (matches stock)", path, current),
+                        );
+                }
+                Some(current) => {
+                        results.add(
+                                category,
+                                false,
+                                format!(
+                                        "FAIL {}  |  Current: \"{}\"  |  Expected: \"{}\" (stock)",
+                                        path, current, expected
+                                ),
+                        );
+                }
+                None => {
+                        results.add(
+                                category,
+                                false,
+                                format!("FAIL {}  |  Not found  |  Expected: \"{}\" (stock)", path, expected),
+                        );
+                }
+        }
+}
+
+fn check_expand_sz(
+        category: &str,
+        hkey: &HKEY,
+        subkey: &str,
+        value_name: &str,
+        expected: &str,
+        path: &str,
+        results: &mut Results,
+)
+{
+        match read_expand_sz(hkey, subkey, value_name) {
+                Some(current) if current == expected => {
+                        results.add(
+                                category,
+                                true,
+                                format!("OK   {}  |  Value: \"{}\" (matches stock)", path, current),
+                        );
+                }
+                Some(current) => {
+                        results.add(
+                                category,
+                                false,
+                                format!(
+                                        "FAIL {}  |  Current: \"{}\"  |  Expected: \"{}\" (stock)",
+                                        path, current, expected
+                                ),
+                        );
+                }
+                None => {
+                        results.add(
+                                category,
+                                false,
+                                format!("FAIL {}  |  Not found  |  Expected: \"{}\" (stock)", path, expected),
+                        );
+                }
+        }
+}
+
+fn check_binary(
+        category: &str,
+        hkey: &HKEY,
+        subkey: &str,
+        value_name: &str,
+        expected: &[u8],
+        path: &str,
+        results: &mut Results,
+)
+{
+        match read_binary(hkey, subkey, value_name) {
+                Some(current) if current == expected => {
+                        results.add(
+                                category,
+                                true,
+                                format!("OK   {}  |  Value: {:?} (matches stock)", path, current),
+                        );
+                }
+                Some(current) => {
+                        results.add(
+                                category,
+                                false,
+                                format!(
+                                        "FAIL {}  |  Current: {:?}  |  Expected: {:?} (stock)",
+                                        path, current, expected
+                                ),
+                        );
+                }
+                None => {
+                        results.add(
+                                category,
+                                false,
+                                format!("FAIL {}  |  Not found  |  Expected: {:?} (stock)", path, expected),
+                        );
+                }
+        }
+}
+
+fn check_operation(category: &str, op: &RegistryOp, results: &mut Results)
+{
+        if op.subkey.is_empty() {
+                return;
+        }
+
+        let hkey = get_hkey(op.hkey);
+        let path = format!("{}\\{}\\{}", op.hkey, op.subkey, op.value_name);
+
+        match &op.stock_value {
+                TweakValue::DeleteKey => check_delete_key(category, &hkey, op.subkey, &path, results),
+                TweakValue::Delete => check_delete_value(category, &hkey, op.subkey, op.value_name, &path, results),
+                TweakValue::Dword(expected) => {
+                        check_dword(category, &hkey, op.subkey, op.value_name, *expected, &path, results)
+                }
+                TweakValue::String(expected) => {
+                        check_string(category, &hkey, op.subkey, op.value_name, expected, &path, results)
+                }
+                TweakValue::ExpandSz(expected) => {
+                        check_expand_sz(category, &hkey, op.subkey, op.value_name, expected, &path, results)
+                }
+                TweakValue::Binary(expected) => {
+                        check_binary(category, &hkey, op.subkey, op.value_name, expected, &path, results)
+                }
+        }
+}
+
 fn main()
 {
         let mut results = Results::default();
@@ -118,164 +327,7 @@ fn main()
 
         for tweak in tweaks {
                 for op in tweak.enabled_ops {
-                        if op.subkey.is_empty() {
-                                continue;
-                        }
-
-                        let hkey = get_hkey(op.hkey);
-                        let path = format!("{}\\{}\\{}", op.hkey, op.subkey, op.value_name);
-
-                        match &op.stock_value {
-                                TweakValue::DeleteKey => {
-                                        if subkey_exists(&hkey, op.subkey) {
-                                                results.add(
-                                                        tweak.category,
-                                                        false,
-                                                        format!("FAIL {}  |  Expected: Subkey not present", path),
-                                                );
-                                        } else {
-                                                results.add(
-                                                        tweak.category,
-                                                        true,
-                                                        format!("OK   {}  |  Not present (expected)", path),
-                                                );
-                                        }
-                                }
-                                TweakValue::Delete => {
-                                        if value_exists(&hkey, op.subkey, op.value_name) {
-                                                let current = read_dword(&hkey, op.subkey, op.value_name)
-                                                        .map(|v| v.to_string())
-                                                        .or_else(|| {
-                                                                read_string(&hkey, op.subkey, op.value_name)
-                                                                        .map(|s| format!("\"{}\"", s))
-                                                        })
-                                                        .unwrap_or_else(|| "exists".to_string());
-                                                results.add(
-                                                        tweak.category,
-                                                        false,
-                                                        format!("FAIL {}  |  Current: {}  |  Expected: Value not present", path, current),
-                                                );
-                                        } else {
-                                                results.add(
-                                                        tweak.category,
-                                                        true,
-                                                        format!("OK   {}  |  Not present (expected)", path),
-                                                );
-                                        }
-                                }
-                                TweakValue::Dword(expected) => {
-                                        match read_dword(&hkey, op.subkey, op.value_name) {
-                                                Some(current) if current == *expected => {
-                                                        results.add(
-                                                                tweak.category,
-                                                                true,
-                                                                format!(
-                                                                        "OK   {}  |  Value: {} (matches stock)",
-                                                                        path, current
-                                                                ),
-                                                        );
-                                                }
-                                                Some(current) => {
-                                                        results.add(
-                                                                tweak.category,
-                                                                false,
-                                                                format!("FAIL {}  |  Current: {}  |  Expected: {} (stock)", path, current, expected),
-                                                        );
-                                                }
-                                                None => {
-                                                        results.add(
-                                                                tweak.category,
-                                                                false,
-                                                                format!("FAIL {}  |  Not found  |  Expected: {} (stock)", path, expected),
-                                                        );
-                                                }
-                                        }
-                                }
-                                TweakValue::String(expected) => {
-                                        match read_string(&hkey, op.subkey, op.value_name) {
-                                                Some(current) if current == *expected => {
-                                                        results.add(
-                                                                tweak.category,
-                                                                true,
-                                                                format!(
-                                                                        "OK   {}  |  Value: \"{}\" (matches stock)",
-                                                                        path, current
-                                                                ),
-                                                        );
-                                                }
-                                                Some(current) => {
-                                                        results.add(
-                                                                tweak.category,
-                                                                false,
-                                                                format!("FAIL {}  |  Current: \"{}\"  |  Expected: \"{}\" (stock)", path, current, expected),
-                                                        );
-                                                }
-                                                None => {
-                                                        results.add(
-                                                                tweak.category,
-                                                                false,
-                                                                format!("FAIL {}  |  Not found  |  Expected: \"{}\" (stock)", path, expected),
-                                                        );
-                                                }
-                                        }
-                                }
-                                TweakValue::ExpandSz(expected) => {
-                                        match read_expand_sz(&hkey, op.subkey, op.value_name) {
-                                                Some(current) if current == *expected => {
-                                                        results.add(
-                                                                tweak.category,
-                                                                true,
-                                                                format!(
-                                                                        "OK   {}  |  Value: \"{}\" (matches stock)",
-                                                                        path, current
-                                                                ),
-                                                        );
-                                                }
-                                                Some(current) => {
-                                                        results.add(
-                                                                tweak.category,
-                                                                false,
-                                                                format!("FAIL {}  |  Current: \"{}\"  |  Expected: \"{}\" (stock)", path, current, expected),
-                                                        );
-                                                }
-                                                None => {
-                                                        results.add(
-                                                                tweak.category,
-                                                                false,
-                                                                format!("FAIL {}  |  Not found  |  Expected: \"{}\" (stock)", path, expected),
-                                                        );
-                                                }
-                                        }
-                                }
-                                TweakValue::Binary(expected) => {
-                                        match read_binary(&hkey, op.subkey, op.value_name) {
-                                                Some(current) if current == *expected => {
-                                                        results.add(
-                                                                tweak.category,
-                                                                true,
-                                                                format!(
-                                                                        "OK   {}  |  Value: {:?} (matches stock)",
-                                                                        path, current
-                                                                ),
-                                                        );
-                                                }
-                                                Some(current) => {
-                                                        results.add(
-                                                        tweak.category,
-                                                        false,
-                                                        format!("FAIL {}  |  Current: {:?}  |  Expected: {:?} (stock)", path, current, expected),
-                                                );
-                                                }
-                                                None => {
-                                                        results.add(
-                                                        tweak.category,
-                                                        false,
-                                                        format!("FAIL {}  |  Not found  |  Expected: {:?} (stock)", path, expected),
-                                                );
-                                                }
-                                        }
-                                }
-                        }
+                        check_operation(tweak.category, op, &mut results);
                 }
         }
 
