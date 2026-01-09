@@ -2,7 +2,7 @@
 /.vscode
 /target
 *.lock
-/.claude
-/.claude-trace
-CLAUDE.md
+GEMINI.md
+/.agent
 /resources
+registry-dump-*.log

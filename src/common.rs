@@ -1,19 +1,26 @@
-use anyhow::Result;
-use anyhow::anyhow;
-use core::fmt::Write as _;
+use crate::trusted_installer::TrustedInstallerGuard;
+use anyhow::{Context, Result, anyhow};
 use std::fs::{self, OpenOptions};
 use std::io::Write as _;
 use std::os::windows::process::CommandExt as _;
 use std::path::PathBuf;
 use std::process::Command;
 use std::sync::OnceLock;
-use winsafe::co::{ERROR, MB, REG};
-use winsafe::prelude::*;
+use windows::Win32::System::Com::{CLSCTX_INPROC_SERVER, COINIT_APARTMENTTHREADED, CoCreateInstance, CoInitializeEx};
+use windows::Win32::System::GroupPolicy::{
+        CLSID_GroupPolicyObject, GPO_OPEN_LOAD_REGISTRY, GPO_SECTION_MACHINE, IGroupPolicyObject,
+        REGISTRY_EXTENSION_GUID,
+};
+use windows::Win32::System::Registry::{
+        REG_BINARY, REG_DWORD, REG_EXPAND_SZ, REG_SZ, RegCloseKey, RegCreateKeyExW, RegSetValueExW,
+};
+use windows::core::{GUID, PCWSTR};
+use winsafe::co::ERROR;
+
 use winsafe::{
-        self as w, GetLocalTime, HKEY, HWND, RegistryValue,
+        self as w, GetLocalTime, HKEY, RegistryValue,
         co::{self, KNOWNFOLDERID},
 };
-use windows::Win32::System::Registry::{RegSetValueExW, REG_SZ};
 
 static CACHE: Cache = Cache::new();
 
@@ -31,276 +38,69 @@ impl Cache
                 Self { cache: OnceLock::new() }
         }
 
-        fn lp(&self) -> &PathBuf
+        fn lp(&self) -> Result<&PathBuf>
         {
-                self.cache.get_or_init(log_path)
+                if let Some(path) = self.cache.get() {
+                        return Ok(path);
+                }
+                let path = log_path()?;
+                let _ = self.cache.set(path);
+                Ok(self.cache.get().expect("Cache should be set"))
         }
 }
 
-fn log_path() -> PathBuf
+fn log_path() -> Result<PathBuf>
 {
-        let documents_dir = get_windows_path(&KNOWNFOLDERID::Documents).unwrap_or_else(|e| {
-                let msg = format!("Failed to get the Documents path, W11Boost will close.\nError: {e}");
-                let _ = HWND::NULL.MessageBox(&msg, "W11Boost Error", MB::OK | MB::ICONERROR);
-                panic!("Windows path failure")
-        });
+        let documents_dir =
+                get_windows_path(&KNOWNFOLDERID::Documents).context("Failed to get Documents folder for logging")?;
 
         let mut log_path = PathBuf::from(documents_dir);
-        log_path.push("W11Boost - do not remove");
+        log_path.push("W11Boost");
 
         if !log_path.exists() {
-                let _ = fs::create_dir_all(log_path.as_path())
-                        .map_err(|e| panic!("Failed to create log path.\nError: {e}"));
+                fs::create_dir_all(&log_path).context(format!("Failed to create log directory at {:?}", log_path))?;
         }
 
-        log_path
+        Ok(log_path)
 }
 
 pub fn get_windows_path(folder_id: &KNOWNFOLDERID) -> Result<String>
 {
-        let the_path = w::SHGetKnownFolderPath(folder_id, co::KF::DEFAULT, None)?;
-        Ok(the_path)
-}
-
-pub fn registry_backup(hkey: &HKEY, subkey: &str, value_name: &str, is_removal: bool) -> Result<()>
-{
-        let hkey_text = get_hkey_text(hkey);
-        let log_path = CACHE.lp();
-        let backup_file = log_path.join("Registry Backup.log");
-
-        if is_removal {
-                return registry_recursive_backup(hkey, subkey, &backup_file, hkey_text);
-        }
-
-        if backup_file.exists() {
-                let content = fs::read_to_string(&backup_file)?;
-                let key_identifier = format!("{hkey_text}|{subkey}|{value_name}");
-
-                // Skip already backed up registry keys.
-                if content.lines().any(|line| line.starts_with(&key_identifier)) {
-                        return Ok(());
-                }
-        }
-
-        let backup_line = match hkey.RegOpenKeyEx(Some(subkey), co::REG_OPTION::NoValue, co::KEY::READ) {
-                Ok(key) => {
-                        // Find the specific value and get its type.
-                        // Collect iterator results first to release the iterator before reading values.
-                        let values: Vec<_> = key.RegEnumValue()?.collect();
-                        let mut found_value = None;
-                        for value_result in values {
-                                let (name, reg_type) = value_result?;
-                                if name == value_name {
-                                        found_value = Some(reg_type);
-                                        break;
-                                }
-                        }
-
-                        let result = match found_value {
-                                Some(REG::DWORD) => match key.RegGetValue(None, Some(value_name), co::RRF::RT_DWORD) {
-                                        Ok(RegistryValue::Dword(val)) => {
-                                                format!("{hkey_text}|{subkey}|{value_name}|DWORD:{val}\n")
-                                        }
-                                        _ => anyhow!("Failed to read DWORD value").to_string(),
-                                },
-                                Some(REG::SZ) => match key.RegGetValue(None, Some(value_name), co::RRF::RT_REG_SZ) {
-                                        Ok(RegistryValue::Sz(val)) => {
-                                                format!("{hkey_text}|{subkey}|{value_name}|SZ:{val}\n")
-                                        }
-                                        _ => anyhow!("Failed to read SZ value").to_string(),
-                                },
-                                None => {
-                                        // Key exists, its value doesn't.
-                                        format!("{hkey_text}|{subkey}|{value_name}|KEY_CREATED_BY_APP\n")
-                                }
-                                _ => anyhow!("Unsupported registry type").to_string(),
-                        };
-                        drop(key); // Explicitly close handle
-                        result
-                }
-                Err(e) if e == ERROR::FILE_NOT_FOUND => {
-                        // Key doesn't exist, mark for subkey removal during restoration.
-                        format!("{hkey_text}|{subkey}|SUBKEY|KEY_CREATED_BY_APP\n")
-                }
-                Err(e) => anyhow!("Failed to open registry key: {e}\n").to_string(),
-        };
-
-        let mut content = if backup_file.exists() {
-                fs::read_to_string(&backup_file)?
-        } else {
-                String::new()
-        };
-
-        if !content.contains(&backup_line) {
-                content.push_str(&backup_line);
-                fs::write(&backup_file, content)?;
-        }
-
-        Ok(())
-}
-
-pub fn registry_recursive_backup(hkey: &HKEY, subkey: &str, backup_file: &PathBuf, hkey_text: &str) -> Result<()>
-{
-        let key = match hkey.RegOpenKeyEx(Some(subkey), co::REG_OPTION::NoValue, co::KEY::READ) {
-                Ok(key) => key,
-                Err(e) if e == ERROR::FILE_NOT_FOUND => {
-                        let backup_line = format!("{hkey_text}|{subkey}|SUBKEY|NOT_FOUND\n");
-                        let mut content = if backup_file.exists() {
-                                fs::read_to_string(backup_file)?
-                        } else {
-                                String::new()
-                        };
-                        content.push_str(&backup_line);
-                        fs::write(backup_file, content)?;
-                        return Ok(());
-                }
-                Err(e) => {
-                        return Err(anyhow!(
-                                "Failed to open subkey for backup: {hkey_text}\\{subkey}\nError: {e}"
-                        ));
-                }
-        };
-
-        let mut content = if backup_file.exists() {
-                fs::read_to_string(backup_file)?
-        } else {
-                String::new()
-        };
-
-        writeln!(content, "{hkey_text}|{subkey}|SUBKEY|BEGIN_SUBKEY\n")?;
-
-        // Collect iterator results first to release the iterator before reading values.
-        let values: Vec<_> = key.RegEnumValue()?.collect();
-        for value_result in values {
-                let (value_name, reg_type) = value_result?;
-                let value_line = match reg_type {
-                        REG::DWORD => match key.RegGetValue(None, Some(&value_name), co::RRF::RT_DWORD) {
-                                Ok(RegistryValue::Dword(val)) => {
-                                        format!("{hkey_text}|{subkey}|{value_name}|DWORD:{val}\n")
-                                }
-                                _ => {
-                                        return Err(anyhow!(
-                                                "{hkey_text}|{subkey}|{value_name}|DWORD:ERROR_READING_VALUE\n"
-                                        ));
-                                }
-                        },
-                        REG::SZ => match key.RegGetValue(None, Some(&value_name), co::RRF::RT_REG_SZ) {
-                                Ok(RegistryValue::Sz(val)) => {
-                                        format!("{hkey_text}|{subkey}|{value_name}|SZ:{val}\n")
-                                }
-                                _ => return Err(anyhow!("{hkey_text}|{subkey}|{value_name}|SZ:ERROR_READING_VALUE\n")),
-                        },
-                        _ => return Err(anyhow!("{hkey_text}|{subkey}|{value_name}|UNKNOWN_TYPE\n")),
-                };
-                content.push_str(&value_line);
-        }
-
-        drop(key); // Explicitly close handle
-        writeln!(content, "{hkey_text}|{subkey}|SUBKEY|END_SUBKEY\n")?;
-
-        fs::write(backup_file, content)?;
-        Ok(())
-}
-
-pub fn restore_from_backup() -> Result<()>
-{
-        let log_path = CACHE.lp();
-        let backup_file = log_path.join("Registry Backup.log");
-
-        if !backup_file.exists() {
-                return Err(anyhow!("No backup file found!"));
-        }
-
-        let content = fs::read_to_string(&backup_file)?;
-        let mut restored = 0;
-        let mut skipped = 0;
-
-        for line in content.lines() {
-                if line.trim().is_empty() {
-                        continue;
-                }
-
-                match restore_single_line(line) {
-                        Ok(true) => restored += 1,
-                        Ok(false) => skipped += 1,
-                        Err(e) => return Err(anyhow!("Failed to restore: {line}\nError: {e}")),
-                }
-        }
-
-        println!("Uninstall complete!\nRestored {restored} registry keys, skipped {skipped} registry keys.");
-        Ok(())
-}
-
-// Expected behavior:
-// - Delete subkey if created by W11Boost.
-// - Set the values back if the key originally existed before W11Boost.
-// - Create the subkey (if BEGIN_SUBKEY) so that keys inside that subkey can also be created. Can think of it like creating a directory.
-fn restore_single_line(line: &str) -> Result<bool>
-{
-        let parts: Vec<&str> = line.split('|').collect();
-
-        let hkey = match parts[0] {
-                "HKEY_LOCAL_MACHINE" => HKEY::LOCAL_MACHINE,
-                "HKEY_CURRENT_USER" => HKEY::CURRENT_USER,
-                _ => return Err(anyhow!("Unknown HKEY: {}", parts[0])),
-        };
-
-        let subkey = parts[1];
-        let value_name = parts[2];
-        let value_info = parts[3];
-
-        match value_info {
-                "NOT_FOUND" | "END_SUBKEY" => return Ok(false),
-                "KEY_CREATED_BY_APP" => {
-                        match hkey.RegDeleteTree(Some(subkey)) {
-                                Ok(()) => return Ok(true),
-                                Err(_) => return Ok(false),
-                        };
-                }
-                "BEGIN_SUBKEY" => {
-                        match hkey.RegCreateKeyEx(subkey, None, co::REG_OPTION::NON_VOLATILE, co::KEY::WRITE, None) {
-                                Ok(_) => return Ok(true),
-                                Err(_) => return Ok(false),
-                        }
-                }
-                _ => {}
-        }
-
-        // strip_prefix instead of strip_suffix since "DWORD:" is not the end of the string.
-        if let Some(dword_str) = value_info.strip_prefix("DWORD:") {
-                let value: u32 = dword_str.parse()?;
-                set_dword(&hkey, subkey, value_name, value)?;
-                Ok(true)
-        } else if let Some(string_str) = value_info.strip_prefix("SZ:") {
-                set_string(&hkey, subkey, value_name, string_str)?;
-                Ok(true)
-        } else {
-                Err(anyhow!("Unknown registry value format: {value_info}"))
-        }
+        w::SHGetKnownFolderPath(folder_id, co::KF::DEFAULT, None)
+                .map_err(|e| anyhow!("WinSafe error getting known folder: {}", e))
 }
 
 pub fn set_dword(hkey: &HKEY, subkey: &str, value_name: &str, value: u32) -> Result<()>
 {
         let hkey_text = get_hkey_text(hkey);
+        let use_ti = is_hklm(hkey);
 
-        registry_backup(hkey, subkey, value_name, false)?;
+        let set_result = {
+                let _ti_guard = if use_ti {
+                        Some(TrustedInstallerGuard::new()?)
+                } else {
+                        None
+                };
 
-        let (key, _) = hkey
-                .RegCreateKeyEx(subkey, None, co::REG_OPTION::NON_VOLATILE, co::KEY::WRITE, None)
-                .map_err(|source| {
-                        anyhow!(
-                                "Failed to open DWORD registry key: {}\\{}\\{}\nError: {}",
-                                hkey_text,
-                                subkey,
-                                value_name,
-                                source
-                        )
-                })?;
+                let result = hkey.RegCreateKeyEx(subkey, None, co::REG_OPTION::NON_VOLATILE, co::KEY::WRITE, None);
 
-        let result = key.RegSetValueEx(Some(value_name), RegistryValue::Dword(value));
-        drop(key); // Explicitly close handle before continuing
+                let (key, _) = match result {
+                        Ok(k) => k,
+                        Err(source) => {
+                                return Err(anyhow!(
+                                        "Failed to open DWORD registry key: {}\\{}\\{}\nError: {}",
+                                        hkey_text,
+                                        subkey,
+                                        value_name,
+                                        source
+                                ));
+                        }
+                };
 
-        result.map_err(|source| {
+                key.RegSetValueEx(Some(value_name), RegistryValue::Dword(value))
+        };
+
+        set_result.map_err(|source| {
                 anyhow!(
                         "Failed to set DWORD registry value: {}\\{}\\{} = {}\nError: {}",
                         hkey_text,
@@ -328,38 +128,47 @@ pub fn set_dword(hkey: &HKEY, subkey: &str, value_name: &str, value: u32) -> Res
 pub fn set_string(hkey: &HKEY, subkey: &str, value_name: &str, value: &str) -> Result<()>
 {
         let hkey_text = get_hkey_text(hkey);
+        let use_ti = is_hklm(hkey);
 
-        registry_backup(hkey, subkey, value_name, false)?;
+        let result = {
+                let _ti_guard = if use_ti {
+                        Some(TrustedInstallerGuard::new()?)
+                } else {
+                        None
+                };
 
-        let (key, _) = hkey
-                .RegCreateKeyEx(subkey, None, co::REG_OPTION::NON_VOLATILE, co::KEY::WRITE, None)
-                .map_err(|source| {
-                        anyhow!(
-                                "Failed to open Sz registry key: {}\\{}\\{}\nError: {}",
-                                hkey_text,
-                                subkey,
-                                value_name,
-                                source
+                let create_result =
+                        hkey.RegCreateKeyEx(subkey, None, co::REG_OPTION::NON_VOLATILE, co::KEY::WRITE, None);
+
+                let (key, _) = match create_result {
+                        Ok(k) => k,
+                        Err(source) => {
+                                return Err(anyhow!(
+                                        "Failed to open Sz registry key: {}\\{}\\{}\nError: {}",
+                                        hkey_text,
+                                        subkey,
+                                        value_name,
+                                        source
+                                ));
+                        }
+                };
+
+                // Use raw Windows API for all strings to handle empty strings correctly.
+                // winsafe's RegistryValue::Sz doesn't handle empty strings (ERROR 998).
+                let wide_value_name: Vec<u16> = value_name.encode_utf16().chain(std::iter::once(0)).collect();
+                let wide_value: Vec<u16> = value.encode_utf16().chain(std::iter::once(0)).collect();
+                let byte_len = wide_value.len() * 2;
+
+                unsafe {
+                        RegSetValueExW(
+                                windows::Win32::System::Registry::HKEY(key.ptr() as *mut _),
+                                windows::core::PCWSTR(wide_value_name.as_ptr()),
+                                None,
+                                REG_SZ,
+                                Some(std::slice::from_raw_parts(wide_value.as_ptr() as *const u8, byte_len)),
                         )
-                })?;
-
-        // Use raw Windows API for all strings to handle empty strings correctly.
-        // winsafe's RegistryValue::Sz doesn't handle empty strings (ERROR 998).
-        let wide_value_name: Vec<u16> = value_name.encode_utf16().chain(std::iter::once(0)).collect();
-        let wide_value: Vec<u16> = value.encode_utf16().chain(std::iter::once(0)).collect();
-        let byte_len = wide_value.len() * 2;
-
-        let result = unsafe {
-                RegSetValueExW(
-                        windows::Win32::System::Registry::HKEY(key.ptr() as *mut _),
-                        windows::core::PCWSTR(wide_value_name.as_ptr()),
-                        None,
-                        REG_SZ,
-                        Some(std::slice::from_raw_parts(wide_value.as_ptr() as *const u8, byte_len)),
-                )
+                }
         };
-
-        drop(key);
 
         if result.is_err() {
                 return Err(anyhow!(
@@ -386,13 +195,154 @@ pub fn set_string(hkey: &HKEY, subkey: &str, value_name: &str, value: &str) -> R
         Ok(())
 }
 
+pub fn set_expand_sz(hkey: &HKEY, subkey: &str, value_name: &str, value: &str) -> Result<()>
+{
+        let hkey_text = get_hkey_text(hkey);
+        let use_ti = is_hklm(hkey);
+
+        let result = {
+                let _ti_guard = if use_ti {
+                        Some(TrustedInstallerGuard::new()?)
+                } else {
+                        None
+                };
+
+                let create_result =
+                        hkey.RegCreateKeyEx(subkey, None, co::REG_OPTION::NON_VOLATILE, co::KEY::WRITE, None);
+
+                let (key, _) = match create_result {
+                        Ok(k) => k,
+                        Err(source) => {
+                                return Err(anyhow!(
+                                        "Failed to open ExpandSz registry key: {}\\{}\\{}\nError: {}",
+                                        hkey_text,
+                                        subkey,
+                                        value_name,
+                                        source
+                                ));
+                        }
+                };
+
+                // Use raw Windows API for all strings to handle empty strings correctly.
+                let wide_value_name: Vec<u16> = value_name.encode_utf16().chain(std::iter::once(0)).collect();
+                let wide_value: Vec<u16> = value.encode_utf16().chain(std::iter::once(0)).collect();
+                let byte_len = wide_value.len() * 2;
+
+                unsafe {
+                        RegSetValueExW(
+                                windows::Win32::System::Registry::HKEY(key.ptr() as *mut _),
+                                windows::core::PCWSTR(wide_value_name.as_ptr()),
+                                None,
+                                REG_EXPAND_SZ,
+                                Some(std::slice::from_raw_parts(wide_value.as_ptr() as *const u8, byte_len)),
+                        )
+                }
+        };
+
+        if result.is_err() {
+                return Err(anyhow!(
+                        "Failed to set ExpandSz registry value: {}\\{}\\{} = {}\nError: {}",
+                        hkey_text,
+                        subkey,
+                        value_name,
+                        value,
+                        result.0
+                ));
+        }
+
+        log_registry(hkey, subkey, value_name, value, "ExpandString").map_err(|e| {
+                anyhow!(
+                        "Failed to log ExpandSz change for key: {}\\{}\\{} -> {}\nError: {}",
+                        hkey_text,
+                        subkey,
+                        value_name,
+                        value,
+                        e
+                )
+        })?;
+
+        Ok(())
+}
+
+pub fn set_binary(hkey: &HKEY, subkey: &str, value_name: &str, value: &[u8]) -> Result<()>
+{
+        let hkey_text = get_hkey_text(hkey);
+        let use_ti = is_hklm(hkey);
+
+        let result = {
+                let _ti_guard = if use_ti {
+                        Some(TrustedInstallerGuard::new()?)
+                } else {
+                        None
+                };
+
+                let create_result =
+                        hkey.RegCreateKeyEx(subkey, None, co::REG_OPTION::NON_VOLATILE, co::KEY::WRITE, None);
+
+                let (key, _) = match create_result {
+                        Ok(k) => k,
+                        Err(source) => {
+                                return Err(anyhow!(
+                                        "Failed to open Binary registry key: {}\\{}\\{}\nError: {}",
+                                        hkey_text,
+                                        subkey,
+                                        value_name,
+                                        source
+                                ));
+                        }
+                };
+
+                let wide_value_name: Vec<u16> = value_name.encode_utf16().chain(std::iter::once(0)).collect();
+
+                unsafe {
+                        RegSetValueExW(
+                                windows::Win32::System::Registry::HKEY(key.ptr() as *mut _),
+                                windows::core::PCWSTR(wide_value_name.as_ptr()),
+                                None,
+                                REG_BINARY,
+                                Some(value),
+                        )
+                }
+        };
+
+        if result.is_err() {
+                return Err(anyhow!(
+                        "Failed to set Binary registry value: {}\\{}\\{}\nError: {}",
+                        hkey_text,
+                        subkey,
+                        value_name,
+                        result.0
+                ));
+        }
+
+        log_registry(hkey, subkey, value_name, &format!("{:?}", value), "Binary").map_err(|e| {
+                anyhow!(
+                        "Failed to log Binary change for key: {}\\{}\\{}\nError: {}",
+                        hkey_text,
+                        subkey,
+                        value_name,
+                        e
+                )
+        })?;
+
+        Ok(())
+}
+
 pub fn remove_subkey(hkey: &HKEY, subkey: &str) -> Result<()>
 {
         let hkey_text = get_hkey_text(hkey);
+        let use_ti = is_hklm(hkey);
 
-        registry_backup(hkey, subkey, "", true)?;
+        let result = {
+                let _ti_guard = if use_ti {
+                        Some(TrustedInstallerGuard::new()?)
+                } else {
+                        None
+                };
+                hkey.RegDeleteTree(Some(subkey))
+        };
 
-        match hkey.RegDeleteTree(Some(subkey)) {
+        match result {
                 Ok(()) => Ok(()),
                 Err(e) if e == ERROR::FILE_NOT_FOUND => Ok(()),
                 Err(e) => Err(anyhow!(
@@ -413,22 +363,35 @@ pub fn remove_subkey(hkey: &HKEY, subkey: &str) -> Result<()>
 pub fn delete_value(hkey: &HKEY, subkey: &str, value_name: &str) -> Result<()>
 {
         let hkey_text = get_hkey_text(hkey);
+        let use_ti = is_hklm(hkey);
 
-        let key = match hkey.RegOpenKeyEx(Some(subkey), co::REG_OPTION::NoValue, co::KEY::SET_VALUE) {
-                Ok(k) => k,
-                Err(e) if e == ERROR::FILE_NOT_FOUND => return Ok(()), // Key doesn't exist = value doesn't exist
-                Err(e) => {
-                        return Err(anyhow!(
-                                "Failed to open key for value deletion: {}\\{}\nError: {}",
-                                hkey_text,
-                                subkey,
-                                e
-                        ))
+        let result = {
+                let _ti_guard = if use_ti {
+                        Some(TrustedInstallerGuard::new()?)
+                } else {
+                        None
+                };
+
+                // Note: In original code, RegOpenKeyEx handles FILE_NOT_FOUND carefully.
+                let key_res = hkey.RegOpenKeyEx(Some(subkey), co::REG_OPTION::NoValue, co::KEY::SET_VALUE);
+
+                match key_res {
+                        Ok(key) => {
+                                let r = key.RegDeleteValue(Some(value_name));
+                                // Check logic: if RegDeleteValue fails with FILE_NOT_FOUND, it's Ok.
+                                r
+                        }
+                        Err(e) if e == ERROR::FILE_NOT_FOUND => return Ok(()),
+                        Err(e) => {
+                                return Err(anyhow!(
+                                        "Failed to open key for value deletion: {}\\{}\nError: {}",
+                                        hkey_text,
+                                        subkey,
+                                        e
+                                ));
+                        }
                 }
         };
-
-        let result = key.RegDeleteValue(Some(value_name));
-        drop(key); // Explicitly close handle before returning
 
         match result {
                 Ok(()) => Ok(()),
@@ -483,15 +446,17 @@ fn get_hkey_text(hkey: &HKEY) -> &str
         }
 }
 
+fn is_hklm(hkey: &HKEY) -> bool
+{
+        *hkey == HKEY::LOCAL_MACHINE
+}
+
 fn log_registry(hkey: &HKEY, subkey: &str, value_name: &str, value: &str, type_name: &str) -> Result<()>
 {
         let hkey_text = get_hkey_text(hkey);
-        let log_path = CACHE.lp();
+        let log_path = CACHE.lp()?;
 
-        if !log_path.exists() {
-                fs::create_dir_all(log_path.as_path())
-                        .map_err(|e| anyhow!("Failed to create log directory: {}\nError: {e}", log_path.display()))?;
-        }
+        // Create dir check is already done in log_path() which is called by CACHE.lp()
 
         let now = GetLocalTime();
         let time_info = format!(
@@ -510,23 +475,11 @@ fn log_registry(hkey: &HKEY, subkey: &str, value_name: &str, value: &str, type_n
         let mut file = OpenOptions::new()
                 .create(true)
                 .append(true)
-                .open(log_file.as_path())
-                .map_err(|e| {
-                        anyhow!(
-                                "Failed to open/create log file: {}{}\nError: {}",
-                                log_path.display(),
-                                log_file.display(),
-                                e
-                        )
-                })?;
+                .open(&log_file)
+                .with_context(|| format!("Failed to open/create log file: {}", log_file.display()))?;
 
-        file.write_all(log_entry.as_bytes()).map_err(|e| {
-                anyhow!(
-                        "Failed to write to log file: {}{}\nError: {e}",
-                        log_path.display(),
-                        log_file.display(),
-                )
-        })?;
+        file.write_all(log_entry.as_bytes())
+                .with_context(|| format!("Failed to write to log file: {}", log_file.display()))?;
 
         Ok(())
 }
@@ -540,4 +493,154 @@ pub fn run_system_command(program: &str, args: &[&str]) -> Result<()>
                 .map_err(|e| anyhow!("Failed to execute {program}.\nError: {e}"))?;
 
         Ok(())
+}
+
+/// Run a command and return (success, stdout, stderr)
+pub fn run_system_command_output(program: &str, args: &[&str]) -> Result<(bool, String, String)>
+{
+        let output = Command::new(program)
+                .args(args)
+                .creation_flags(CREATE_NO_WINDOW)
+                .output()
+                .map_err(|e| anyhow!("Failed to execute {program}.\nError: {e}"))?;
+
+        let stdout = String::from_utf8_lossy(&output.stdout).to_string();
+        let stderr = String::from_utf8_lossy(&output.stderr).to_string();
+        Ok((output.status.success(), stdout, stderr))
+}
+
+pub fn init_registry_gpo() -> Result<(windows::Win32::System::Registry::HKEY, IGroupPolicyObject)>
+{
+        unsafe {
+                let _ = CoInitializeEx(None, COINIT_APARTMENTTHREADED);
+                let gpo: IGroupPolicyObject = CoCreateInstance(&CLSID_GroupPolicyObject, None, CLSCTX_INPROC_SERVER)?;
+
+                gpo.OpenLocalMachineGPO(GPO_OPEN_LOAD_REGISTRY)?;
+
+                let mut hkey = windows::Win32::System::Registry::HKEY::default();
+                gpo.GetRegistryKey(GPO_SECTION_MACHINE, &mut hkey)?;
+
+                Ok((hkey, gpo))
+        }
+}
+
+pub fn save_registry_gpo(hkey: windows::Win32::System::Registry::HKEY, gpo: IGroupPolicyObject) -> Result<()>
+{
+        let mut snap_guid = GUID::from_u128(0x0f6b957e_509e_11d1_a7cc_0000f87571e3);
+        let mut registry_guid = REGISTRY_EXTENSION_GUID;
+        unsafe {
+                gpo.Save(true, false, &mut registry_guid as *mut _, &mut snap_guid as *mut _)?;
+                let _ = RegCloseKey(hkey);
+        }
+
+        Ok(())
+}
+
+pub fn set_dword_gpo(
+        hkey: windows::Win32::System::Registry::HKEY,
+        subkey: &str,
+        value_name: &str,
+        value: u32,
+) -> Result<()>
+{
+        let subkey_wide: Vec<u16> = subkey.encode_utf16().chain(std::iter::once(0)).collect();
+        let value_name_wide: Vec<u16> = value_name.encode_utf16().chain(std::iter::once(0)).collect();
+
+        unsafe {
+                let mut hsubkey = windows::Win32::System::Registry::HKEY::default();
+                RegCreateKeyExW(
+                        hkey,
+                        PCWSTR(subkey_wide.as_ptr()),
+                        Some(0),
+                        None,
+                        windows::Win32::System::Registry::REG_OPTION_NON_VOLATILE,
+                        windows::Win32::System::Registry::KEY_WRITE,
+                        None,
+                        &mut hsubkey,
+                        None,
+                )
+                .ok()
+                .map_err(|e| anyhow!("Failed to create GPO key: {}", e))?;
+
+                RegSetValueExW(
+                        hsubkey,
+                        PCWSTR(value_name_wide.as_ptr()),
+                        Some(0),
+                        REG_DWORD,
+                        Some(std::slice::from_raw_parts(&value as *const u32 as *const u8, 4)),
+                )
+                .ok()
+                .map_err(|e| anyhow!("Failed to set GPO DWORD value: {}", e))?;
+
+                let _ = RegCloseKey(hsubkey);
+        }
+        Ok(())
+}
+
+pub fn set_string_gpo(
+        hkey: windows::Win32::System::Registry::HKEY,
+        subkey: &str,
+        value_name: &str,
+        value: &str,
+) -> Result<()>
+{
+        let subkey_wide: Vec<u16> = subkey.encode_utf16().chain(std::iter::once(0)).collect();
+        let value_name_wide: Vec<u16> = value_name.encode_utf16().chain(std::iter::once(0)).collect();
+        let value_wide: Vec<u16> = value.encode_utf16().chain(std::iter::once(0)).collect();
+
+        unsafe {
+                let mut hsubkey = windows::Win32::System::Registry::HKEY::default();
+                RegCreateKeyExW(
+                        hkey,
+                        PCWSTR(subkey_wide.as_ptr()),
+                        Some(0),
+                        None,
+                        windows::Win32::System::Registry::REG_OPTION_NON_VOLATILE,
+                        windows::Win32::System::Registry::KEY_WRITE,
+                        None,
+                        &mut hsubkey,
+                        None,
+                )
+                .ok()
+                .map_err(|e| anyhow!("Failed to create GPO key: {}", e))?;
+
+                let byte_len = (value_wide.len() - 1) * 2 + 2; // includes null terminator
+
+                RegSetValueExW(
+                        hsubkey,
+                        PCWSTR(value_name_wide.as_ptr()),
+                        Some(0),
+                        REG_SZ,
+                        Some(std::slice::from_raw_parts(value_wide.as_ptr() as *const u8, byte_len)),
+                )
+                .ok()
+                .map_err(|e| anyhow!("Failed to set GPO string value: {}", e))?;
+
+                let _ = RegCloseKey(hsubkey);
+        }
+        Ok(())
+}
+
+pub fn apply_dark_mode_to_window(hwnd_ptr: isize) -> Result<()>
+{
+        use windows::Win32::Foundation::HWND;
+        use windows::Win32::Graphics::Dwm::{DWMWA_USE_IMMERSIVE_DARK_MODE, DwmSetWindowAttribute};
+
+        unsafe {
+                let hwnd = HWND(hwnd_ptr as _);
+                let dark_mode = 1i32;
+                DwmSetWindowAttribute(
+                        hwnd,
+                        DWMWA_USE_IMMERSIVE_DARK_MODE,
+                        &dark_mode as *const _ as *const _,
+                        std::mem::size_of::<i32>() as u32,
+                )
+                .map_err(|e| anyhow!("Failed to set dark mode: {}", e))?;
+        }
+        Ok(())
+}
+
+pub fn run_powershell_command(command: &str) -> Result<()>
+{
+        run_system_command("powershell.exe", &["-NoProfile", "-Command", command])
 }

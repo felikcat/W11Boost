@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+  - alias: felikcat
+title: "W11Boost"
+version: 2.0.0-dev1
+date-released: 2026-01-08
+license: AGPL-3.0
+url: "https://github.com/felikcat/W11Boost"
+abstract: "A multi-choice Windows 10/11 optimizer & debloater"

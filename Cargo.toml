@@ -1,13 +1,13 @@
 [package]
 name = "W11Boost"
-version = "1.8.0"
+version = "2.0.0-dev1"
 edition = "2024"
 build = "build.rs"
 authors = ["felikcat"]
 license = "AGPLv3"
 repository = "https://github.com/felikcat/W11Boost"
 readme = "README.adoc"
-description = "♻️ Multi-choice Windows 10 & 11 optimizer / debloater that prioritizes breaking nothing"
+description = "♻️ A multi-choice Windows 10/11 optimizer & debloater"
 categories = ["os", "os::windows-apis", "security"]
 keywords = [
     "audio",
@@ -50,25 +50,36 @@ LegalCopyright = "© 2026 felikcat, AGPL3 License"
 OriginalFilename = "W11Boost.exe"
 ProductName = "W11Boost"
 
-# Optimize for size.
+# A balance between runtime performance, size, and keeping compile times low
 [profile.release]
 strip = true
-opt-level = "z"
-lto = "fat"
-codegen-units = 1
+opt-level = "s"
+lto = "thin"
 
 [dependencies]
 anyhow = "1.0.100"
+eframe = { version = "0.33.3", default-features = false, features = ["glow", "default_fonts"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+rfd = "0.17"
+raw-window-handle = "0.6"
+rayon = "1.11"
+
 
 [dependencies.windows]
 version = "0.62.2"
 features = [
     "Win32_Foundation",
-    "Win32_Graphics_Gdi",
-    "Win32_Graphics_Dwm",
     "Win32_UI_WindowsAndMessaging",
-    "Win32_UI_Controls",
     "Win32_System_Registry",
+    "Win32_Security",
+    "Win32_System_Threading",
+    "Win32_System_Services",
+    "Win32_System_Diagnostics_ToolHelp",
+    "Win32_System_ProcessStatus",
+    "Win32_System_Com",
+    "Win32_System_GroupPolicy",
+    "Win32_Graphics_Dwm",
 ]
 
 [build-dependencies]
@@ -76,7 +87,7 @@ winresource = "0.1.28"
 
 [dependencies.winsafe]
 version = "0.0.27"
-features = ["user", "shell", "advapi", "kernel", "gui", "comctl", "gdi"]
+features = ["user", "shell", "advapi", "kernel"]
 
 [dev-dependencies]
 tempfile = "3.24.0"

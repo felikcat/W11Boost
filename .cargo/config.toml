@@ -1,9 +1,9 @@
 [build]
 target = "x86_64-pc-windows-msvc"
 
-[unstable]
-build-std = ["std"]
-build-std-features = ["optimize_for_size"]
+# Use LLD linker to speed up this part of compilation
+[target.x86_64-pc-windows-msvc]
+linker = "rust-lld.exe"
 
 [env]
 # Tests must run serially - they share registry keys and can interfere

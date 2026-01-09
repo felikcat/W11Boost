@@ -1,8 +1,11 @@
 //! W11Boost library - exports common functions for integration testing.
 
 pub mod common;
+pub mod gui;
+pub mod trusted_installer;
 
 pub use common::{
-	check_dword, delete_value, get_windows_path, registry_backup, remove_subkey, restore_from_backup,
-	run_system_command, set_dword, set_string, CREATE_NO_WINDOW,
+        CREATE_NO_WINDOW, check_dword, delete_value, get_windows_path, init_registry_gpo, remove_subkey,
+        run_powershell_command, run_system_command, run_system_command_output, save_registry_gpo, set_binary,
+        set_dword, set_dword_gpo, set_expand_sz, set_string, set_string_gpo,
 };
