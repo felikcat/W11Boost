@@ -570,39 +570,35 @@ impl W11BoostApp
                 });
         }
 
-        fn render_category_view(&mut self, ui: &mut egui::Ui, category_id: &str)
-        {
-                let category = CATEGORIES.iter().find(|c| c.id == category_id);
-                let tweaks = get_tweaks_for_category(category_id);
+        fn render_category_quick_actions(&mut self, ui: &mut egui::Ui, tweaks: &[&'static Tweak]) {
+                ui.horizontal(|ui| {
+                        if ui.button("Enable All").clicked() {
+                                for tweak in tweaks {
+                                        self.tweak_states.states.insert(tweak.id.to_string(), true);
+                                }
+                                self.autosave();
+                        }
+                        if ui.button("Disable All").clicked() {
+                                for tweak in tweaks {
+                                        self.tweak_states.states.insert(tweak.id.to_string(), false);
+                                }
+                                self.autosave();
+                        }
+                });
+        }
 
-                if let Some(cat) = category {
+        fn render_category_header(&mut self, ui: &mut egui::Ui, category: Option<&super::tweaks::TweakCategory>) {
+                 if let Some(cat) = category {
                         ui.add_space(10.0);
                         ui.heading(RichText::new(cat.name).size(28.0));
                         ui.add_space(4.0);
                         ui.label(RichText::new(cat.description).weak());
                         ui.add_space(20.0);
                 }
+        }
 
-                // Quick actions
-                ui.horizontal(|ui| {
-                        if ui.button("Enable All").clicked() {
-                                for tweak in &tweaks {
-                                        self.tweak_states.states.insert(tweak.id.to_string(), true);
-                                }
-                                self.autosave();
-                        }
-                        if ui.button("Disable All").clicked() {
-                                for tweak in &tweaks {
-                                        self.tweak_states.states.insert(tweak.id.to_string(), false);
-                                }
-                                self.autosave();
-                        }
-                });
-                ui.add_space(12.0);
-                ui.separator();
-                ui.add_space(12.0);
-
-                ui.vertical(|ui| {
+        fn render_category_tweaks_list(&mut self, ui: &mut egui::Ui, tweaks: Vec<&'static Tweak>) {
+                 ui.vertical(|ui| {
                         ui.set_max_width(800.0);
                         // Tweaks list with card layout
                         let visible_tweaks = self.get_visible_tweaks(tweaks);
@@ -616,6 +612,21 @@ impl W11BoostApp
                                 self.render_tweak_tree_node(ui, tweak);
                         }
                 });
+        }
+
+        fn render_category_view(&mut self, ui: &mut egui::Ui, category_id: &str)
+        {
+                let category = CATEGORIES.iter().find(|c| c.id == category_id);
+                let tweaks = get_tweaks_for_category(category_id);
+
+                self.render_category_header(ui, category);
+                self.render_category_quick_actions(ui, &tweaks);
+
+                ui.add_space(12.0);
+                ui.separator();
+                ui.add_space(12.0);
+
+                self.render_category_tweaks_list(ui, tweaks);
         }
 
         fn render_effect_badge(ui: &mut egui::Ui, effect: super::tweaks::TweakEffect)
@@ -755,46 +766,53 @@ impl W11BoostApp
                 ui.add_space(4.0);
         }
 
+        fn render_tweak_description_column(&self, ui: &mut egui::Ui, tweak: &'static Tweak) {
+                ui.vertical(|ui| {
+                        ui.label(RichText::new("Description").strong().size(16.0));
+                        ui.add_space(4.0);
+                        egui::Frame::group(ui.style())
+                                .fill(ui.style().visuals.faint_bg_color)
+                                .inner_margin(8.0)
+                                .show(ui, |ui| {
+                                        ui.label(tweak.description);
+                                });
+                });
+        }
+
+        fn render_tweak_impact_column(&self, ui: &mut egui::Ui, tweak: &'static Tweak) {
+               ui.vertical(|ui| {
+                        ui.label(RichText::new("Impact & Effect").strong().size(16.0));
+                        ui.add_space(4.0);
+                        egui::Frame::group(ui.style())
+                                .fill(ui.style().visuals.faint_bg_color)
+                                .inner_margin(8.0)
+                                .show(ui, |ui| {
+                                        let desc = tweak.effect.description();
+                                        let is_logoff = desc == "Requires sign out/sign in";
+
+                                        if desc != "Requires restart" && !is_logoff {
+                                                ui.label(desc);
+                                        }
+                                        if tweak.requires_restart {
+                                                if desc != "Requires restart" {
+                                                        ui.add_space(2.0);
+                                                }
+                                                ui.label(RichText::new("\u{26A0} Requires restart")
+                                                        .color(Color32::from_rgb(255, 100, 100)));
+                                        }
+                                        if is_logoff {
+                                                ui.label(RichText::new("\u{26A0} Requires sign out/sign in")
+                                                        .color(Color32::from_rgb(255, 190, 40)));
+                                        }
+                                });
+                });
+        }
+
         fn render_tweak_metadata_panel(&mut self, ui: &mut egui::Ui, tweak: &'static Tweak)
         {
                 ui.columns(2, |columns| {
-                        columns[0].vertical(|ui| {
-                                ui.label(RichText::new("Description").strong().size(16.0));
-                                ui.add_space(4.0);
-                                egui::Frame::group(ui.style())
-                                        .fill(ui.style().visuals.faint_bg_color)
-                                        .inner_margin(8.0)
-                                        .show(ui, |ui| {
-                                                ui.label(tweak.description);
-                                        });
-                        });
-
-                        columns[1].vertical(|ui| {
-                                ui.label(RichText::new("Impact & Effect").strong().size(16.0));
-                                ui.add_space(4.0);
-                                egui::Frame::group(ui.style())
-                                        .fill(ui.style().visuals.faint_bg_color)
-                                        .inner_margin(8.0)
-                                        .show(ui, |ui| {
-                                                let desc = tweak.effect.description();
-                                                let is_logoff = desc == "Requires sign out/sign in";
-
-                                                if desc != "Requires restart" && !is_logoff {
-                                                        ui.label(desc);
-                                                }
-                                                if tweak.requires_restart {
-                                                        if desc != "Requires restart" {
-                                                                ui.add_space(2.0);
-                                                        }
-                                                        ui.label(RichText::new("\u{26A0} Requires restart")
-                                                                .color(Color32::from_rgb(255, 100, 100)));
-                                                }
-                                                if is_logoff {
-                                                        ui.label(RichText::new("\u{26A0} Requires sign out/sign in")
-                                                                .color(Color32::from_rgb(255, 190, 40)));
-                                                }
-                                        });
-                        });
+                        self.render_tweak_description_column(&mut columns[0], tweak);
+                        self.render_tweak_impact_column(&mut columns[1], tweak);
                 });
         }
 
@@ -861,12 +879,7 @@ impl W11BoostApp
                 ui.add_space(12.0);
         }
 
-        fn render_tweak_custom_input(&mut self, ui: &mut egui::Ui, tweak: &'static Tweak)
-        {
-                ui.add_space(12.0);
-                ui.separator();
-                ui.add_space(12.0);
-
+        fn render_input_controls(&mut self, ui: &mut egui::Ui) {
                 ui.horizontal(|ui| {
                         ui.label(RichText::new("Configuration:").strong().size(16.0));
 
@@ -891,6 +904,84 @@ impl W11BoostApp
                                 }
                         });
                 }
+        }
+
+        fn generate_highlight_job(text: &str, search_query: &str, theme_color: Color32) -> egui::text::LayoutJob {
+                let mut layout_job = egui::text::LayoutJob::default();
+                // We use auto wrapping with infinite width because we want multiline editing,
+                // but usually layouters are called with a specific wrap width.
+                // However, our logic appending text is independent of wrap width except for
+                // the fact that we're feeding it to the painter eventually.
+                // The `layouter` closure in egui is responsible for setting the max_width.
+                // We'll leave that for the caller to set on the result or pass in.
+                // Actually, `layout_job` holds the sections. Wrapping is applied by the widget
+                // using the job's break settings.
+                
+                if search_query.is_empty() {
+                        layout_job.append(
+                                text,
+                                0.0,
+                                egui::TextFormat {
+                                        font_id: egui::FontId::monospace(14.0),
+                                        color: theme_color,
+                                        ..Default::default()
+                                },
+                        );
+                } else {
+                        let haystack = text.to_lowercase();
+                        let needle = search_query.to_lowercase();
+                        let mut last_end = 0;
+
+                        for (start, part) in haystack.match_indices(&needle) {
+                                if start > last_end {
+                                        layout_job.append(
+                                                &text[last_end..start],
+                                                0.0,
+                                                egui::TextFormat {
+                                                        font_id: egui::FontId::monospace(14.0),
+                                                        color: theme_color,
+                                                        ..Default::default()
+                                                },
+                                        );
+                                }
+
+                                let match_end = start + part.len();
+                                layout_job.append(
+                                        &text[start..match_end],
+                                        0.0,
+                                        egui::TextFormat {
+                                                font_id: egui::FontId::monospace(14.0),
+                                                background: Color32::from_rgb(255, 255, 0),
+                                                color: Color32::BLACK,
+                                                ..Default::default()
+                                        },
+                                );
+
+                                last_end = match_end;
+                        }
+
+                        if last_end < text.len() {
+                                layout_job.append(
+                                        &text[last_end..],
+                                        0.0,
+                                        egui::TextFormat {
+                                                font_id: egui::FontId::monospace(14.0),
+                                                color: theme_color,
+                                                ..Default::default()
+                                        },
+                                );
+                        }
+                }
+                layout_job
+        }
+
+        fn render_tweak_custom_input(&mut self, ui: &mut egui::Ui, tweak: &'static Tweak)
+        {
+                ui.add_space(12.0);
+                ui.separator();
+                ui.add_space(12.0);
+
+                self.render_input_controls(ui);
 
                 ui.add_space(4.0);
 
@@ -905,66 +996,9 @@ impl W11BoostApp
                 let theme_color = ui.visuals().text_color();
 
                 let mut layouter = move |ui: &egui::Ui, string: &dyn egui::TextBuffer, wrap_width: f32| {
-                        let string = string.as_str();
-                        let mut layout_job = egui::text::LayoutJob::default();
-                        layout_job.wrap.max_width = wrap_width;
-
-                        if search_query.is_empty() {
-                                layout_job.append(
-                                        string,
-                                        0.0,
-                                        egui::TextFormat {
-                                                font_id: egui::FontId::monospace(14.0),
-                                                color: theme_color,
-                                                ..Default::default()
-                                        },
-                                );
-                        } else {
-                                let haystack = string.to_lowercase();
-                                let needle = search_query.to_lowercase();
-                                let mut last_end = 0;
-
-                                for (start, part) in haystack.match_indices(&needle) {
-                                        if start > last_end {
-                                                layout_job.append(
-                                                        &string[last_end..start],
-                                                        0.0,
-                                                        egui::TextFormat {
-                                                                font_id: egui::FontId::monospace(14.0),
-                                                                color: theme_color,
-                                                                ..Default::default()
-                                                        },
-                                                );
-                                        }
-
-                                        let match_end = start + part.len();
-                                        layout_job.append(
-                                                &string[start..match_end],
-                                                0.0,
-                                                egui::TextFormat {
-                                                        font_id: egui::FontId::monospace(14.0),
-                                                        background: Color32::from_rgb(255, 255, 0),
-                                                        color: Color32::BLACK,
-                                                        ..Default::default()
-                                                },
-                                        );
-
-                                        last_end = match_end;
-                                }
-
-                                if last_end < string.len() {
-                                        layout_job.append(
-                                                &string[last_end..],
-                                                0.0,
-                                                egui::TextFormat {
-                                                        font_id: egui::FontId::monospace(14.0),
-                                                        color: theme_color,
-                                                        ..Default::default()
-                                                },
-                                        );
-                                }
-                        }
-                        ui.painter().layout_job(layout_job)
+                        let mut job = Self::generate_highlight_job(string.as_str(), &search_query, theme_color);
+                        job.wrap.max_width = wrap_width;
+                        ui.painter().layout_job(job)
                 };
 
                 if ui.add(
@@ -1158,6 +1192,37 @@ impl W11BoostApp
                 self.render_bottom_buttons(ui, is_running);
         }
 
+        fn render_bottom_buttons_nav(&mut self, ui: &mut egui::Ui) {
+             if ui.button("Remove W11Boost").clicked() {
+                    self.mode = ViewMode::ConfirmRemove;
+            }
+
+            if ui.button("Show Selected").clicked() {
+                    self.mode = ViewMode::SelectedTweaks;
+            }
+
+            ui.separator();
+
+            if ui.button("Save Config").clicked() {
+                    self.save_config();
+            }
+
+            if ui.button("Load Config").clicked() {
+                    self.load_config();
+            }
+
+            if ui.button("Unset all tweaks").clicked() {
+                    self.mode = ViewMode::ConfirmUnsetAll;
+            }
+
+            ui.separator();
+
+            let log_text = if self.show_log_panel { "Hide Log" } else { "Show Log" };
+            if ui.button(log_text).clicked() {
+                    self.show_log_panel = !self.show_log_panel;
+            }
+        }
+
         fn render_bottom_buttons(&mut self, ui: &mut egui::Ui, is_running: bool)
         {
                 ui.horizontal_wrapped(|ui| {
@@ -1177,34 +1242,7 @@ impl W11BoostApp
                                 self.mode = ViewMode::ConfirmApply;
                         }
 
-                        if ui.button("Remove W11Boost").clicked() {
-                                self.mode = ViewMode::ConfirmRemove;
-                        }
-
-                        if ui.button("Show Selected").clicked() {
-                                self.mode = ViewMode::SelectedTweaks;
-                        }
-
-                        ui.separator();
-
-                        if ui.button("Save Config").clicked() {
-                                self.save_config();
-                        }
-
-                        if ui.button("Load Config").clicked() {
-                                self.load_config();
-                        }
-
-                        if ui.button("Unset all tweaks").clicked() {
-                                self.mode = ViewMode::ConfirmUnsetAll;
-                        }
-
-                        ui.separator();
-
-                        let log_text = if self.show_log_panel { "Hide Log" } else { "Show Log" };
-                        if ui.button(log_text).clicked() {
-                                self.show_log_panel = !self.show_log_panel;
-                        }
+                        self.render_bottom_buttons_nav(ui);
                 });
         }
 
