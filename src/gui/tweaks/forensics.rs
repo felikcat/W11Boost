@@ -210,17 +210,6 @@ pub static FORENSICS_TWEAKS: &[Tweak] = &[
         ],
         },
         crate::tweak! {
-        id: "disable_error_reporting_log",
-        category: "forensics",
-        name: "Disable Error Reporting Logging",
-        description: "Disables Windows Error Reporting logging to system event log.",
-        effect: TweakEffect::Immediate,
-        enabled_ops: &[
-                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Windows Error Reporting", "LoggingDisabled", 1),
-                crate::reg_dword!("HKCU", r"SOFTWARE\Policies\Microsoft\Windows\Windows Error Reporting", "LoggingDisabled", 1),
-        ],
-        },
-        crate::tweak! {
         id: "disable_handwriting_reports",
         category: "forensics",
         name: "Disable Handwriting Error Reports",

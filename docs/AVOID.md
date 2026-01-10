@@ -27,7 +27,6 @@
 *   **The Risk:** Forces Windows to kill all processes instantly without waiting for them to save data.
 *   **Result:** High risk of **User Profile Corruption** (cannot login), registry hive corruption, and data loss in open applications.
 
----
 
 ## 2. Feature Breakers (UI & Apps)
 
@@ -54,7 +53,6 @@
 ### Setting the `CI` environment variable to `1`
 *   **The Risk:** Breaks gemini-cli.
 
----
 
 ## 3. "Snake Oil" & Performance Degraders
 These tweaks are legacies from the Windows XP/7 era. They do **not** improve performance on modern systems and often cause stuttering or memory errors.
@@ -143,8 +141,6 @@ These tweaks are legacies from the Windows XP/7 era. They do **not** improve per
 *   **Reality:** WER is the mechanism that generates **BSOD Mini Dumps**. If you disable this service, when your PC crashes (Blue Screen of Death), **no dump file will be created**. This makes it impossible to analyze the crash using tools like BlueScreenView or WhoCrashed to identify the faulty driver or hardware. You are flying blind when diagnosing instability.
 
 
----
-
 ## 4. Dangerous Combinations
 
 ### The "Zombie OS" Combo
@@ -154,3 +150,40 @@ These tweaks are legacies from the Windows XP/7 era. They do **not** improve per
 ### The "Silent Admin" Security Hole
 *   **Edits:** `EnableLUA = 0` (Disable UAC) **+** `ConsentPromptBehaviorAdmin = 0`
 *   **Result:** Malware and scripts can execute with System/Root privileges instantly without you ever seeing a prompt, notification, or warning.
+
+## 5. Windows 10 Registry Edits Incompatible with Windows 11
+
+The following registry keys and values control features that exist in Windows 10 but have been removed, deprecated, or fundamentally re-architected in Windows 11. Applying these tweaks in Windows 11 will typically result in no effect, or in some cases (like Taskbar positioning), may cause user interface instability.
+
+### Taskbar Customization
+The Windows 11 Taskbar was rebuilt from scratch using XAML, breaking compatibility with legacy Explorer tweaks that manipulated the old code.
+
+| Feature | Registry Key & Path | Windows 10 Function | Windows 11 Status |
+| :--- | :--- | :--- | :--- |
+| **Taskbar Position** | **Key:** `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\StuckRects3`<br>**Value:** `Settings` (Binary) | Allowed moving the taskbar to the **Top**, **Left**, or **Right** by modifying the 13th byte. | **Broken / Unsupported**<br>Windows 11 hardcodes the taskbar to the bottom. Forcing other values often causes the taskbar to disappear or crash `explorer.exe`. |
+| **Taskbar Size** | **Key:** `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced`<br>**Value:** `TaskbarSi` | *Unofficial:* Changed taskbar size (0=Small, 1=Med, 2=Large). | **Removed**<br>Functioned in early Windows 11 builds but was patched out in versions 22H2/23H2. It is now completely ignored. |
+| **Small Icons** | **Key:** `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced`<br>**Value:** `TaskbarSmallIcons` | Toggled "Use small taskbar buttons" to reduce bar height. | **Ignored**<br>The new taskbar has a fixed height and grid size. This native Windows 10 value is not read by the new shell. |
+| **Toolbars** | **Key:** `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Streams\Desktop`<br>**Value:** `TaskbarWinXP` | Stored configurations for user-added toolbars (e.g., Address, Links, NetSpeedMonitor). | **Feature Removed**<br>Windows 11 does not support adding custom toolbars or deskbands to the taskbar. |
+| **"My People" Bar** | **Key:** `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced\People`<br>**Value:** `PeopleBand` | Showed the "My People" contact hub on the taskbar. | **Feature Removed**<br>The "My People" feature was completely deprecated and removed from the OS. |
+| **News & Interests** | **Key:** `HKCU\Software\Microsoft\Windows\CurrentVersion\Feeds`<br>**Value:** `ShellFeedsTaskbarViewMode` | Controlled the weather/news popup on the taskbar. | **Replaced**<br>Replaced by the "Widgets" feature, which uses different registry keys (e.g., `TaskbarDa`). |
+
+### Start Menu & Live Tiles
+The Windows 11 Start Menu uses a static icon grid and does not support the "Metro" Live Tile infrastructure or XML layouts.
+
+| Feature | Registry Key & Path | Windows 10 Function | Windows 11 Status |
+| :--- | :--- | :--- | :--- |
+| **Live Tiles** | **Key:** `HKCU\Software\Policies\Microsoft\Windows\CurrentVersion\PushNotifications`<br>**Value:** `NoTileApplicationNotification` | Disabled animations and updates for Live Tiles. | **Obsolete**<br>Live Tiles do not exist in Windows 11. |
+| **Start Layout XML** | **Key:** `HKLM\SOFTWARE\Policies\Microsoft\Windows\Explorer`<br>**Value:** `StartLayoutFile` | Applied a locked tile layout using a specific XML schema (groups/sizes). | **Incompatible Schema**<br>Windows 11 requires a JSON-based configuration (`.json`) for the "Pinned" section. Legacy XML layouts are largely ignored. |
+| **Full Screen Start** | **Key:** `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\StartPage`<br>**Value:** `MakeAllAppsDefault` | Forced the Start Menu to open in full-screen (Tablet) mode. | **Ignored**<br>Windows 11 does not support a full-screen Start Menu interface on the desktop. |
+| **More Tiles** | **Key:** `HKLM\SOFTWARE\Policies\Microsoft\Windows\Explorer`<br>**Value:** `ShowMoreTiles` | Enabled a 4th column of tiles in the Start Menu groups. | **Obsolete**<br>The grid system for tiles has been removed. |
+
+### Deprecated System Features
+Tweaks for features that have been removed from the operating system entirely or significantly altered.
+
+| Feature | Registry Key & Path | Windows 10 Function | Windows 11 Status |
+| :--- | :--- | :--- | :--- |
+| **Windows Timeline** | **Key:** `HKLM\SOFTWARE\Policies\Microsoft\Windows\System`<br>**Value:** `EnableActivityFeed` | Enabled the "Timeline" history view in Task View. | **Feature Removed**<br>Timeline is gone; Task View only shows virtual desktops and current windows. |
+| **Tablet Mode** | **Key:** `HKCU\Software\Microsoft\Windows\CurrentVersion\ImmersiveShell`<br>**Value:** `TabletMode` | Manually forced the UI into "Tablet Mode." | **Changed**<br>Windows 11 switches modes automatically based on hardware posture. The manual toggle and specific registry force switch are ignored. |
+| **Action Center** | **Key:** `HKCU\Control Panel\Quick Actions`<br>**Value:** `PinnedQuickActionSlotCount` | Customized the 4xN grid of Quick Actions. | **Replaced**<br>Action Center is split into "Notifications" and "Quick Settings." The legacy layout blobs do not apply to the new Quick Settings UI. |
+| **Volume Mixer** | **Key:** `HKLM\Software\Microsoft\Windows NT\CurrentVersion\MTCUVC`<br>**Value:** `EnableMtcUvc` | `0` = Restored the legacy (Win7 style) volume mixer flyout. | **Ignored**<br>Windows 11 enforces the modern volume flyout and Settings-based mixer; this key no longer reverts it. |
+| **Ribbon UI** | **Key:** `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Ribbon`<br>**Value:** `MinimizedStateTabletModeOff` | Controlled if the Explorer Ribbon was minimized or expanded. | **Obsolete**<br>The Ribbon UI has been replaced by a modern XAML Command Bar. |

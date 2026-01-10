@@ -1,7 +1,7 @@
 // System Repair Tweaks
 // These tweaks are designed to revert dangerous or harmful optimizations and restore default Windows behavior.
 
-use super::{RegistryValue, Tweak, TweakEffect};
+use super::{Tweak, TweakEffect};
 
 pub static REPAIR_TWEAKS: &[Tweak] = &[
         crate::tweak! {

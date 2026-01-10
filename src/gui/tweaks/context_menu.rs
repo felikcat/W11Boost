@@ -467,16 +467,6 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
         ],
                 },
         crate::tweak! {
-        id: "remove_scan_with_defender",
-        category: "context_menu",
-        name: "Remove 'Scan with Microsoft Defender'",
-        description: "Removes the 'Scan with Microsoft Defender' option from the context menu.",
-        effect: TweakEffect::Immediate,
-        enabled_ops: &[
-            crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", "{09A47860-11B0-4DA5-AFA5-26D86198A780}", "Scan with Microsoft Defender", RegistryValue::Delete),
-        ],
-                },
-        crate::tweak! {
         id: "add_open_in_new_process",
         category: "context_menu",
         name: "Add 'Open in new process'",

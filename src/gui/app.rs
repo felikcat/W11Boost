@@ -101,6 +101,11 @@ impl W11BoostApp
                         .collect()
         }
 
+        fn is_running(&self) -> bool {
+                let state = self.shared.lock().unwrap();
+                state.is_running
+        }
+
         fn spawn_tweaks_worker(&self, ctx: egui::Context, skip_restore_point: bool)
         {
                 let enabled_tweaks = self.get_enabled_tweaks();
@@ -285,6 +290,10 @@ impl W11BoostApp
         /// Render the left sidebar with category tree
         pub fn render_sidebar(&mut self, ui: &mut egui::Ui)
         {
+                if self.is_running() {
+                        ui.disable();
+                }
+
                 ui.add_space(8.0);
                 self.render_search_box(ui);
                 ui.add_space(8.0);
@@ -1333,6 +1342,9 @@ impl W11BoostApp
                                 bottom: 0,
                         }))
                         .show(ctx, |ui| {
+                                if self.is_running() {
+                                        ui.disable();
+                                }
                                 // Use a unique ID based on the current view state to persist scroll position
                                 let scroll_id = if let Some(tweak) = &self.selection.selected_tweak {
                                         format!("scroll_tweak_{}", tweak)

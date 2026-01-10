@@ -17,6 +17,7 @@ mod online_data;
 mod performance;
 mod power;
 mod privacy;
+mod remove_ai;
 mod repair;
 mod security;
 mod software;
@@ -48,6 +49,7 @@ pub use online_data::ONLINE_DATA_TWEAKS;
 pub use performance::PERFORMANCE_TWEAKS;
 pub use power::POWER_TWEAKS;
 pub use privacy::PRIVACY_TWEAKS;
+pub use remove_ai::REMOVE_AI_TWEAKS;
 pub use repair::REPAIR_TWEAKS;
 
 pub use security::SECURITY_TWEAKS;
@@ -408,6 +410,11 @@ pub static CATEGORIES: &[TweakCategory] = &[
                 description: "Control Windows data collection, telemetry, and privacy settings",
         },
         TweakCategory {
+                id: "remove_ai",
+                name: "Remove AI",
+                description: "Disable Copilot, Recall, and other AI/NPU features",
+        },
+        TweakCategory {
                 id: "repair",
                 name: "Repair & Restore",
                 description: "Restore default Windows behavior and fix common issues",
@@ -511,6 +518,7 @@ pub static CATEGORIES: &[TweakCategory] = &[
 
 const ALL_TWEAK_LISTS: &[&[Tweak]] = &[
         PRIVACY_TWEAKS,
+        REMOVE_AI_TWEAKS,
         ACCESSIBILITY_TWEAKS,
         DESKTOP_TWEAKS,
         EXPLORER_TWEAKS,

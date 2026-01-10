@@ -25,24 +25,6 @@ pub static DEBLOAT_TWEAKS: &[Tweak] = &[
                                 custom_apply: Some(|ctx| remove_package("MSTeams", ctx))
         },
         crate::tweak! {
-                id: "debloat_copilot",
-                category: "debloat",
-                name: "Remove Copilot App",
-                description: "Uninstalls the Microsoft Copilot app.",
-                effect: TweakEffect::Immediate,
-                enabled_ops: &[],
-                                custom_apply: Some(|ctx| remove_package("Microsoft.Copilot", ctx))
-        },
-        crate::tweak! {
-                id: "debloat_cortana",
-                category: "debloat",
-                name: "Remove Cortana",
-                description: "Uninstalls the Cortana app.",
-                effect: TweakEffect::Immediate,
-                enabled_ops: &[],
-                                custom_apply: Some(|ctx| remove_package("Microsoft.549981C3F5F10", ctx))
-        },
-        crate::tweak! {
                 id: "debloat_clipchamp",
                 category: "debloat",
                 name: "Remove Clipchamp",
@@ -277,18 +259,18 @@ pub static DEBLOAT_TWEAKS: &[Tweak] = &[
                                 custom_apply: Some(|ctx| remove_package("Microsoft.WindowsMaps", ctx))
         },
         crate::tweak! {
-            id: "remove_mixed_reality_settings",
-            category: "debloat",
-            name: "Remove Mixed Reality Settings",
-            description: "Removes the Mixed Reality page from the Settings app.",
-            effect: TweakEffect::Immediate,
-            enabled_ops: &[
-                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Holographic", "FirstRunSucceeded", 0, 1),
-            ],
-                    },
+        id: "remove_mixed_reality_settings",
+        category: "debloat",
+        name: "Remove Mixed Reality Settings",
+        description: "Removes the Mixed Reality page from the Settings app.",
+        effect: TweakEffect::Immediate,
+        enabled_ops: &[
+            crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Holographic", "FirstRunSucceeded", 0, 1),
+        ],
+                },
 ];
 
-fn remove_package(package_name: &str, ctx: &Arc<WorkerContext>) -> Result<()>
+pub fn remove_package(package_name: &str, ctx: &Arc<WorkerContext>) -> Result<()>
 {
         ctx.post_status(&format!("Removing app package: {package_name}"));
 
