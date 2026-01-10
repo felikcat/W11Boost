@@ -117,20 +117,13 @@ fn setup_fonts(ctx: &Context)
 {
         let mut fonts = FontDefinitions::default();
 
-        // Load standard Segoe UI
-        let font_paths = ["C:\\Windows\\Fonts\\SegoeUI-VF.ttf", "C:\\Windows\\Fonts\\segoeui.ttf"];
-        let mut main_font_loaded = false;
-
-        for path in font_paths {
-                if let Ok(font_data) = std::fs::read(path) {
-                        fonts.font_data.insert(
-                                "Segoe UI".to_owned(),
-                                std::sync::Arc::new(FontData::from_owned(font_data)),
-                        );
-                        main_font_loaded = true;
-                        break;
-                }
-        }
+        // Embed Roboto font
+        fonts.font_data.insert(
+                "Roboto".to_owned(),
+                std::sync::Arc::new(FontData::from_static(include_bytes!(
+                        "../../fonts/Roboto-VariableFont_wdth,wght.ttf"
+                ))),
+        );
 
         // Load Segoe UI Emoji for color icons
         const EMOJI_FONT: &str = "C:\\Windows\\Fonts\\seguiemj.ttf";
@@ -141,15 +134,16 @@ fn setup_fonts(ctx: &Context)
                 );
         }
 
-        if main_font_loaded {
-                if let Some(family) = fonts.families.get_mut(&FontFamily::Proportional) {
-                        family.insert(0, "Segoe UI".to_owned());
-                        family.push("Segoe UI Emoji".to_owned());
-                }
-                if let Some(family) = fonts.families.get_mut(&FontFamily::Monospace) {
-                        family.push("Segoe UI Emoji".to_owned());
-                }
-
-                ctx.set_fonts(fonts);
+        // Configure Proportional
+        if let Some(family) = fonts.families.get_mut(&FontFamily::Proportional) {
+                family.insert(0, "Roboto".to_owned());
+                family.push("Segoe UI Emoji".to_owned());
         }
+
+        // Configure Monospace
+        if let Some(family) = fonts.families.get_mut(&FontFamily::Monospace) {
+                family.push("Segoe UI Emoji".to_owned());
+        }
+
+        ctx.set_fonts(fonts);
 }

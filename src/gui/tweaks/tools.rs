@@ -1,6 +1,6 @@
 // System Tools tweaks
 
-use super::{RegistryOp, RegistryValue, Tweak, TweakEffect};
+use super::{RegistryValue, Tweak, TweakEffect};
 
 pub static TOOLS_TWEAKS: &[Tweak] = &[
         crate::tweak! {
@@ -10,78 +10,18 @@ pub static TOOLS_TWEAKS: &[Tweak] = &[
                 description: "Restores Windows Photo Viewer as an option for opening images.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows Photo Viewer\Capabilities\FileAssociations",
-                                value_name: ".bmp",
-                                value: RegistryValue::String("PhotoViewer.FileAssoc.Tiff"),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows Photo Viewer\Capabilities\FileAssociations",
-                                value_name: ".gif",
-                                value: RegistryValue::String("PhotoViewer.FileAssoc.Tiff"),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows Photo Viewer\Capabilities\FileAssociations",
-                                value_name: ".jpeg",
-                                value: RegistryValue::String("PhotoViewer.FileAssoc.Tiff"),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows Photo Viewer\Capabilities\FileAssociations",
-                                value_name: ".jpg",
-                                value: RegistryValue::String("PhotoViewer.FileAssoc.Tiff"),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows Photo Viewer\Capabilities\FileAssociations",
-                                value_name: ".png",
-                                value: RegistryValue::String("PhotoViewer.FileAssoc.Tiff"),
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows Photo Viewer\Capabilities\FileAssociations", ".bmp", "PhotoViewer.FileAssoc.Tiff", RegistryValue::Delete),
+                        crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows Photo Viewer\Capabilities\FileAssociations", ".gif", "PhotoViewer.FileAssoc.Tiff", RegistryValue::Delete),
+                        crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows Photo Viewer\Capabilities\FileAssociations", ".jpeg", "PhotoViewer.FileAssoc.Tiff", RegistryValue::Delete),
+                        crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows Photo Viewer\Capabilities\FileAssociations", ".jpg", "PhotoViewer.FileAssoc.Tiff", RegistryValue::Delete),
+                        crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows Photo Viewer\Capabilities\FileAssociations", ".png", "PhotoViewer.FileAssoc.Tiff", RegistryValue::Delete),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows Photo Viewer\Capabilities\FileAssociations",
-                                value_name: ".bmp",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows Photo Viewer\Capabilities\FileAssociations",
-                                value_name: ".gif",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows Photo Viewer\Capabilities\FileAssociations",
-                                value_name: ".jpeg",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows Photo Viewer\Capabilities\FileAssociations",
-                                value_name: ".jpg",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows Photo Viewer\Capabilities\FileAssociations",
-                                value_name: ".png",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows Photo Viewer\Capabilities\FileAssociations", ".bmp", RegistryValue::Delete),
+                        crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows Photo Viewer\Capabilities\FileAssociations", ".gif", RegistryValue::Delete),
+                        crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows Photo Viewer\Capabilities\FileAssociations", ".jpeg", RegistryValue::Delete),
+                        crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows Photo Viewer\Capabilities\FileAssociations", ".jpg", RegistryValue::Delete),
+                        crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows Photo Viewer\Capabilities\FileAssociations", ".png", RegistryValue::Delete),
                 ])
         },
         crate::tweak! {
@@ -90,20 +30,12 @@ pub static TOOLS_TWEAKS: &[Tweak] = &[
                 name: "Remove Restore Point Limit",
                 description: "Removes the 24-hour limit between manual restore point creation.",
                 effect: TweakEffect::Immediate,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\SystemRestore",
-                        value_name: "SystemRestorePointCreationFrequency",
-                        value: RegistryValue::Dword(0),
-                        stock_value: RegistryValue::Delete
-        }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\SystemRestore",
-                        value_name: "SystemRestorePointCreationFrequency",
-                        value: RegistryValue::Delete,
-                        stock_value: RegistryValue::Delete
-        }])
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\SystemRestore", "SystemRestorePointCreationFrequency", 0),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\SystemRestore", "SystemRestorePointCreationFrequency", RegistryValue::Delete),
+                ])
         },
         crate::tweak! {
                 id: "enable_registry_backup",
@@ -111,20 +43,12 @@ pub static TOOLS_TWEAKS: &[Tweak] = &[
                 name: "Enable Registry Backup",
                 description: "Enables automatic periodic registry backup (disabled by default in Win10 1803+).",
                 effect: TweakEffect::Restart,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SYSTEM\CurrentControlSet\Control\Session Manager\Configuration Manager",
-                        value_name: "EnablePeriodicBackup",
-                        value: RegistryValue::Dword(1),
-                        stock_value: RegistryValue::Delete
-        }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SYSTEM\CurrentControlSet\Control\Session Manager\Configuration Manager",
-                        value_name: "EnablePeriodicBackup",
-                        value: RegistryValue::Delete,
-                        stock_value: RegistryValue::Delete
-        }]),
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Control\Session Manager\Configuration Manager", "EnablePeriodicBackup", 1),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_del!("HKLM", r"SYSTEM\CurrentControlSet\Control\Session Manager\Configuration Manager", "EnablePeriodicBackup", RegistryValue::Delete),
+                ]),
                 requires_restart: true
         },
         crate::tweak! {
@@ -133,20 +57,12 @@ pub static TOOLS_TWEAKS: &[Tweak] = &[
                 name: "Disable Automatic Maintenance",
                 description: "Disables Windows automatic maintenance tasks.",
                 effect: TweakEffect::Immediate,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\Maintenance",
-                        value_name: "MaintenanceDisabled",
-                        value: RegistryValue::Dword(1),
-                        stock_value: RegistryValue::Delete
-        }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\Maintenance",
-                        value_name: "MaintenanceDisabled",
-                        value: RegistryValue::Delete,
-                        stock_value: RegistryValue::Delete
-        }])
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\Maintenance", "MaintenanceDisabled", 1),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\Maintenance", "MaintenanceDisabled", RegistryValue::Delete),
+                ])
         },
         crate::tweak! {
                 id: "reset_windows_store",
@@ -170,36 +86,12 @@ pub static TOOLS_TWEAKS: &[Tweak] = &[
                 description: "Sets custom OEM information in System properties.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\OEMInformation",
-                                value_name: "Manufacturer",
-                                value: RegistryValue::String("W11Boost"),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\OEMInformation",
-                                value_name: "SupportURL",
-                                value: RegistryValue::String("https://github.com/Admin/W11Boost"),
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\OEMInformation", "Manufacturer", "W11Boost", RegistryValue::Delete),
+                        crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\OEMInformation", "SupportURL", "https://github.com/Admin/W11Boost", RegistryValue::Delete),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\OEMInformation",
-                                value_name: "Manufacturer",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\OEMInformation",
-                                value_name: "SupportURL",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\OEMInformation", "Manufacturer", RegistryValue::Delete),
+                        crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\OEMInformation", "SupportURL", RegistryValue::Delete),
                 ])
         },
         crate::tweak! {
@@ -208,19 +100,11 @@ pub static TOOLS_TWEAKS: &[Tweak] = &[
                 name: "Set Registered Owner",
                 description: "Changes the registered owner name in Windows.",
                 effect: TweakEffect::Immediate,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Microsoft\Windows NT\CurrentVersion",
-                        value_name: "RegisteredOwner",
-                        value: RegistryValue::String("W11Boost User"),
-                        stock_value: RegistryValue::String("epic")
-        }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Microsoft\Windows NT\CurrentVersion",
-                        value_name: "RegisteredOwner",
-                        value: RegistryValue::String("Windows User"),
-                        stock_value: RegistryValue::String("Windows User")
-        }])
+                enabled_ops: &[
+                        crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows NT\CurrentVersion", "RegisteredOwner", "W11Boost User", "epic"),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows NT\CurrentVersion", "RegisteredOwner", "Windows User", "Windows User"),
+                ])
         },
 ];

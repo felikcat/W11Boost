@@ -1,6 +1,11 @@
 /// Default recommended tweaks to enabled
 pub const RECOMMENDED_TWEAKS: &[&str] = &[
         "disable_telemetry",
+        "disable_geolocation_service",
+        "disable_app_launch_tracking",
+        "disable_lock_screen_widgets",
+        "disable_vs_telemetry",
+        "disable_media_player_telemetry",
         "disable_copilot",
         "disable_web_search",
         "disable_background_apps",
@@ -387,4 +392,16 @@ pub const RECOMMENDED_TWEAKS: &[&str] = &[
         "office_feedback_enabled",
         "disable_text_input_personalization",
         "disable_npsm_svc",
+        "appcd_telemetry_false",
+        "canvas_lms_stats_collection",
+        "mm_servicesettings_securityfixalert",
+        "automatedlab_telemetry_optin",
+        "disable_checkpoint_signature",
+        "optimize_platform_tick",
+        "optimize_timer_resolution",
+        "directx_swap_effect_upgrade",
+        "enable_qos_dscp_marking",
+        "gaming_task_priority",
+        "optimize_browser_policies",
+        "install_7zip",
 ];

@@ -1,6 +1,6 @@
 // Windows App Debloating
 
-use super::{RegistryOp, RegistryValue, Tweak, TweakEffect};
+use super::{Tweak, TweakEffect};
 use crate::gui::shared_state::WorkerContext;
 use anyhow::Result;
 use std::sync::Arc;
@@ -313,22 +313,10 @@ pub static DEBLOAT_TWEAKS: &[Tweak] = &[
             description: "Removes the Mixed Reality page from the Settings app.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\Holographic",
-                    value_name: "FirstRunSucceeded",
-                    value: RegistryValue::Dword(0),
-                    stock_value: RegistryValue::Dword(1),
-                },
+                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Holographic", "FirstRunSucceeded", 0, 1),
             ],
             disabled_ops: Some(&[
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\Holographic",
-                    value_name: "FirstRunSucceeded",
-                    value: RegistryValue::Dword(1),
-                    stock_value: RegistryValue::Dword(1),
-                },
+                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Holographic", "FirstRunSucceeded", 1, 1),
             ]),
         },
 ];

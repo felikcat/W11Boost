@@ -1,7 +1,7 @@
 // Context Menu tweaks
 
 use super::super::shared_state::WorkerContext;
-use super::{RegistryOp, RegistryValue, Tweak, TweakEffect};
+use super::{RegistryValue, Tweak, TweakEffect};
 use anyhow::Result;
 use std::sync::Arc;
 
@@ -14,31 +14,19 @@ pub static REMOVE_CONTEXT_PINS: Tweak = crate::tweak! {
         is_hidden: true,
         enabled_ops: &[
                 // Remove Pin to Home (Quick Access)
-                RegistryOp { hkey: "HKCR", subkey: r"AllFilesystemObjects\shell\pintohome", value_name: "", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                RegistryOp { hkey: "HKCR", subkey: r"Drive\shell\pintohome", value_name: "", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                RegistryOp { hkey: "HKCR", subkey: r"Folder\shell\pintohome", value_name: "", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                RegistryOp { hkey: "HKCR", subkey: r"Network\shell\pintohome", value_name: "", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
+                crate::reg_del!("HKCR", r"AllFilesystemObjects\shell\pintohome", "", RegistryValue::Delete),
+                crate::reg_del!("HKCR", r"Drive\shell\pintohome", "", RegistryValue::Delete),
+                crate::reg_del!("HKCR", r"Folder\shell\pintohome", "", RegistryValue::Delete),
+                crate::reg_del!("HKCR", r"Network\shell\pintohome", "", RegistryValue::Delete),
                 // Remove Pin to Start
-                RegistryOp { hkey: "HKCR", subkey: r"exefile\shellex\ContextMenuHandlers\PintoStartScreen", value_name: "", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                RegistryOp { hkey: "HKCR", subkey: r"Folder\ShellEx\ContextMenuHandlers\PintoStartScreen", value_name: "", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                RegistryOp { hkey: "HKCR", subkey: r"Microsoft.Website\shellex\ContextMenuHandlers\PintoStartScreen", value_name: "", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                RegistryOp { hkey: "HKCR", subkey: r"mscfile\shellex\ContextMenuHandlers\PintoStartScreen", value_name: "", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked",
-                        value_name: "{470C0EBD-5D73-4d58-9CED-E91E22E23282}",
-                        value: RegistryValue::String(""),
-                        stock_value: RegistryValue::Delete
-                },
+                crate::reg_del!("HKCR", r"exefile\shellex\ContextMenuHandlers\PintoStartScreen", "", RegistryValue::Delete),
+                crate::reg_del!("HKCR", r"Folder\ShellEx\ContextMenuHandlers\PintoStartScreen", "", RegistryValue::Delete),
+                crate::reg_del!("HKCR", r"Microsoft.Website\shellex\ContextMenuHandlers\PintoStartScreen", "", RegistryValue::Delete),
+                crate::reg_del!("HKCR", r"mscfile\shellex\ContextMenuHandlers\PintoStartScreen", "", RegistryValue::Delete),
+                crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", "{470C0EBD-5D73-4d58-9CED-E91E22E23282}", "", RegistryValue::Delete),
         ],
         disabled_ops: Some(&[
-                RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked",
-                        value_name: "{470C0EBD-5D73-4d58-9CED-E91E22E23282}",
-                        value: RegistryValue::Delete,
-                        stock_value: RegistryValue::Delete
-                },
+                crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", "{470C0EBD-5D73-4d58-9CED-E91E22E23282}", RegistryValue::Delete),
         ])
 };
 
@@ -49,20 +37,12 @@ pub static REMOVE_TERMINAL: Tweak = crate::tweak! {
         description: "Removes 'Open in Terminal' from the context menu.",
         effect: TweakEffect::ExplorerRestart,
         is_hidden: true,
-        enabled_ops: &[RegistryOp {
-                hkey: "HKCU",
-                subkey: r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked",
-                value_name: "{9F156763-7844-4DC4-B2B1-901F640F5155}",
-                value: RegistryValue::String(""),
-                stock_value: RegistryValue::Delete
-        }],
-        disabled_ops: Some(&[RegistryOp {
-                hkey: "HKCU",
-                subkey: r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked",
-                value_name: "{9F156763-7844-4DC4-B2B1-901F640F5155}",
-                value: RegistryValue::Delete,
-                stock_value: RegistryValue::Delete
-        }])
+        enabled_ops: &[
+                crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", "{9F156763-7844-4DC4-B2B1-901F640F5155}", "", RegistryValue::Delete),
+        ],
+        disabled_ops: Some(&[
+                crate::reg_del!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", "{9F156763-7844-4DC4-B2B1-901F640F5155}", RegistryValue::Delete),
+        ])
 };
 
 pub static REMOVE_EDIT_NOTEPAD: Tweak = crate::tweak! {
@@ -72,20 +52,12 @@ pub static REMOVE_EDIT_NOTEPAD: Tweak = crate::tweak! {
         description: "Removes 'Edit in Notepad' from the file context menu.",
         effect: TweakEffect::ExplorerRestart,
         is_hidden: true,
-        enabled_ops: &[RegistryOp {
-                hkey: "HKCU",
-                subkey: r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked",
-                value_name: "{CA6CC9F1-867A-481E-951E-A28C5E4F01EA}",
-                value: RegistryValue::String(""),
-                stock_value: RegistryValue::Delete
-        }],
-        disabled_ops: Some(&[RegistryOp {
-                hkey: "HKCU",
-                subkey: r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked",
-                value_name: "{CA6CC9F1-867A-481E-951E-A28C5E4F01EA}",
-                value: RegistryValue::Delete,
-                stock_value: RegistryValue::Delete
-        }])
+        enabled_ops: &[
+                crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", "{CA6CC9F1-867A-481E-951E-A28C5E4F01EA}", "", RegistryValue::Delete),
+        ],
+        disabled_ops: Some(&[
+                crate::reg_del!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", "{CA6CC9F1-867A-481E-951E-A28C5E4F01EA}", RegistryValue::Delete),
+        ])
 };
 
 pub static REMOVE_MOVE_TO_ONEDRIVE: Tweak = crate::tweak! {
@@ -96,12 +68,12 @@ pub static REMOVE_MOVE_TO_ONEDRIVE: Tweak = crate::tweak! {
         effect: TweakEffect::ExplorerRestart,
         is_hidden: true,
         enabled_ops: &[
-                RegistryOp { hkey: "HKCU", subkey: r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", value_name: "{1FA0E654-C9F2-4A1F-9800-B9A75D744B00}", value: RegistryValue::String("OneDrive"), stock_value: RegistryValue::Delete },
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", value_name: "{1FA0E654-C9F2-4A1F-9800-B9A75D744B00}", value: RegistryValue::String("OneDrive"), stock_value: RegistryValue::Delete },
+                crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", "{1FA0E654-C9F2-4A1F-9800-B9A75D744B00}", "OneDrive", RegistryValue::Delete),
+                crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", "{1FA0E654-C9F2-4A1F-9800-B9A75D744B00}", "OneDrive", RegistryValue::Delete),
         ],
         disabled_ops: Some(&[
-                RegistryOp { hkey: "HKCU", subkey: r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", value_name: "{1FA0E654-C9F2-4A1F-9800-B9A75D744B00}", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", value_name: "{1FA0E654-C9F2-4A1F-9800-B9A75D744B00}", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
+                crate::reg_del!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", "{1FA0E654-C9F2-4A1F-9800-B9A75D744B00}", RegistryValue::Delete),
+                crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", "{1FA0E654-C9F2-4A1F-9800-B9A75D744B00}", RegistryValue::Delete),
         ])
 };
 
@@ -113,14 +85,14 @@ pub static REMOVE_PHOTOS_MENU: Tweak = crate::tweak! {
         effect: TweakEffect::ExplorerRestart,
         is_hidden: true,
         enabled_ops: &[
-                RegistryOp { hkey: "HKCU", subkey: r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", value_name: "{BFE0E2A4-C70C-4AD7-AC3D-10D1ECEBB5B4}", value: RegistryValue::String("Photos"), stock_value: RegistryValue::Delete },
-                RegistryOp { hkey: "HKCU", subkey: r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", value_name: "{1100CBCD-B822-43F0-84CB-16814C2F6B44}", value: RegistryValue::String("Photos"), stock_value: RegistryValue::Delete },
-                RegistryOp { hkey: "HKCU", subkey: r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", value_name: "{7A53B94A-4E6E-4826-B48E-535020B264E5}", value: RegistryValue::String("Photos"), stock_value: RegistryValue::Delete },
-                RegistryOp { hkey: "HKCU", subkey: r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", value_name: "{9AAFEDA2-97B6-43EA-9466-9DE90501B1B6}", value: RegistryValue::String("Photos"), stock_value: RegistryValue::Delete },
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", value_name: "{BFE0E2A4-C70C-4AD7-AC3D-10D1ECEBB5B4}", value: RegistryValue::String("Photos"), stock_value: RegistryValue::Delete },
+                crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", "{BFE0E2A4-C70C-4AD7-AC3D-10D1ECEBB5B4}", "Photos"),
+                crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", "{1100CBCD-B822-43F0-84CB-16814C2F6B44}", "Photos"),
+                crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", "{7A53B94A-4E6E-4826-B48E-535020B264E5}", "Photos"),
+                crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", "{9AAFEDA2-97B6-43EA-9466-9DE90501B1B6}", "Photos"),
+                crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", "{BFE0E2A4-C70C-4AD7-AC3D-10D1ECEBB5B4}", "Photos"),
         ],
         disabled_ops: Some(&[
-                RegistryOp { hkey: "HKCU", subkey: r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", value_name: "{BFE0E2A4-C70C-4AD7-AC3D-10D1ECEBB5B4}", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
+                crate::reg_del!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", "{BFE0E2A4-C70C-4AD7-AC3D-10D1ECEBB5B4}", RegistryValue::Delete),
         ])
 };
 
@@ -132,10 +104,10 @@ pub static REMOVE_CAST_TO_DEVICE: Tweak = crate::tweak! {
         effect: TweakEffect::ExplorerRestart,
         is_hidden: true,
         enabled_ops: &[
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", value_name: "{7AD84985-87B4-4a16-BE58-8B72A5B390F7}", value: RegistryValue::String("Play to Menu"), stock_value: RegistryValue::Delete },
+                crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", "{7AD84985-87B4-4a16-BE58-8B72A5B390F7}", "Play to Menu"),
         ],
         disabled_ops: Some(&[
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", value_name: "{7AD84985-87B4-4a16-BE58-8B72A5B390F7}", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
+                crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", "{7AD84985-87B4-4a16-BE58-8B72A5B390F7}", RegistryValue::Delete),
         ])
 };
 
@@ -147,36 +119,12 @@ pub static REMOVE_ASK_COPILOT: Tweak = crate::tweak! {
         effect: TweakEffect::ExplorerRestart,
         is_hidden: true,
         enabled_ops: &[
-                RegistryOp {
-                        hkey: "HKCU",
-                        subkey: r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked",
-                        value_name: "{CB3B0003-8088-4EDE-8769-8B354AB2FF8C}",
-                        value: RegistryValue::String(""),
-                        stock_value: RegistryValue::Delete
-                },
-                RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked",
-                        value_name: "{CB3B0003-8088-4EDE-8769-8B354AB2FF8C}",
-                        value: RegistryValue::String(""),
-                        stock_value: RegistryValue::Delete
-                }
+                crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", "{CB3B0003-8088-4EDE-8769-8B354AB2FF8C}", ""),
+                crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", "{CB3B0003-8088-4EDE-8769-8B354AB2FF8C}", ""),
         ],
         disabled_ops: Some(&[
-                RegistryOp {
-                        hkey: "HKCU",
-                        subkey: r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked",
-                        value_name: "{CB3B0003-8088-4EDE-8769-8B354AB2FF8C}",
-                        value: RegistryValue::Delete,
-                        stock_value: RegistryValue::Delete
-                },
-                RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked",
-                        value_name: "{CB3B0003-8088-4EDE-8769-8B354AB2FF8C}",
-                        value: RegistryValue::Delete,
-                        stock_value: RegistryValue::Delete
-                }
+                crate::reg_del!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", "{CB3B0003-8088-4EDE-8769-8B354AB2FF8C}", RegistryValue::Delete),
+                crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", "{CB3B0003-8088-4EDE-8769-8B354AB2FF8C}", RegistryValue::Delete),
         ])
 };
 
@@ -188,14 +136,14 @@ pub static REMOVE_CUSTOMIZE_THIS_FOLDER: Tweak = crate::tweak! {
         effect: TweakEffect::ExplorerRestart,
         is_hidden: true,
         enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\shellex\PropertySheetHandlers\{ef43ecfe-2ab9-4632-bf21-58909dd177f0}", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Drive\shellex\PropertySheetHandlers\{ef43ecfe-2ab9-4632-bf21-58909dd177f0}", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCU", subkey: r"Software\Microsoft\Windows\CurrentVersion\Policies\Explorer", value_name: "NoCustomizeThisFolder", value: RegistryValue::Dword(1), stock_value: RegistryValue::Delete },
+                crate::reg_del_key!("HKCR", r"Directory\shellex\PropertySheetHandlers\{ef43ecfe-2ab9-4632-bf21-58909dd177f0}", "", RegistryValue::DeleteKey),
+                crate::reg_del_key!("HKCR", r"Drive\shellex\PropertySheetHandlers\{ef43ecfe-2ab9-4632-bf21-58909dd177f0}", "", RegistryValue::DeleteKey),
+                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Policies\Explorer", "NoCustomizeThisFolder", 1),
         ],
         disabled_ops: Some(&[
-                 RegistryOp { hkey: "HKCR", subkey: r"Directory\shellex\PropertySheetHandlers\{ef43ecfe-2ab9-4632-bf21-58909dd177f0}", value_name: "", value: RegistryValue::String(""), stock_value: RegistryValue::String("") },
-                 RegistryOp { hkey: "HKCR", subkey: r"Drive\shellex\PropertySheetHandlers\{ef43ecfe-2ab9-4632-bf21-58909dd177f0}", value_name: "", value: RegistryValue::String(""), stock_value: RegistryValue::String("") },
-                 RegistryOp { hkey: "HKCU", subkey: r"Software\Microsoft\Windows\CurrentVersion\Policies\Explorer", value_name: "NoCustomizeThisFolder", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
+                 crate::reg_str!("HKCR", r"Directory\shellex\PropertySheetHandlers\{ef43ecfe-2ab9-4632-bf21-58909dd177f0}", "", ""),
+                 crate::reg_str!("HKCR", r"Drive\shellex\PropertySheetHandlers\{ef43ecfe-2ab9-4632-bf21-58909dd177f0}", "", ""),
+                 crate::reg_del!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Policies\Explorer", "NoCustomizeThisFolder", RegistryValue::Delete),
         ])
 };
 
@@ -207,10 +155,10 @@ pub static REMOVE_CHANGE_BITLOCKER_PASSWORD: Tweak = crate::tweak! {
         effect: TweakEffect::Immediate,
         is_hidden: true,
         enabled_ops: &[
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Classes\Drive\shell\change-passphrase", value_name: "LegacyDisable", value: RegistryValue::String(""), stock_value: RegistryValue::Delete },
+                crate::reg_str!("HKLM", r"SOFTWARE\Classes\Drive\shell\change-passphrase", "LegacyDisable", ""),
         ],
         disabled_ops: Some(&[
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Classes\Drive\shell\change-passphrase", value_name: "LegacyDisable", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
+                crate::reg_del!("HKLM", r"SOFTWARE\Classes\Drive\shell\change-passphrase", "LegacyDisable", RegistryValue::Delete),
         ])
 };
 
@@ -222,10 +170,10 @@ pub static REMOVE_COPY_AS_PATH: Tweak = crate::tweak! {
         effect: TweakEffect::Immediate,
         is_hidden: true,
         enabled_ops: &[
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Classes\AllFilesystemObjects\shellex\ContextMenuHandlers\CopyAsPathMenu", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                crate::reg_del_key!("HKLM", r"SOFTWARE\Classes\AllFilesystemObjects\shellex\ContextMenuHandlers\CopyAsPathMenu", "", RegistryValue::DeleteKey),
         ],
         disabled_ops: Some(&[
-                 RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Classes\AllFilesystemObjects\shellex\ContextMenuHandlers\CopyAsPathMenu", value_name: "", value: RegistryValue::String("{f3d06e7c-1e45-4a26-847e-f9fcdee59be0}"), stock_value: RegistryValue::String("{f3d06e7c-1e45-4a26-847e-f9fcdee59be0}") },
+                 crate::reg_str!("HKLM", r"SOFTWARE\Classes\AllFilesystemObjects\shellex\ContextMenuHandlers\CopyAsPathMenu", "", "{f3d06e7c-1e45-4a26-847e-f9fcdee59be0}", "{f3d06e7c-1e45-4a26-847e-f9fcdee59be0}"),
         ])
 };
 
@@ -237,10 +185,10 @@ pub static REMOVE_TROUBLESHOOT_COMPATIBILITY: Tweak = crate::tweak! {
         effect: TweakEffect::Immediate,
         is_hidden: true,
         enabled_ops: &[
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Classes\exefile\shell\compatibility", value_name: "LegacyDisable", value: RegistryValue::String(""), stock_value: RegistryValue::Delete },
+                crate::reg_str!("HKLM", r"SOFTWARE\Classes\exefile\shell\compatibility", "LegacyDisable", ""),
         ],
         disabled_ops: Some(&[
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Classes\exefile\shell\compatibility", value_name: "LegacyDisable", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
+                crate::reg_del!("HKLM", r"SOFTWARE\Classes\exefile\shell\compatibility", "LegacyDisable", RegistryValue::Delete),
         ])
 };
 
@@ -252,22 +200,10 @@ pub static REMOVE_PIN_TO_START: Tweak = crate::tweak! {
         effect: TweakEffect::ExplorerRestart,
         is_hidden: true,
         enabled_ops: &[
-                RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked",
-                        value_name: "{470C0EBD-5D73-4d58-9CED-E91E22E23282}",
-                        value: RegistryValue::String(""),
-                        stock_value: RegistryValue::Delete
-                }
+                crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", "{470C0EBD-5D73-4d58-9CED-E91E22E23282}", ""),
         ],
         disabled_ops: Some(&[
-                RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked",
-                        value_name: "{470C0EBD-5D73-4d58-9CED-E91E22E23282}",
-                        value: RegistryValue::Delete,
-                        stock_value: RegistryValue::Delete
-                }
+                crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", "{470C0EBD-5D73-4d58-9CED-E91E22E23282}", RegistryValue::Delete),
         ])
 };
 
@@ -279,10 +215,10 @@ pub static REMOVE_NVIDIA_CONTROL_PANEL: Tweak = crate::tweak! {
         effect: TweakEffect::Immediate,
         is_hidden: true,
         enabled_ops: &[
-                RegistryOp { hkey: "HKCU", subkey: r"Software\NVIDIA Corporation\Global\NvCplApi\Policies", value_name: "ContextUIPolicy", value: RegistryValue::Dword(0), stock_value: RegistryValue::Dword(2) },
+                crate::reg_dword!("HKCU", r"Software\NVIDIA Corporation\Global\NvCplApi\Policies", "ContextUIPolicy", 0, 2),
         ],
         disabled_ops: Some(&[
-                RegistryOp { hkey: "HKCU", subkey: r"Software\NVIDIA Corporation\Global\NvCplApi\Policies", value_name: "ContextUIPolicy", value: RegistryValue::Dword(2), stock_value: RegistryValue::Dword(2) },
+                crate::reg_dword!("HKCU", r"Software\NVIDIA Corporation\Global\NvCplApi\Policies", "ContextUIPolicy", 2, 2),
         ])
 };
 
@@ -294,14 +230,14 @@ pub static REMOVE_PERSONALIZE_DISPLAY: Tweak = crate::tweak! {
         effect: TweakEffect::Immediate,
         is_hidden: true,
         enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Personalize", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Display", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                crate::reg_del_key!("HKCR", r"DesktopBackground\Shell\Personalize", "", RegistryValue::DeleteKey),
+                crate::reg_del_key!("HKCR", r"DesktopBackground\Shell\Display", "", RegistryValue::DeleteKey),
         ],
         disabled_ops: Some(&[
                 // Note: Deleting these keys is destructive. Reverting requires re-adding them.
                 // For simplicity, we assume they are standard and can be restored if needed,
                 // but usually users don't want them back if they enable this.
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Personalize", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                crate::reg_del_key!("HKCR", r"DesktopBackground\Shell\Personalize", "", RegistryValue::DeleteKey),
         ])
 };
 
@@ -312,20 +248,12 @@ pub static REMOVE_EDIT_PAINT: Tweak = crate::tweak! {
         description: "Removes 'Edit with Paint' from the context menu.",
         effect: TweakEffect::Immediate,
         is_hidden: true,
-        enabled_ops: &[RegistryOp {
-                hkey: "HKCU",
-                subkey: r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked",
-                value_name: "{2430F218-B743-4FD6-97BF-5C76541B4AE9}",
-                value: RegistryValue::String("Edit with Paint"),
-                stock_value: RegistryValue::Delete
-        }],
-        disabled_ops: Some(&[RegistryOp {
-                hkey: "HKCU",
-                subkey: r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked",
-                value_name: "{2430F218-B743-4FD6-97BF-5C76541B4AE9}",
-                value: RegistryValue::Delete,
-                stock_value: RegistryValue::Delete
-        }])
+        enabled_ops: &[
+                crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", "{2430F218-B743-4FD6-97BF-5C76541B4AE9}", "Edit with Paint"),
+        ],
+        disabled_ops: Some(&[
+                crate::reg_del!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", "{2430F218-B743-4FD6-97BF-5C76541B4AE9}", RegistryValue::Delete),
+        ])
 };
 
 pub static REMOVE_EDIT_CLIPCHAMP: Tweak = crate::tweak! {
@@ -335,20 +263,12 @@ pub static REMOVE_EDIT_CLIPCHAMP: Tweak = crate::tweak! {
         description: "Removes 'Edit with Clipchamp' from the context menu.",
         effect: TweakEffect::Immediate,
         is_hidden: true,
-        enabled_ops: &[RegistryOp {
-                hkey: "HKCU",
-                subkey: r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked",
-                value_name: "{8AB635F8-9A67-4698-AB99-784AD929F3B4}",
-                value: RegistryValue::String("Edit with Clipchamp"),
-                stock_value: RegistryValue::Delete
-        }],
-        disabled_ops: Some(&[RegistryOp {
-                hkey: "HKCU",
-                subkey: r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked",
-                value_name: "{8AB635F8-9A67-4698-AB99-784AD929F3B4}",
-                value: RegistryValue::Delete,
-                stock_value: RegistryValue::Delete
-        }])
+        enabled_ops: &[
+                crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", "{8AB635F8-9A67-4698-AB99-784AD929F3B4}", "Edit with Clipchamp"),
+        ],
+        disabled_ops: Some(&[
+                crate::reg_del!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", "{8AB635F8-9A67-4698-AB99-784AD929F3B4}", RegistryValue::Delete),
+        ])
 };
 
 fn apply_remove_set_as_desktop_bg(_context: &Arc<WorkerContext>) -> Result<()>
@@ -403,16 +323,16 @@ pub static REMOVE_SEND_TO: Tweak = crate::tweak! {
         effect: TweakEffect::Immediate,
         is_hidden: true,
         enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r"AllFilesystemObjects\shellex\ContextMenuHandlers\SendTo", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::String("{7BA4C740-9E81-11CF-99D3-00AA004AE837}") },
-                RegistryOp { hkey: "HKCR", subkey: r"UserLibraryFolder\shellex\ContextMenuHandlers\SendTo", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::String("{7BA4C740-9E81-11CF-99D3-00AA004AE837}") },
-                RegistryOp { hkey: "HKCR", subkey: r"Drives\shellex\ContextMenuHandlers\SendTo", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::String("{7BA4C740-9E81-11CF-99D3-00AA004AE837}") },
-                RegistryOp { hkey: "HKCR", subkey: r"Folder\shellex\ContextMenuHandlers\SendTo", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::String("{7BA4C740-9E81-11CF-99D3-00AA004AE837}") },
+                crate::reg_del_key!("HKCR", r"AllFilesystemObjects\shellex\ContextMenuHandlers\SendTo", "", RegistryValue::String("{7BA4C740-9E81-11CF-99D3-00AA004AE837}")),
+                crate::reg_del_key!("HKCR", r"UserLibraryFolder\shellex\ContextMenuHandlers\SendTo", "", RegistryValue::String("{7BA4C740-9E81-11CF-99D3-00AA004AE837}")),
+                crate::reg_del_key!("HKCR", r"Drives\shellex\ContextMenuHandlers\SendTo", "", RegistryValue::String("{7BA4C740-9E81-11CF-99D3-00AA004AE837}")),
+                crate::reg_del_key!("HKCR", r"Folder\shellex\ContextMenuHandlers\SendTo", "", RegistryValue::String("{7BA4C740-9E81-11CF-99D3-00AA004AE837}")),
         ],
         disabled_ops: Some(&[
-                RegistryOp { hkey: "HKCR", subkey: r"AllFilesystemObjects\shellex\ContextMenuHandlers\SendTo", value_name: "", value: RegistryValue::String("{7BA4C740-9E81-11CF-99D3-00AA004AE837}"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"UserLibraryFolder\shellex\ContextMenuHandlers\SendTo", value_name: "", value: RegistryValue::String("{7BA4C740-9E81-11CF-99D3-00AA004AE837}"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Drives\shellex\ContextMenuHandlers\SendTo", value_name: "", value: RegistryValue::String("{7BA4C740-9E81-11CF-99D3-00AA004AE837}"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Folder\shellex\ContextMenuHandlers\SendTo", value_name: "", value: RegistryValue::String("{7BA4C740-9E81-11CF-99D3-00AA004AE837}"), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"AllFilesystemObjects\shellex\ContextMenuHandlers\SendTo", "", "{7BA4C740-9E81-11CF-99D3-00AA004AE837}"),
+                crate::reg_str!("HKCR", r"UserLibraryFolder\shellex\ContextMenuHandlers\SendTo", "", "{7BA4C740-9E81-11CF-99D3-00AA004AE837}"),
+                crate::reg_str!("HKCR", r"Drives\shellex\ContextMenuHandlers\SendTo", "", "{7BA4C740-9E81-11CF-99D3-00AA004AE837}"),
+                crate::reg_str!("HKCR", r"Folder\shellex\ContextMenuHandlers\SendTo", "", "{7BA4C740-9E81-11CF-99D3-00AA004AE837}"),
         ])
 };
 
@@ -424,10 +344,10 @@ pub static REMOVE_SEND_TO_MY_PHONE: Tweak = crate::tweak! {
         effect: TweakEffect::Immediate,
         is_hidden: true,
         enabled_ops: &[
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", value_name: "{2F788D0F-1317-441B-86D2-4725301BD49D}", value: RegistryValue::String("Send to My Phone"), stock_value: RegistryValue::Delete },
+                crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", "{2F788D0F-1317-441B-86D2-4725301BD49D}", "Send to My Phone"),
         ],
         disabled_ops: Some(&[
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", value_name: "{2F788D0F-1317-441B-86D2-4725301BD49D}", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
+                crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", "{2F788D0F-1317-441B-86D2-4725301BD49D}", RegistryValue::Delete),
         ])
 };
 
@@ -439,12 +359,12 @@ pub static REMOVE_SHARE_CONTEXT_MENU: Tweak = crate::tweak! {
         effect: TweakEffect::ExplorerRestart,
         is_hidden: true,
         enabled_ops: &[
-                RegistryOp { hkey: "HKCU", subkey: r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", value_name: "{e2bf9676-5f8f-435c-97eb-11607a5bedf7}", value: RegistryValue::String("Share"), stock_value: RegistryValue::Delete },
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", value_name: "{e2bf9676-5f8f-435c-97eb-11607a5bedf7}", value: RegistryValue::String("Share"), stock_value: RegistryValue::Delete },
+                crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", "{e2bf9676-5f8f-435c-97eb-11607a5bedf7}", "Share"),
+                crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", "{e2bf9676-5f8f-435c-97eb-11607a5bedf7}", "Share"),
         ],
         disabled_ops: Some(&[
-                RegistryOp { hkey: "HKCU", subkey: r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", value_name: "{e2bf9676-5f8f-435c-97eb-11607a5bedf7}", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", value_name: "{e2bf9676-5f8f-435c-97eb-11607a5bedf7}", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
+                crate::reg_del!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", "{e2bf9676-5f8f-435c-97eb-11607a5bedf7}", RegistryValue::Delete),
+                crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", "{e2bf9676-5f8f-435c-97eb-11607a5bedf7}", RegistryValue::Delete),
         ])
 };
 
@@ -456,50 +376,14 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
                 description: "Adds 'Open Command Prompt here' to the folder context menu.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\Directory\shell\cmd2",
-                                value_name: "",
-                                value: RegistryValue::String("Command Prompt Here"),
-                                stock_value: RegistryValue::DeleteKey
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\Directory\shell\cmd2\command",
-                                value_name: "",
-                                value: RegistryValue::String(r#"cmd.exe /s /k pushd "%V""#),
-                                stock_value: RegistryValue::DeleteKey
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\Directory\Background\shell\cmd2",
-                                value_name: "",
-                                value: RegistryValue::String("Command Prompt Here"),
-                                stock_value: RegistryValue::DeleteKey
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\Directory\Background\shell\cmd2\command",
-                                value_name: "",
-                                value: RegistryValue::String(r#"cmd.exe /s /k pushd "%V""#),
-                                stock_value: RegistryValue::DeleteKey
-        },
+                        crate::reg_str!("HKCU", r"Software\Classes\Directory\shell\cmd2", "", "Command Prompt Here", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCU", r"Software\Classes\Directory\shell\cmd2\command", "", r#"cmd.exe /s /k pushd "%V""#, RegistryValue::DeleteKey),
+                crate::reg_str!("HKCU", r"Software\Classes\Directory\Background\shell\cmd2", "", "Command Prompt Here", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCU", r"Software\Classes\Directory\Background\shell\cmd2\command", "", r#"cmd.exe /s /k pushd "%V""#, RegistryValue::DeleteKey),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\Directory\shell\cmd2",
-                                value_name: "",
-                                value: RegistryValue::DeleteKey,
-                                stock_value: RegistryValue::DeleteKey
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\Directory\Background\shell\cmd2",
-                                value_name: "",
-                                value: RegistryValue::DeleteKey,
-                                stock_value: RegistryValue::DeleteKey
-        },
+                        crate::reg_del_key!("HKCU", r"Software\Classes\Directory\shell\cmd2", "", RegistryValue::DeleteKey),
+                        crate::reg_del_key!("HKCU", r"Software\Classes\Directory\Background\shell\cmd2", "", RegistryValue::DeleteKey),
                 ])
         },
         crate::tweak! {
@@ -509,64 +393,16 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
                 description: "Adds 'Open PowerShell here as Administrator' to the folder context menu.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\Directory\shell\OpenElevatedPS",
-                                value_name: "",
-                                value: RegistryValue::String("PowerShell (Admin) Here"),
-                                stock_value: RegistryValue::DeleteKey
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\Directory\shell\OpenElevatedPS",
-                                value_name: "HasLUAShield",
-                                value: RegistryValue::String(""),
-                                stock_value: RegistryValue::DeleteKey
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\Directory\shell\OpenElevatedPS\command",
-                                value_name: "",
-                                value: RegistryValue::String(r#"PowerShell.exe -windowstyle hidden -Command "Start-Process cmd.exe -ArgumentList '/s,/c,pushd %V && powershell' -Verb RunAs""#),
-                                stock_value: RegistryValue::DeleteKey
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\Directory\Background\shell\OpenElevatedPS",
-                                value_name: "",
-                                value: RegistryValue::String("PowerShell (Admin) Here"),
-                                stock_value: RegistryValue::DeleteKey
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\Directory\Background\shell\OpenElevatedPS",
-                                value_name: "HasLUAShield",
-                                value: RegistryValue::String(""),
-                                stock_value: RegistryValue::DeleteKey
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\Directory\Background\shell\OpenElevatedPS\command",
-                                value_name: "",
-                                value: RegistryValue::String(r#"PowerShell.exe -windowstyle hidden -Command "Start-Process cmd.exe -ArgumentList '/s,/c,pushd %V && powershell' -Verb RunAs""#),
-                                stock_value: RegistryValue::DeleteKey
-        },
-                ],
+                crate::reg_str!("HKCU", r"Software\Classes\Directory\shell\OpenElevatedPS", "", "PowerShell (Admin) Here", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCU", r"Software\Classes\Directory\shell\OpenElevatedPS", "HasLUAShield", "", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCU", r"Software\Classes\Directory\shell\OpenElevatedPS\command", "", r#"PowerShell.exe -windowstyle hidden -Command "Start-Process cmd.exe -ArgumentList '/s,/c,pushd %V && powershell' -Verb RunAs""#, RegistryValue::DeleteKey),
+                crate::reg_str!("HKCU", r"Software\Classes\Directory\Background\shell\OpenElevatedPS", "", "PowerShell (Admin) Here", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCU", r"Software\Classes\Directory\Background\shell\OpenElevatedPS", "HasLUAShield", "", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCU", r"Software\Classes\Directory\Background\shell\OpenElevatedPS\command", "", r#"PowerShell.exe -windowstyle hidden -Command "Start-Process cmd.exe -ArgumentList '/s,/c,pushd %V && powershell' -Verb RunAs""#, RegistryValue::DeleteKey),
+        ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\Directory\shell\OpenElevatedPS",
-                                value_name: "",
-                                value: RegistryValue::DeleteKey,
-                                stock_value: RegistryValue::DeleteKey
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\Directory\Background\shell\OpenElevatedPS",
-                                value_name: "",
-                                value: RegistryValue::DeleteKey,
-                                stock_value: RegistryValue::DeleteKey
-        },
+                        crate::reg_del_key!("HKCU", r"Software\Classes\Directory\shell\OpenElevatedPS", "", RegistryValue::DeleteKey),
+                        crate::reg_del_key!("HKCU", r"Software\Classes\Directory\Background\shell\OpenElevatedPS", "", RegistryValue::DeleteKey),
                 ])
         },
         crate::tweak! {
@@ -576,64 +412,16 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
                 description: "Adds 'Take Ownership' option to file and folder context menus.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\*\shell\TakeOwnership",
-                                value_name: "",
-                                value: RegistryValue::String("Take Ownership"),
-                                stock_value: RegistryValue::DeleteKey
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\*\shell\TakeOwnership",
-                                value_name: "HasLUAShield",
-                                value: RegistryValue::String(""),
-                                stock_value: RegistryValue::DeleteKey
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\*\shell\TakeOwnership\command",
-                                value_name: "",
-                                value: RegistryValue::String(r#"powershell.exe -windowstyle hidden -command "Start-Process cmd -ArgumentList '/c takeown /f \"%1\" && icacls \"%1\" /grant *S-1-3-4:F /c /l' -Verb runAs""#),
-                                stock_value: RegistryValue::DeleteKey
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\Directory\shell\TakeOwnership",
-                                value_name: "",
-                                value: RegistryValue::String("Take Ownership"),
-                                stock_value: RegistryValue::DeleteKey
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\Directory\shell\TakeOwnership",
-                                value_name: "HasLUAShield",
-                                value: RegistryValue::String(""),
-                                stock_value: RegistryValue::DeleteKey
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\Directory\shell\TakeOwnership\command",
-                                value_name: "",
-                                value: RegistryValue::String(r#"powershell.exe -windowstyle hidden -command "Start-Process cmd -ArgumentList '/c takeown /f \"%1\" /r /d y && icacls \"%1\" /grant *S-1-3-4:F /c /l /q' -Verb runAs""#),
-                                stock_value: RegistryValue::DeleteKey
-        },
-                ],
+                        crate::reg_str!("HKCU", r"Software\Classes\*\shell\TakeOwnership", "", "Take Ownership", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCU", r"Software\Classes\*\shell\TakeOwnership", "HasLUAShield", "", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCU", r"Software\Classes\*\shell\TakeOwnership\command", "", r#"powershell.exe -windowstyle hidden -command "Start-Process cmd -ArgumentList '/c takeown /f \"%1\" && icacls \"%1\" /grant *S-1-3-4:F /c /l' -Verb runAs""#, RegistryValue::DeleteKey),
+                crate::reg_str!("HKCU", r"Software\Classes\Directory\shell\TakeOwnership", "", "Take Ownership", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCU", r"Software\Classes\Directory\shell\TakeOwnership", "HasLUAShield", "", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCU", r"Software\Classes\Directory\shell\TakeOwnership\command", "", r#"powershell.exe -windowstyle hidden -command "Start-Process cmd -ArgumentList '/c takeown /f \"%1\" /r /d y && icacls \"%1\" /grant *S-1-3-4:F /c /l /q' -Verb runAs""#, RegistryValue::DeleteKey),
+        ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\*\shell\TakeOwnership",
-                                value_name: "",
-                                value: RegistryValue::DeleteKey,
-                                stock_value: RegistryValue::DeleteKey
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\Directory\shell\TakeOwnership",
-                                value_name: "",
-                                value: RegistryValue::DeleteKey,
-                                stock_value: RegistryValue::DeleteKey
-        },
+                        crate::reg_del_key!("HKCU", r"Software\Classes\*\shell\TakeOwnership", "", RegistryValue::DeleteKey),
+                        crate::reg_del_key!("HKCU", r"Software\Classes\Directory\shell\TakeOwnership", "", RegistryValue::DeleteKey),
                 ])
         },
         crate::tweak! {
@@ -643,35 +431,13 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
                 description: "Adds 'Restart Explorer' to the desktop context menu.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\DesktopBackground\shell\RestartExplorer",
-                                value_name: "",
-                                value: RegistryValue::String("Restart Explorer"),
-                                stock_value: RegistryValue::DeleteKey
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\DesktopBackground\shell\RestartExplorer",
-                                value_name: "Icon",
-                                value: RegistryValue::String("explorer.exe"),
-                                stock_value: RegistryValue::DeleteKey
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\DesktopBackground\shell\RestartExplorer\command",
-                                value_name: "",
-                                value: RegistryValue::String(r#"cmd.exe /c taskkill /f /im explorer.exe & start explorer.exe"#),
-                                stock_value: RegistryValue::DeleteKey
-        },
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\shell\RestartExplorer", "", "Restart Explorer", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\shell\RestartExplorer", "Icon", "explorer.exe", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\shell\RestartExplorer\command", "", r#"cmd.exe /c taskkill /f /im explorer.exe & start explorer.exe"#, RegistryValue::DeleteKey),
                 ],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKCU",
-                        subkey: r"Software\Classes\DesktopBackground\shell\RestartExplorer",
-                        value_name: "",
-                        value: RegistryValue::DeleteKey,
-                        stock_value: RegistryValue::DeleteKey
-        }])
+                disabled_ops: Some(&[
+                        crate::reg_del_key!("HKCU", r"Software\Classes\DesktopBackground\shell\RestartExplorer", "", RegistryValue::DeleteKey)
+                ])
         },
         crate::tweak! {
                 id: "add_kill_not_responding",
@@ -680,28 +446,12 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
                 description: "Adds 'Kill Not Responding Tasks' to the desktop context menu.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\DesktopBackground\shell\KillNotResponding",
-                                value_name: "",
-                                value: RegistryValue::String("Kill Not Responding Tasks"),
-                                stock_value: RegistryValue::DeleteKey
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\DesktopBackground\shell\KillNotResponding\command",
-                                value_name: "",
-                                value: RegistryValue::String(r#"taskkill /F /FI "status eq NOT RESPONDING""#),
-                                stock_value: RegistryValue::DeleteKey
-        },
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\shell\KillNotResponding", "", "Kill Not Responding Tasks", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\shell\KillNotResponding\command", "", r#"taskkill /F /FI "status eq NOT RESPONDING""#, RegistryValue::DeleteKey),
                 ],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKCU",
-                        subkey: r"Software\Classes\DesktopBackground\shell\KillNotResponding",
-                        value_name: "",
-                        value: RegistryValue::DeleteKey,
-                        stock_value: RegistryValue::DeleteKey
-        }])
+                disabled_ops: Some(&[
+                        crate::reg_del_key!("HKCU", r"Software\Classes\DesktopBackground\shell\KillNotResponding", "", RegistryValue::DeleteKey)
+                ])
         },
         crate::tweak! {
                 id: "add_disk_cleanup",
@@ -710,42 +460,14 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
                 description: "Adds 'Cleanup' to the context menu of all drives.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\Drive\shell\Windows.CleanUp",
-                                value_name: "CommandStateSync",
-                                value: RegistryValue::String(""),
-                                stock_value: RegistryValue::DeleteKey
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\Drive\shell\Windows.CleanUp",
-                                value_name: "ExplorerCommandHandler",
-                                value: RegistryValue::String("{9cca66bb-9c78-4e59-a76f-a5e9990b8aa0}"),
-                                stock_value: RegistryValue::DeleteKey
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\Drive\shell\Windows.CleanUp",
-                                value_name: "Icon",
-                                value: RegistryValue::String(r"%SystemRoot%\System32\cleanmgr.exe,-104"),
-                                stock_value: RegistryValue::DeleteKey
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\Drive\shell\Windows.CleanUp",
-                                value_name: "ImpliedSelectionModel",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::DeleteKey
-        },
+                        crate::reg_str!("HKCU", r"Software\Classes\Drive\shell\Windows.CleanUp", "CommandStateSync", "", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\Drive\shell\Windows.CleanUp", "ExplorerCommandHandler", "{9cca66bb-9c78-4e59-a76f-a5e9990b8aa0}", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\Drive\shell\Windows.CleanUp", "Icon", r"%SystemRoot%\System32\cleanmgr.exe,-104", RegistryValue::DeleteKey),
+                        crate::reg_dword!("HKCU", r"Software\Classes\Drive\shell\Windows.CleanUp", "ImpliedSelectionModel", 1, RegistryValue::DeleteKey),
                 ],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKCU",
-                        subkey: r"Software\Classes\Drive\shell\Windows.CleanUp",
-                        value_name: "",
-                        value: RegistryValue::DeleteKey,
-                        stock_value: RegistryValue::DeleteKey
-        }])
+                disabled_ops: Some(&[
+                        crate::reg_del_key!("HKCU", r"Software\Classes\Drive\shell\Windows.CleanUp", "", RegistryValue::DeleteKey)
+                ])
         },
         crate::tweak! {
                 id: "add_copy_to_move_to",
@@ -754,36 +476,12 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
                 description: "Adds 'Copy To folder' and 'Move to folder' options to the context menu for all files and folders.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKCR",
-                                subkey: r"AllFilesystemObjects\shellex\ContextMenuHandlers\Copy To",
-                                value_name: "",
-                                value: RegistryValue::String("{C2FBB630-2971-11D1-A18C-00C04FD75D13}"),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCR",
-                                subkey: r"AllFilesystemObjects\shellex\ContextMenuHandlers\Move To",
-                                value_name: "",
-                                value: RegistryValue::String("{C2FBB631-2971-11D1-A18C-00C04FD75D13}"),
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_str!("HKCR", r"AllFilesystemObjects\shellex\ContextMenuHandlers\Copy To", "", "{C2FBB630-2971-11D1-A18C-00C04FD75D13}", RegistryValue::Delete),
+                        crate::reg_str!("HKCR", r"AllFilesystemObjects\shellex\ContextMenuHandlers\Move To", "", "{C2FBB631-2971-11D1-A18C-00C04FD75D13}", RegistryValue::Delete),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKCR",
-                                subkey: r"AllFilesystemObjects\shellex\ContextMenuHandlers\Copy To",
-                                value_name: "",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCR",
-                                subkey: r"AllFilesystemObjects\shellex\ContextMenuHandlers\Move To",
-                                value_name: "",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_del!("HKCR", r"AllFilesystemObjects\shellex\ContextMenuHandlers\Copy To", "", RegistryValue::Delete),
+                        crate::reg_del!("HKCR", r"AllFilesystemObjects\shellex\ContextMenuHandlers\Move To", "", RegistryValue::Delete),
                 ])
         },
         crate::tweak! {
@@ -793,43 +491,13 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
                 description: "Adds context menu to Desktop to kill all unresponsive applications.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKCR",
-                                subkey: r"DesktopBackground\Shell\KillNRTasks",
-                                value_name: "",
-                                value: RegistryValue::String("Kill all not responding tasks"),
-                                stock_value: RegistryValue::DeleteKey
-                        },
-                        RegistryOp {
-                                hkey: "HKCR",
-                                subkey: r"DesktopBackground\Shell\KillNRTasks",
-                                value_name: "icon",
-                                value: RegistryValue::String("taskmgr.exe,-30651"),
-                                stock_value: RegistryValue::DeleteKey
-                        },
-                        RegistryOp {
-                                hkey: "HKCR",
-                                subkey: r"DesktopBackground\Shell\KillNRTasks",
-                                value_name: "Position",
-                                value: RegistryValue::String("Top"),
-                                stock_value: RegistryValue::DeleteKey
-                        },
-                        RegistryOp {
-                                hkey: "HKCR",
-                                subkey: r"DesktopBackground\Shell\KillNRTasks\command",
-                                value_name: "",
-                                value: RegistryValue::String(r#"CMD.exe /C (tasklist /fi "status eq Not Responding" | find /v "No tasks" && taskkill.exe /f /fi "status eq Not Responding" || echo No not-responding tasks found.) & ECHO; & <NUL: set /p junk=Press any key to close this window. & PAUSE >NUL:"#),
-                                stock_value: RegistryValue::DeleteKey
-                        },
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\KillNRTasks", "", "Kill all not responding tasks", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\KillNRTasks", "icon", "taskmgr.exe,-30651", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\KillNRTasks", "Position", "Top", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\KillNRTasks\command", "", r#"CMD.exe /C (tasklist /fi "status eq Not Responding" | find /v "No tasks" && taskkill.exe /f /fi "status eq Not Responding" || echo No not-responding tasks found.) & ECHO; & <NUL: set /p junk=Press any key to close this window. & PAUSE >NUL:"#, RegistryValue::DeleteKey),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKCR",
-                                subkey: r"DesktopBackground\Shell\KillNRTasks",
-                                value_name: "",
-                                value: RegistryValue::DeleteKey,
-                                stock_value: RegistryValue::DeleteKey
-                        },
+                        crate::reg_del_key!("HKCR", r"DesktopBackground\Shell\KillNRTasks", "", RegistryValue::DeleteKey)
                 ])
         },
         crate::tweak! {
@@ -840,35 +508,35 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
                         // Main Menu Item
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\exefile\shell\priority", value_name: "MUIVerb", value: RegistryValue::String("Run with priority"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\exefile\shell\priority", value_name: "SubCommands", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
+                        crate::reg_str!("HKCU", r"Software\Classes\exefile\shell\priority", "MUIVerb", "Run with priority", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\exefile\shell\priority", "SubCommands", "", RegistryValue::DeleteKey),
 
                         // Realtime
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\exefile\shell\priority\shell\001flyout", value_name: "", value: RegistryValue::String("Realtime"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\exefile\shell\priority\shell\001flyout\command", value_name: "", value: RegistryValue::String(r#"cmd /c start "" /Realtime "%1""#), stock_value: RegistryValue::DeleteKey },
+                        crate::reg_str!("HKCU", r"Software\Classes\exefile\shell\priority\shell\001flyout", "", "Realtime", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\exefile\shell\priority\shell\001flyout\command", "", r#"cmd /c start "" /Realtime "%1""#, RegistryValue::DeleteKey),
 
                         // High
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\exefile\shell\priority\shell\002flyout", value_name: "", value: RegistryValue::String("High"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\exefile\shell\priority\shell\002flyout\command", value_name: "", value: RegistryValue::String(r#"cmd /c start "" /High "%1""#), stock_value: RegistryValue::DeleteKey },
+                        crate::reg_str!("HKCU", r"Software\Classes\exefile\shell\priority\shell\002flyout", "", "High", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\exefile\shell\priority\shell\002flyout\command", "", r#"cmd /c start "" /High "%1""#, RegistryValue::DeleteKey),
 
                         // Above Normal
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\exefile\shell\priority\shell\003flyout", value_name: "", value: RegistryValue::String("Above Normal"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\exefile\shell\priority\shell\003flyout\command", value_name: "", value: RegistryValue::String(r#"cmd /c start "" /AboveNormal "%1""#), stock_value: RegistryValue::DeleteKey },
+                        crate::reg_str!("HKCU", r"Software\Classes\exefile\shell\priority\shell\003flyout", "", "Above Normal", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\exefile\shell\priority\shell\003flyout\command", "", r#"cmd /c start "" /AboveNormal "%1""#, RegistryValue::DeleteKey),
 
                         // Normal
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\exefile\shell\priority\shell\004flyout", value_name: "", value: RegistryValue::String("Normal"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\exefile\shell\priority\shell\004flyout\command", value_name: "", value: RegistryValue::String(r#"cmd /c start "" /Normal "%1""#), stock_value: RegistryValue::DeleteKey },
+                        crate::reg_str!("HKCU", r"Software\Classes\exefile\shell\priority\shell\004flyout", "", "Normal", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\exefile\shell\priority\shell\004flyout\command", "", r#"cmd /c start "" /Normal "%1""#, RegistryValue::DeleteKey),
 
                         // Below Normal
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\exefile\shell\priority\shell\005flyout", value_name: "", value: RegistryValue::String("Below Normal"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\exefile\shell\priority\shell\005flyout\command", value_name: "", value: RegistryValue::String(r#"cmd /c start "" /BelowNormal "%1""#), stock_value: RegistryValue::DeleteKey },
+                        crate::reg_str!("HKCU", r"Software\Classes\exefile\shell\priority\shell\005flyout", "", "Below Normal", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\exefile\shell\priority\shell\005flyout\command", "", r#"cmd /c start "" /BelowNormal "%1""#, RegistryValue::DeleteKey),
 
                         // Low
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\exefile\shell\priority\shell\006flyout", value_name: "", value: RegistryValue::String("Low"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\exefile\shell\priority\shell\006flyout\command", value_name: "", value: RegistryValue::String(r#"cmd /c start "" /Low "%1""#), stock_value: RegistryValue::DeleteKey },
+                        crate::reg_str!("HKCU", r"Software\Classes\exefile\shell\priority\shell\006flyout", "", "Low", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\exefile\shell\priority\shell\006flyout\command", "", r#"cmd /c start "" /Low "%1""#, RegistryValue::DeleteKey),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\exefile\shell\priority", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                        crate::reg_del_key!("HKCU", r"Software\Classes\exefile\shell\priority", "", RegistryValue::DeleteKey),
                 ]),
         },
         crate::tweak! {
@@ -878,36 +546,12 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
                 description: "Adds option to context menu to copy file contents directly to clipboard (for all file types).",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKCR",
-                                subkey: r"*\shell\CopyContents",
-                                value_name: "MUIVerb",
-                                value: RegistryValue::String("Copy Contents to Clipboard"),
-                                stock_value: RegistryValue::DeleteKey
-                        },
-                        RegistryOp {
-                                hkey: "HKCR",
-                                subkey: r"*\shell\CopyContents",
-                                value_name: "Icon",
-                                value: RegistryValue::String("DxpTaskSync.dll,-52"),
-                                stock_value: RegistryValue::DeleteKey
-                        },
-                        RegistryOp {
-                                hkey: "HKCR",
-                                subkey: r"*\shell\CopyContents\command",
-                                value_name: "",
-                                value: RegistryValue::String(r#"cmd /c clip < "%1""#),
-                                stock_value: RegistryValue::DeleteKey
-                        },
+                        crate::reg_str!("HKCR", r"*\shell\CopyContents", "MUIVerb", "Copy Contents to Clipboard", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"*\shell\CopyContents", "Icon", "DxpTaskSync.dll,-52", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"*\shell\CopyContents\command", "", r#"cmd /c clip < "%1""#, RegistryValue::DeleteKey),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKCR",
-                                subkey: r"*\shell\CopyContents",
-                                value_name: "",
-                                value: RegistryValue::DeleteKey,
-                                stock_value: RegistryValue::DeleteKey
-                        },
+                        crate::reg_del_key!("HKCR", r"*\shell\CopyContents", "", RegistryValue::DeleteKey)
                 ])
         },
         crate::tweak! {
@@ -946,61 +590,61 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds a 'Settings' submenu to the desktop context menu with quick access to various settings pages.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                    RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings", value_name: "Icon", value: RegistryValue::String("shell32.dll,-16826"), stock_value: RegistryValue::DeleteKey },
-                    RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings", value_name: "MUIVerb", value: RegistryValue::String("&Settings"), stock_value: RegistryValue::DeleteKey },
-                    RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings", value_name: "Position", value: RegistryValue::String("Bottom"), stock_value: RegistryValue::DeleteKey },
-                    RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings", value_name: "SubCommands", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
+                    crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings", "Icon", "shell32.dll,-16826", RegistryValue::DeleteKey),
+                    crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings", "MUIVerb", "&Settings", RegistryValue::DeleteKey),
+                    crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings", "Position", "Bottom", RegistryValue::DeleteKey),
+                    crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings", "SubCommands", "", RegistryValue::DeleteKey),
                     // Home
-                    RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\01menu", value_name: "Icon", value: RegistryValue::String("shell32.dll,-51380"), stock_value: RegistryValue::DeleteKey },
-                    RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\01menu", value_name: "MUIVerb", value: RegistryValue::String("&Home"), stock_value: RegistryValue::DeleteKey },
-                    RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\01menu\command", value_name: "", value: RegistryValue::String("explorer ms-settings:home"), stock_value: RegistryValue::DeleteKey },
+                    crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\01menu", "Icon", "shell32.dll,-51380", RegistryValue::DeleteKey),
+                    crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\01menu", "MUIVerb", "&Home", RegistryValue::DeleteKey),
+                    crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\01menu\command", "", "explorer ms-settings:home", RegistryValue::DeleteKey),
                     // System
-                    RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\02menu", value_name: "Icon", value: RegistryValue::String("shell32.dll,-35"), stock_value: RegistryValue::DeleteKey },
-                    RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\02menu", value_name: "MUIVerb", value: RegistryValue::String("&System"), stock_value: RegistryValue::DeleteKey },
-                    RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\02menu\command", value_name: "", value: RegistryValue::String("explorer ms-settings:system"), stock_value: RegistryValue::DeleteKey },
+                    crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\02menu", "Icon", "shell32.dll,-35", RegistryValue::DeleteKey),
+                    crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\02menu", "MUIVerb", "&System", RegistryValue::DeleteKey),
+                    crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\02menu\command", "", "explorer ms-settings:system", RegistryValue::DeleteKey),
                     // Devices
-                    RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\03menu", value_name: "Icon", value: RegistryValue::String("BthpanContextHandler.dll,-200"), stock_value: RegistryValue::DeleteKey },
-                    RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\03menu", value_name: "MUIVerb", value: RegistryValue::String("&Bluetooth && devices"), stock_value: RegistryValue::DeleteKey },
-                    RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\03menu\command", value_name: "", value: RegistryValue::String("explorer ms-settings:devices"), stock_value: RegistryValue::DeleteKey },
+                    crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\03menu", "Icon", "BthpanContextHandler.dll,-200", RegistryValue::DeleteKey),
+                    crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\03menu", "MUIVerb", "&Bluetooth && devices", RegistryValue::DeleteKey),
+                    crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\03menu\command", "", "explorer ms-settings:devices", RegistryValue::DeleteKey),
                     // Network
-                    RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\04menu", value_name: "Icon", value: RegistryValue::String("shell32.dll,-193"), stock_value: RegistryValue::DeleteKey },
-                    RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\04menu", value_name: "MUIVerb", value: RegistryValue::String("&Network && internet"), stock_value: RegistryValue::DeleteKey },
-                    RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\04menu\command", value_name: "", value: RegistryValue::String("explorer ms-settings:network"), stock_value: RegistryValue::DeleteKey },
+                    crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\04menu", "Icon", "shell32.dll,-193", RegistryValue::DeleteKey),
+                    crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\04menu", "MUIVerb", "&Network && internet", RegistryValue::DeleteKey),
+                    crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\04menu\command", "", "explorer ms-settings:network", RegistryValue::DeleteKey),
                     // Personalization
-                    RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\05menu", value_name: "Icon", value: RegistryValue::String("themecpl.dll,-1"), stock_value: RegistryValue::DeleteKey },
-                    RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\05menu", value_name: "MUIVerb", value: RegistryValue::String("&Personalization"), stock_value: RegistryValue::DeleteKey },
-                    RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\05menu\command", value_name: "", value: RegistryValue::String("explorer ms-settings:personalization"), stock_value: RegistryValue::DeleteKey },
+                    crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\05menu", "Icon", "themecpl.dll,-1", RegistryValue::DeleteKey),
+                    crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\05menu", "MUIVerb", "&Personalization", RegistryValue::DeleteKey),
+                    crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\05menu\command", "", "explorer ms-settings:personalization", RegistryValue::DeleteKey),
                     // Apps
-                    RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\06menu", value_name: "Icon", value: RegistryValue::String("shell32.dll,-63010"), stock_value: RegistryValue::DeleteKey },
-                    RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\06menu", value_name: "MUIVerb", value: RegistryValue::String("&Apps"), stock_value: RegistryValue::DeleteKey },
-                    RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\06menu\command", value_name: "", value: RegistryValue::String("explorer ms-settings:appsfeatures"), stock_value: RegistryValue::DeleteKey },
+                    crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\06menu", "Icon", "shell32.dll,-63010", RegistryValue::DeleteKey),
+                    crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\06menu", "MUIVerb", "&Apps", RegistryValue::DeleteKey),
+                    crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\06menu\command", "", "explorer ms-settings:appsfeatures", RegistryValue::DeleteKey),
                     // Accounts
-                    RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\07menu", value_name: "Icon", value: RegistryValue::String("imageres.dll,-88"), stock_value: RegistryValue::DeleteKey },
-                    RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\07menu", value_name: "MUIVerb", value: RegistryValue::String("A&ccounts"), stock_value: RegistryValue::DeleteKey },
-                    RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\07menu\command", value_name: "", value: RegistryValue::String("explorer ms-settings:accounts"), stock_value: RegistryValue::DeleteKey },
+                    crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\07menu", "Icon", "imageres.dll,-88", RegistryValue::DeleteKey),
+                    crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\07menu", "MUIVerb", "A&ccounts", RegistryValue::DeleteKey),
+                    crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\07menu\command", "", "explorer ms-settings:accounts", RegistryValue::DeleteKey),
                     // Time & Language
-                    RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\08menu", value_name: "Icon", value: RegistryValue::String("shell32.dll,-276"), stock_value: RegistryValue::DeleteKey },
-                    RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\08menu", value_name: "MUIVerb", value: RegistryValue::String("&Time && language"), stock_value: RegistryValue::DeleteKey },
-                    RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\08menu\command", value_name: "", value: RegistryValue::String("explorer ms-settings:dateandtime"), stock_value: RegistryValue::DeleteKey },
+                    crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\08menu", "Icon", "shell32.dll,-276", RegistryValue::DeleteKey),
+                    crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\08menu", "MUIVerb", "&Time && language", RegistryValue::DeleteKey),
+                    crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\08menu\command", "", "explorer ms-settings:dateandtime", RegistryValue::DeleteKey),
                     // Gaming
-                    RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\09menu", value_name: "Icon", value: RegistryValue::String("DDORes.dll,-2207"), stock_value: RegistryValue::DeleteKey },
-                    RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\09menu", value_name: "MUIVerb", value: RegistryValue::String("&Gaming"), stock_value: RegistryValue::DeleteKey },
-                    RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\09menu\command", value_name: "", value: RegistryValue::String("explorer ms-settings:gaming-gamebar"), stock_value: RegistryValue::DeleteKey },
+                    crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\09menu", "Icon", "DDORes.dll,-2207", RegistryValue::DeleteKey),
+                    crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\09menu", "MUIVerb", "&Gaming", RegistryValue::DeleteKey),
+                    crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\09menu\command", "", "explorer ms-settings:gaming-gamebar", RegistryValue::DeleteKey),
                     // Accessibility
-                    RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\10menu", value_name: "Icon", value: RegistryValue::String("imageres.dll,-86"), stock_value: RegistryValue::DeleteKey },
-                    RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\10menu", value_name: "MUIVerb", value: RegistryValue::String("Acc&essibility"), stock_value: RegistryValue::DeleteKey },
-                    RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\10menu\command", value_name: "", value: RegistryValue::String("explorer ms-settings:easeofaccess"), stock_value: RegistryValue::DeleteKey },
+                    crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\10menu", "Icon", "imageres.dll,-86", RegistryValue::DeleteKey),
+                    crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\10menu", "MUIVerb", "Acc&essibility", RegistryValue::DeleteKey),
+                    crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\10menu\command", "", "explorer ms-settings:easeofaccess", RegistryValue::DeleteKey),
                     // Privacy & Security
-                    RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\11menu", value_name: "Icon", value: RegistryValue::String(r"%ProgramFiles%\Windows Defender\EppManifest.dll,-101"), stock_value: RegistryValue::DeleteKey },
-                    RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\11menu", value_name: "MUIVerb", value: RegistryValue::String("Pri&vacy && security"), stock_value: RegistryValue::DeleteKey },
-                    RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\11menu\command", value_name: "", value: RegistryValue::String("explorer ms-settings:privacy"), stock_value: RegistryValue::DeleteKey },
+                    crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\11menu", "Icon", r"%ProgramFiles%\Windows Defender\EppManifest.dll,-101", RegistryValue::DeleteKey),
+                    crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\11menu", "MUIVerb", "Pri&vacy && security", RegistryValue::DeleteKey),
+                    crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\11menu\command", "", "explorer ms-settings:privacy", RegistryValue::DeleteKey),
                     // Windows Update
-                    RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\12menu", value_name: "Icon", value: RegistryValue::String("imageres.dll,-1401"), stock_value: RegistryValue::DeleteKey },
-                    RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\12menu", value_name: "MUIVerb", value: RegistryValue::String("&Windows Update"), stock_value: RegistryValue::DeleteKey },
-                    RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\12menu\command", value_name: "", value: RegistryValue::String("explorer ms-settings:windowsupdate"), stock_value: RegistryValue::DeleteKey },
+                    crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\12menu", "Icon", "imageres.dll,-1401", RegistryValue::DeleteKey),
+                    crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\12menu", "MUIVerb", "&Windows Update", RegistryValue::DeleteKey),
+                    crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\12menu\command", "", "explorer ms-settings:windowsupdate", RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                    RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                    crate::reg_del_key!("HKCR", r"DesktopBackground\Shell\Settings", "", RegistryValue::DeleteKey),
             ])
         },
         crate::tweak! {
@@ -1010,21 +654,21 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
                 description: "Adds an 'AutoPlay' menu to the desktop context menu to quickly access AutoPlay settings.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\AutoPlay", value_name: "", value: RegistryValue::String("AutoPlay"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\AutoPlay", value_name: "Icon", value: RegistryValue::String("imageres.dll,-5362"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\AutoPlay", value_name: "Position", value: RegistryValue::String("Bottom"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\AutoPlay", value_name: "SubCommands", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\AutoPlay", "", "AutoPlay", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\AutoPlay", "Icon", "imageres.dll,-5362", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\AutoPlay", "Position", "Bottom", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\AutoPlay", "SubCommands", "", RegistryValue::DeleteKey),
                         // Submenu item 1: Settings
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\shell\AutoPlay\shell\001menu", value_name: "", value: RegistryValue::String("Open AutoPlay in Settings"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\shell\AutoPlay\shell\001menu", value_name: "Icon", value: RegistryValue::String("shell32.dll,-16826"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\shell\AutoPlay\shell\001menu\command", value_name: "", value: RegistryValue::String("explorer ms-settings:autoplay"), stock_value: RegistryValue::DeleteKey },
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\shell\AutoPlay\shell\001menu", "", "Open AutoPlay in Settings", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\shell\AutoPlay\shell\001menu", "Icon", "shell32.dll,-16826", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\shell\AutoPlay\shell\001menu\command", "", "explorer ms-settings:autoplay", RegistryValue::DeleteKey),
                         // Submenu item 2: Control Panel
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\shell\AutoPlay\shell\002menu", value_name: "", value: RegistryValue::String("Open AutoPlay in Control Panel"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\shell\AutoPlay\shell\002menu", value_name: "Icon", value: RegistryValue::String("imageres.dll,-27"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\shell\AutoPlay\shell\002menu\command", value_name: "", value: RegistryValue::String("control /name Microsoft.AutoPlay"), stock_value: RegistryValue::DeleteKey },
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\shell\AutoPlay\shell\002menu", "", "Open AutoPlay in Control Panel", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\shell\AutoPlay\shell\002menu", "Icon", "imageres.dll,-27", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\shell\AutoPlay\shell\002menu\command", "", "control /name Microsoft.AutoPlay", RegistryValue::DeleteKey),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\AutoPlay", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                        crate::reg_del_key!("HKCU", r"Software\Classes\DesktopBackground\Shell\AutoPlay", "", RegistryValue::DeleteKey),
                 ])
         },
         crate::tweak! {
@@ -1034,13 +678,13 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
                 description: "Adds 'BitLocker Status' to the context menu of all drives to quickly check encryption status.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\Drive\shell\manage-bde-status", value_name: "", value: RegistryValue::String("BitLocker Status"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\Drive\shell\manage-bde-status", value_name: "HasLUAShield", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\Drive\shell\manage-bde-status", value_name: "MultiSelectModel", value: RegistryValue::String("Single"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\Drive\shell\manage-bde-status\command", value_name: "", value: RegistryValue::String(r#"PowerShell.exe -windowstyle hidden -command "Start-Process cmd -ArgumentList '/s,/k, manage-bde -status %1' -Verb runAs""#), stock_value: RegistryValue::DeleteKey },
+                        crate::reg_str!("HKCU", r"Software\Classes\Drive\shell\manage-bde-status", "", "BitLocker Status", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\Drive\shell\manage-bde-status", "HasLUAShield", "", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\Drive\shell\manage-bde-status", "MultiSelectModel", "Single", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\Drive\shell\manage-bde-status\command", "", r#"PowerShell.exe -windowstyle hidden -command "Start-Process cmd -ArgumentList '/s,/k, manage-bde -status %1' -Verb runAs""#, RegistryValue::DeleteKey),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\Drive\shell\manage-bde-status", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                        crate::reg_del_key!("HKCU", r"Software\Classes\Drive\shell\manage-bde-status", "", RegistryValue::DeleteKey),
                 ])
         },
         crate::tweak! {
@@ -1050,13 +694,13 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
                 description: "Adds 'Boot to UEFI Firmware Settings' to the desktop context menu.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\Firmware", value_name: "", value: RegistryValue::String("Boot to UEFI Firmware Settings"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\Firmware", value_name: "Icon", value: RegistryValue::String("bootux.dll,-1016"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\Firmware", value_name: "Position", value: RegistryValue::String("Bottom"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\Firmware\command", value_name: "", value: RegistryValue::String(r#"powershell.exe -windowstyle hidden -command "Start-Process cmd -ArgumentList '/s,/c,shutdown /r /fw' -Verb runAs""#), stock_value: RegistryValue::DeleteKey },
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\Firmware", "", "Boot to UEFI Firmware Settings", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\Firmware", "Icon", "bootux.dll,-1016", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\Firmware", "Position", "Bottom", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\Firmware\command", "", r#"powershell.exe -windowstyle hidden -command "Start-Process cmd -ArgumentList '/s,/c,shutdown /r /fw' -Verb runAs""#, RegistryValue::DeleteKey),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\Firmware", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                        crate::reg_del_key!("HKCU", r"Software\Classes\DesktopBackground\Shell\Firmware", "", RegistryValue::DeleteKey),
                 ])
         },
         crate::tweak! {
@@ -1066,21 +710,21 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
                     description: "Adds a menu to quickly switch between Public and Private network profiles.",
                     effect: TweakEffect::Immediate,
                     enabled_ops: &[
-                            RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\shell\NetworkLocation", value_name: "", value: RegistryValue::String("Network Location"), stock_value: RegistryValue::DeleteKey },
-                            RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\shell\NetworkLocation", value_name: "Icon", value: RegistryValue::String("imageres.dll,-25"), stock_value: RegistryValue::DeleteKey },
-                            RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\shell\NetworkLocation", value_name: "Position", value: RegistryValue::String("Middle"), stock_value: RegistryValue::DeleteKey },
-                            RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\shell\NetworkLocation", value_name: "SubCommands", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
+                            crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\shell\NetworkLocation", "", "Network Location", RegistryValue::DeleteKey),
+                            crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\shell\NetworkLocation", "Icon", "imageres.dll,-25", RegistryValue::DeleteKey),
+                            crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\shell\NetworkLocation", "Position", "Middle", RegistryValue::DeleteKey),
+                            crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\shell\NetworkLocation", "SubCommands", "", RegistryValue::DeleteKey),
                             // Private
-                            RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\shell\NetworkLocation\shell\01menu", value_name: "", value: RegistryValue::String("Change to Private network"), stock_value: RegistryValue::DeleteKey },
-                            RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\shell\NetworkLocation\shell\01menu", value_name: "HasLUAShield", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                            RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\shell\NetworkLocation\shell\01menu\command", value_name: "", value: RegistryValue::String(r#"PowerShell -windowstyle hidden -Command "Start-Process cmd -ArgumentList '/s,/c,PowerShell $net = get-netconnectionprofile;Set-NetConnectionProfile -Name $net.Name -NetworkCategory Private' -Verb RunAs""#), stock_value: RegistryValue::DeleteKey },
+                            crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\shell\NetworkLocation\shell\01menu", "", "Change to Private network", RegistryValue::DeleteKey),
+                            crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\shell\NetworkLocation\shell\01menu", "HasLUAShield", "", RegistryValue::DeleteKey),
+                            crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\shell\NetworkLocation\shell\01menu\command", "", r#"PowerShell -windowstyle hidden -Command "Start-Process cmd -ArgumentList '/s,/c,PowerShell $net = get-netconnectionprofile;Set-NetConnectionProfile -Name $net.Name -NetworkCategory Private' -Verb RunAs""#, RegistryValue::DeleteKey),
                             // Public
-                            RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\shell\NetworkLocation\shell\02menu", value_name: "", value: RegistryValue::String("Change to Public network"), stock_value: RegistryValue::DeleteKey },
-                            RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\shell\NetworkLocation\shell\02menu", value_name: "HasLUAShield", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                            RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\shell\NetworkLocation\shell\02menu\command", value_name: "", value: RegistryValue::String(r#"PowerShell -windowstyle hidden -Command "Start-Process cmd -ArgumentList '/s,/c,PowerShell $net = get-netconnectionprofile;Set-NetConnectionProfile -Name $net.Name -NetworkCategory Public' -Verb RunAs""#), stock_value: RegistryValue::DeleteKey },
+                            crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\shell\NetworkLocation\shell\02menu", "", "Change to Public network", RegistryValue::DeleteKey),
+                            crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\shell\NetworkLocation\shell\02menu", "HasLUAShield", "", RegistryValue::DeleteKey),
+                            crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\shell\NetworkLocation\shell\02menu\command", "", r#"PowerShell -windowstyle hidden -Command "Start-Process cmd -ArgumentList '/s,/c,PowerShell $net = get-netconnectionprofile;Set-NetConnectionProfile -Name $net.Name -NetworkCategory Public' -Verb RunAs""#, RegistryValue::DeleteKey),
                     ],
                     disabled_ops: Some(&[
-                            RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\shell\NetworkLocation", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                            crate::reg_del_key!("HKCU", r"Software\Classes\DesktopBackground\shell\NetworkLocation", "", RegistryValue::DeleteKey),
                     ])
         },
         crate::tweak! {
@@ -1091,27 +735,27 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             effect: TweakEffect::Immediate,
             enabled_ops: &[
                 // SubCommands for "Select"
-                RegistryOp { hkey: "HKCR", subkey: r"*\shell\Select", value_name: "MUIVerb", value: RegistryValue::String("Select"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"*\shell\Select", value_name: "Icon", value: RegistryValue::String("imageres.dll,-5308"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"*\shell\Select", value_name: "SubCommands", value: RegistryValue::String("Windows.selectall;Windows.selectnone;Windows.invertselection"), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"*\shell\Select", "MUIVerb", "Select", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"*\shell\Select", "Icon", "imageres.dll,-5308", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"*\shell\Select", "SubCommands", "Windows.selectall;Windows.selectnone;Windows.invertselection", RegistryValue::DeleteKey),
 
-                RegistryOp { hkey: "HKCR", subkey: r"Folder\shell\Select", value_name: "MUIVerb", value: RegistryValue::String("Select"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Folder\shell\Select", value_name: "Icon", value: RegistryValue::String("imageres.dll,-5308"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Folder\shell\Select", value_name: "SubCommands", value: RegistryValue::String("Windows.selectall;Windows.selectnone;Windows.invertselection"), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"Folder\shell\Select", "MUIVerb", "Select", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Folder\shell\Select", "Icon", "imageres.dll,-5308", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Folder\shell\Select", "SubCommands", "Windows.selectall;Windows.selectnone;Windows.invertselection", RegistryValue::DeleteKey),
 
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\Select", value_name: "MUIVerb", value: RegistryValue::String("Select"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\Select", value_name: "Icon", value: RegistryValue::String("imageres.dll,-5308"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\Select", value_name: "SubCommands", value: RegistryValue::String("Windows.selectall;Windows.selectnone;Windows.invertselection"), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"Directory\Background\shell\Select", "MUIVerb", "Select", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Directory\Background\shell\Select", "Icon", "imageres.dll,-5308", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Directory\Background\shell\Select", "SubCommands", "Windows.selectall;Windows.selectnone;Windows.invertselection", RegistryValue::DeleteKey),
 
-                RegistryOp { hkey: "HKCR", subkey: r"LibraryFolder\background\shell\Select", value_name: "MUIVerb", value: RegistryValue::String("Select"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"LibraryFolder\background\shell\Select", value_name: "Icon", value: RegistryValue::String("imageres.dll,-5308"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"LibraryFolder\background\shell\Select", value_name: "SubCommands", value: RegistryValue::String("Windows.selectall;Windows.selectnone;Windows.invertselection"), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"LibraryFolder\background\shell\Select", "MUIVerb", "Select", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"LibraryFolder\background\shell\Select", "Icon", "imageres.dll,-5308", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"LibraryFolder\background\shell\Select", "SubCommands", "Windows.selectall;Windows.selectnone;Windows.invertselection", RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                 RegistryOp { hkey: "HKCR", subkey: r"*\shell\Select", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"Folder\shell\Select", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\Select", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"LibraryFolder\background\shell\Select", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                 crate::reg_del_key!("HKCR", r"*\shell\Select", "", RegistryValue::DeleteKey),
+                 crate::reg_del_key!("HKCR", r"Folder\shell\Select", "", RegistryValue::DeleteKey),
+                 crate::reg_del_key!("HKCR", r"Directory\Background\shell\Select", "", RegistryValue::DeleteKey),
+                 crate::reg_del_key!("HKCR", r"LibraryFolder\background\shell\Select", "", RegistryValue::DeleteKey),
             ])
         },
         crate::tweak! {
@@ -1122,29 +766,29 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
                         // Files
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\*\shell\ChangeOwner", value_name: "MUIVerb", value: RegistryValue::String("Change Owner"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\*\shell\ChangeOwner", value_name: "Icon", value: RegistryValue::String("imageres.dll,-88"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\*\shell\ChangeOwner", value_name: "SubCommands", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\*\shell\ChangeOwner\shell\01Owner", value_name: "", value: RegistryValue::String("See Current Owner"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\*\shell\ChangeOwner\shell\01Owner\command", value_name: "", value: RegistryValue::String("powershell -NoExit Get-ACL '%1'| Format-List -Property Owner"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\*\shell\ChangeOwner\shell\02Owner", value_name: "", value: RegistryValue::String("Take Ownership"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\*\shell\ChangeOwner\shell\02Owner\command", value_name: "", value: RegistryValue::String(r#"powershell.exe -windowstyle hidden -command "Start-Process cmd -ArgumentList '/c takeown /f \"%1\" && icacls \"%1\" /grant *S-1-3-4:F /t /c /l' -Verb runAs""#), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\*\shell\ChangeOwner\shell\Administrators", value_name: "", value: RegistryValue::String("Change Owner to Administrators"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\*\shell\ChangeOwner\shell\Administrators\command", value_name: "", value: RegistryValue::String(r#"powershell.exe -windowstyle hidden -command "Start-Process cmd -ArgumentList '/c icacls \"%1\" /setowner \"Administrators\" /t /c /l' -Verb runAs""#), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\*\shell\ChangeOwner\shell\SYSTEM", value_name: "", value: RegistryValue::String("Change Owner to SYSTEM"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\*\shell\ChangeOwner\shell\SYSTEM\command", value_name: "", value: RegistryValue::String(r#"powershell.exe -windowstyle hidden -command "Start-Process cmd -ArgumentList '/c icacls \"%1\" /setowner \"SYSTEM\" /t /c /l' -Verb runAs""#), stock_value: RegistryValue::DeleteKey },
+                        crate::reg_str!("HKCU", r"Software\Classes\*\shell\ChangeOwner", "MUIVerb", "Change Owner", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\*\shell\ChangeOwner", "Icon", "imageres.dll,-88", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\*\shell\ChangeOwner", "SubCommands", "", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\*\shell\ChangeOwner\shell\01Owner", "", "See Current Owner", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\*\shell\ChangeOwner\shell\01Owner\command", "", "powershell -NoExit Get-ACL '%1'| Format-List -Property Owner", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\*\shell\ChangeOwner\shell\02Owner", "", "Take Ownership", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\*\shell\ChangeOwner\shell\02Owner\command", "", r#"powershell.exe -windowstyle hidden -command "Start-Process cmd -ArgumentList '/c takeown /f \"%1\" && icacls \"%1\" /grant *S-1-3-4:F /t /c /l' -Verb runAs""#, RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\*\shell\ChangeOwner\shell\Administrators", "", "Change Owner to Administrators", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\*\shell\ChangeOwner\shell\Administrators\command", "", r#"powershell.exe -windowstyle hidden -command "Start-Process cmd -ArgumentList '/c icacls \"%1\" /setowner \"Administrators\" /t /c /l' -Verb runAs""#, RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\*\shell\ChangeOwner\shell\SYSTEM", "", "Change Owner to SYSTEM", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\*\shell\ChangeOwner\shell\SYSTEM\command", "", r#"powershell.exe -windowstyle hidden -command "Start-Process cmd -ArgumentList '/c icacls \"%1\" /setowner \"SYSTEM\" /t /c /l' -Verb runAs""#, RegistryValue::DeleteKey),
                         // Folders (with recursion protection)
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\Directory\shell\ChangeOwner", value_name: "MUIVerb", value: RegistryValue::String("Change Owner"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\Directory\shell\ChangeOwner", value_name: "Icon", value: RegistryValue::String("imageres.dll,-88"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\Directory\shell\ChangeOwner", value_name: "SubCommands", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\Directory\shell\ChangeOwner\shell\01Owner", value_name: "", value: RegistryValue::String("See Current Owner"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\Directory\shell\ChangeOwner\shell\01Owner\command", value_name: "", value: RegistryValue::String("powershell -NoExit Get-ACL '%1'| Format-List -Property Owner"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\Directory\shell\ChangeOwner\shell\02Owner", value_name: "", value: RegistryValue::String("Take Ownership"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\Directory\shell\ChangeOwner\shell\02Owner\command", value_name: "", value: RegistryValue::String(r#"powershell.exe -windowstyle hidden -command "Start-Process cmd -ArgumentList '/c takeown /f \"%1\" /r /d y && icacls \"%1\" /grant *S-1-3-4:F /t /c /l /q' -Verb runAs""#), stock_value: RegistryValue::DeleteKey },
+                        crate::reg_str!("HKCU", r"Software\Classes\Directory\shell\ChangeOwner", "MUIVerb", "Change Owner", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\Directory\shell\ChangeOwner", "Icon", "imageres.dll,-88", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\Directory\shell\ChangeOwner", "SubCommands", "", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\Directory\shell\ChangeOwner\shell\01Owner", "", "See Current Owner", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\Directory\shell\ChangeOwner\shell\01Owner\command", "", "powershell -NoExit Get-ACL '%1'| Format-List -Property Owner", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\Directory\shell\ChangeOwner\shell\02Owner", "", "Take Ownership", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\Directory\shell\ChangeOwner\shell\02Owner\command", "", r#"powershell.exe -windowstyle hidden -command "Start-Process cmd -ArgumentList '/c takeown /f \"%1\" /r /d y && icacls \"%1\" /grant *S-1-3-4:F /t /c /l /q' -Verb runAs""#, RegistryValue::DeleteKey),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\*\shell\ChangeOwner", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\Directory\shell\ChangeOwner", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                        crate::reg_del_key!("HKCU", r"Software\Classes\*\shell\ChangeOwner", "", RegistryValue::DeleteKey),
+                        crate::reg_del_key!("HKCU", r"Software\Classes\Directory\shell\ChangeOwner", "", RegistryValue::DeleteKey),
                 ])
         },
         crate::tweak! {
@@ -1154,24 +798,24 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
                 description: "Adds a menu to quickly toggle between Light and Dark modes for apps and system.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\ChooseMode", value_name: "", value: RegistryValue::String("Choose Light or Dark Mode"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\ChooseMode", value_name: "Icon", value: RegistryValue::String("themecpl.dll,-1"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\ChooseMode", value_name: "Position", value: RegistryValue::String("Bottom"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\ChooseMode", value_name: "SubCommands", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\ChooseMode", "", "Choose Light or Dark Mode", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\ChooseMode", "Icon", "themecpl.dll,-1", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\ChooseMode", "Position", "Bottom", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\ChooseMode", "SubCommands", "", RegistryValue::DeleteKey),
                         // App and Windows Mode Submenu
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\ChooseMode\shell\AppANDWindowsMode", value_name: "", value: RegistryValue::String("App and Windows mode"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\ChooseMode\shell\AppANDWindowsMode", value_name: "SubCommands", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\ChooseMode\shell\AppANDWindowsMode", "", "App and Windows mode", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\ChooseMode\shell\AppANDWindowsMode", "SubCommands", "", RegistryValue::DeleteKey),
                         // Light
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\ChooseMode\shell\AppANDWindowsMode\shell\001flyout", value_name: "", value: RegistryValue::String("Light"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\ChooseMode\shell\AppANDWindowsMode\shell\001flyout", value_name: "Icon", value: RegistryValue::String("imageres.dll,-5411"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\ChooseMode\shell\AppANDWindowsMode\shell\001flyout\command", value_name: "", value: RegistryValue::String(r#"cmd /s /c "Reg Add HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize /v AppsUseLightTheme /t REG_DWORD /d 1 /f & Reg Add HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize /v SystemUsesLightTheme /t REG_DWORD /d 1 /f & taskkill /f /im explorer.exe & start explorer.exe""#), stock_value: RegistryValue::DeleteKey },
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\ChooseMode\shell\AppANDWindowsMode\shell\001flyout", "", "Light", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\ChooseMode\shell\AppANDWindowsMode\shell\001flyout", "Icon", "imageres.dll,-5411", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\ChooseMode\shell\AppANDWindowsMode\shell\001flyout\command", "", r#"cmd /s /c "Reg Add HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize /v AppsUseLightTheme /t REG_DWORD /d 1 /f & Reg Add HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize /v SystemUsesLightTheme /t REG_DWORD /d 1 /f & taskkill /f /im explorer.exe & start explorer.exe""#, RegistryValue::DeleteKey),
                         // Dark
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\ChooseMode\shell\AppANDWindowsMode\shell\002flyout", value_name: "", value: RegistryValue::String("Dark"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\ChooseMode\shell\AppANDWindowsMode\shell\002flyout", value_name: "Icon", value: RegistryValue::String("imageres.dll,-5412"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\ChooseMode\shell\AppANDWindowsMode\shell\002flyout\command", value_name: "", value: RegistryValue::String(r#"cmd /s /c "Reg Add HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize /v AppsUseLightTheme /t REG_DWORD /d 0 /f & Reg Add HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize /v SystemUsesLightTheme /t REG_DWORD /d 0 /f & taskkill /f /im explorer.exe & start explorer.exe""#), stock_value: RegistryValue::DeleteKey },
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\ChooseMode\shell\AppANDWindowsMode\shell\002flyout", "", "Dark", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\ChooseMode\shell\AppANDWindowsMode\shell\002flyout", "Icon", "imageres.dll,-5412", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\ChooseMode\shell\AppANDWindowsMode\shell\002flyout\command", "", r#"cmd /s /c "Reg Add HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize /v AppsUseLightTheme /t REG_DWORD /d 0 /f & Reg Add HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize /v SystemUsesLightTheme /t REG_DWORD /d 0 /f & taskkill /f /im explorer.exe & start explorer.exe""#, RegistryValue::DeleteKey),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\ChooseMode", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                        crate::reg_del_key!("HKCU", r"Software\Classes\DesktopBackground\Shell\ChooseMode", "", RegistryValue::DeleteKey),
                 ])
         },
         crate::tweak! {
@@ -1181,24 +825,24 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
                 description: "Adds a menu to access classic appearance settings like screensaver, colors, and sounds.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\Appearance", value_name: "", value: RegistryValue::String("Appearance"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\Appearance", value_name: "Icon", value: RegistryValue::String("desk.cpl"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\Appearance", value_name: "Position", value: RegistryValue::String("Bottom"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\Appearance", value_name: "SubCommands", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\Appearance", "", "Appearance", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\Appearance", "Icon", "desk.cpl", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\Appearance", "Position", "Bottom", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\Appearance", "SubCommands", "", RegistryValue::DeleteKey),
                         // Items
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\shell\Appearance\shell\01themecpl", value_name: "", value: RegistryValue::String("Theme Settings"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\shell\Appearance\shell\01themecpl\command", value_name: "", value: RegistryValue::String("control /name Microsoft.Personalization /page pageTheme"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\shell\Appearance\shell\02deskcpl", value_name: "", value: RegistryValue::String("Desktop Icon Settings"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\shell\Appearance\shell\02deskcpl\command", value_name: "", value: RegistryValue::String("control desk.cpl,,0"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\shell\Appearance\shell\03colorcpl", value_name: "", value: RegistryValue::String("Color Settings"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\shell\Appearance\shell\03colorcpl\command", value_name: "", value: RegistryValue::String("control /name Microsoft.Personalization /page pageColorization"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\shell\Appearance\shell\04soundcpl", value_name: "", value: RegistryValue::String("Sound Settings"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\shell\Appearance\shell\04soundcpl\command", value_name: "", value: RegistryValue::String("rundll32.exe shell32.dll,Control_RunDLL mmsys.cpl,,2"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\shell\Appearance\shell\05screensaver", value_name: "", value: RegistryValue::String("Screen Saver Settings"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\shell\Appearance\shell\05screensaver\command", value_name: "", value: RegistryValue::String("rundll32.exe shell32.dll,Control_RunDLL desk.cpl,,1"), stock_value: RegistryValue::DeleteKey },
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\shell\Appearance\shell\01themecpl", "", "Theme Settings", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\shell\Appearance\shell\01themecpl\command", "", "control /name Microsoft.Personalization /page pageTheme", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\shell\Appearance\shell\02deskcpl", "", "Desktop Icon Settings", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\shell\Appearance\shell\02deskcpl\command", "", "control desk.cpl,,0", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\shell\Appearance\shell\03colorcpl", "", "Color Settings", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\shell\Appearance\shell\03colorcpl\command", "", "control /name Microsoft.Personalization /page pageColorization", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\shell\Appearance\shell\04soundcpl", "", "Sound Settings", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\shell\Appearance\shell\04soundcpl\command", "", "rundll32.exe shell32.dll,Control_RunDLL mmsys.cpl,,2", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\shell\Appearance\shell\05screensaver", "", "Screen Saver Settings", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\shell\Appearance\shell\05screensaver\command", "", "rundll32.exe shell32.dll,Control_RunDLL desk.cpl,,1", RegistryValue::DeleteKey),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\Appearance", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                        crate::reg_del_key!("HKCU", r"Software\Classes\DesktopBackground\Shell\Appearance", "", RegistryValue::DeleteKey),
                 ])
         },
         crate::tweak! {
@@ -1208,12 +852,12 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
                 description: "Adds 'God Mode' (All Tasks) to the desktop context menu.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\GodMode", value_name: "", value: RegistryValue::String("God Mode"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\GodMode", value_name: "Icon", value: RegistryValue::String("imageres.dll,-27"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\GodMode\command", value_name: "", value: RegistryValue::String("explorer shell:::{ED7BA470-8E54-465E-825C-99712043E01C}"), stock_value: RegistryValue::DeleteKey },
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\GodMode", "", "God Mode", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\GodMode", "Icon", "imageres.dll,-27", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\GodMode\command", "", "explorer shell:::{ED7BA470-8E54-465E-825C-99712043E01C}", RegistryValue::DeleteKey),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\GodMode", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                        crate::reg_del_key!("HKCU", r"Software\Classes\DesktopBackground\Shell\GodMode", "", RegistryValue::DeleteKey),
                 ])
         },
         crate::tweak! {
@@ -1223,20 +867,20 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
                 description: "Adds a 'Tools' menu with shortcuts to administrative tools like Registry Editor, Task Manager, etc.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\Tools", value_name: "", value: RegistryValue::String("Tools"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\Tools", value_name: "Icon", value: RegistryValue::String("imageres.dll,-109"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\Tools", value_name: "Position", value: RegistryValue::String("Bottom"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\Tools", value_name: "SubCommands", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\Tools", "", "Tools", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\Tools", "Icon", "imageres.dll,-109", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\Tools", "Position", "Bottom", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\Tools", "SubCommands", "", RegistryValue::DeleteKey),
                         // Items
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\Tools\shell\01Admin", value_name: "", value: RegistryValue::String("Command Prompt (Admin)"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\Tools\shell\01Admin\command", value_name: "", value: RegistryValue::String(r#"powershell.exe -windowstyle hidden -command "Start-Process cmd -Verb runAs""#), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\Tools\shell\02RegEdit", value_name: "", value: RegistryValue::String("Registry Editor"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\Tools\shell\02RegEdit\command", value_name: "", value: RegistryValue::String("regedit.exe"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\Tools\shell\03TaskMgr", value_name: "", value: RegistryValue::String("Task Manager"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\Tools\shell\03TaskMgr\command", value_name: "", value: RegistryValue::String("taskmgr.exe"), stock_value: RegistryValue::DeleteKey },
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\Tools\shell\01Admin", "", "Command Prompt (Admin)", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\Tools\shell\01Admin\command", "", r#"powershell.exe -windowstyle hidden -command "Start-Process cmd -Verb runAs""#, RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\Tools\shell\02RegEdit", "", "Registry Editor", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\Tools\shell\02RegEdit\command", "", "regedit.exe", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\Tools\shell\03TaskMgr", "", "Task Manager", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\Tools\shell\03TaskMgr\command", "", "taskmgr.exe", RegistryValue::DeleteKey),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\Tools", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                        crate::reg_del_key!("HKCU", r"Software\Classes\DesktopBackground\Shell\Tools", "", RegistryValue::DeleteKey),
                 ])
         },
         crate::tweak! {
@@ -1246,43 +890,13 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
                 description: "Adds 'Permanently delete' to the context menu of all files and folders.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\AllFilesystemObjects\shell\Windows.PermanentDelete",
-                                value_name: "CommandStateSync",
-                                value: RegistryValue::String(""),
-                                stock_value: RegistryValue::DeleteKey
-                        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\AllFilesystemObjects\shell\Windows.PermanentDelete",
-                                value_name: "ExplorerCommandHandler",
-                                value: RegistryValue::String("{E9571AB2-AD92-4ec6-8924-4E5AD33790F5}"),
-                                stock_value: RegistryValue::DeleteKey
-                        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\AllFilesystemObjects\shell\Windows.PermanentDelete",
-                                value_name: "Icon",
-                                value: RegistryValue::String("shell32.dll,-240"),
-                                stock_value: RegistryValue::DeleteKey
-                        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\AllFilesystemObjects\shell\Windows.PermanentDelete",
-                                value_name: "Position",
-                                value: RegistryValue::String("Bottom"),
-                                stock_value: RegistryValue::DeleteKey
-                        },
+                        crate::reg_str!("HKCU", r"Software\Classes\AllFilesystemObjects\shell\Windows.PermanentDelete", "CommandStateSync", "", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\AllFilesystemObjects\shell\Windows.PermanentDelete", "ExplorerCommandHandler", "{E9571AB2-AD92-4ec6-8924-4E5AD33790F5}", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\AllFilesystemObjects\shell\Windows.PermanentDelete", "Icon", "shell32.dll,-240", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\AllFilesystemObjects\shell\Windows.PermanentDelete", "Position", "Bottom", RegistryValue::DeleteKey),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\AllFilesystemObjects\shell\Windows.PermanentDelete",
-                                value_name: "",
-                                value: RegistryValue::DeleteKey,
-                                stock_value: RegistryValue::DeleteKey
-                        },
+                        crate::reg_del_key!("HKCU", r"Software\Classes\AllFilesystemObjects\shell\Windows.PermanentDelete", "", RegistryValue::DeleteKey),
                 ])
         },
         crate::tweak! {
@@ -1292,71 +906,17 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
                 description: "Adds 'Slide show' to the context menu of image files.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\*\shell\Windows.slideshow",
-                                value_name: "MUIVerb",
-                                value: RegistryValue::String("@shell32.dll,-31287"),
-                                stock_value: RegistryValue::DeleteKey
-                        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\*\shell\Windows.slideshow",
-                                value_name: "CanonicalName",
-                                value: RegistryValue::String("{73BCE053-3BBC-4AD7-9FE7-7A7C212C98E6}"),
-                                stock_value: RegistryValue::DeleteKey
-                        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\*\shell\Windows.slideshow",
-                                value_name: "CommandStateHandler",
-                                value: RegistryValue::String("{880ac964-2e34-4425-8cf2-86ada2c3a019}"),
-                                stock_value: RegistryValue::DeleteKey
-                        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\*\shell\Windows.slideshow",
-                                value_name: "CommandStateSync",
-                                value: RegistryValue::String(""),
-                                stock_value: RegistryValue::DeleteKey
-                        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\*\shell\Windows.slideshow",
-                                value_name: "Icon",
-                                value: RegistryValue::String("imageres.dll,-5347"),
-                                stock_value: RegistryValue::DeleteKey
-                        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\*\shell\Windows.slideshow",
-                                value_name: "MediaTypeFlags",
-                                value: RegistryValue::Dword(5),
-                                stock_value: RegistryValue::DeleteKey
-                        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\*\shell\Windows.slideshow",
-                                value_name: "VerbToInvoke",
-                                value: RegistryValue::String("slideshow"),
-                                stock_value: RegistryValue::DeleteKey
-                        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\*\shell\Windows.slideshow\command",
-                                value_name: "DelegateExecute",
-                                value: RegistryValue::String("{80c68d96-366b-11dc-9eaa-00161718cf63}"),
-                                stock_value: RegistryValue::DeleteKey
-                        },
+                        crate::reg_str!("HKCU", r"Software\Classes\*\shell\Windows.slideshow", "MUIVerb", "@shell32.dll,-31287", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\*\shell\Windows.slideshow", "CanonicalName", "{73BCE053-3BBC-4AD7-9FE7-7A7C212C98E6}", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\*\shell\Windows.slideshow", "CommandStateHandler", "{880ac964-2e34-4425-8cf2-86ada2c3a019}", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\*\shell\Windows.slideshow", "CommandStateSync", "", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\*\shell\Windows.slideshow", "Icon", "imageres.dll,-5347", RegistryValue::DeleteKey),
+                        crate::reg_dword!("HKCU", r"Software\Classes\*\shell\Windows.slideshow", "MediaTypeFlags", 5, RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\*\shell\Windows.slideshow", "VerbToInvoke", "slideshow", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\*\shell\Windows.slideshow\command", "DelegateExecute", "{80c68d96-366b-11dc-9eaa-00161718cf63}", RegistryValue::DeleteKey),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\*\shell\Windows.slideshow",
-                                value_name: "",
-                                value: RegistryValue::DeleteKey,
-                                stock_value: RegistryValue::DeleteKey
-                        },
+                        crate::reg_del_key!("HKCU", r"Software\Classes\*\shell\Windows.slideshow", "", RegistryValue::DeleteKey),
                 ])
         },
         crate::tweak! {
@@ -1366,43 +926,13 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
                 description: "Adds 'Restart Start menu' to the desktop context menu.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\DesktopBackground\Shell\RestartStart",
-                                value_name: "MUIVerb",
-                                value: RegistryValue::String("Restart Start menu"),
-                                stock_value: RegistryValue::DeleteKey
-                        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\DesktopBackground\Shell\RestartStart",
-                                value_name: "Icon",
-                                value: RegistryValue::String(r"C:\Windows\System32\UNP\UNPUX.dll,-101"),
-                                stock_value: RegistryValue::DeleteKey
-                        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\DesktopBackground\Shell\RestartStart",
-                                value_name: "Position",
-                                value: RegistryValue::String("Bottom"),
-                                stock_value: RegistryValue::DeleteKey
-                        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\DesktopBackground\Shell\RestartStart\command",
-                                value_name: "",
-                                value: RegistryValue::String("cmd /c taskkill /im StartMenuExperienceHost.exe /F /T"),
-                                stock_value: RegistryValue::DeleteKey
-                        },
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\RestartStart", "MUIVerb", "Restart Start menu", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\RestartStart", "Icon", r"C:\Windows\System32\UNP\UNPUX.dll,-101", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\RestartStart", "Position", "Bottom", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\RestartStart\command", "", "cmd /c taskkill /im StartMenuExperienceHost.exe /F /T", RegistryValue::DeleteKey),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\DesktopBackground\Shell\RestartStart",
-                                value_name: "",
-                                value: RegistryValue::DeleteKey,
-                                stock_value: RegistryValue::DeleteKey
-                        },
+                        crate::reg_del_key!("HKCU", r"Software\Classes\DesktopBackground\Shell\RestartStart", "", RegistryValue::DeleteKey),
                 ])
         },
         crate::tweak! {
@@ -1412,36 +942,12 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
                 description: "Adds 'Restart Widgets' to the desktop context menu.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\DesktopBackground\Shell\RestartWidgets",
-                                value_name: "MUIVerb",
-                                value: RegistryValue::String("Restart Widgets"),
-                                stock_value: RegistryValue::DeleteKey
-                        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\DesktopBackground\Shell\RestartWidgets",
-                                value_name: "Position",
-                                value: RegistryValue::String("Bottom"),
-                                stock_value: RegistryValue::DeleteKey
-                        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\DesktopBackground\Shell\RestartWidgets\command",
-                                value_name: "",
-                                value: RegistryValue::String("cmd /c taskkill /im widgets.exe /T /F"),
-                                stock_value: RegistryValue::DeleteKey
-                        },
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\RestartWidgets", "MUIVerb", "Restart Widgets", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\RestartWidgets", "Position", "Bottom", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\RestartWidgets\command", "", "cmd /c taskkill /im widgets.exe /T /F", RegistryValue::DeleteKey),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\DesktopBackground\Shell\RestartWidgets",
-                                value_name: "",
-                                value: RegistryValue::DeleteKey,
-                                stock_value: RegistryValue::DeleteKey
-                        },
+                        crate::reg_del_key!("HKCU", r"Software\Classes\DesktopBackground\Shell\RestartWidgets", "", RegistryValue::DeleteKey),
                 ])
         },
         crate::tweak! {
@@ -1451,18 +957,18 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
                 description: "Adds 'SFC /SCANNOW' to the desktop context menu to repair system files.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\SFC", value_name: "MUIVerb", value: RegistryValue::String("SFC /SCANNOW"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\SFC", value_name: "Icon", value: RegistryValue::String("WmiPrvSE.exe"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\SFC", value_name: "SubCommands", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\SFC\shell\001menu", value_name: "MUIVerb", value: RegistryValue::String("Run SFC /SCANNOW"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\SFC\shell\001menu", value_name: "HasLUAShield", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\SFC\shell\001menu\command", value_name: "", value: RegistryValue::String("PowerShell -windowstyle hidden -command \"Start-Process cmd -ArgumentList '/s,/k, sfc /scannow' -Verb runAs\""), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\SFC\shell\002menu", value_name: "MUIVerb", value: RegistryValue::String("View SFC scan log"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\SFC\shell\002menu", value_name: "Icon", value: RegistryValue::String("imageres.dll,-102"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\SFC\shell\002menu\command", value_name: "", value: RegistryValue::String("PowerShell (sls [SR] $env:windir\\Logs\\CBS\\CBS.log -s).Line >\"$env:userprofile\\Desktop\\sfcdetails.txt\""), stock_value: RegistryValue::DeleteKey },
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\SFC", "MUIVerb", "SFC /SCANNOW", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\SFC", "Icon", "WmiPrvSE.exe", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\SFC", "SubCommands", "", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\SFC\shell\001menu", "MUIVerb", "Run SFC /SCANNOW", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\SFC\shell\001menu", "HasLUAShield", "", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\SFC\shell\001menu\command", "", r#"PowerShell -windowstyle hidden -command "Start-Process cmd -ArgumentList '/s,/k, sfc /scannow' -Verb runAs""#, RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\SFC\shell\002menu", "MUIVerb", "View SFC scan log", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\SFC\shell\002menu", "Icon", "imageres.dll,-102", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\SFC\shell\002menu\command", "", r#"PowerShell (sls [SR] $env:windir\Logs\CBS\CBS.log -s).Line >"$env:userprofile\Desktop\sfcdetails.txt""#, RegistryValue::DeleteKey),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\SFC", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                        crate::reg_del_key!("HKCU", r"Software\Classes\DesktopBackground\Shell\SFC", "", RegistryValue::DeleteKey),
                 ])
         },
         crate::tweak! {
@@ -1472,18 +978,18 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
                 description: "Adds 'Repair Windows Image' to the desktop context menu (DISM).",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\RepairWindowsImage", value_name: "MUIVerb", value: RegistryValue::String("Repair Windows Image"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\RepairWindowsImage", value_name: "Icon", value: RegistryValue::String("imageres.dll,-5374"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\RepairWindowsImage", value_name: "SubCommands", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\RepairWindowsImage\shell\001menu", value_name: "MUIVerb", value: RegistryValue::String("Check Health of Windows Image"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\RepairWindowsImage\shell\001menu", value_name: "HasLUAShield", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\RepairWindowsImage\shell\001menu\command", value_name: "", value: RegistryValue::String("PowerShell -windowstyle hidden -command \"Start-Process cmd -ArgumentList '/s,/k, Dism /Online /Cleanup-Image /CheckHealth' -Verb runAs\""), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\RepairWindowsImage\shell\002menu", value_name: "MUIVerb", value: RegistryValue::String("Repair Windows Image"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\RepairWindowsImage\shell\002menu", value_name: "HasLUAShield", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\RepairWindowsImage\shell\002menu\command", value_name: "", value: RegistryValue::String("PowerShell -windowstyle hidden -command \"Start-Process cmd -ArgumentList '/s,/k, Dism /Online /Cleanup-Image /RestoreHealth' -Verb runAs\""), stock_value: RegistryValue::DeleteKey },
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\RepairWindowsImage", "MUIVerb", "Repair Windows Image", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\RepairWindowsImage", "Icon", "imageres.dll,-5374", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\RepairWindowsImage", "SubCommands", "", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\RepairWindowsImage\shell\001menu", "MUIVerb", "Check Health of Windows Image", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\RepairWindowsImage\shell\001menu", "HasLUAShield", "", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\RepairWindowsImage\shell\001menu\command", "", r#"PowerShell -windowstyle hidden -command "Start-Process cmd -ArgumentList '/s,/k, Dism /Online /Cleanup-Image /CheckHealth' -Verb runAs""#, RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\RepairWindowsImage\shell\002menu", "MUIVerb", "Repair Windows Image", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\RepairWindowsImage\shell\002menu", "HasLUAShield", "", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\DesktopBackground\Shell\RepairWindowsImage\shell\002menu\command", "", r#"PowerShell -windowstyle hidden -command "Start-Process cmd -ArgumentList '/s,/k, Dism /Online /Cleanup-Image /RestoreHealth' -Verb runAs""#, RegistryValue::DeleteKey),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\DesktopBackground\Shell\RepairWindowsImage", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                        crate::reg_del_key!("HKCU", r"Software\Classes\DesktopBackground\Shell\RepairWindowsImage", "", RegistryValue::DeleteKey),
                 ])
         },
         crate::tweak! {
@@ -1493,16 +999,16 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
                 description: "Adds an elevated 'Open in Windows Terminal' option to folder context menus.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\OpenWTHereAsAdmin", value_name: "MUIVerb", value: RegistryValue::String("Open in Windows Terminal as administrator"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\OpenWTHereAsAdmin", value_name: "HasLUAShield", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\OpenWTHereAsAdmin\command", value_name: "", value: RegistryValue::String("powershell.exe -WindowStyle Hidden \"Start-Process -Verb RunAs cmd.exe -ArgumentList @('/c','start wt.exe','-d','\"\"\"%V\\.\"\"\"')\""), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\OpenWTHereAsAdmin", value_name: "MUIVerb", value: RegistryValue::String("Open in Windows Terminal as administrator"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\OpenWTHereAsAdmin", value_name: "HasLUAShield", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\OpenWTHereAsAdmin\command", value_name: "", value: RegistryValue::String("powershell.exe -WindowStyle Hidden \"Start-Process -Verb RunAs cmd.exe -ArgumentList @('/c','start wt.exe','-d','\"\"\"%V\\.\"\"\"')\""), stock_value: RegistryValue::DeleteKey },
+                        crate::reg_str!("HKCR", r"Directory\shell\OpenWTHereAsAdmin", "MUIVerb", "Open in Windows Terminal as administrator", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"Directory\shell\OpenWTHereAsAdmin", "HasLUAShield", "", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"Directory\shell\OpenWTHereAsAdmin\command", "", r#"powershell.exe -WindowStyle Hidden "Start-Process -Verb RunAs cmd.exe -ArgumentList @('/c','start wt.exe','-d','"""%V\."""')""#, RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"Directory\Background\shell\OpenWTHereAsAdmin", "MUIVerb", "Open in Windows Terminal as administrator", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"Directory\Background\shell\OpenWTHereAsAdmin", "HasLUAShield", "", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"Directory\Background\shell\OpenWTHereAsAdmin\command", "", r#"powershell.exe -WindowStyle Hidden "Start-Process -Verb RunAs cmd.exe -ArgumentList @('/c','start wt.exe','-d','"""%V\."""')""#, RegistryValue::DeleteKey),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\OpenWTHereAsAdmin", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\OpenWTHereAsAdmin", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                        crate::reg_del_key!("HKCR", r"Directory\shell\OpenWTHereAsAdmin", "", RegistryValue::DeleteKey),
+                        crate::reg_del_key!("HKCR", r"Directory\Background\shell\OpenWTHereAsAdmin", "", RegistryValue::DeleteKey),
                 ])
         },
         crate::tweak! {
@@ -1512,18 +1018,18 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
                 description: "Adds an 'Unblock' option to files and folders to easily remove Mark of the Web.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp { hkey: "HKCR", subkey: r"*\shell\unblock", value_name: "MUIVerb", value: RegistryValue::String("Unblock"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"*\shell\unblock\command", value_name: "", value: RegistryValue::String("powershell.exe Unblock-File -LiteralPath '%L'"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\unblock", value_name: "MUIVerb", value: RegistryValue::String("Unblock"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\unblock", value_name: "SubCommands", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\unblock\shell\001flyout", value_name: "MUIVerb", value: RegistryValue::String("Unblock files in folder"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\unblock\shell\001flyout\command", value_name: "", value: RegistryValue::String("powershell.exe get-childitem -LiteralPath '%L' | Unblock-File"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\unblock\shell\002flyout", value_name: "MUIVerb", value: RegistryValue::String("Unblock files in folder and subfolders"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\unblock\shell\002flyout\command", value_name: "", value: RegistryValue::String("powershell.exe get-childitem -LiteralPath '%L' -recurse | Unblock-File"), stock_value: RegistryValue::DeleteKey },
+                        crate::reg_str!("HKCR", r"*\shell\unblock", "MUIVerb", "Unblock", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"*\shell\unblock\command", "", "powershell.exe Unblock-File -LiteralPath '%L'", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"Directory\shell\unblock", "MUIVerb", "Unblock", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"Directory\shell\unblock", "SubCommands", "", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"Directory\shell\unblock\shell\001flyout", "MUIVerb", "Unblock files in folder", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"Directory\shell\unblock\shell\001flyout\command", "", "powershell.exe get-childitem -LiteralPath '%L' | Unblock-File", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"Directory\shell\unblock\shell\002flyout", "MUIVerb", "Unblock files in folder and subfolders", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"Directory\shell\unblock\shell\002flyout\command", "", "powershell.exe get-childitem -LiteralPath '%L' -recurse | Unblock-File", RegistryValue::DeleteKey),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp { hkey: "HKCR", subkey: r"*\shell\unblock", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\unblock", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                        crate::reg_del_key!("HKCR", r"*\shell\unblock", "", RegistryValue::DeleteKey),
+                        crate::reg_del_key!("HKCR", r"Directory\shell\unblock", "", RegistryValue::DeleteKey),
                 ])
         },
         crate::tweak! {
@@ -1533,21 +1039,21 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
                 description: "Adds a comprehensive Windows Update menu to the desktop context menu.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\WindowsUpdate", value_name: "MUIVerb", value: RegistryValue::String("Windows Update"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\WindowsUpdate", value_name: "Icon", value: RegistryValue::String("imageres.dll,-1401"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\WindowsUpdate", value_name: "Position", value: RegistryValue::String("Bottom"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\WindowsUpdate", value_name: "SubCommands", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\WindowsUpdate\shell\001flyout", value_name: "MUIVerb", value: RegistryValue::String("Check for Updates"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\WindowsUpdate\shell\001flyout\command", value_name: "", value: RegistryValue::String("cmd /s /c USOClient StartInteractiveScan & start ms-settings:windowsupdate"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\WindowsUpdate\shell\002flyout", value_name: "MUIVerb", value: RegistryValue::String("Windows Update"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\WindowsUpdate\shell\002flyout\command", value_name: "", value: RegistryValue::String("explorer ms-settings:windowsupdate"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\WindowsUpdate\shell\003flyout", value_name: "MUIVerb", value: RegistryValue::String("Update history"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\WindowsUpdate\shell\003flyout\command", value_name: "", value: RegistryValue::String("explorer ms-settings:windowsupdate-history"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\WindowsUpdate\shell\004flyout", value_name: "MUIVerb", value: RegistryValue::String("Advanced options"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\WindowsUpdate\shell\004flyout\command", value_name: "", value: RegistryValue::String("explorer ms-settings:windowsupdate-options"), stock_value: RegistryValue::DeleteKey },
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\WindowsUpdate", "MUIVerb", "Windows Update", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\WindowsUpdate", "Icon", "imageres.dll,-1401", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\WindowsUpdate", "Position", "Bottom", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\WindowsUpdate", "SubCommands", "", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\WindowsUpdate\shell\001flyout", "MUIVerb", "Check for Updates", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\WindowsUpdate\shell\001flyout\command", "", "cmd /s /c USOClient StartInteractiveScan & start ms-settings:windowsupdate", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\WindowsUpdate\shell\002flyout", "MUIVerb", "Windows Update", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\WindowsUpdate\shell\002flyout\command", "", "explorer ms-settings:windowsupdate", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\WindowsUpdate\shell\003flyout", "MUIVerb", "Update history", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\WindowsUpdate\shell\003flyout\command", "", "explorer ms-settings:windowsupdate-history", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\WindowsUpdate\shell\004flyout", "MUIVerb", "Advanced options", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\WindowsUpdate\shell\004flyout\command", "", "explorer ms-settings:windowsupdate-options", RegistryValue::DeleteKey),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\WindowsUpdate", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                        crate::reg_del_key!("HKCR", r"DesktopBackground\Shell\WindowsUpdate", "", RegistryValue::DeleteKey),
                 ])
         },
         crate::tweak! {
@@ -1557,17 +1063,17 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
                 description: "Adds an option to turn off the display immediately to the desktop context menu.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\TurnOffDisplay", value_name: "MUIVerb", value: RegistryValue::String("Turn off display"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\TurnOffDisplay", value_name: "Icon", value: RegistryValue::String("imageres.dll,-109"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\TurnOffDisplay", value_name: "Position", value: RegistryValue::String("Bottom"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\TurnOffDisplay", value_name: "SubCommands", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\TurnOffDisplay\shell\01menu", value_name: "MUIVerb", value: RegistryValue::String("Turn off display"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\TurnOffDisplay\shell\01menu\command", value_name: "", value: RegistryValue::String("powershell.exe -NoProfile -ExecutionPolicy Bypass -Command \"Add-Type -TypeDefinition 'using System; using System.Runtime.InteropServices; public static class User32 { [DllImport(\\\"user32.dll\\\", SetLastError = true)] public static extern int SendMessage(int hWnd, int hMsg, int wParam, int lParam); }' -ReferencedAssemblies System.Windows.Forms; Start-Sleep -Seconds 1; $null = [User32]::SendMessage((New-Object System.Windows.Forms.Form).Handle.ToInt32(), 0x0112, 0xF170, 2);\""), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\TurnOffDisplay\shell\02menu", value_name: "MUIVerb", value: RegistryValue::String("Lock and Turn off display"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\TurnOffDisplay\shell\02menu\command", value_name: "", value: RegistryValue::String("cmd /c \"powershell.exe -Command \"(Add-Type '[DllImport(\\\"user32.dll\\\")]public static extern int SendMessage(int hWnd,int hMsg,int wParam,int lParam);' -Name a -Pas)::SendMessage(-1,0x0112,0xF170,2)\" & rundll32.exe user32.dll, LockWorkStation\""), stock_value: RegistryValue::DeleteKey },
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\TurnOffDisplay", "MUIVerb", "Turn off display", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\TurnOffDisplay", "Icon", "imageres.dll,-109", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\TurnOffDisplay", "Position", "Bottom", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\TurnOffDisplay", "SubCommands", "", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\TurnOffDisplay\shell\01menu", "MUIVerb", "Turn off display", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\TurnOffDisplay\shell\01menu\command", "", "powershell.exe -NoProfile -ExecutionPolicy Bypass -Command \"Add-Type -TypeDefinition 'using System; using System.Runtime.InteropServices; public static class User32 { [DllImport(\\\"user32.dll\\\", SetLastError = true)] public static extern int SendMessage(int hWnd, int hMsg, int wParam, int lParam); }' -ReferencedAssemblies System.Windows.Forms; Start-Sleep -Seconds 1; $null = [User32]::SendMessage((New-Object System.Windows.Forms.Form).Handle.ToInt32(), 0x0112, 0xF170, 2);\"", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\TurnOffDisplay\shell\02menu", "MUIVerb", "Lock and Turn off display", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\TurnOffDisplay\shell\02menu\command", "", "cmd /c \"powershell.exe -Command \"(Add-Type '[DllImport(\\\"user32.dll\\\")]public static extern int SendMessage(int hWnd,int hMsg,int wParam,int lParam);' -Name a -Pas)::SendMessage(-1,0x0112,0xF170,2)\" & rundll32.exe user32.dll, LockWorkStation\"", RegistryValue::DeleteKey),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\TurnOffDisplay", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                        crate::reg_del_key!("HKCR", r"DesktopBackground\Shell\TurnOffDisplay", "", RegistryValue::DeleteKey),
                 ])
         },
         crate::tweak! {
@@ -1577,19 +1083,19 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
                 description: "Adds a menu for managing restore points and system protection.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\SystemProtection", value_name: "MUIVerb", value: RegistryValue::String("System Protection and Restore"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\SystemProtection", value_name: "Icon", value: RegistryValue::String("rstrui.exe"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\SystemProtection", value_name: "Position", value: RegistryValue::String("Bottom"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\SystemProtection", value_name: "SubCommands", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\SystemProtection\shell\001flyout", value_name: "MUIVerb", value: RegistryValue::String("System Restore"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\SystemProtection\shell\001flyout\command", value_name: "", value: RegistryValue::String("rstrui.exe"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\SystemProtection\shell\002flyout", value_name: "MUIVerb", value: RegistryValue::String("Create restore point"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\SystemProtection\shell\002flyout", value_name: "HasLUAShield", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\SystemProtection\shell\002flyout\command", value_name: "", value: RegistryValue::String("PowerShell -windowstyle hidden -command \"Start-Process cmd -ArgumentList '/s,/c, PowerShell Checkpoint-Computer -Description \"Manual\" -RestorePointType \"MODIFY_SETTINGS\"' -Verb runAs\""), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\SystemRestore", value_name: "SystemRestorePointCreationFrequency", value: RegistryValue::Dword(0), stock_value: RegistryValue::Dword(1) },
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\SystemProtection", "MUIVerb", "System Protection and Restore", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\SystemProtection", "Icon", "rstrui.exe", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\SystemProtection", "Position", "Bottom", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\SystemProtection", "SubCommands", "", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\SystemProtection\shell\001flyout", "MUIVerb", "System Restore", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\SystemProtection\shell\001flyout\command", "", "rstrui.exe", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\SystemProtection\shell\002flyout", "MUIVerb", "Create restore point", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\SystemProtection\shell\002flyout", "HasLUAShield", "", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\SystemProtection\shell\002flyout\command", "", r#"PowerShell -windowstyle hidden -command "Start-Process cmd -ArgumentList '/s,/c, PowerShell Checkpoint-Computer -Description \"Manual\" -RestorePointType \"MODIFY_SETTINGS\"' -Verb runAs""#, RegistryValue::DeleteKey),
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\SystemRestore", "SystemRestorePointCreationFrequency", 0, 1),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\SystemProtection", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                        crate::reg_del_key!("HKCR", r"DesktopBackground\Shell\SystemProtection", "", RegistryValue::DeleteKey),
                 ])
         },
         crate::tweak! {
@@ -1599,17 +1105,17 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
                 description: "Adds DISM component store cleanup options to the desktop context menu.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\WinSxS", value_name: "MUIVerb", value: RegistryValue::String("Component Store Cleanup"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\WinSxS", value_name: "Icon", value: RegistryValue::String("cleanmgr.exe"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\WinSxS", value_name: "Position", value: RegistryValue::String("Bottom"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\WinSxS", value_name: "SubCommands", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\shell\WinSxS\shell\001menu", value_name: "MUIVerb", value: RegistryValue::String("Analyze Component Store"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\shell\WinSxS\shell\001menu\command", value_name: "", value: RegistryValue::String("PowerShell -windowstyle hidden -command \"Start-Process cmd -ArgumentList '/s,/k, DISM /Online /Cleanup-Image /AnalyzeComponentStore' -Verb runAs\""), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\shell\WinSxS\shell\002menu", value_name: "MUIVerb", value: RegistryValue::String("Clean Up Component Store"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\shell\WinSxS\shell\002menu\command", value_name: "", value: RegistryValue::String("PowerShell -windowstyle hidden -command \"Start-Process cmd -ArgumentList '/s,/k, DISM /Online /Cleanup-Image /StartComponentCleanup' -Verb runAs\""), stock_value: RegistryValue::DeleteKey },
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\WinSxS", "MUIVerb", "Component Store Cleanup", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\WinSxS", "Icon", "cleanmgr.exe", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\WinSxS", "Position", "Bottom", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\WinSxS", "SubCommands", "", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\shell\WinSxS\shell\001menu", "MUIVerb", "Analyze Component Store", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\shell\WinSxS\shell\001menu\command", "", r#"PowerShell -windowstyle hidden -command "Start-Process cmd -ArgumentList '/s,/k, DISM /Online /Cleanup-Image /AnalyzeComponentStore' -Verb runAs""#, RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\shell\WinSxS\shell\002menu", "MUIVerb", "Clean Up Component Store", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\shell\WinSxS\shell\002menu\command", "", r#"PowerShell -windowstyle hidden -command "Start-Process cmd -ArgumentList '/s,/k, DISM /Online /Cleanup-Image /StartComponentCleanup' -Verb runAs""#, RegistryValue::DeleteKey),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\WinSxS", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                        crate::reg_del_key!("HKCR", r"DesktopBackground\Shell\WinSxS", "", RegistryValue::DeleteKey),
                 ])
         },
         crate::tweak! {
@@ -1619,13 +1125,13 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
                 description: "Adds an option to temporarily suspend BitLocker protection for a drive.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp { hkey: "HKCR", subkey: r"Drive\shell\suspend-bde", value_name: "", value: RegistryValue::String("Suspend BitLocker protection"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"Drive\shell\suspend-bde", value_name: "AppliesTo", value: RegistryValue::String("(System.Volume.BitLockerProtection:=System.Volume.BitLockerProtection#On"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"Drive\shell\suspend-bde", value_name: "HasLUAShield", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"Drive\shell\suspend-bde\command", value_name: "", value: RegistryValue::String("PowerShell -windowstyle hidden -command \"Start-Process cmd -ArgumentList '/s,/c, manage-bde -protectors -disable %1' -Verb runAs\""), stock_value: RegistryValue::DeleteKey },
+                        crate::reg_str!("HKCR", r"Drive\shell\suspend-bde", "", "Suspend BitLocker protection", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"Drive\shell\suspend-bde", "AppliesTo", "(System.Volume.BitLockerProtection:=System.Volume.BitLockerProtection#On", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"Drive\shell\suspend-bde", "HasLUAShield", "", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"Drive\shell\suspend-bde\command", "", r#"PowerShell -windowstyle hidden -command "Start-Process cmd -ArgumentList '/s,/c, manage-bde -protectors -disable %1' -Verb runAs""#, RegistryValue::DeleteKey),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp { hkey: "HKCR", subkey: r"Drive\shell\suspend-bde", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                        crate::reg_del_key!("HKCR", r"Drive\shell\suspend-bde", "", RegistryValue::DeleteKey),
                 ])
         },
         crate::tweak! {
@@ -1635,13 +1141,13 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
                 description: "Adds an option to completely decrypt and turn off BitLocker for a drive.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp { hkey: "HKCR", subkey: r"Drive\shell\decrypt-bde", value_name: "", value: RegistryValue::String("Turn off BitLocker"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"Drive\shell\decrypt-bde", value_name: "AppliesTo", value: RegistryValue::String("(System.Volume.BitLockerProtection:=System.Volume.BitLockerProtection#On"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"Drive\shell\decrypt-bde", value_name: "HasLUAShield", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"Drive\shell\decrypt-bde\command", value_name: "", value: RegistryValue::String("PowerShell -windowstyle hidden -command \"Start-Process cmd -ArgumentList '/s,/c, manage-bde -off %1' -Verb runAs\""), stock_value: RegistryValue::DeleteKey },
+                        crate::reg_str!("HKCR", r"Drive\shell\decrypt-bde", "", "Turn off BitLocker", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"Drive\shell\decrypt-bde", "AppliesTo", "(System.Volume.BitLockerProtection:=System.Volume.BitLockerProtection#On", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"Drive\shell\decrypt-bde", "HasLUAShield", "", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"Drive\shell\decrypt-bde\command", "", r#"PowerShell -windowstyle hidden -command "Start-Process cmd -ArgumentList '/s,/c, manage-bde -off %1' -Verb runAs""#, RegistryValue::DeleteKey),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp { hkey: "HKCR", subkey: r"Drive\shell\decrypt-bde", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                        crate::reg_del_key!("HKCR", r"Drive\shell\decrypt-bde", "", RegistryValue::DeleteKey),
                 ])
         },
         crate::tweak! {
@@ -1651,19 +1157,19 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
                 description: "Adds a menu to the desktop context menu for quick access to various Account settings.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\AccountsSettings", value_name: "MUIVerb", value: RegistryValue::String("Accounts Settings"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\AccountsSettings", value_name: "Icon", value: RegistryValue::String("imageres.dll,-88"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\AccountsSettings", value_name: "Position", value: RegistryValue::String("Bottom"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\AccountsSettings", value_name: "SubCommands", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\AccountsSettings\shell\001menu", value_name: "MUIVerb", value: RegistryValue::String("Accounts"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\AccountsSettings\shell\001menu\command", value_name: "", value: RegistryValue::String("explorer ms-settings:accounts"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\AccountsSettings\shell\002menu", value_name: "MUIVerb", value: RegistryValue::String("Your info"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\AccountsSettings\shell\002menu\command", value_name: "", value: RegistryValue::String("explorer ms-settings:yourinfo"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\AccountsSettings\shell\003menu", value_name: "MUIVerb", value: RegistryValue::String("Sign-in options"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\AccountsSettings\shell\003menu\command", value_name: "", value: RegistryValue::String("explorer ms-settings:signinoptions"), stock_value: RegistryValue::DeleteKey },
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\AccountsSettings", "MUIVerb", "Accounts Settings", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\AccountsSettings", "Icon", "imageres.dll,-88", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\AccountsSettings", "Position", "Bottom", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\AccountsSettings", "SubCommands", "", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\AccountsSettings\shell\001menu", "MUIVerb", "Accounts", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\AccountsSettings\shell\001menu\command", "", "explorer ms-settings:accounts", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\AccountsSettings\shell\002menu", "MUIVerb", "Your info", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\AccountsSettings\shell\002menu\command", "", "explorer ms-settings:yourinfo", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\AccountsSettings\shell\003menu", "MUIVerb", "Sign-in options", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\AccountsSettings\shell\003menu\command", "", "explorer ms-settings:signinoptions", RegistryValue::DeleteKey),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\AccountsSettings", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                        crate::reg_del_key!("HKCR", r"DesktopBackground\Shell\AccountsSettings", "", RegistryValue::DeleteKey),
                 ])
         },
         crate::tweak! {
@@ -1673,17 +1179,17 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
                 description: "Adds a menu to quickly turn on/off location services for the device or apps.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Location", value_name: "MUIVerb", value: RegistryValue::String("Location Services"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Location", value_name: "Icon", value: RegistryValue::String("taskbarcpl.dll,-10"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Location", value_name: "Position", value: RegistryValue::String("Bottom"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Location", value_name: "SubCommands", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Location\Shell\001flyout", value_name: "MUIVerb", value: RegistryValue::String("Turn On for Device"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Location\Shell\001flyout\command", value_name: "", value: RegistryValue::String("PowerShell -windowstyle hidden -command \"Start-Process cmd -ArgumentList '/s,/c, Reg Add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\CapabilityAccessManager\\ConsentStore\\location /v Value /t REG_SZ /d \"Allow\" /f' -Verb runAs\""), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Location\Shell\002flyout", value_name: "MUIVerb", value: RegistryValue::String("Turn Off for Device"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Location\Shell\002flyout\command", value_name: "", value: RegistryValue::String("PowerShell -windowstyle hidden -command \"Start-Process cmd -ArgumentList '/s,/c, Reg Add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\CapabilityAccessManager\\ConsentStore\\location /v Value /t REG_SZ /d \"Deny\" /f' -Verb runAs\""), stock_value: RegistryValue::DeleteKey },
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\Location", "MUIVerb", "Location Services", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\Location", "Icon", "taskbarcpl.dll,-10", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\Location", "Position", "Bottom", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\Location", "SubCommands", "", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\Location\Shell\001flyout", "MUIVerb", "Turn On for Device", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\Location\Shell\001flyout\command", "", r#"PowerShell -windowstyle hidden -command "Start-Process cmd -ArgumentList '/s,/c, Reg Add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\location /v Value /t REG_SZ /d \"Allow\" /f' -Verb runAs""#, RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\Location\Shell\002flyout", "MUIVerb", "Turn Off for Device", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCR", r"DesktopBackground\Shell\Location\Shell\002flyout\command", "", r#"PowerShell -windowstyle hidden -command "Start-Process cmd -ArgumentList '/s,/c, Reg Add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\location /v Value /t REG_SZ /d \"Deny\" /f' -Verb runAs""#, RegistryValue::DeleteKey),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Location", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                        crate::reg_del_key!("HKCR", r"DesktopBackground\Shell\Location", "", RegistryValue::DeleteKey),
                 ])
         },
         crate::tweak! {
@@ -1693,10 +1199,10 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
                 description: "Adds 'Windows Batch File' to the 'New' context menu.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp { hkey: "HKCR", subkey: r".bat\ShellNew", value_name: "NullFile", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
+                        crate::reg_str!("HKCR", r".bat\ShellNew", "NullFile", "", RegistryValue::DeleteKey),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp { hkey: "HKCR", subkey: r".bat\ShellNew", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                        crate::reg_del_key!("HKCR", r".bat\ShellNew", "", RegistryValue::DeleteKey),
                 ])
         },
         crate::tweak! {
@@ -1706,10 +1212,10 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
                 description: "Adds 'VBScript Script File' to the 'New' context menu.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp { hkey: "HKCR", subkey: r".vbs\ShellNew", value_name: "NullFile", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
+                        crate::reg_str!("HKCR", r".vbs\ShellNew", "NullFile", "", RegistryValue::DeleteKey),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp { hkey: "HKCR", subkey: r".vbs\ShellNew", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                        crate::reg_del_key!("HKCR", r".vbs\ShellNew", "", RegistryValue::DeleteKey),
                 ])
         },
         crate::tweak! {
@@ -1719,10 +1225,10 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
                 description: "Adds 'Registration Entries (REG)' to the 'New' context menu.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp { hkey: "HKCR", subkey: r".reg\ShellNew", value_name: "NullFile", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
+                        crate::reg_str!("HKCR", r".reg\ShellNew", "NullFile", "", RegistryValue::DeleteKey),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp { hkey: "HKCR", subkey: r".reg\ShellNew", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                        crate::reg_del_key!("HKCR", r".reg\ShellNew", "", RegistryValue::DeleteKey),
                 ])
         },
         crate::tweak! {
@@ -1732,22 +1238,10 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Removes 'Copy as path' from the context menu of drives.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp {
-                    hkey: "HKCR",
-                    subkey: r"Drive\shellex\ContextMenuHandlers\CopyAsPathMenu",
-                    value_name: "",
-                    value: RegistryValue::DeleteKey,
-                    stock_value: RegistryValue::String("{f3d06e7c-1e45-4a26-847e-f9fcdee59be0}"),
-                },
+                crate::reg_del_key!("HKCR", r"Drive\shellex\ContextMenuHandlers\CopyAsPathMenu", "", RegistryValue::String("{f3d06e7c-1e45-4a26-847e-f9fcdee59be0}")),
             ],
             disabled_ops: Some(&[
-                RegistryOp {
-                    hkey: "HKCR",
-                    subkey: r"Drive\shellex\ContextMenuHandlers\CopyAsPathMenu",
-                    value_name: "",
-                    value: RegistryValue::String("{f3d06e7c-1e45-4a26-847e-f9fcdee59be0}"),
-                    stock_value: RegistryValue::String("{f3d06e7c-1e45-4a26-847e-f9fcdee59be0}"),
-                },
+                crate::reg_str!("HKCR", r"Drive\shellex\ContextMenuHandlers\CopyAsPathMenu", "", "{f3d06e7c-1e45-4a26-847e-f9fcdee59be0}", "{f3d06e7c-1e45-4a26-847e-f9fcdee59be0}"),
             ]),
         },
         crate::tweak! {
@@ -1757,22 +1251,10 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Removes 'Manage BitLocker' from the drive context menu.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp {
-                    hkey: "HKCR",
-                    subkey: r"Drive\shell\manage-bde",
-                    value_name: "LegacyDisable",
-                    value: RegistryValue::String(""),
-                    stock_value: RegistryValue::Delete,
-                },
+                crate::reg_str!("HKCR", r"Drive\shell\manage-bde", "LegacyDisable", "", RegistryValue::Delete),
             ],
             disabled_ops: Some(&[
-                RegistryOp {
-                    hkey: "HKCR",
-                    subkey: r"Drive\shell\manage-bde",
-                    value_name: "LegacyDisable",
-                    value: RegistryValue::Delete,
-                    stock_value: RegistryValue::Delete,
-                },
+                crate::reg_del!("HKCR", r"Drive\shell\manage-bde", "LegacyDisable", RegistryValue::Delete),
             ]),
         },
         crate::tweak! {
@@ -1782,36 +1264,12 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Removes 'Map network drive' and 'Disconnect network drive' from This PC context menu.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\Policies\Explorer",
-                    value_name: "NoNetConnectDisconnect",
-                    value: RegistryValue::Dword(1),
-                    stock_value: RegistryValue::Delete,
-                },
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer",
-                    value_name: "NoNetConnectDisconnect",
-                    value: RegistryValue::Dword(1),
-                    stock_value: RegistryValue::Delete,
-                },
+                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Policies\Explorer", "NoNetConnectDisconnect", 1, RegistryValue::Delete),
+                crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer", "NoNetConnectDisconnect", 1, RegistryValue::Delete),
             ],
             disabled_ops: Some(&[
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\Policies\Explorer",
-                    value_name: "NoNetConnectDisconnect",
-                    value: RegistryValue::Delete,
-                    stock_value: RegistryValue::Delete,
-                },
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer",
-                    value_name: "NoNetConnectDisconnect",
-                    value: RegistryValue::Delete,
-                    stock_value: RegistryValue::Delete,
-                },
+                crate::reg_del!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Policies\Explorer", "NoNetConnectDisconnect", RegistryValue::Delete),
+                crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer", "NoNetConnectDisconnect", RegistryValue::Delete),
             ]),
         },
         crate::tweak! {
@@ -1821,22 +1279,10 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Removes 'Open as Portable Device' from the drive context menu.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp {
-                    hkey: "HKCR",
-                    subkey: r"Drive\shellex\ContextMenuHandlers\{D6791A63-E7E2-4fee-BF52-5DED8E86E9B8}",
-                    value_name: "",
-                    value: RegistryValue::DeleteKey,
-                    stock_value: RegistryValue::String("Portable Devices Menu"),
-                },
+                crate::reg_del_key!("HKCR", r"Drive\shellex\ContextMenuHandlers\{D6791A63-E7E2-4fee-BF52-5DED8E86E9B8}", "", RegistryValue::String("Portable Devices Menu")),
             ],
             disabled_ops: Some(&[
-                RegistryOp {
-                    hkey: "HKCR",
-                    subkey: r"Drive\shellex\ContextMenuHandlers\{D6791A63-E7E2-4fee-BF52-5DED8E86E9B8}",
-                    value_name: "",
-                    value: RegistryValue::String("Portable Devices Menu"),
-                    stock_value: RegistryValue::String("Portable Devices Menu"),
-                },
+                crate::reg_str!("HKCR", r"Drive\shellex\ContextMenuHandlers\{D6791A63-E7E2-4fee-BF52-5DED8E86E9B8}", "", "Portable Devices Menu", "Portable Devices Menu"),
             ]),
         },
         crate::tweak! {
@@ -1846,22 +1292,22 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Removes 'Open file location' and 'Open folder location' from various context menus (search results, shortcuts, etc.)",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r".symlink\shellex\ContextMenuHandlers\OpenContainingFolderMenu", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::String("{37ea3a21-7493-4208-a011-7f9ea79ce9f5}") },
-                RegistryOp { hkey: "HKCR", subkey: r"LibraryLocation\ShellEx\ContextMenuHandlers\OpenContainingFolderMenu", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::String("{37ea3a21-7493-4208-a011-7f9ea79ce9f5}") },
-                RegistryOp { hkey: "HKCR", subkey: r"lnkfile\shellex\ContextMenuHandlers\OpenContainingFolderMenu", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::String("{37ea3a21-7493-4208-a011-7f9ea79ce9f5}") },
-                RegistryOp { hkey: "HKCR", subkey: r"PinnedRecentDocument\ShellEx\ContextMenuHandlers\OpenContainingFolderMenu", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::String("{37ea3a21-7493-4208-a011-7f9ea79ce9f5}") },
-                RegistryOp { hkey: "HKCR", subkey: r"RecentDocument\ShellEx\ContextMenuHandlers\OpenContainingFolderMenu", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::String("{37ea3a21-7493-4208-a011-7f9ea79ce9f5}") },
-                RegistryOp { hkey: "HKCR", subkey: r"RecommendationsFile\ShellEx\ContextMenuHandlers\OpenContainingFolderMenu", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::String("{37ea3a21-7493-4208-a011-7f9ea79ce9f5}") },
-                RegistryOp { hkey: "HKCR", subkey: r"Results\ShellEx\ContextMenuHandlers\OpenContainingFolderMenu", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::String("{37ea3a21-7493-4208-a011-7f9ea79ce9f5}") },
+                crate::reg_del_key!("HKCR", r".symlink\shellex\ContextMenuHandlers\OpenContainingFolderMenu", "", RegistryValue::String("{37ea3a21-7493-4208-a011-7f9ea79ce9f5}")),
+                crate::reg_del_key!("HKCR", r"LibraryLocation\ShellEx\ContextMenuHandlers\OpenContainingFolderMenu", "", RegistryValue::String("{37ea3a21-7493-4208-a011-7f9ea79ce9f5}")),
+                crate::reg_del_key!("HKCR", r"lnkfile\shellex\ContextMenuHandlers\OpenContainingFolderMenu", "", RegistryValue::String("{37ea3a21-7493-4208-a011-7f9ea79ce9f5}")),
+                crate::reg_del_key!("HKCR", r"PinnedRecentDocument\ShellEx\ContextMenuHandlers\OpenContainingFolderMenu", "", RegistryValue::String("{37ea3a21-7493-4208-a011-7f9ea79ce9f5}")),
+                crate::reg_del_key!("HKCR", r"RecentDocument\ShellEx\ContextMenuHandlers\OpenContainingFolderMenu", "", RegistryValue::String("{37ea3a21-7493-4208-a011-7f9ea79ce9f5}")),
+                crate::reg_del_key!("HKCR", r"RecommendationsFile\ShellEx\ContextMenuHandlers\OpenContainingFolderMenu", "", RegistryValue::String("{37ea3a21-7493-4208-a011-7f9ea79ce9f5}")),
+                crate::reg_del_key!("HKCR", r"Results\ShellEx\ContextMenuHandlers\OpenContainingFolderMenu", "", RegistryValue::String("{37ea3a21-7493-4208-a011-7f9ea79ce9f5}")),
             ],
             disabled_ops: Some(&[
-                RegistryOp { hkey: "HKCR", subkey: r".symlink\shellex\ContextMenuHandlers\OpenContainingFolderMenu", value_name: "", value: RegistryValue::String("{37ea3a21-7493-4208-a011-7f9ea79ce9f5}"), stock_value: RegistryValue::String("{37ea3a21-7493-4208-a011-7f9ea79ce9f5}") },
-                RegistryOp { hkey: "HKCR", subkey: r"LibraryLocation\ShellEx\ContextMenuHandlers\OpenContainingFolderMenu", value_name: "", value: RegistryValue::String("{37ea3a21-7493-4208-a011-7f9ea79ce9f5}"), stock_value: RegistryValue::String("{37ea3a21-7493-4208-a011-7f9ea79ce9f5}") },
-                RegistryOp { hkey: "HKCR", subkey: r"lnkfile\shellex\ContextMenuHandlers\OpenContainingFolderMenu", value_name: "", value: RegistryValue::String("{37ea3a21-7493-4208-a011-7f9ea79ce9f5}"), stock_value: RegistryValue::String("{37ea3a21-7493-4208-a011-7f9ea79ce9f5}") },
-                RegistryOp { hkey: "HKCR", subkey: r"PinnedRecentDocument\ShellEx\ContextMenuHandlers\OpenContainingFolderMenu", value_name: "", value: RegistryValue::String("{37ea3a21-7493-4208-a011-7f9ea79ce9f5}"), stock_value: RegistryValue::String("{37ea3a21-7493-4208-a011-7f9ea79ce9f5}") },
-                RegistryOp { hkey: "HKCR", subkey: r"RecentDocument\ShellEx\ContextMenuHandlers\OpenContainingFolderMenu", value_name: "", value: RegistryValue::String("{37ea3a21-7493-4208-a011-7f9ea79ce9f5}"), stock_value: RegistryValue::String("{37ea3a21-7493-4208-a011-7f9ea79ce9f5}") },
-                RegistryOp { hkey: "HKCR", subkey: r"RecommendationsFile\ShellEx\ContextMenuHandlers\OpenContainingFolderMenu", value_name: "", value: RegistryValue::String("{37ea3a21-7493-4208-a011-7f9ea79ce9f5}"), stock_value: RegistryValue::String("{37ea3a21-7493-4208-a011-7f9ea79ce9f5}") },
-                RegistryOp { hkey: "HKCR", subkey: r"Results\ShellEx\ContextMenuHandlers\OpenContainingFolderMenu", value_name: "", value: RegistryValue::String("{37ea3a21-7493-4208-a011-7f9ea79ce9f5}"), stock_value: RegistryValue::String("{37ea3a21-7493-4208-a011-7f9ea79ce9f5}") },
+                crate::reg_str!("HKCR", r".symlink\shellex\ContextMenuHandlers\OpenContainingFolderMenu", "", "{37ea3a21-7493-4208-a011-7f9ea79ce9f5}", "{37ea3a21-7493-4208-a011-7f9ea79ce9f5}"),
+                crate::reg_str!("HKCR", r"LibraryLocation\ShellEx\ContextMenuHandlers\OpenContainingFolderMenu", "", "{37ea3a21-7493-4208-a011-7f9ea79ce9f5}", "{37ea3a21-7493-4208-a011-7f9ea79ce9f5}"),
+                crate::reg_str!("HKCR", r"lnkfile\shellex\ContextMenuHandlers\OpenContainingFolderMenu", "", "{37ea3a21-7493-4208-a011-7f9ea79ce9f5}", "{37ea3a21-7493-4208-a011-7f9ea79ce9f5}"),
+                crate::reg_str!("HKCR", r"PinnedRecentDocument\ShellEx\ContextMenuHandlers\OpenContainingFolderMenu", "", "{37ea3a21-7493-4208-a011-7f9ea79ce9f5}", "{37ea3a21-7493-4208-a011-7f9ea79ce9f5}"),
+                crate::reg_str!("HKCR", r"RecentDocument\ShellEx\ContextMenuHandlers\OpenContainingFolderMenu", "", "{37ea3a21-7493-4208-a011-7f9ea79ce9f5}", "{37ea3a21-7493-4208-a011-7f9ea79ce9f5}"),
+                crate::reg_str!("HKCR", r"RecommendationsFile\ShellEx\ContextMenuHandlers\OpenContainingFolderMenu", "", "{37ea3a21-7493-4208-a011-7f9ea79ce9f5}", "{37ea3a21-7493-4208-a011-7f9ea79ce9f5}"),
+                crate::reg_str!("HKCR", r"Results\ShellEx\ContextMenuHandlers\OpenContainingFolderMenu", "", "{37ea3a21-7493-4208-a011-7f9ea79ce9f5}", "{37ea3a21-7493-4208-a011-7f9ea79ce9f5}"),
             ]),
         },
         crate::tweak! {
@@ -1871,18 +1317,12 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Removes the 'Next desktop background' option from the desktop context menu (for Windows Spotlight).",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp {
-                    hkey: "HKCR",
-                    subkey: r"DesktopBackground\Shell\.SpotlightNextImage",
-                    value_name: "",
-                    value: RegistryValue::DeleteKey,
-                    stock_value: RegistryValue::DeleteKey,
-                },
+                crate::reg_del_key!("HKCR", r"DesktopBackground\Shell\.SpotlightNextImage", "", RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\.SpotlightNextImage", value_name: "CommandStateSync", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\.SpotlightNextImage", value_name: "ExplorerCommandHandler", value: RegistryValue::String("{2ECAB2B4-B6A8-5482-0AE6-D1A5BF594B00}"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\.SpotlightNextImage", value_name: "Position", value: RegistryValue::String("Bottom"), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\.SpotlightNextImage", "CommandStateSync", "", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\.SpotlightNextImage", "ExplorerCommandHandler", "{2ECAB2B4-B6A8-5482-0AE6-D1A5BF594B00}", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\.SpotlightNextImage", "Position", "Bottom", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -1892,13 +1332,7 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds the 'Open with' context menu option to .URL internet shortcuts.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp {
-                    hkey: "HKCR",
-                    subkey: r"InternetShortcut\ShellEx\ContextMenuHandlers\Open With",
-                    value_name: "",
-                    value: RegistryValue::String("{09799AFB-AD67-11d1-ABCD-00C04FC30936}"),
-                    stock_value: RegistryValue::DeleteKey,
-                },
+                crate::reg_str!("HKCR", r"InternetShortcut\ShellEx\ContextMenuHandlers\Open With", "", "{09799AFB-AD67-11d1-ABCD-00C04FC30936}", RegistryValue::DeleteKey),
             ],
         },
         crate::tweak! {
@@ -1908,23 +1342,23 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Removes 'Pin to Quick access' from the context menu.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r"AllFilesystemObjects\shell\pintohome", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Drive\shell\pintohome", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Folder\shell\pintohome", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Network\shell\pintohome", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                crate::reg_del_key!("HKCR", r"AllFilesystemObjects\shell\pintohome", "", RegistryValue::DeleteKey),
+                crate::reg_del_key!("HKCR", r"Drive\shell\pintohome", "", RegistryValue::DeleteKey),
+                crate::reg_del_key!("HKCR", r"Folder\shell\pintohome", "", RegistryValue::DeleteKey),
+                crate::reg_del_key!("HKCR", r"Network\shell\pintohome", "", RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
                 // Restore AllFilesystemObjects
-                RegistryOp { hkey: "HKCR", subkey: r"AllFilesystemObjects\shell\pintohome", value_name: "CommandStateHandler", value: RegistryValue::String("{b455f46e-e4af-4035-b0a4-cf18d2f6f28e}"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"AllFilesystemObjects\shell\pintohome", value_name: "MUIVerb", value: RegistryValue::String("@shell32.dll,-51377"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"AllFilesystemObjects\shell\pintohome\command", value_name: "DelegateExecute", value: RegistryValue::String("{b455f46e-e4af-4035-b0a4-cf18d2f6f28e}"), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"AllFilesystemObjects\shell\pintohome", "CommandStateHandler", "{b455f46e-e4af-4035-b0a4-cf18d2f6f28e}", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"AllFilesystemObjects\shell\pintohome", "MUIVerb", "@shell32.dll,-51377", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"AllFilesystemObjects\shell\pintohome\command", "DelegateExecute", "{b455f46e-e4af-4035-b0a4-cf18d2f6f28e}", RegistryValue::DeleteKey),
                  // Restore Drive
-                RegistryOp { hkey: "HKCR", subkey: r"Drive\shell\pintohome", value_name: "CommandStateHandler", value: RegistryValue::String("{b455f46e-e4af-4035-b0a4-cf18d2f6f28e}"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Drive\shell\pintohome", value_name: "MUIVerb", value: RegistryValue::String("@shell32.dll,-51377"), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"Drive\shell\pintohome", "CommandStateHandler", "{b455f46e-e4af-4035-b0a4-cf18d2f6f28e}", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Drive\shell\pintohome", "MUIVerb", "@shell32.dll,-51377", RegistryValue::DeleteKey),
                  // Restore Folder
-                RegistryOp { hkey: "HKCR", subkey: r"Folder\shell\pintohome", value_name: "MUIVerb", value: RegistryValue::String("@shell32.dll,-51377"), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"Folder\shell\pintohome", "MUIVerb", "@shell32.dll,-51377", RegistryValue::DeleteKey),
                  // Restore Network
-                RegistryOp { hkey: "HKCR", subkey: r"Network\shell\pintohome", value_name: "MUIVerb", value: RegistryValue::String("@shell32.dll,-51377"), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"Network\shell\pintohome", "MUIVerb", "@shell32.dll,-51377", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -1934,22 +1368,22 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Removes the rotation options from the context menu of image files.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r"SystemFileAssociations\.avci\ShellEx\ContextMenuHandlers\ShellImagePreview", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"SystemFileAssociations\.avif\ShellEx\ContextMenuHandlers\ShellImagePreview", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"SystemFileAssociations\.bmp\ShellEx\ContextMenuHandlers\ShellImagePreview", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"SystemFileAssociations\.gif\ShellEx\ContextMenuHandlers\ShellImagePreview", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"SystemFileAssociations\.ico\ShellEx\ContextMenuHandlers\ShellImagePreview", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"SystemFileAssociations\.jpe\ShellEx\ContextMenuHandlers\ShellImagePreview", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"SystemFileAssociations\.jpeg\ShellEx\ContextMenuHandlers\ShellImagePreview", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"SystemFileAssociations\.jpg\ShellEx\ContextMenuHandlers\ShellImagePreview", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"SystemFileAssociations\.png\ShellEx\ContextMenuHandlers\ShellImagePreview", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"SystemFileAssociations\.tif\ShellEx\ContextMenuHandlers\ShellImagePreview", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"SystemFileAssociations\.tiff\ShellEx\ContextMenuHandlers\ShellImagePreview", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"SystemFileAssociations\.webp\ShellEx\ContextMenuHandlers\ShellImagePreview", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                crate::reg_del_key!("HKCR", r"SystemFileAssociations\.avci\ShellEx\ContextMenuHandlers\ShellImagePreview", "", RegistryValue::DeleteKey),
+                crate::reg_del_key!("HKCR", r"SystemFileAssociations\.avif\ShellEx\ContextMenuHandlers\ShellImagePreview", "", RegistryValue::DeleteKey),
+                crate::reg_del_key!("HKCR", r"SystemFileAssociations\.bmp\ShellEx\ContextMenuHandlers\ShellImagePreview", "", RegistryValue::DeleteKey),
+                crate::reg_del_key!("HKCR", r"SystemFileAssociations\.gif\ShellEx\ContextMenuHandlers\ShellImagePreview", "", RegistryValue::DeleteKey),
+                crate::reg_del_key!("HKCR", r"SystemFileAssociations\.ico\ShellEx\ContextMenuHandlers\ShellImagePreview", "", RegistryValue::DeleteKey),
+                crate::reg_del_key!("HKCR", r"SystemFileAssociations\.jpe\ShellEx\ContextMenuHandlers\ShellImagePreview", "", RegistryValue::DeleteKey),
+                crate::reg_del_key!("HKCR", r"SystemFileAssociations\.jpeg\ShellEx\ContextMenuHandlers\ShellImagePreview", "", RegistryValue::DeleteKey),
+                crate::reg_del_key!("HKCR", r"SystemFileAssociations\.jpg\ShellEx\ContextMenuHandlers\ShellImagePreview", "", RegistryValue::DeleteKey),
+                crate::reg_del_key!("HKCR", r"SystemFileAssociations\.png\ShellEx\ContextMenuHandlers\ShellImagePreview", "", RegistryValue::DeleteKey),
+                crate::reg_del_key!("HKCR", r"SystemFileAssociations\.tif\ShellEx\ContextMenuHandlers\ShellImagePreview", "", RegistryValue::DeleteKey),
+                crate::reg_del_key!("HKCR", r"SystemFileAssociations\.tiff\ShellEx\ContextMenuHandlers\ShellImagePreview", "", RegistryValue::DeleteKey),
+                crate::reg_del_key!("HKCR", r"SystemFileAssociations\.webp\ShellEx\ContextMenuHandlers\ShellImagePreview", "", RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                 RegistryOp { hkey: "HKCR", subkey: r"SystemFileAssociations\.jpg\ShellEx\ContextMenuHandlers\ShellImagePreview", value_name: "", value: RegistryValue::String("{FFE2A43C-56B9-4bf5-9A79-CC6D4285608A}"), stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"SystemFileAssociations\.png\ShellEx\ContextMenuHandlers\ShellImagePreview", value_name: "", value: RegistryValue::String("{FFE2A43C-56B9-4bf5-9A79-CC6D4285608A}"), stock_value: RegistryValue::DeleteKey },
+                 crate::reg_str!("HKCR", r"SystemFileAssociations\.jpg\ShellEx\ContextMenuHandlers\ShellImagePreview", "", "{FFE2A43C-56B9-4bf5-9A79-CC6D4285608A}", RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"SystemFileAssociations\.png\ShellEx\ContextMenuHandlers\ShellImagePreview", "", "{FFE2A43C-56B9-4bf5-9A79-CC6D4285608A}", RegistryValue::DeleteKey),
                  // NOTE: Only restoring common types for brevity, user can re-enable to restore all if we implemented all 20+ types.
                  // Currently simplified.
             ]),
@@ -1962,23 +1396,24 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             effect: TweakEffect::Immediate,
             enabled_ops: &[
                 // batfile
-                RegistryOp { hkey: "HKCR", subkey: r"batfile\shell\runasuser", value_name: "", value: RegistryValue::String("@shell32.dll,-50944"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"batfile\shell\runasuser", value_name: "Extended", value: RegistryValue::Delete, stock_value: RegistryValue::DeleteKey }, // Remove extended to show always
-                RegistryOp { hkey: "HKCR", subkey: r"batfile\shell\runasuser", value_name: "SuppressionPolicyEx", value: RegistryValue::String("{F211AA05-D4DF-4370-A2A0-9F19C09756A7}"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"batfile\shell\runasuser\command", value_name: "DelegateExecute", value: RegistryValue::String("{ea72d00e-4960-42fa-ba92-7792a7944c1d}"), stock_value: RegistryValue::DeleteKey },
+                // batfile
+                crate::reg_str!("HKCR", r"batfile\shell\runasuser", "", "@shell32.dll,-50944", RegistryValue::DeleteKey),
+                crate::reg_del!("HKCR", r"batfile\shell\runasuser", "Extended", RegistryValue::DeleteKey), // Remove extended to show always
+                crate::reg_str!("HKCR", r"batfile\shell\runasuser", "SuppressionPolicyEx", "{F211AA05-D4DF-4370-A2A0-9F19C09756A7}", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"batfile\shell\runasuser\command", "DelegateExecute", "{ea72d00e-4960-42fa-ba92-7792a7944c1d}", RegistryValue::DeleteKey),
                 // cmdfile
-                RegistryOp { hkey: "HKCR", subkey: r"cmdfile\shell\runasuser", value_name: "", value: RegistryValue::String("@shell32.dll,-50944"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"cmdfile\shell\runasuser", value_name: "Extended", value: RegistryValue::Delete, stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"cmdfile\shell\runasuser\command", value_name: "DelegateExecute", value: RegistryValue::String("{ea72d00e-4960-42fa-ba92-7792a7944c1d}"), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"cmdfile\shell\runasuser", "", "@shell32.dll,-50944", RegistryValue::DeleteKey),
+                crate::reg_del!("HKCR", r"cmdfile\shell\runasuser", "Extended", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"cmdfile\shell\runasuser\command", "DelegateExecute", "{ea72d00e-4960-42fa-ba92-7792a7944c1d}", RegistryValue::DeleteKey),
                 // exefile
-                RegistryOp { hkey: "HKCR", subkey: r"exefile\shell\runasuser", value_name: "", value: RegistryValue::String("@shell32.dll,-50944"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"exefile\shell\runasuser", value_name: "Extended", value: RegistryValue::Delete, stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"exefile\shell\runasuser\command", value_name: "DelegateExecute", value: RegistryValue::String("{ea72d00e-4960-42fa-ba92-7792a7944c1d}"), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"exefile\shell\runasuser", "", "@shell32.dll,-50944", RegistryValue::DeleteKey),
+                crate::reg_del!("HKCR", r"exefile\shell\runasuser", "Extended", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"exefile\shell\runasuser\command", "DelegateExecute", "{ea72d00e-4960-42fa-ba92-7792a7944c1d}", RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                RegistryOp { hkey: "HKCR", subkey: r"batfile\shell\runasuser", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"cmdfile\shell\runasuser", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"exefile\shell\runasuser", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                crate::reg_del_key!("HKCR", r"batfile\shell\runasuser", "", RegistryValue::DeleteKey),
+                crate::reg_del_key!("HKCR", r"cmdfile\shell\runasuser", "", RegistryValue::DeleteKey),
+                crate::reg_del_key!("HKCR", r"exefile\shell\runasuser", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -1988,22 +1423,10 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Removes the 'Scan with Microsoft Defender' option from the context menu.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked",
-                    value_name: "{09A47860-11B0-4DA5-AFA5-26D86198A780}",
-                    value: RegistryValue::String("Scan with Microsoft Defender"),
-                    stock_value: RegistryValue::Delete,
-                },
+                crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", "{09A47860-11B0-4DA5-AFA5-26D86198A780}", "Scan with Microsoft Defender", RegistryValue::Delete),
             ],
             disabled_ops: Some(&[
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked",
-                    value_name: "{09A47860-11B0-4DA5-AFA5-26D86198A780}",
-                    value: RegistryValue::Delete,
-                    stock_value: RegistryValue::Delete,
-                },
+                crate::reg_del!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", "{09A47860-11B0-4DA5-AFA5-26D86198A780}", RegistryValue::Delete),
             ]),
         },
         crate::tweak! {
@@ -2013,15 +1436,15 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds 'Open in new process' to the folder context menu.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r"Folder\shell\opennewprocess", value_name: "ExplorerHost", value: RegistryValue::String("{ceff45ee-c862-41de-aee2-a022c81eda92}"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Folder\shell\opennewprocess", value_name: "Extended", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Folder\shell\opennewprocess", value_name: "LaunchExplorerFlags", value: RegistryValue::Dword(3), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Folder\shell\opennewprocess", value_name: "MUIVerb", value: RegistryValue::String("@shell32.dll,-8518"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Folder\shell\opennewprocess", value_name: "MultiSelectModel", value: RegistryValue::String("Document"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Folder\shell\opennewprocess\command", value_name: "DelegateExecute", value: RegistryValue::String("{11dbb47c-a525-400b-9e80-a54615a090c0}"), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"Folder\shell\opennewprocess", "ExplorerHost", "{ceff45ee-c862-41de-aee2-a022c81eda92}", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Folder\shell\opennewprocess", "Extended", "", RegistryValue::DeleteKey),
+                crate::reg_dword!("HKCR", r"Folder\shell\opennewprocess", "LaunchExplorerFlags", 3, RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Folder\shell\opennewprocess", "MUIVerb", "@shell32.dll,-8518", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Folder\shell\opennewprocess", "MultiSelectModel", "Document", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Folder\shell\opennewprocess\command", "DelegateExecute", "{11dbb47c-a525-400b-9e80-a54615a090c0}", RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-               RegistryOp { hkey: "HKCR", subkey: r"Folder\shell\opennewprocess", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+               crate::reg_del_key!("HKCR", r"Folder\shell\opennewprocess", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -2031,16 +1454,16 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds 'Open in new tab' to the folder context menu.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r"Folder\shell\opennewtab", value_name: "CommandStateHandler", value: RegistryValue::String("{11dbb47c-a525-400b-9e80-a54615a090c0}"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Folder\shell\opennewtab", value_name: "CommandStateSync", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Folder\shell\opennewtab", value_name: "LaunchExplorerFlags", value: RegistryValue::Dword(32), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Folder\shell\opennewtab", value_name: "MUIVerb", value: RegistryValue::String("@windows.storage.dll,-8519"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Folder\shell\opennewtab", value_name: "MultiSelectModel", value: RegistryValue::String("Document"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Folder\shell\opennewtab", value_name: "OnlyInBrowserWindow", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Folder\shell\opennewtab\command", value_name: "DelegateExecute", value: RegistryValue::String("{11dbb47c-a525-400b-9e80-a54615a090c0}"), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"Folder\shell\opennewtab", "CommandStateHandler", "{11dbb47c-a525-400b-9e80-a54615a090c0}", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Folder\shell\opennewtab", "CommandStateSync", "", RegistryValue::DeleteKey),
+                crate::reg_dword!("HKCR", r"Folder\shell\opennewtab", "LaunchExplorerFlags", 32, RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Folder\shell\opennewtab", "MUIVerb", "@windows.storage.dll,-8519", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Folder\shell\opennewtab", "MultiSelectModel", "Document", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Folder\shell\opennewtab", "OnlyInBrowserWindow", "", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Folder\shell\opennewtab\command", "DelegateExecute", "{11dbb47c-a525-400b-9e80-a54615a090c0}", RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                RegistryOp { hkey: "HKCR", subkey: r"Folder\shell\opennewtab", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                crate::reg_del_key!("HKCR", r"Folder\shell\opennewtab", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -2050,14 +1473,14 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds 'Open in new window' to the folder context menu.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r"Folder\shell\opennewwindow", value_name: "LaunchExplorerFlags", value: RegistryValue::Dword(1), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Folder\shell\opennewwindow", value_name: "MUIVerb", value: RegistryValue::String("@windows.storage.dll,-8517"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Folder\shell\opennewwindow", value_name: "MultiSelectModel", value: RegistryValue::String("Document"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Folder\shell\opennewwindow", value_name: "OnlyInBrowserWindow", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Folder\shell\opennewwindow\command", value_name: "DelegateExecute", value: RegistryValue::String("{11dbb47c-a525-400b-9e80-a54615a090c0}"), stock_value: RegistryValue::DeleteKey },
+                crate::reg_dword!("HKCR", r"Folder\shell\opennewwindow", "LaunchExplorerFlags", 1, RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Folder\shell\opennewwindow", "MUIVerb", "@windows.storage.dll,-8517", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Folder\shell\opennewwindow", "MultiSelectModel", "Document", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Folder\shell\opennewwindow", "OnlyInBrowserWindow", "", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Folder\shell\opennewwindow\command", "DelegateExecute", "{11dbb47c-a525-400b-9e80-a54615a090c0}", RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                RegistryOp { hkey: "HKCR", subkey: r"Folder\shell\opennewwindow", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                crate::reg_del_key!("HKCR", r"Folder\shell\opennewwindow", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -2067,22 +1490,10 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Removes the 'Open in Terminal Preview' option from the context menu.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked",
-                    value_name: "{02DB545A-3E20-46DE-83A5-1329B1E88B6B}",
-                    value: RegistryValue::String(""),
-                    stock_value: RegistryValue::Delete,
-                },
+                crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", "{02DB545A-3E20-46DE-83A5-1329B1E88B6B}", "", RegistryValue::Delete),
             ],
             disabled_ops: Some(&[
-                 RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked",
-                    value_name: "{02DB545A-3E20-46DE-83A5-1329B1E88B6B}",
-                    value: RegistryValue::Delete,
-                    stock_value: RegistryValue::Delete,
-                },
+                 crate::reg_del!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", "{02DB545A-3E20-46DE-83A5-1329B1E88B6B}", RegistryValue::Delete),
             ]),
         },
         crate::tweak! {
@@ -2092,22 +1503,22 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds a cascaded 'Control Panel' menu to the desktop context menu.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\ControlPanel", value_name: "MUIVerb", value: RegistryValue::String("Control Panel"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\ControlPanel", value_name: "SubCommands", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\ControlPanel", value_name: "Icon", value: RegistryValue::String("imageres.dll,-27"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\ControlPanel", value_name: "Position", value: RegistryValue::String("Bottom"), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\ControlPanel", "MUIVerb", "Control Panel", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\ControlPanel", "SubCommands", "", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\ControlPanel", "Icon", "imageres.dll,-27", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\ControlPanel", "Position", "Bottom", RegistryValue::DeleteKey),
                 // Menu 1: Category View
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\ControlPanel\shell\001menu", value_name: "", value: RegistryValue::String("Category view"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\ControlPanel\shell\001menu\command", value_name: "", value: RegistryValue::String("explorer.exe shell:::{26EE0668-A00A-44D7-9371-BEB064C98683}"), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\ControlPanel\shell\001menu", "", "Category view", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\ControlPanel\shell\001menu\command", "", "explorer.exe shell:::{26EE0668-A00A-44D7-9371-BEB064C98683}", RegistryValue::DeleteKey),
                 // Menu 2: Icons View
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\ControlPanel\shell\002menu", value_name: "", value: RegistryValue::String("Icons view"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\ControlPanel\shell\002menu\command", value_name: "", value: RegistryValue::String("explorer.exe shell:::{21EC2020-3AEA-1069-A2DD-08002B30309D}"), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\ControlPanel\shell\002menu", "", "Icons view", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\ControlPanel\shell\002menu\command", "", "explorer.exe shell:::{21EC2020-3AEA-1069-A2DD-08002B30309D}", RegistryValue::DeleteKey),
                 // Menu 3: All Tasks
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\ControlPanel\shell\003menu", value_name: "", value: RegistryValue::String("All Tasks (God mode)"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\ControlPanel\shell\003menu\command", value_name: "", value: RegistryValue::String("explorer.exe shell:::{ED7BA470-8E54-465E-825C-99712043E01C}"), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\ControlPanel\shell\003menu", "", "All Tasks (God mode)", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\ControlPanel\shell\003menu\command", "", "explorer.exe shell:::{ED7BA470-8E54-465E-825C-99712043E01C}", RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\ControlPanel", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                crate::reg_del_key!("HKCR", r"DesktopBackground\Shell\ControlPanel", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -2118,61 +1529,61 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             effect: TweakEffect::Immediate,
             enabled_ops: &[
                 // Main Menu
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings", value_name: "Icon", value: RegistryValue::String("shell32.dll,-16826"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings", value_name: "MUIVerb", value: RegistryValue::String("&Settings"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings", value_name: "Position", value: RegistryValue::String("Bottom"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings", value_name: "SubCommands", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings", "Icon", "shell32.dll,-16826", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings", "MUIVerb", "&Settings", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings", "Position", "Bottom", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings", "SubCommands", "", RegistryValue::DeleteKey),
                 // Submenu 01: Home
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\01menu", value_name: "Icon", value: RegistryValue::String("shell32.dll,-51380"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\01menu", value_name: "MUIVerb", value: RegistryValue::String("&Home"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\01menu\command", value_name: "", value: RegistryValue::String("explorer ms-settings:home"), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\01menu", "Icon", "shell32.dll,-51380", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\01menu", "MUIVerb", "&Home", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\01menu\command", "", "explorer ms-settings:home", RegistryValue::DeleteKey),
                 // Submenu 02: System
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\02menu", value_name: "Icon", value: RegistryValue::String("shell32.dll,-35"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\02menu", value_name: "MUIVerb", value: RegistryValue::String("&System"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\02menu\command", value_name: "", value: RegistryValue::String("explorer ms-settings:system"), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\02menu", "Icon", "shell32.dll,-35", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\02menu", "MUIVerb", "&System", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\02menu\command", "", "explorer ms-settings:system", RegistryValue::DeleteKey),
                 // Submenu 03: Bluetooth & devices
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\03menu", value_name: "Icon", value: RegistryValue::String("BthpanContextHandler.dll,-200"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\03menu", value_name: "MUIVerb", value: RegistryValue::String("&Bluetooth && devices"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\03menu\command", value_name: "", value: RegistryValue::String("explorer ms-settings:devices"), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\03menu", "Icon", "BthpanContextHandler.dll,-200", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\03menu", "MUIVerb", "&Bluetooth && devices", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\03menu\command", "", "explorer ms-settings:devices", RegistryValue::DeleteKey),
                 // Submenu 04: Network & internet
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\04menu", value_name: "Icon", value: RegistryValue::String("shell32.dll,-193"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\04menu", value_name: "MUIVerb", value: RegistryValue::String("&Network && internet"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\04menu\command", value_name: "", value: RegistryValue::String("explorer ms-settings:network"), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\04menu", "Icon", "shell32.dll,-193", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\04menu", "MUIVerb", "&Network && internet", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\04menu\command", "", "explorer ms-settings:network", RegistryValue::DeleteKey),
                 // Submenu 05: Personalization
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\05menu", value_name: "Icon", value: RegistryValue::String("themecpl.dll,-1"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\05menu", value_name: "MUIVerb", value: RegistryValue::String("&Personalization"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\05menu\command", value_name: "", value: RegistryValue::String("explorer ms-settings:personalization"), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\05menu", "Icon", "themecpl.dll,-1", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\05menu", "MUIVerb", "&Personalization", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\05menu\command", "", "explorer ms-settings:personalization", RegistryValue::DeleteKey),
                 // Submenu 06: Apps
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\06menu", value_name: "Icon", value: RegistryValue::String("shell32.dll,-63010"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\06menu", value_name: "MUIVerb", value: RegistryValue::String("&Apps"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\06menu\command", value_name: "", value: RegistryValue::String("explorer ms-settings:appsfeatures"), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\06menu", "Icon", "shell32.dll,-63010", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\06menu", "MUIVerb", "&Apps", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\06menu\command", "", "explorer ms-settings:appsfeatures", RegistryValue::DeleteKey),
                 // Submenu 07: Accounts
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\07menu", value_name: "Icon", value: RegistryValue::String("imageres.dll,-88"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\07menu", value_name: "MUIVerb", value: RegistryValue::String("A&ccounts"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\07menu\command", value_name: "", value: RegistryValue::String("explorer ms-settings:accounts"), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\07menu", "Icon", "imageres.dll,-88", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\07menu", "MUIVerb", "A&ccounts", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\07menu\command", "", "explorer ms-settings:accounts", RegistryValue::DeleteKey),
                 // Submenu 08: Time & language
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\08menu", value_name: "Icon", value: RegistryValue::String("shell32.dll,-276"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\08menu", value_name: "MUIVerb", value: RegistryValue::String("&Time && language"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\08menu\command", value_name: "", value: RegistryValue::String("explorer ms-settings:dateandtime"), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\08menu", "Icon", "shell32.dll,-276", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\08menu", "MUIVerb", "&Time && language", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\08menu\command", "", "explorer ms-settings:dateandtime", RegistryValue::DeleteKey),
                 // Submenu 09: Gaming
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\09menu", value_name: "Icon", value: RegistryValue::String("DDORes.dll,-2207"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\09menu", value_name: "MUIVerb", value: RegistryValue::String("&Gaming"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\09menu\command", value_name: "", value: RegistryValue::String("explorer ms-settings:gaming-gamebar"), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\09menu", "Icon", "DDORes.dll,-2207", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\09menu", "MUIVerb", "&Gaming", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\09menu\command", "", "explorer ms-settings:gaming-gamebar", RegistryValue::DeleteKey),
                 // Submenu 10: Accessibility
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\10menu", value_name: "Icon", value: RegistryValue::String("imageres.dll,-86"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\10menu", value_name: "MUIVerb", value: RegistryValue::String("Acc&essibility"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\10menu\command", value_name: "", value: RegistryValue::String("explorer ms-settings:easeofaccess"), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\10menu", "Icon", "imageres.dll,-86", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\10menu", "MUIVerb", "Acc&essibility", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\10menu\command", "", "explorer ms-settings:easeofaccess", RegistryValue::DeleteKey),
                 // Submenu 11: Privacy & security
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\11menu", value_name: "Icon", value: RegistryValue::String("%ProgramFiles%\\Windows Defender\\EppManifest.dll,-101"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\11menu", value_name: "MUIVerb", value: RegistryValue::String("Pri&vacy && security"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\11menu\command", value_name: "", value: RegistryValue::String("explorer ms-settings:privacy"), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\11menu", "Icon", "%ProgramFiles%\\Windows Defender\\EppManifest.dll,-101", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\11menu", "MUIVerb", "Pri&vacy && security", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\11menu\command", "", "explorer ms-settings:privacy", RegistryValue::DeleteKey),
                 // Submenu 12: Windows Update
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\12menu", value_name: "Icon", value: RegistryValue::String("imageres.dll,-1401"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\12menu", value_name: "MUIVerb", value: RegistryValue::String("&Windows Update"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings\shell\12menu\command", value_name: "", value: RegistryValue::String("explorer ms-settings:windowsupdate"), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\12menu", "Icon", "imageres.dll,-1401", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\12menu", "MUIVerb", "&Windows Update", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\Settings\shell\12menu\command", "", "explorer ms-settings:windowsupdate", RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Settings", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                crate::reg_del_key!("HKCR", r"DesktopBackground\Shell\Settings", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -2182,28 +1593,28 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds a comprehensive 'Edit or Run with' submenu to .ps1 PowerShell scripts.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r"SystemFileAssociations\.ps1\Shell\Edit-Run-with", value_name: "MUIVerb", value: RegistryValue::String("Edit or Run with"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"SystemFileAssociations\.ps1\Shell\Edit-Run-with", value_name: "SubCommands", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"SystemFileAssociations\.ps1\Shell\Edit-Run-with", "MUIVerb", "Edit or Run with", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"SystemFileAssociations\.ps1\Shell\Edit-Run-with", "SubCommands", "", RegistryValue::DeleteKey),
                 // Menu 1: Run with PowerShell
-                RegistryOp { hkey: "HKCR", subkey: r"SystemFileAssociations\.ps1\Shell\Edit-Run-with\shell\001flyout", value_name: "MUIVerb", value: RegistryValue::String("Run with PowerShell"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"SystemFileAssociations\.ps1\Shell\Edit-Run-with\shell\001flyout", value_name: "Icon", value: RegistryValue::String("powershell.exe"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"SystemFileAssociations\.ps1\Shell\Edit-Run-with\shell\001flyout\Command", value_name: "", value: RegistryValue::String("\"C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe\" \"-Command\" \"if((Get-ExecutionPolicy ) -ne 'AllSigned') { Set-ExecutionPolicy -Scope Process Bypass }; & '%1'\""), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"SystemFileAssociations\.ps1\Shell\Edit-Run-with\shell\001flyout", "MUIVerb", "Run with PowerShell", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"SystemFileAssociations\.ps1\Shell\Edit-Run-with\shell\001flyout", "Icon", "powershell.exe", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"SystemFileAssociations\.ps1\Shell\Edit-Run-with\shell\001flyout\Command", "", r#""C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe" "-Command" "if((Get-ExecutionPolicy ) -ne 'AllSigned') { Set-ExecutionPolicy -Scope Process Bypass }; & '%1'""#, RegistryValue::DeleteKey),
                 // Menu 2: Run with PowerShell as Admin
-                RegistryOp { hkey: "HKCR", subkey: r"SystemFileAssociations\.ps1\Shell\Edit-Run-with\shell\002flyout", value_name: "MUIVerb", value: RegistryValue::String("Run with PowerShell as administrator"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"SystemFileAssociations\.ps1\Shell\Edit-Run-with\shell\002flyout", value_name: "HasLUAShield", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"SystemFileAssociations\.ps1\Shell\Edit-Run-with\shell\002flyout", value_name: "Icon", value: RegistryValue::String("powershell.exe"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"SystemFileAssociations\.ps1\Shell\Edit-Run-with\shell\002flyout\Command", value_name: "", value: RegistryValue::String("\"C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe\" \"-Command\" \"\"& {Start-Process PowerShell.exe -ArgumentList '-ExecutionPolicy RemoteSigned -File \\\"%1\\\"' -Verb RunAs}\""), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"SystemFileAssociations\.ps1\Shell\Edit-Run-with\shell\002flyout", "MUIVerb", "Run with PowerShell as administrator", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"SystemFileAssociations\.ps1\Shell\Edit-Run-with\shell\002flyout", "HasLUAShield", "", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"SystemFileAssociations\.ps1\Shell\Edit-Run-with\shell\002flyout", "Icon", "powershell.exe", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"SystemFileAssociations\.ps1\Shell\Edit-Run-with\shell\002flyout\Command", "", r#""C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe" "-Command" ""& {Start-Process PowerShell.exe -ArgumentList '-ExecutionPolicy RemoteSigned -File \"%1\"' -Verb RunAs}""#, RegistryValue::DeleteKey),
                  // Menu 5: Edit with PowerShell ISE
-                RegistryOp { hkey: "HKCR", subkey: r"SystemFileAssociations\.ps1\Shell\Edit-Run-with\shell\005flyout", value_name: "MUIVerb", value: RegistryValue::String("Edit with PowerShell ISE"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"SystemFileAssociations\.ps1\Shell\Edit-Run-with\shell\005flyout", value_name: "Icon", value: RegistryValue::String("powershell_ise.exe"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"SystemFileAssociations\.ps1\Shell\Edit-Run-with\shell\005flyout\Command", value_name: "", value: RegistryValue::String("\"C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell_ise.exe\" \"%1\""), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"SystemFileAssociations\.ps1\Shell\Edit-Run-with\shell\005flyout", "MUIVerb", "Edit with PowerShell ISE", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"SystemFileAssociations\.ps1\Shell\Edit-Run-with\shell\005flyout", "Icon", "powershell_ise.exe", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"SystemFileAssociations\.ps1\Shell\Edit-Run-with\shell\005flyout\Command", "", r#""C:\Windows\System32\WindowsPowerShell\v1.0\powershell_ise.exe" "%1""#, RegistryValue::DeleteKey),
                 // Menu 9: Edit with Notepad
-                RegistryOp { hkey: "HKCR", subkey: r"SystemFileAssociations\.ps1\Shell\Edit-Run-with\shell\009flyout", value_name: "MUIVerb", value: RegistryValue::String("Edit with Notepad"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"SystemFileAssociations\.ps1\Shell\Edit-Run-with\shell\009flyout", value_name: "Icon", value: RegistryValue::String("notepad.exe"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"SystemFileAssociations\.ps1\Shell\Edit-Run-with\shell\009flyout\Command", value_name: "", value: RegistryValue::String("\"C:\\Windows\\System32\\notepad.exe\" \"%1\""), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"SystemFileAssociations\.ps1\Shell\Edit-Run-with\shell\009flyout", "MUIVerb", "Edit with Notepad", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"SystemFileAssociations\.ps1\Shell\Edit-Run-with\shell\009flyout", "Icon", "notepad.exe", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"SystemFileAssociations\.ps1\Shell\Edit-Run-with\shell\009flyout\Command", "", r#""C:\Windows\System32\notepad.exe" "%1""#, RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                RegistryOp { hkey: "HKCR", subkey: r"SystemFileAssociations\.ps1\Shell\Edit-Run-with", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                crate::reg_del_key!("HKCR", r"SystemFileAssociations\.ps1\Shell\Edit-Run-with", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -2213,13 +1624,13 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds an option to empty the contents of a folder.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\EmptyFolder", value_name: "Icon", value: RegistryValue::String("shell32.dll,-16715"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\EmptyFolder", value_name: "MUIVerb", value: RegistryValue::String("Empty folder"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\EmptyFolder", value_name: "Position", value: RegistryValue::String("bottom"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\EmptyFolder\command", value_name: "", value: RegistryValue::String("cmd /c title Empty \"%1\" & (cmd /c echo. & echo This will permanently delete all contents in only this folder and not subfolders. & echo. & choice /c:yn /m \"Are you sure?\") & (if errorlevel 2 exit) & (cmd /c \"cd /d %1 && del /f /q *.*\")"), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"Directory\shell\EmptyFolder", "Icon", "shell32.dll,-16715", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Directory\shell\EmptyFolder", "MUIVerb", "Empty folder", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Directory\shell\EmptyFolder", "Position", "bottom", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Directory\shell\EmptyFolder\command", "", r#"cmd /c title Empty "%1" & (cmd /c echo. & echo This will permanently delete all contents in only this folder and not subfolders. & echo. & choice /c:yn /m "Are you sure?") & (if errorlevel 2 exit) & (cmd /c "cd /d %1 && del /f /q *.*")"#, RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\EmptyFolder", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                crate::reg_del_key!("HKCR", r"Directory\shell\EmptyFolder", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -2229,14 +1640,14 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds 'Empty Recycle Bin' to the desktop context menu.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\empty", value_name: "CommandStateHandler", value: RegistryValue::String("{c9298eef-69dd-4cdd-b153-bdbc38486781}"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\empty", value_name: "Description", value: RegistryValue::String("@shell32.dll,-31332"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\empty", value_name: "Icon", value: RegistryValue::String("%SystemRoot%\\System32\\imageres.dll,-54"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\empty", value_name: "MUIVerb", value: RegistryValue::String("@shell32.dll,-10564"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\empty\command", value_name: "DelegateExecute", value: RegistryValue::String("{48527bb3-e8de-450b-8910-8c4099cb8624}"), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"Directory\Background\shell\empty", "CommandStateHandler", "{c9298eef-69dd-4cdd-b153-bdbc38486781}", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Directory\Background\shell\empty", "Description", "@shell32.dll,-31332", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Directory\Background\shell\empty", "Icon", "%SystemRoot%\\System32\\imageres.dll,-54", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Directory\Background\shell\empty", "MUIVerb", "@shell32.dll,-10564", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Directory\Background\shell\empty\command", "DelegateExecute", "{48527bb3-e8de-450b-8910-8c4099cb8624}", RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\empty", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                crate::reg_del_key!("HKCR", r"Directory\Background\shell\empty", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -2246,21 +1657,21 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds a menu to Enable or Disable new USB connections (useful for security).",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\USB", value_name: "Icon", value: RegistryValue::String("hotplug.dll,-100"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\USB", value_name: "MUIVerb", value: RegistryValue::String("USB connections"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\USB", value_name: "Position", value: RegistryValue::String("Bottom"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\USB", value_name: "SubCommands", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\USB", "Icon", "hotplug.dll,-100", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\USB", "MUIVerb", "USB connections", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\USB", "Position", "Bottom", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\USB", "SubCommands", "", RegistryValue::DeleteKey),
                 // Menu 1: Enable
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\USB\shell\01menu", value_name: "HasLUAShield", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\USB\shell\01menu", value_name: "MUIVerb", value: RegistryValue::String("Enable new USB connections"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\USB\shell\01menu\command", value_name: "", value: RegistryValue::String("PowerShell -windowstyle hidden -Command \"Start-Process cmd -ArgumentList '/s,/c,REG ADD \"HKLM\\SYSTEM\\CurrentControlSet\\Services\\USBSTOR\" /V Start /T REG_DWORD /D 3 /F' -Verb RunAs\""), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\USB\shell\01menu", "HasLUAShield", "", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\USB\shell\01menu", "MUIVerb", "Enable new USB connections", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\USB\shell\01menu\command", "", r#"PowerShell -windowstyle hidden -Command "Start-Process cmd -ArgumentList '/s,/c,REG ADD \"HKLM\SYSTEM\CurrentControlSet\Services\USBSTOR\" /V Start /T REG_DWORD /D 3 /F' -Verb RunAs""#, RegistryValue::DeleteKey),
                 // Menu 2: Disable
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\USB\shell\02menu", value_name: "HasLUAShield", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\USB\shell\02menu", value_name: "MUIVerb", value: RegistryValue::String("Disable new USB connections"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\USB\shell\02menu\command", value_name: "", value: RegistryValue::String("PowerShell -windowstyle hidden -Command \"Start-Process cmd -ArgumentList '/s,/c,REG ADD \"HKLM\\SYSTEM\\CurrentControlSet\\Services\\USBSTOR\" /V Start /T REG_DWORD /D 4 /F' -Verb RunAs\""), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\USB\shell\02menu", "HasLUAShield", "", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\USB\shell\02menu", "MUIVerb", "Disable new USB connections", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\USB\shell\02menu\command", "", r#"PowerShell -windowstyle hidden -Command "Start-Process cmd -ArgumentList '/s,/c,REG ADD \"HKLM\SYSTEM\CurrentControlSet\Services\USBSTOR\" /V Start /T REG_DWORD /D 4 /F' -Verb RunAs""#, RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\USB", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                crate::reg_del_key!("HKCR", r"DesktopBackground\Shell\USB", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -2270,10 +1681,10 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds EFS Encrypt and Decrypt options to the right-click menu.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCU", subkey: r"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", value_name: "EncryptionContextMenu", value: RegistryValue::Dword(1), stock_value: RegistryValue::Delete },
+                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "EncryptionContextMenu", 1, RegistryValue::Delete),
             ],
             disabled_ops: Some(&[
-                RegistryOp { hkey: "HKCU", subkey: r"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", value_name: "EncryptionContextMenu", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
+                crate::reg_del!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "EncryptionContextMenu", RegistryValue::Delete),
             ]),
         },
         crate::tweak! {
@@ -2283,16 +1694,16 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds an option to find and recursively delete empty folders.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\FindAndDeleteEmptyFolders", value_name: "", value: RegistryValue::String("Find and Delete Empty Folders"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\FindAndDeleteEmptyFolders", value_name: "Icon", value: RegistryValue::String("shell32.dll,-16715"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\FindAndDeleteEmptyFolders\command", value_name: "", value: RegistryValue::String("powershell -NoProfile -Command \"& {Get-ChildItem -Path '%1' -Recurse -Directory | Where-Object {!(Get-ChildItem -Path $_.FullName)} | ForEach-Object {Write-Host 'Empty folder found:' $_.FullName; $response = Read-Host 'Do you want to delete this folder (Y/N)?'; If ($response -eq 'Y') {Remove-Item -Path $_.FullName -Force}}}\""), stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\FindAndDeleteEmptyFolders", value_name: "", value: RegistryValue::String("Find and Delete Empty Folders"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\FindAndDeleteEmptyFolders", value_name: "Icon", value: RegistryValue::String("imageres.dll,-1025"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\FindAndDeleteEmptyFolders\command", value_name: "", value: RegistryValue::String("powershell -NoProfile -Command \"& {Get-ChildItem -Path '%1' -Recurse -Directory | Where-Object {!(Get-ChildItem -Path $_.FullName)} | ForEach-Object {Write-Host 'Empty folder found:' $_.FullName; $response = Read-Host 'Do you want to delete this folder (Y/N)?'; If ($response -eq 'Y') {Remove-Item -Path $_.FullName -Force}}}\""), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"Directory\shell\FindAndDeleteEmptyFolders", "", "Find and Delete Empty Folders", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Directory\shell\FindAndDeleteEmptyFolders", "Icon", "shell32.dll,-16715", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Directory\shell\FindAndDeleteEmptyFolders\command", "", r#"powershell -NoProfile -Command "& {Get-ChildItem -Path '%1' -Recurse -Directory | Where-Object {!(Get-ChildItem -Path $_.FullName)} | ForEach-Object {Write-Host 'Empty folder found:' $_.FullName; $response = Read-Host 'Do you want to delete this folder (Y/N)?'; If ($response -eq 'Y') {Remove-Item -Path $_.FullName -Force}}}"#, RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"Directory\Background\shell\FindAndDeleteEmptyFolders", "", "Find and Delete Empty Folders", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Directory\Background\shell\FindAndDeleteEmptyFolders", "Icon", "imageres.dll,-1025", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Directory\Background\shell\FindAndDeleteEmptyFolders\command", "", r#"powershell -NoProfile -Command "& {Get-ChildItem -Path '%1' -Recurse -Directory | Where-Object {!(Get-ChildItem -Path $_.FullName)} | ForEach-Object {Write-Host 'Empty folder found:' $_.FullName; $response = Read-Host 'Do you want to delete this folder (Y/N)?'; If ($response -eq 'Y') {Remove-Item -Path $_.FullName -Force}}}"#, RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\FindAndDeleteEmptyFolders", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\FindAndDeleteEmptyFolders", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                crate::reg_del_key!("HKCR", r"Directory\shell\FindAndDeleteEmptyFolders", "", RegistryValue::DeleteKey),
+                 crate::reg_del_key!("HKCR", r"Directory\Background\shell\FindAndDeleteEmptyFolders", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -2302,20 +1713,20 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds a context menu to calculate file hashes (MD5, SHA1, SHA256, etc.).",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r"*\shell\hash", value_name: "MUIVerb", value: RegistryValue::String("Hash value"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"*\shell\hash", value_name: "subCommands", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"*\shell\hash", "MUIVerb", "Hash value", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"*\shell\hash", "subCommands", "", RegistryValue::DeleteKey),
                 // MD5
-                RegistryOp { hkey: "HKCR", subkey: r"*\shell\hash\shell\01menu", value_name: "MUIVerb", value: RegistryValue::String("MD5"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"*\shell\hash\shell\01menu\command", value_name: "", value: RegistryValue::String("cmd /c echo \\\"%1\\\" | powershell -nop $file=[string]$input; get-filehash -literalpath $file.substring(2,$file.length - 5) -algorithm MD5 ^| format-list; Start-Sleep 3600"), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"*\shell\hash\shell\01menu", "MUIVerb", "MD5", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"*\shell\hash\shell\01menu\command", "", r#"cmd /c echo \"%1\" | powershell -nop $file=[string]$input; get-filehash -literalpath $file.substring(2,$file.length - 5) -algorithm MD5 ^| format-list; Start-Sleep 3600"#, RegistryValue::DeleteKey),
                  // SHA256
-                RegistryOp { hkey: "HKCR", subkey: r"*\shell\hash\shell\03menu", value_name: "MUIVerb", value: RegistryValue::String("SHA256"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"*\shell\hash\shell\03menu\command", value_name: "", value: RegistryValue::String("cmd /c echo \\\"%1\\\" | powershell -nop $file=[string]$input; get-filehash -literalpath $file.substring(2,$file.length - 5) -algorithm SHA256 ^| format-list; Start-Sleep 3600"), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"*\shell\hash\shell\03menu", "MUIVerb", "SHA256", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"*\shell\hash\shell\03menu\command", "", r#"cmd /c echo \"%1\" | powershell -nop $file=[string]$input; get-filehash -literalpath $file.substring(2,$file.length - 5) -algorithm SHA256 ^| format-list; Start-Sleep 3600"#, RegistryValue::DeleteKey),
                  // Show All
-                RegistryOp { hkey: "HKCR", subkey: r"*\shell\hash\shell\08menu", value_name: "MUIVerb", value: RegistryValue::String("Show all"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"*\shell\hash\shell\08menu\command", value_name: "", value: RegistryValue::String("cmd /c echo \\\"%1\\\" | powershell -nop $raw=[string]$input; $file=$raw.substring(2,$raw.length - 5); \\\"Path:`n$file`n\\\"; @(foreach ($a in @('MD5','SHA1','SHA256','SHA384','SHA512','MACTripleDES','RIPEMD160')) { get-filehash -literalpath $file -algorithm $a }) ^| foreach { \\\"$($_.Algorithm):`n$($_.Hash)`n\\\" }; Start-Sleep 3600"), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"*\shell\hash\shell\08menu", "MUIVerb", "Show all", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"*\shell\hash\shell\08menu\command", "", r#"cmd /c echo \"%1\" | powershell -nop $raw=[string]$input; $file=$raw.substring(2,$raw.length - 5); \"Path:`n$file`n\"; @(foreach ($a in @('MD5','SHA1','SHA256','SHA384','SHA512','MACTripleDES','RIPEMD160')) { get-filehash -literalpath $file -algorithm $a }) ^| foreach { \"$($_.Algorithm):`n$($_.Hash)`n\" }; Start-Sleep 3600"#, RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                RegistryOp { hkey: "HKCR", subkey: r"*\shell\hash", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                crate::reg_del_key!("HKCR", r"*\shell\hash", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -2325,19 +1736,19 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds a menu to toggle Hidden Items and Protected OS Files visibility.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\HiddenFiles", value_name: "Icon", value: RegistryValue::String("imageres.dll,-5314"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\HiddenFiles", value_name: "MUIVerb", value: RegistryValue::String("Hidden items"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\HiddenFiles", value_name: "Position", value: RegistryValue::String("Bottom"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\HiddenFiles", value_name: "SubCommands", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"Directory\Background\shell\HiddenFiles", "Icon", "imageres.dll,-5314", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Directory\Background\shell\HiddenFiles", "MUIVerb", "Hidden items", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Directory\Background\shell\HiddenFiles", "Position", "Bottom", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Directory\Background\shell\HiddenFiles", "SubCommands", "", RegistryValue::DeleteKey),
                  // Toggle Hidden Files
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\HiddenFiles\shell\Windows.ShowHiddenFiles", value_name: "CommandStateSync", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\HiddenFiles\shell\Windows.ShowHiddenFiles", value_name: "Description", value: RegistryValue::String("@shell32.dll,-37573"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\HiddenFiles\shell\Windows.ShowHiddenFiles", value_name: "ExplorerCommandHandler", value: RegistryValue::String("{f7300245-1f4b-41ba-8948-6fd392064494}"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\HiddenFiles\shell\Windows.ShowHiddenFiles", value_name: "Icon", value: RegistryValue::String("imageres.dll,-5314"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\HiddenFiles\shell\Windows.ShowHiddenFiles", value_name: "MUIVerb", value: RegistryValue::String("Hide/Show Hidden items"), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"Directory\Background\shell\HiddenFiles\shell\Windows.ShowHiddenFiles", "CommandStateSync", "", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Directory\Background\shell\HiddenFiles\shell\Windows.ShowHiddenFiles", "Description", "@shell32.dll,-37573", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Directory\Background\shell\HiddenFiles\shell\Windows.ShowHiddenFiles", "ExplorerCommandHandler", "{f7300245-1f4b-41ba-8948-6fd392064494}", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Directory\Background\shell\HiddenFiles\shell\Windows.ShowHiddenFiles", "Icon", "imageres.dll,-5314", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Directory\Background\shell\HiddenFiles\shell\Windows.ShowHiddenFiles", "MUIVerb", "Hide/Show Hidden items", RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\HiddenFiles", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                crate::reg_del_key!("HKCR", r"Directory\Background\shell\HiddenFiles", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -2347,12 +1758,12 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds an 'Install' option for .cab files using DISM.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r"CABFolder\Shell\RunAs", value_name: "", value: RegistryValue::String("Install"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"CABFolder\Shell\RunAs", value_name: "HasLUAShield", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"CABFolder\Shell\RunAs\Command", value_name: "", value: RegistryValue::String("cmd /k dism /online /add-package /packagepath:\"%1\""), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"CABFolder\Shell\RunAs", "", "Install", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"CABFolder\Shell\RunAs", "HasLUAShield", "", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"CABFolder\Shell\RunAs\Command", "", r#"cmd /k dism /online /add-package /packagepath:"%1""#, RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                RegistryOp { hkey: "HKCR", subkey: r"CABFolder\Shell\RunAs", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                crate::reg_del_key!("HKCR", r"CABFolder\Shell\RunAs", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -2362,14 +1773,14 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds a 'Lock Drive' option for BitLocker-encrypted drives.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r"Drive\shell\lock-bde", value_name: "AppliesTo", value: RegistryValue::String("System.Volume.BitLockerProtection:=1 OR System.Volume.BitLockerProtection:=3 OR System.Volume.BitLockerProtection:=5 NOT C:"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Drive\shell\lock-bde", value_name: "", value: RegistryValue::String("Lock Drive"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Drive\shell\lock-bde", value_name: "HasLUAShield", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Drive\shell\lock-bde", value_name: "MultiSelectModel", value: RegistryValue::String("Single"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Drive\shell\lock-bde\command", value_name: "", value: RegistryValue::String("PowerShell -windowstyle hidden -command \"Start-Process cmd -ArgumentList '/s,/c, lock-bde %1' -Verb runAs\""), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"Drive\shell\lock-bde", "AppliesTo", "System.Volume.BitLockerProtection:=1 OR System.Volume.BitLockerProtection:=3 OR System.Volume.BitLockerProtection:=5 NOT C:", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Drive\shell\lock-bde", "", "Lock Drive", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Drive\shell\lock-bde", "HasLUAShield", "", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Drive\shell\lock-bde", "MultiSelectModel", "Single", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Drive\shell\lock-bde\command", "", r#"PowerShell -windowstyle hidden -command "Start-Process cmd -ArgumentList '/s,/c, lock-bde %1' -Verb runAs""#, RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                RegistryOp { hkey: "HKCR", subkey: r"Drive\shell\lock-bde", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                crate::reg_del_key!("HKCR", r"Drive\shell\lock-bde", "", RegistryValue::DeleteKey),
             ]),
         },
         // Batch 5 Tweaks
@@ -2380,17 +1791,17 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds a menu to quickly switch between Private and Public network profiles.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\shell\NetworkLocation", value_name: "MUIVerb", value: RegistryValue::String("Network Location"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\shell\NetworkLocation", value_name: "Icon", value: RegistryValue::String("imageres.dll,-25"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\shell\NetworkLocation", value_name: "Position", value: RegistryValue::String("Middle"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\shell\NetworkLocation", value_name: "SubCommands", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\shell\NetworkLocation\shell\01menu", value_name: "MUIVerb", value: RegistryValue::String("Change to Private network"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\shell\NetworkLocation\shell\01menu\command", value_name: "", value: RegistryValue::String(r#"PowerShell -windowstyle hidden -Command "Start-Process cmd -ArgumentList '/s,/c,PowerShell $net = get-netconnectionprofile;Set-NetConnectionProfile -Name $net.Name -NetworkCategory Private' -Verb RunAs""#), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\shell\NetworkLocation\shell\02menu", value_name: "MUIVerb", value: RegistryValue::String("Change to Public network"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\shell\NetworkLocation\shell\02menu\command", value_name: "", value: RegistryValue::String(r#"PowerShell -windowstyle hidden -Command "Start-Process cmd -ArgumentList '/s,/c,PowerShell $net = get-netconnectionprofile;Set-NetConnectionProfile -Name $net.Name -NetworkCategory Public' -Verb RunAs""#), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"DesktopBackground\shell\NetworkLocation", "MUIVerb", "Network Location", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\shell\NetworkLocation", "Icon", "imageres.dll,-25", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\shell\NetworkLocation", "Position", "Middle", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\shell\NetworkLocation", "SubCommands", "", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\shell\NetworkLocation\shell\01menu", "MUIVerb", "Change to Private network", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\shell\NetworkLocation\shell\01menu\command", "", r#"PowerShell -windowstyle hidden -Command "Start-Process cmd -ArgumentList '/s,/c,PowerShell $net = get-netconnectionprofile;Set-NetConnectionProfile -Name $net.Name -NetworkCategory Private' -Verb RunAs""#, RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\shell\NetworkLocation\shell\02menu", "MUIVerb", "Change to Public network", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\shell\NetworkLocation\shell\02menu\command", "", r#"PowerShell -windowstyle hidden -Command "Start-Process cmd -ArgumentList '/s,/c,PowerShell $net = get-netconnectionprofile;Set-NetConnectionProfile -Name $net.Name -NetworkCategory Public' -Verb RunAs""#, RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\shell\NetworkLocation", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                crate::reg_del_key!("HKCR", r"DesktopBackground\shell\NetworkLocation", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -2400,13 +1811,13 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds 'Close All Apps' to the Desktop context menu to kill most user apps.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\CloseAllApps", value_name: "MUIVerb", value: RegistryValue::String("Close All Apps"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\CloseAllApps", value_name: "icon", value: RegistryValue::String("imageres.dll,-5102"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\CloseAllApps", value_name: "Position", value: RegistryValue::String("Bottom"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\CloseAllApps\command", value_name: "", value: RegistryValue::String(r#"PowerShell -Command "Get-Process |? {$_.MainWindowTitle -ne \"\" -and $_.Id -ne $PID -and $_.ProcessName -ne \"explorer\"} | Stop-Process -Force""#), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\CloseAllApps", "MUIVerb", "Close All Apps", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\CloseAllApps", "icon", "imageres.dll,-5102", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\CloseAllApps", "Position", "Bottom", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\CloseAllApps\command", "", r#"PowerShell -Command "Get-Process |? {$_.MainWindowTitle -ne \"\" -and $_.Id -ne $PID -and $_.ProcessName -ne \"explorer\"} | Stop-Process -Force""#, RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\CloseAllApps", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                crate::reg_del_key!("HKCR", r"DesktopBackground\Shell\CloseAllApps", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -2416,13 +1827,13 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds 'Create Restore Point' to the background context menu.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\Create Restore Point", value_name: "Icon", value: RegistryValue::String("SystemPropertiesProtection.exe"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\Create Restore Point\command", value_name: "", value: RegistryValue::String(r#"PowerShell -windowstyle hidden -command "Start-Process cmd -ArgumentList '/s,/c, PowerShell Checkpoint-Computer -Description \"Manual\" -RestorePointType \"MODIFY_SETTINGS\"' -Verb runAs""#), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"Directory\Background\shell\Create Restore Point", "Icon", "SystemPropertiesProtection.exe", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Directory\Background\shell\Create Restore Point\command", "", r#"PowerShell -windowstyle hidden -command "Start-Process cmd -ArgumentList '/s,/c, PowerShell Checkpoint-Computer -Description \"Manual\" -RestorePointType \"MODIFY_SETTINGS\"' -Verb runAs""#, RegistryValue::DeleteKey),
                  // Enable System Restore frequency (set to 0 to allow creating points frequently)
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\SystemRestore", value_name: "SystemRestorePointCreationFrequency", value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete },
+                crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\SystemRestore", "SystemRestorePointCreationFrequency", 0, RegistryValue::Delete),
             ],
             disabled_ops: Some(&[
-                 RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\Create Restore Point", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                 crate::reg_del_key!("HKCR", r"Directory\Background\shell\Create Restore Point", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -2432,17 +1843,17 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds a menu to Turn On/Off 'Automatically hide the taskbar'.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\HideTaskbar", value_name: "Icon", value: RegistryValue::String("imageres.dll,-80"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\HideTaskbar", value_name: "MUIVerb", value: RegistryValue::String("Automatically hide taskbar"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\HideTaskbar", value_name: "Position", value: RegistryValue::String("Bottom"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\HideTaskbar", value_name: "SubCommands", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\HideTaskbar\shell\001flyout", value_name: "MUIVerb", value: RegistryValue::String("Turn on"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\HideTaskbar\shell\001flyout\command", value_name: "", value: RegistryValue::String(r#"powershell -command "&{$p='HKCU:SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\StuckRects3';$v=(Get-ItemProperty -Path $p).Settings;$v[8]=3;&Set-ItemProperty -Path $p -Name Settings -Value $v;&Stop-Process -f -ProcessName explorer}""#), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\HideTaskbar\shell\002flyout", value_name: "MUIVerb", value: RegistryValue::String("Turn off"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\HideTaskbar\shell\002flyout\command", value_name: "", value: RegistryValue::String(r#"powershell -command "&{$p='HKCU:SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\StuckRects3';$v=(Get-ItemProperty -Path $p).Settings;$v[8]=2;&Set-ItemProperty -Path $p -Name Settings -Value $v;&Stop-Process -f -ProcessName explorer}""#), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\HideTaskbar", "Icon", "imageres.dll,-80", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\HideTaskbar", "MUIVerb", "Automatically hide taskbar", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\HideTaskbar", "Position", "Bottom", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\HideTaskbar", "SubCommands", "", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\HideTaskbar\shell\001flyout", "MUIVerb", "Turn on", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\HideTaskbar\shell\001flyout\command", "", r#"powershell -command "&{$p='HKCU:SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\StuckRects3';$v=(Get-ItemProperty -Path $p).Settings;$v[8]=3;&Set-ItemProperty -Path $p -Name Settings -Value $v;&Stop-Process -f -ProcessName explorer}""#, RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\HideTaskbar\shell\002flyout", "MUIVerb", "Turn off", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\HideTaskbar\shell\002flyout\command", "", r#"powershell -command "&{$p='HKCU:SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\StuckRects3';$v=(Get-ItemProperty -Path $p).Settings;$v[8]=2;&Set-ItemProperty -Path $p -Name Settings -Value $v;&Stop-Process -f -ProcessName explorer}""#, RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\HideTaskbar", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                crate::reg_del_key!("HKCR", r"DesktopBackground\Shell\HideTaskbar", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -2452,13 +1863,13 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds 'Boot to Advanced Startup' to Desktop context menu.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\AdvancedStartup", value_name: "icon", value: RegistryValue::String("shell32.dll,-16826"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\AdvancedStartup", value_name: "MUIVerb", value: RegistryValue::String("Boot to Advanced Startup"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\AdvancedStartup", value_name: "Position", value: RegistryValue::String("Bottom"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\AdvancedStartup\command", value_name: "", value: RegistryValue::String("shutdown.exe /r /o /f /t 00"), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\AdvancedStartup", "icon", "shell32.dll,-16826", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\AdvancedStartup", "MUIVerb", "Boot to Advanced Startup", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\AdvancedStartup", "Position", "Bottom", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\AdvancedStartup\command", "", "shutdown.exe /r /o /f /t 00", RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\AdvancedStartup", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                crate::reg_del_key!("HKCR", r"DesktopBackground\Shell\AdvancedStartup", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -2468,25 +1879,25 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds a menu to switch Power Plans (Balanced, High Performance, etc.).",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\PowerPlan", value_name: "Icon", value: RegistryValue::String("powercpl.dll"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\PowerPlan", value_name: "MUIVerb", value: RegistryValue::String("Choose Power Plan"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\PowerPlan", value_name: "Position", value: RegistryValue::String("Middle"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\PowerPlan", value_name: "SubCommands", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\PowerPlan", "Icon", "powercpl.dll", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\PowerPlan", "MUIVerb", "Choose Power Plan", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\PowerPlan", "Position", "Middle", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\PowerPlan", "SubCommands", "", RegistryValue::DeleteKey),
                 // Balanced
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\PowerPlan\shell\01menu", value_name: "MUIVerb", value: RegistryValue::String("Balanced"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\PowerPlan\shell\01menu", value_name: "Icon", value: RegistryValue::String("powercpl.dll"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\PowerPlan\shell\01menu\command", value_name: "", value: RegistryValue::String("powercfg.exe /setactive 381b4222-f694-41f0-9685-ff5bb260df2e"), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\PowerPlan\shell\01menu", "MUIVerb", "Balanced", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\PowerPlan\shell\01menu", "Icon", "powercpl.dll", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\PowerPlan\shell\01menu\command", "", "powercfg.exe /setactive 381b4222-f694-41f0-9685-ff5bb260df2e", RegistryValue::DeleteKey),
                 // High Performance
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\PowerPlan\shell\02menu", value_name: "MUIVerb", value: RegistryValue::String("High Performance"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\PowerPlan\shell\02menu", value_name: "Icon", value: RegistryValue::String("powercpl.dll"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\PowerPlan\shell\02menu\command", value_name: "", value: RegistryValue::String("powercfg.exe /setactive 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c"), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\PowerPlan\shell\02menu", "MUIVerb", "High Performance", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\PowerPlan\shell\02menu", "Icon", "powercpl.dll", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\PowerPlan\shell\02menu\command", "", "powercfg.exe /setactive 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c", RegistryValue::DeleteKey),
                  // Power Saver
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\PowerPlan\shell\03menu", value_name: "MUIVerb", value: RegistryValue::String("Power Saver"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\PowerPlan\shell\03menu", value_name: "Icon", value: RegistryValue::String("powercpl.dll"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\PowerPlan\shell\03menu\command", value_name: "", value: RegistryValue::String("powercfg.exe /setactive a1841308-3541-4fab-bc81-f71556f20b4a"), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\PowerPlan\shell\03menu", "MUIVerb", "Power Saver", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\PowerPlan\shell\03menu", "Icon", "powercpl.dll", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\PowerPlan\shell\03menu\command", "", "powercfg.exe /setactive a1841308-3541-4fab-bc81-f71556f20b4a", RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\PowerPlan", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                crate::reg_del_key!("HKCR", r"DesktopBackground\Shell\PowerPlan", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -2503,13 +1914,13 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
                 // Checks: RegistryValue definition. Usually handled as String in Rust code if just setting data.
                 // However, `display.dll,-4` is a resource string.
                 // Let's use simple string values where possible.
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Display", value_name: "Icon", value: RegistryValue::String("display.dll,-1"), stock_value: RegistryValue::DeleteKey }, // Simplified icon
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Display", value_name: "MUIVerb", value: RegistryValue::String("Display settings"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Display", value_name: "Position", value: RegistryValue::String("Bottom"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Display\command", value_name: "DelegateExecute", value: RegistryValue::String("{556FF0D6-A1EE-49E5-9FA4-90AE116AD744}"), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\Display", "Icon", "display.dll,-1", RegistryValue::DeleteKey), // Simplified icon
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\Display", "MUIVerb", "Display settings", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\Display", "Position", "Bottom", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\Display\command", "DelegateExecute", "{556FF0D6-A1EE-49E5-9FA4-90AE116AD744}", RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Display", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                crate::reg_del_key!("HKCR", r"DesktopBackground\Shell\Display", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -2519,15 +1930,15 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds 'Optimize' option to Drive context menu (Defrag/Trim).",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r"Drive\shell\Optimize", value_name: "Icon", value: RegistryValue::String("dfrgui.exe"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Drive\shell\Optimize", value_name: "SubCommands", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Drive\Shell\Optimize\shell\001menu", value_name: "MUIVerb", value: RegistryValue::String("Analyze Drive"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Drive\Shell\Optimize\shell\001menu\command", value_name: "", value: RegistryValue::String(r#"PowerShell -windowstyle hidden -command "Start-Process cmd -ArgumentList '/s,/k, defrag %1 /A' -Verb runAs""#), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Drive\Shell\Optimize\shell\002menu", value_name: "MUIVerb", value: RegistryValue::String("Optimize Drive"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Drive\Shell\Optimize\shell\002menu\command", value_name: "", value: RegistryValue::String(r#"PowerShell -windowstyle hidden -command "Start-Process cmd -ArgumentList '/s,/k, defrag %1 /O /H' -Verb runAs""#), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"Drive\shell\Optimize", "Icon", "dfrgui.exe", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Drive\shell\Optimize", "SubCommands", "", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Drive\Shell\Optimize\shell\001menu", "MUIVerb", "Analyze Drive", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Drive\Shell\Optimize\shell\001menu\command", "", r#"PowerShell -windowstyle hidden -command "Start-Process cmd -ArgumentList '/s,/k, defrag %1 /A' -Verb runAs""#, RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Drive\Shell\Optimize\shell\002menu", "MUIVerb", "Optimize Drive", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Drive\Shell\Optimize\shell\002menu\command", "", r#"PowerShell -windowstyle hidden -command "Start-Process cmd -ArgumentList '/s,/k, defrag %1 /O /H' -Verb runAs""#, RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                RegistryOp { hkey: "HKCR", subkey: r"Drive\shell\Optimize", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                crate::reg_del_key!("HKCR", r"Drive\shell\Optimize", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -2537,23 +1948,23 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds an expandable 'Open in Windows Terminal' menu with Profiles.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\OpenWTHere", value_name: "MUIVerb", value: RegistryValue::String("Open in Windows Terminal"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\OpenWTHere", value_name: "SubCommands", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\Shell\OpenWTHere\shell\001flyout", value_name: "MUIVerb", value: RegistryValue::String("Default Profile"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\Shell\OpenWTHere\shell\001flyout\command", value_name: "", value: RegistryValue::String(r#"cmd.exe /c start wt.exe -d "%1\.""#), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\Shell\OpenWTHere\shell\002flyout", value_name: "MUIVerb", value: RegistryValue::String("Command Prompt"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\Shell\OpenWTHere\shell\002flyout\command", value_name: "", value: RegistryValue::String(r#"cmd.exe /c start wt.exe -p "Command Prompt" -d "%1\.""#), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\Shell\OpenWTHere\shell\003flyout", value_name: "MUIVerb", value: RegistryValue::String("PowerShell"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\Shell\OpenWTHere\shell\003flyout\command", value_name: "", value: RegistryValue::String(r#"cmd.exe /c start wt.exe -p "Windows PowerShell" -d "%1\.""#), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"Directory\shell\OpenWTHere", "MUIVerb", "Open in Windows Terminal", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Directory\shell\OpenWTHere", "SubCommands", "", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Directory\Shell\OpenWTHere\shell\001flyout", "MUIVerb", "Default Profile", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Directory\Shell\OpenWTHere\shell\001flyout\command", "", r#"cmd.exe /c start wt.exe -d "%1\.""#, RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Directory\Shell\OpenWTHere\shell\002flyout", "MUIVerb", "Command Prompt", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Directory\Shell\OpenWTHere\shell\002flyout\command", "", r#"cmd.exe /c start wt.exe -p "Command Prompt" -d "%1\.""#, RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Directory\Shell\OpenWTHere\shell\003flyout", "MUIVerb", "PowerShell", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Directory\Shell\OpenWTHere\shell\003flyout\command", "", r#"cmd.exe /c start wt.exe -p "Windows PowerShell" -d "%1\.""#, RegistryValue::DeleteKey),
                 // Background
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\OpenWTHere", value_name: "MUIVerb", value: RegistryValue::String("Open in Windows Terminal"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\OpenWTHere", value_name: "SubCommands", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\Shell\OpenWTHere\shell\001flyout", value_name: "MUIVerb", value: RegistryValue::String("Default Profile"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\Shell\OpenWTHere\shell\001flyout\command", value_name: "", value: RegistryValue::String(r#"cmd.exe /c start wt.exe -d "%V\.""#), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"Directory\Background\shell\OpenWTHere", "MUIVerb", "Open in Windows Terminal", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Directory\Background\shell\OpenWTHere", "SubCommands", "", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Directory\Background\Shell\OpenWTHere\shell\001flyout", "MUIVerb", "Default Profile", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Directory\Background\Shell\OpenWTHere\shell\001flyout\command", "", r#"cmd.exe /c start wt.exe -d "%V\.""#, RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\OpenWTHere", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\OpenWTHere", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                crate::reg_del_key!("HKCR", r"Directory\shell\OpenWTHere", "", RegistryValue::DeleteKey),
+                crate::reg_del_key!("HKCR", r"Directory\Background\shell\OpenWTHere", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -2564,12 +1975,12 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             effect: TweakEffect::Immediate,
             // The enable op should DELETE the Blocked entry.
             enabled_ops: &[
-                RegistryOp { hkey: "HKCU", subkey: r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", value_name: "{2430F218-B743-4FD6-97BF-5C76541B4AE9}", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", value_name: "{2430F218-B743-4FD6-97BF-5C76541B4AE9}", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
+                crate::reg_del!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", "{2430F218-B743-4FD6-97BF-5C76541B4AE9}", RegistryValue::Delete),
+                crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", "{2430F218-B743-4FD6-97BF-5C76541B4AE9}", RegistryValue::Delete),
             ],
             // The disable op should ADD the Blocked entry (Remove 'Edit with Paint').
             disabled_ops: Some(&[
-                RegistryOp { hkey: "HKCU", subkey: r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", value_name: "{2430F218-B743-4FD6-97BF-5C76541B4AE9}", value: RegistryValue::String("Edit with Paint"), stock_value: RegistryValue::Delete },
+                crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", "{2430F218-B743-4FD6-97BF-5C76541B4AE9}", "Edit with Paint", RegistryValue::Delete),
             ]),
         },
         // Batch 6
@@ -2580,15 +1991,15 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Restores the 'Give access to' (Sharing) option in context menus. Useful for network sharing.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r"*\shellex\ContextMenuHandlers\Sharing", value_name: "", value: RegistryValue::String("{f81e9010-6ea4-11ce-a7ff-00aa003ca9f6}"), stock_value: RegistryValue::Delete },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shellex\ContextMenuHandlers\Sharing", value_name: "", value: RegistryValue::String("{f81e9010-6ea4-11ce-a7ff-00aa003ca9f6}"), stock_value: RegistryValue::Delete },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\shellex\ContextMenuHandlers\Sharing", value_name: "", value: RegistryValue::String("{f81e9010-6ea4-11ce-a7ff-00aa003ca9f6}"), stock_value: RegistryValue::Delete },
-                RegistryOp { hkey: "HKCR", subkey: r"Drive\shellex\ContextMenuHandlers\Sharing", value_name: "", value: RegistryValue::String("{f81e9010-6ea4-11ce-a7ff-00aa003ca9f6}"), stock_value: RegistryValue::Delete },
-                RegistryOp { hkey: "HKCU", subkey: r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", value_name: "{f81e9010-6ea4-11ce-a7ff-00aa003ca9f6}", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", value_name: "{f81e9010-6ea4-11ce-a7ff-00aa003ca9f6}", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
+                crate::reg_str!("HKCR", r"*\shellex\ContextMenuHandlers\Sharing", "", "{f81e9010-6ea4-11ce-a7ff-00aa003ca9f6}", RegistryValue::Delete),
+                crate::reg_str!("HKCR", r"Directory\Background\shellex\ContextMenuHandlers\Sharing", "", "{f81e9010-6ea4-11ce-a7ff-00aa003ca9f6}", RegistryValue::Delete),
+                crate::reg_str!("HKCR", r"Directory\shellex\ContextMenuHandlers\Sharing", "", "{f81e9010-6ea4-11ce-a7ff-00aa003ca9f6}", RegistryValue::Delete),
+                crate::reg_str!("HKCR", r"Drive\shellex\ContextMenuHandlers\Sharing", "", "{f81e9010-6ea4-11ce-a7ff-00aa003ca9f6}", RegistryValue::Delete),
+                crate::reg_del!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", "{f81e9010-6ea4-11ce-a7ff-00aa003ca9f6}", RegistryValue::Delete),
+                crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", "{f81e9010-6ea4-11ce-a7ff-00aa003ca9f6}", RegistryValue::Delete),
             ],
             disabled_ops: Some(&[
-                RegistryOp { hkey: "HKCU", subkey: r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", value_name: "{f81e9010-6ea4-11ce-a7ff-00aa003ca9f6}", value: RegistryValue::String("Give access to"), stock_value: RegistryValue::Delete },
+                crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", "{f81e9010-6ea4-11ce-a7ff-00aa003ca9f6}", "Give access to", RegistryValue::Delete),
             ]),
         },
         crate::tweak! {
@@ -2598,10 +2009,10 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Restores the 'Include in library' option for folders.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r"Folder\ShellEx\ContextMenuHandlers\Library Location", value_name: "", value: RegistryValue::String("{3dad6c5d-2167-4cae-9914-f99e41c12cfa}"), stock_value: RegistryValue::Delete },
+                crate::reg_str!("HKCR", r"Folder\ShellEx\ContextMenuHandlers\Library Location", "", "{3dad6c5d-2167-4cae-9914-f99e41c12cfa}", RegistryValue::Delete),
             ],
             disabled_ops: Some(&[
-                 RegistryOp { hkey: "HKCR", subkey: r"Folder\ShellEx\ContextMenuHandlers\Library Location", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                 crate::reg_del_key!("HKCR", r"Folder\ShellEx\ContextMenuHandlers\Library Location", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -2611,16 +2022,16 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds 'Open Linux shell here' (WSL) to Directory background context menu.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\WSL", value_name: "", value: RegistryValue::String("@wsl.exe,-2"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\WSL", value_name: "Extended", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\WSL\command", value_name: "", value: RegistryValue::String(r#"wsl.exe --cd "%V""#), stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\WSL", value_name: "", value: RegistryValue::String("@wsl.exe,-2"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\WSL", value_name: "Extended", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\WSL\command", value_name: "", value: RegistryValue::String(r#"wsl.exe --cd "%V""#), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"Directory\Background\shell\WSL", "", "@wsl.exe,-2", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Directory\Background\shell\WSL", "Extended", "", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Directory\Background\shell\WSL\command", "", r#"wsl.exe --cd "%V""#, RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"Directory\shell\WSL", "", "@wsl.exe,-2", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Directory\shell\WSL", "Extended", "", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Directory\shell\WSL\command", "", r#"wsl.exe --cd "%V""#, RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\WSL", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\WSL", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                crate::reg_del_key!("HKCR", r"Directory\Background\shell\WSL", "", RegistryValue::DeleteKey),
+                crate::reg_del_key!("HKCR", r"Directory\shell\WSL", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -2630,17 +2041,17 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds standard 'Open PowerShell window here' to Directory context menus.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                 RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\Powershell", value_name: "", value: RegistryValue::String("@shell32.dll,-8508"), stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\Powershell\command", value_name: "", value: RegistryValue::String(r#"powershell.exe -noexit -command Set-Location -literalPath "%V""#), stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\Powershell", value_name: "", value: RegistryValue::String("@shell32.dll,-8508"), stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\Powershell\command", value_name: "", value: RegistryValue::String(r#"powershell.exe -noexit -command Set-Location -literalPath "%V""#), stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"Drive\shell\Powershell", value_name: "", value: RegistryValue::String("@shell32.dll,-8508"), stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"Drive\shell\Powershell\command", value_name: "", value: RegistryValue::String(r#"powershell.exe -noexit -command Set-Location -literalPath "%V""#), stock_value: RegistryValue::DeleteKey },
+                 crate::reg_str!("HKCR", r"Directory\Background\shell\Powershell", "", "@shell32.dll,-8508", RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"Directory\Background\shell\Powershell\command", "", r#"powershell.exe -noexit -command Set-Location -literalPath "%V""#, RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"Directory\shell\Powershell", "", "@shell32.dll,-8508", RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"Directory\shell\Powershell\command", "", r#"powershell.exe -noexit -command Set-Location -literalPath "%V""#, RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"Drive\shell\Powershell", "", "@shell32.dll,-8508", RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"Drive\shell\Powershell\command", "", r#"powershell.exe -noexit -command Set-Location -literalPath "%V""#, RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                 RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\Powershell", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\Powershell", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"Drive\shell\Powershell", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                 crate::reg_del_key!("HKCR", r"Directory\Background\shell\Powershell", "", RegistryValue::DeleteKey),
+                 crate::reg_del_key!("HKCR", r"Directory\shell\Powershell", "", RegistryValue::DeleteKey),
+                 crate::reg_del_key!("HKCR", r"Drive\shell\Powershell", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -2650,13 +2061,10 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Restores the generic 'Open with' context menu handler.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r"*\shellex\ContextMenuHandlers\Open With", value_name: "", value: RegistryValue::String("{09799AFB-AD67-11d0-8D05-00A0C90F2719}"), stock_value: RegistryValue::Delete },
-                // Note: GUID corrected to one in Windows 10/11 defaults if different. Commonly it's {09799AFB-AD67-11d1-ABCD-00C04FC30936} or similar.
-                // Using the one from the summary: {09799AFB-AD67-11d1-ABCD-00C04FC30936}
-                 RegistryOp { hkey: "HKCR", subkey: r"*\shellex\ContextMenuHandlers\Open With", value_name: "", value: RegistryValue::String("{09799AFB-AD67-11d1-ABCD-00C04FC30936}"), stock_value: RegistryValue::Delete },
+                crate::reg_str!("HKCR", r"*\shellex\ContextMenuHandlers\Open With", "", "{09799AFB-AD67-11d1-ABCD-00C04FC30936}", RegistryValue::Delete),
             ],
             disabled_ops: Some(&[
-                 RegistryOp { hkey: "HKCR", subkey: r"*\shellex\ContextMenuHandlers\Open With", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                 crate::reg_del_key!("HKCR", r"*\shellex\ContextMenuHandlers\Open With", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -2666,12 +2074,12 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds 'Turn on BitLocker' option to the context menu of drives.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                 RegistryOp { hkey: "HKCR", subkey: r"Drive\shell\encrypt-bde", value_name: "LegacyDisable", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                 RegistryOp { hkey: "HKCR", subkey: r"Drive\shell\encrypt-bde-elev", value_name: "LegacyDisable", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
+                 crate::reg_del!("HKCR", r"Drive\shell\encrypt-bde", "LegacyDisable", RegistryValue::Delete),
+                 crate::reg_del!("HKCR", r"Drive\shell\encrypt-bde-elev", "LegacyDisable", RegistryValue::Delete),
             ],
             disabled_ops: Some(&[
-                 RegistryOp { hkey: "HKCR", subkey: r"Drive\shell\encrypt-bde", value_name: "LegacyDisable", value: RegistryValue::String(""), stock_value: RegistryValue::Delete },
-                 RegistryOp { hkey: "HKCR", subkey: r"Drive\shell\encrypt-bde-elev", value_name: "LegacyDisable", value: RegistryValue::String(""), stock_value: RegistryValue::Delete },
+                 crate::reg_str!("HKCR", r"Drive\shell\encrypt-bde", "LegacyDisable", "", RegistryValue::Delete),
+                 crate::reg_str!("HKCR", r"Drive\shell\encrypt-bde-elev", "LegacyDisable", "", RegistryValue::Delete),
             ]),
         },
         crate::tweak! {
@@ -2682,16 +2090,17 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             effect: TweakEffect::Immediate,
             enabled_ops: &[
                 // .jpg
-                 RegistryOp { hkey: "HKCR", subkey: r"SystemFileAssociations\.jpg\ShellEx\ContextMenuHandlers\ShellImagePreview", value_name: "", value: RegistryValue::String("{FFE2A43C-56B9-4bf5-9A79-CC6D4285608A}"), stock_value: RegistryValue::Delete },
+                 // .jpg
+                 crate::reg_str!("HKCR", r"SystemFileAssociations\.jpg\ShellEx\ContextMenuHandlers\ShellImagePreview", "", "{FFE2A43C-56B9-4bf5-9A79-CC6D4285608A}", RegistryValue::Delete),
                  // .png
-                 RegistryOp { hkey: "HKCR", subkey: r"SystemFileAssociations\.png\ShellEx\ContextMenuHandlers\ShellImagePreview", value_name: "", value: RegistryValue::String("{FFE2A43C-56B9-4bf5-9A79-CC6D4285608A}"), stock_value: RegistryValue::Delete },
+                 crate::reg_str!("HKCR", r"SystemFileAssociations\.png\ShellEx\ContextMenuHandlers\ShellImagePreview", "", "{FFE2A43C-56B9-4bf5-9A79-CC6D4285608A}", RegistryValue::Delete),
                  // .jpeg
-                 RegistryOp { hkey: "HKCR", subkey: r"SystemFileAssociations\.jpeg\ShellEx\ContextMenuHandlers\ShellImagePreview", value_name: "", value: RegistryValue::String("{FFE2A43C-56B9-4bf5-9A79-CC6D4285608A}"), stock_value: RegistryValue::Delete },
+                 crate::reg_str!("HKCR", r"SystemFileAssociations\.jpeg\ShellEx\ContextMenuHandlers\ShellImagePreview", "", "{FFE2A43C-56B9-4bf5-9A79-CC6D4285608A}", RegistryValue::Delete),
             ],
             disabled_ops: Some(&[
-                 RegistryOp { hkey: "HKCR", subkey: r"SystemFileAssociations\.jpg\ShellEx\ContextMenuHandlers\ShellImagePreview", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"SystemFileAssociations\.png\ShellEx\ContextMenuHandlers\ShellImagePreview", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"SystemFileAssociations\.jpeg\ShellEx\ContextMenuHandlers\ShellImagePreview", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                 crate::reg_del_key!("HKCR", r"SystemFileAssociations\.jpg\ShellEx\ContextMenuHandlers\ShellImagePreview", "", RegistryValue::DeleteKey),
+                 crate::reg_del_key!("HKCR", r"SystemFileAssociations\.png\ShellEx\ContextMenuHandlers\ShellImagePreview", "", RegistryValue::DeleteKey),
+                 crate::reg_del_key!("HKCR", r"SystemFileAssociations\.jpeg\ShellEx\ContextMenuHandlers\ShellImagePreview", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -2701,10 +2110,10 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Restores the 'Send To' submenu in context menus.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                 RegistryOp { hkey: "HKCR", subkey: r"AllFilesystemObjects\shellex\ContextMenuHandlers\SendTo", value_name: "", value: RegistryValue::String("{7BA4C740-9E81-11CF-99D3-00AA004AE837}"), stock_value: RegistryValue::Delete },
+                 crate::reg_str!("HKCR", r"AllFilesystemObjects\shellex\ContextMenuHandlers\SendTo", "", "{7BA4C740-9E81-11CF-99D3-00AA004AE837}", RegistryValue::Delete),
             ],
             disabled_ops: Some(&[
-                 RegistryOp { hkey: "HKCR", subkey: r"AllFilesystemObjects\shellex\ContextMenuHandlers\SendTo", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                 crate::reg_del_key!("HKCR", r"AllFilesystemObjects\shellex\ContextMenuHandlers\SendTo", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -2714,11 +2123,11 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Restores the 'Share' option in context menus.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                 RegistryOp { hkey: "HKCU", subkey: r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", value_name: "{e2bf9676-5f8f-435c-97eb-11607a5bedf7}", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                 RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", value_name: "{e2bf9676-5f8f-435c-97eb-11607a5bedf7}", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
+                 crate::reg_del!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", "{e2bf9676-5f8f-435c-97eb-11607a5bedf7}", RegistryValue::Delete),
+                 crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", "{e2bf9676-5f8f-435c-97eb-11607a5bedf7}", RegistryValue::Delete),
             ],
             disabled_ops: Some(&[
-                 RegistryOp { hkey: "HKCU", subkey: r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", value_name: "{e2bf9676-5f8f-435c-97eb-11607a5bedf7}", value: RegistryValue::String("Share"), stock_value: RegistryValue::Delete },
+                 crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", "{e2bf9676-5f8f-435c-97eb-11607a5bedf7}", "Share", RegistryValue::Delete),
             ]),
         },
         crate::tweak! {
@@ -2728,14 +2137,14 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Ensures 'Run as administrator' is available for BAT, CMD, EXE, MSC files.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                 RegistryOp { hkey: "HKCR", subkey: r"batfile\shell\runas", value_name: "HasLUAShield", value: RegistryValue::String(""), stock_value: RegistryValue::Delete },
-                 RegistryOp { hkey: "HKCR", subkey: r"cmdfile\shell\runas", value_name: "HasLUAShield", value: RegistryValue::String(""), stock_value: RegistryValue::Delete },
-                 RegistryOp { hkey: "HKCR", subkey: r"exefile\shell\runas", value_name: "HasLUAShield", value: RegistryValue::String(""), stock_value: RegistryValue::Delete },
+                 crate::reg_str!("HKCR", r"batfile\shell\runas", "HasLUAShield", "", RegistryValue::Delete),
+                 crate::reg_str!("HKCR", r"cmdfile\shell\runas", "HasLUAShield", "", RegistryValue::Delete),
+                 crate::reg_str!("HKCR", r"exefile\shell\runas", "HasLUAShield", "", RegistryValue::Delete),
             ],
             disabled_ops: Some(&[
-                 RegistryOp { hkey: "HKCR", subkey: r"batfile\shell\runas", value_name: "HasLUAShield", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                 RegistryOp { hkey: "HKCR", subkey: r"cmdfile\shell\runas", value_name: "HasLUAShield", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                 RegistryOp { hkey: "HKCR", subkey: r"exefile\shell\runas", value_name: "HasLUAShield", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
+                 crate::reg_del!("HKCR", r"batfile\shell\runas", "HasLUAShield", RegistryValue::Delete),
+                 crate::reg_del!("HKCR", r"cmdfile\shell\runas", "HasLUAShield", RegistryValue::Delete),
+                 crate::reg_del!("HKCR", r"exefile\shell\runas", "HasLUAShield", RegistryValue::Delete),
             ]),
         },
         // Batch 7
@@ -2746,13 +2155,13 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds 'Permanently Delete' to the context menu to bypass Recycle Bin.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r"AllFilesystemObjects\shell\Windows.PermanentDelete", value_name: "ExplorerCommandHandler", value: RegistryValue::String("{E9571AB2-AD92-4ec6-8924-4E5AD33790F5}"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"AllFilesystemObjects\shell\Windows.PermanentDelete", value_name: "CommandStateSync", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"AllFilesystemObjects\shell\Windows.PermanentDelete", value_name: "Icon", value: RegistryValue::String("shell32.dll,-240"), stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"AllFilesystemObjects\shell\Windows.PermanentDelete", value_name: "Position", value: RegistryValue::String("Bottom"), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"AllFilesystemObjects\shell\Windows.PermanentDelete", "ExplorerCommandHandler", "{E9571AB2-AD92-4ec6-8924-4E5AD33790F5}", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"AllFilesystemObjects\shell\Windows.PermanentDelete", "CommandStateSync", "", RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"AllFilesystemObjects\shell\Windows.PermanentDelete", "Icon", "shell32.dll,-240", RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"AllFilesystemObjects\shell\Windows.PermanentDelete", "Position", "Bottom", RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                 RegistryOp { hkey: "HKCR", subkey: r"AllFilesystemObjects\shell\Windows.PermanentDelete", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                 crate::reg_del_key!("HKCR", r"AllFilesystemObjects\shell\Windows.PermanentDelete", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -2762,26 +2171,26 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds a classic 'Personalize' menu with quick access to Theme, Wallpaper, etc.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Personalization", value_name: "MUIVerb", value: RegistryValue::String("Personalize (classic)"), stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Personalization", value_name: "Icon", value: RegistryValue::String("themecpl.dll"), stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Personalization", value_name: "Position", value: RegistryValue::String("Bottom"), stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Personalization", value_name: "SubCommands", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\Personalization", "MUIVerb", "Personalize (classic)", RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"DesktopBackground\Shell\Personalization", "Icon", "themecpl.dll", RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"DesktopBackground\Shell\Personalization", "Position", "Bottom", RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"DesktopBackground\Shell\Personalization", "SubCommands", "", RegistryValue::DeleteKey),
                  // Sub-items would be many RegistryOps here, simplifying for readability, implemented fully as per summary
                  // Item 1: Theme Settings
-                 RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Personalization\shell\001flyout", value_name: "MUIVerb", value: RegistryValue::String("Theme Settings"), stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Personalization\shell\001flyout\command", value_name: "", value: RegistryValue::String(r#"explorer shell:::{ED834ED6-4B5A-4bfe-8F11-A626DCB6A921}"#), stock_value: RegistryValue::DeleteKey },
+                 crate::reg_str!("HKCR", r"DesktopBackground\Shell\Personalization\shell\001flyout", "MUIVerb", "Theme Settings", RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"DesktopBackground\Shell\Personalization\shell\001flyout\command", "", r#"explorer shell:::{ED834ED6-4B5A-4bfe-8F11-A626DCB6A921}"#, RegistryValue::DeleteKey),
                  // Item 2: Desktop Background
-                 RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Personalization\shell\002flyout", value_name: "MUIVerb", value: RegistryValue::String("Desktop Background"), stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Personalization\shell\002flyout\command", value_name: "", value: RegistryValue::String(r#"explorer shell:::{ED834ED6-4B5A-4bfe-8F11-A626DCB6A921} -Microsoft.Personalization\pageWallpaper"#), stock_value: RegistryValue::DeleteKey },
+                 crate::reg_str!("HKCR", r"DesktopBackground\Shell\Personalization\shell\002flyout", "MUIVerb", "Desktop Background", RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"DesktopBackground\Shell\Personalization\shell\002flyout\command", "", r#"explorer shell:::{ED834ED6-4B5A-4bfe-8F11-A626DCB6A921} -Microsoft.Personalization\pageWallpaper"#, RegistryValue::DeleteKey),
                  // Item 3: Color
-                 RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Personalization\shell\003flyout", value_name: "MUIVerb", value: RegistryValue::String("Color and Appearance"), stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Personalization\shell\003flyout\command", value_name: "", value: RegistryValue::String(r#"explorer shell:::{ED834ED6-4B5A-4bfe-8F11-A626DCB6A921} -Microsoft.Personalization\pageColorization"#), stock_value: RegistryValue::DeleteKey },
+                 crate::reg_str!("HKCR", r"DesktopBackground\Shell\Personalization\shell\003flyout", "MUIVerb", "Color and Appearance", RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"DesktopBackground\Shell\Personalization\shell\003flyout\command", "", r#"explorer shell:::{ED834ED6-4B5A-4bfe-8F11-A626DCB6A921} -Microsoft.Personalization\pageColorization"#, RegistryValue::DeleteKey),
                  // Item 6: Desktop Icons
-                 RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Personalization\shell\006flyout", value_name: "MUIVerb", value: RegistryValue::String("Desktop Icon Settings"), stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Personalization\shell\006flyout\command", value_name: "", value: RegistryValue::String(r#"rundll32.exe shell32.dll,Control_RunDLL desk.cpl,,0"#), stock_value: RegistryValue::DeleteKey },
+                 crate::reg_str!("HKCR", r"DesktopBackground\Shell\Personalization\shell\006flyout", "MUIVerb", "Desktop Icon Settings", RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"DesktopBackground\Shell\Personalization\shell\006flyout\command", "", r#"rundll32.exe shell32.dll,Control_RunDLL desk.cpl,,0"#, RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                 RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Personalization", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                 crate::reg_del_key!("HKCR", r"DesktopBackground\Shell\Personalization", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -2791,23 +2200,23 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds 'Read-only' toggle to files and folders context menu for quick attribute changes.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r"*\shell\Read-only", value_name: "MUIVerb", value: RegistryValue::String("Read-only"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"*\shell\Read-only", value_name: "SubCommands", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"*\shell\Read-only\shell\001menu", value_name: "MUIVerb", value: RegistryValue::String("Apply read-only"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"*\shell\Read-only\shell\001menu\command", value_name: "", value: RegistryValue::String(r#"attrib +r "%1""#), stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"*\shell\Read-only\shell\002menu", value_name: "MUIVerb", value: RegistryValue::String("Clear read-only"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"*\shell\Read-only\shell\002menu\command", value_name: "", value: RegistryValue::String(r#"attrib -r "%1""#), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"*\shell\Read-only", "MUIVerb", "Read-only", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"*\shell\Read-only", "SubCommands", "", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"*\shell\Read-only\shell\001menu", "MUIVerb", "Apply read-only", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"*\shell\Read-only\shell\001menu\command", "", r#"attrib +r "%1""#, RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"*\shell\Read-only\shell\002menu", "MUIVerb", "Clear read-only", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"*\shell\Read-only\shell\002menu\command", "", r#"attrib -r "%1""#, RegistryValue::DeleteKey),
                 // Directory
-                 RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\Read-only", value_name: "MUIVerb", value: RegistryValue::String("Read-only"), stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\Read-only", value_name: "SubCommands", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\Read-only\shell\001menu", value_name: "MUIVerb", value: RegistryValue::String("Apply read-only (recursive)"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\Read-only\shell\001menu\command", value_name: "", value: RegistryValue::String(r#"cmd /c attrib +r "%1" & attrib +r "%1\*.*" /s /d"#), stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\Read-only\shell\002menu", value_name: "MUIVerb", value: RegistryValue::String("Clear read-only (recursive)"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\Read-only\shell\002menu\command", value_name: "", value: RegistryValue::String(r#"cmd /c attrib -r "%1" & attrib -r "%1\*.*" /s /d"#), stock_value: RegistryValue::DeleteKey },
+                 crate::reg_str!("HKCR", r"Directory\shell\Read-only", "MUIVerb", "Read-only", RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"Directory\shell\Read-only", "SubCommands", "", RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"Directory\shell\Read-only\shell\001menu", "MUIVerb", "Apply read-only (recursive)", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Directory\shell\Read-only\shell\001menu\command", "", r#"cmd /c attrib +r "%1" & attrib +r "%1\*.*" /s /d"#, RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"Directory\shell\Read-only\shell\002menu", "MUIVerb", "Clear read-only (recursive)", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Directory\shell\Read-only\shell\002menu\command", "", r#"cmd /c attrib -r "%1" & attrib -r "%1\*.*" /s /d"#, RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                 RegistryOp { hkey: "HKCR", subkey: r"*\shell\Read-only", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\Read-only", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                 crate::reg_del_key!("HKCR", r"*\shell\Read-only", "", RegistryValue::DeleteKey),
+                 crate::reg_del_key!("HKCR", r"Directory\shell\Read-only", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -2817,16 +2226,16 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds 'Register Server' and 'Unregister Server' for .dll and .ocx files.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                 RegistryOp { hkey: "HKCR", subkey: r"dllfile\shell\Register\command", value_name: "", value: RegistryValue::String("regsvr32.exe \"%1\""), stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"dllfile\shell\Unregister\command", value_name: "", value: RegistryValue::String("regsvr32.exe /u \"%1\""), stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"ocxfile\shell\Register\command", value_name: "", value: RegistryValue::String("regsvr32.exe \"%1\""), stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"ocxfile\shell\Unregister\command", value_name: "", value: RegistryValue::String("regsvr32.exe /u \"%1\""), stock_value: RegistryValue::DeleteKey },
+                 crate::reg_str!("HKCR", r"dllfile\shell\Register\command", "", "regsvr32.exe \"%1\"", RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"dllfile\shell\Unregister\command", "", "regsvr32.exe /u \"%1\"", RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"ocxfile\shell\Register\command", "", "regsvr32.exe \"%1\"", RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"ocxfile\shell\Unregister\command", "", "regsvr32.exe /u \"%1\"", RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                 RegistryOp { hkey: "HKCR", subkey: r"dllfile\shell\Register", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"dllfile\shell\Unregister", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"ocxfile\shell\Register", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"ocxfile\shell\Unregister", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                 crate::reg_del_key!("HKCR", r"dllfile\shell\Register", "", RegistryValue::DeleteKey),
+                 crate::reg_del_key!("HKCR", r"dllfile\shell\Unregister", "", RegistryValue::DeleteKey),
+                 crate::reg_del_key!("HKCR", r"ocxfile\shell\Register", "", RegistryValue::DeleteKey),
+                 crate::reg_del_key!("HKCR", r"ocxfile\shell\Unregister", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -2836,14 +2245,14 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds 'Reset Permissions' (icacls reset) to files and folders to fix access issues.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                 RegistryOp { hkey: "HKCR", subkey: r"*\shell\ResetPermissions", value_name: "MUIVerb", value: RegistryValue::String("Reset Permissions"), stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"*\shell\ResetPermissions\command", value_name: "", value: RegistryValue::String(r#"powershell -windowstyle hidden -command "Start-Process cmd -ArgumentList '/c icacls \"%1\" /reset' -Verb runAs""#), stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\ResetPermissions", value_name: "MUIVerb", value: RegistryValue::String("Reset Permissions"), stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\ResetPermissions\command", value_name: "", value: RegistryValue::String(r#"powershell -windowstyle hidden -command "Start-Process cmd -ArgumentList '/c icacls \"%1\" /reset /t /c /l' -Verb runAs""#), stock_value: RegistryValue::DeleteKey },
+                 crate::reg_str!("HKCR", r"*\shell\ResetPermissions", "MUIVerb", "Reset Permissions", RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"*\shell\ResetPermissions\command", "", r#"powershell -windowstyle hidden -command "Start-Process cmd -ArgumentList '/c icacls \"%1\" /reset' -Verb runAs""#, RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"Directory\shell\ResetPermissions", "MUIVerb", "Reset Permissions", RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"Directory\shell\ResetPermissions\command", "", r#"powershell -windowstyle hidden -command "Start-Process cmd -ArgumentList '/c icacls \"%1\" /reset /t /c /l' -Verb runAs""#, RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                 RegistryOp { hkey: "HKCR", subkey: r"*\shell\ResetPermissions", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\ResetPermissions", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                 crate::reg_del_key!("HKCR", r"*\shell\ResetPermissions", "", RegistryValue::DeleteKey),
+                 crate::reg_del_key!("HKCR", r"Directory\shell\ResetPermissions", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -2853,13 +2262,13 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds 'Restart Explorer' to the Desktop context menu for quick shell restart.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\RestartExplorer", value_name: "MUIVerb", value: RegistryValue::String("Restart Explorer"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\RestartExplorer", value_name: "Icon", value: RegistryValue::String("explorer.exe"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\RestartExplorer\Position", value_name: "", value: RegistryValue::String("Bottom"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\RestartExplorer\command", value_name: "", value: RegistryValue::String(r#"cmd.exe /c taskkill /f /im explorer.exe & start explorer.exe"#), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\RestartExplorer", "MUIVerb", "Restart Explorer", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\RestartExplorer", "Icon", "explorer.exe", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\RestartExplorer\Position", "", "Bottom", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\RestartExplorer\command", "", r#"cmd.exe /c taskkill /f /im explorer.exe & start explorer.exe"#, RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                 RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\RestartExplorer", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                        crate::reg_del_key!("HKCR", r"DesktopBackground\Shell\RestartExplorer", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -2869,11 +2278,11 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds 'Run as administrator' option to .msi file context menu for installing as admin.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r"Msi.Package\Shell\runas", value_name: "HasLUAShield", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Msi.Package\Shell\runas\command", value_name: "", value: RegistryValue::String(r#"msiexec /i "%1""#), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"Msi.Package\Shell\runas", "HasLUAShield", "", RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"Msi.Package\Shell\runas\command", "", r#"msiexec /i "%1""#, RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                 RegistryOp { hkey: "HKCR", subkey: r"Msi.Package\Shell\runas", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                 crate::reg_del_key!("HKCR", r"Msi.Package\Shell\runas", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -2883,11 +2292,11 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds 'Run as administrator' option to .ps1 file context menu.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r"SystemFileAssociations\.ps1\Shell\runas", value_name: "HasLUAShield", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"SystemFileAssociations\.ps1\Shell\runas\command", value_name: "", value: RegistryValue::String(r#"powershell.exe "-Command" "if((Get-ExecutionPolicy ) -ne 'AllSigned') { Set-ExecutionPolicy -Scope Process Bypass }; & '%1'""#), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"SystemFileAssociations\.ps1\Shell\runas", "HasLUAShield", "", RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"SystemFileAssociations\.ps1\Shell\runas\command", "", r#"powershell.exe "-Command" "if((Get-ExecutionPolicy ) -ne 'AllSigned') { Set-ExecutionPolicy -Scope Process Bypass }; & '%1'""#, RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                 RegistryOp { hkey: "HKCR", subkey: r"SystemFileAssociations\.ps1\Shell\runas", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                 crate::reg_del_key!("HKCR", r"SystemFileAssociations\.ps1\Shell\runas", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -2897,11 +2306,11 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds 'Run as administrator' option to .vbs file context menu.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r"VBSFile\Shell\runas", value_name: "HasLUAShield", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"VBSFile\Shell\runas\command", value_name: "", value: RegistryValue::String(r#"wscript.exe "%1" %*"#), stock_value: RegistryValue::DeleteKey }, // Simplified, typically invokes wscript/cscript as admin
+                crate::reg_str!("HKCR", r"VBSFile\Shell\runas", "HasLUAShield", "", RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"VBSFile\Shell\runas\command", "", r#"wscript.exe "%1" %*"#, RegistryValue::DeleteKey), // Simplified, typically invokes wscript/cscript as admin
             ],
             disabled_ops: Some(&[
-                 RegistryOp { hkey: "HKCR", subkey: r"VBSFile\Shell\runas", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                 crate::reg_del_key!("HKCR", r"VBSFile\Shell\runas", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -2911,21 +2320,21 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds 'Safe Mode' boot options (Normal, Safe, Network) to Desktop context menu.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\SafeMode", value_name: "MUIVerb", value: RegistryValue::String("Safe Mode"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\SafeMode", value_name: "Position", value: RegistryValue::String("Bottom"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\SafeMode", value_name: "SubCommands", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                // Normal
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\SafeMode\shell\001-NormalMode", value_name: "MUIVerb", value: RegistryValue::String("Restart in Normal Mode"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\SafeMode\shell\001-NormalMode\command", value_name: "", value: RegistryValue::String(r#"powershell -windowstyle hidden -command "Start-Process cmd -ArgumentList '/s,/c,bcdedit /deletevalue {current} safeboot & bcdedit /deletevalue {current} safebootalternateshell & shutdown -r -t 00 -f' -Verb runAs""#), stock_value: RegistryValue::DeleteKey },
-                 // Safe Mode
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\SafeMode\shell\002-SafeMode", value_name: "MUIVerb", value: RegistryValue::String("Restart in Safe Mode"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\SafeMode\shell\002-SafeMode\command", value_name: "", value: RegistryValue::String(r#"powershell -windowstyle hidden -command "Start-Process cmd -ArgumentList '/s,/c,bcdedit /set {current} safeboot minimal & bcdedit /deletevalue {current} safebootalternateshell & shutdown -r -t 00 -f' -Verb runAs""#), stock_value: RegistryValue::DeleteKey },
-                // Network
-                 RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\SafeMode\shell\003-SafeModeNetworking", value_name: "MUIVerb", value: RegistryValue::String("Restart in Safe Mode with Networking"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\SafeMode\shell\003-SafeModeNetworking\command", value_name: "", value: RegistryValue::String(r#"powershell -windowstyle hidden -command "Start-Process cmd -ArgumentList '/s,/c,bcdedit /set {current} safeboot network & bcdedit /deletevalue {current} safebootalternateshell & shutdown -r -t 00 -f' -Verb runAs""#), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\SafeMode", "MUIVerb", "Safe Mode", RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"DesktopBackground\Shell\SafeMode", "Position", "Bottom", RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"DesktopBackground\Shell\SafeMode", "SubCommands", "", RegistryValue::DeleteKey),
+                 // Normal
+                 crate::reg_str!("HKCR", r"DesktopBackground\Shell\SafeMode\shell\001-NormalMode", "MUIVerb", "Restart in Normal Mode", RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"DesktopBackground\Shell\SafeMode\shell\001-NormalMode\command", "", r#"powershell -windowstyle hidden -command "Start-Process cmd -ArgumentList '/s,/c,bcdedit /deletevalue {current} safeboot & bcdedit /deletevalue {current} safebootalternateshell & shutdown -r -t 00 -f' -Verb runAs""#, RegistryValue::DeleteKey),
+                  // Safe Mode
+                 crate::reg_str!("HKCR", r"DesktopBackground\Shell\SafeMode\shell\002-SafeMode", "MUIVerb", "Restart in Safe Mode", RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"DesktopBackground\Shell\SafeMode\shell\002-SafeMode\command", "", r#"powershell -windowstyle hidden -command "Start-Process cmd -ArgumentList '/s,/c,bcdedit /set {current} safeboot minimal & bcdedit /deletevalue {current} safebootalternateshell & shutdown -r -t 00 -f' -Verb runAs""#, RegistryValue::DeleteKey),
+                 // Network
+                  crate::reg_str!("HKCR", r"DesktopBackground\Shell\SafeMode\shell\003-SafeModeNetworking", "MUIVerb", "Restart in Safe Mode with Networking", RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"DesktopBackground\Shell\SafeMode\shell\003-SafeModeNetworking\command", "", r#"powershell -windowstyle hidden -command "Start-Process cmd -ArgumentList '/s,/c,bcdedit /set {current} safeboot network & bcdedit /deletevalue {current} safebootalternateshell & shutdown -r -t 00 -f' -Verb runAs""#, RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                 RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\SafeMode", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                 crate::reg_del_key!("HKCR", r"DesktopBackground\Shell\SafeMode", "", RegistryValue::DeleteKey),
             ]),
         },
         // Batch 8
@@ -2936,28 +2345,28 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds 'Take Ownership' to files, folders, and drives context menu to quickly gain access permissions.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r"*\shell\TakeOwnership", value_name: "", value: RegistryValue::String("Take Ownership"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"*\shell\TakeOwnership", value_name: "HasLUAShield", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"*\shell\TakeOwnership", value_name: "NoWorkingDirectory", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"*\shell\TakeOwnership\command", value_name: "", value: RegistryValue::String(r#"powershell -windowstyle hidden -command "Start-Process cmd -ArgumentList '/c takeown /f \"%1\" && icacls \"%1\" /grant *S-1-3-4:F /t /c /l' -Verb runAs""#), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"*\shell\TakeOwnership\command", value_name: "IsolatedCommand", value: RegistryValue::String(r#"powershell -windowstyle hidden -command "Start-Process cmd -ArgumentList '/c takeown /f \"%1\" && icacls \"%1\" /grant *S-1-3-4:F /t /c /l' -Verb runAs""#), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"*\shell\TakeOwnership", "", "Take Ownership", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"*\shell\TakeOwnership", "HasLUAShield", "", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"*\shell\TakeOwnership", "NoWorkingDirectory", "", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"*\shell\TakeOwnership\command", "", r#"powershell -windowstyle hidden -command "Start-Process cmd -ArgumentList '/c takeown /f \"%1\" && icacls \"%1\" /grant *S-1-3-4:F /t /c /l' -Verb runAs""#, RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"*\shell\TakeOwnership\command", "IsolatedCommand", r#"powershell -windowstyle hidden -command "Start-Process cmd -ArgumentList '/c takeown /f \"%1\" && icacls \"%1\" /grant *S-1-3-4:F /t /c /l' -Verb runAs""#, RegistryValue::DeleteKey),
                 // Directory
-                 RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\TakeOwnership", value_name: "", value: RegistryValue::String("Take Ownership"), stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\TakeOwnership", value_name: "HasLUAShield", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\TakeOwnership", value_name: "NoWorkingDirectory", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\TakeOwnership", value_name: "Position", value: RegistryValue::String("middle"), stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\TakeOwnership\command", value_name: "", value: RegistryValue::String(r#"powershell -windowstyle hidden -command "Start-Process cmd -ArgumentList '/c takeown /f \"%1\" /r /d y && icacls \"%1\" /grant *S-1-3-4:F /t /c /l /q' -Verb runAs""#), stock_value: RegistryValue::DeleteKey },
+                 crate::reg_str!("HKCR", r"Directory\shell\TakeOwnership", "", "Take Ownership", RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"Directory\shell\TakeOwnership", "HasLUAShield", "", RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"Directory\shell\TakeOwnership", "NoWorkingDirectory", "", RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"Directory\shell\TakeOwnership", "Position", "middle", RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"Directory\shell\TakeOwnership\command", "", r#"powershell -windowstyle hidden -command "Start-Process cmd -ArgumentList '/c takeown /f \"%1\" /r /d y && icacls \"%1\" /grant *S-1-3-4:F /t /c /l /q' -Verb runAs""#, RegistryValue::DeleteKey),
                 // Drive
-                 RegistryOp { hkey: "HKCR", subkey: r"Drive\shell\runas", value_name: "", value: RegistryValue::String("Take Ownership"), stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"Drive\shell\runas", value_name: "HasLUAShield", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"Drive\shell\runas", value_name: "NoWorkingDirectory", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"Drive\shell\runas", value_name: "Position", value: RegistryValue::String("middle"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Drive\shell\runas\command", value_name: "", value: RegistryValue::String(r#"cmd.exe /c takeown /f "%1" /r /d y && icacls "%1" /grant *S-1-3-4:F /t /c"#), stock_value: RegistryValue::DeleteKey },
+                 crate::reg_str!("HKCR", r"Drive\shell\runas", "", "Take Ownership", RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"Drive\shell\runas", "HasLUAShield", "", RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"Drive\shell\runas", "NoWorkingDirectory", "", RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"Drive\shell\runas", "Position", "middle", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Drive\shell\runas\command", "", r#"cmd.exe /c takeown /f "%1" /r /d y && icacls "%1" /grant *S-1-3-4:F /t /c"#, RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                 RegistryOp { hkey: "HKCR", subkey: r"*\shell\TakeOwnership", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\TakeOwnership", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"Drive\shell\runas", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey }, // Note: This might conflict if 'runas' is used for other things on Drives, but standard Windows doesn't use it there significantly.
+                        crate::reg_del_key!("HKCR", r"*\shell\TakeOwnership", "", RegistryValue::DeleteKey),
+                        crate::reg_del_key!("HKCR", r"Directory\shell\TakeOwnership", "", RegistryValue::DeleteKey),
+                        crate::reg_del_key!("HKCR", r"Drive\shell\runas", "", RegistryValue::DeleteKey), // Note: This might conflict if 'runas' is used for other things on Drives, but standard Windows doesn't use it there significantly.
             ]),
         },
         crate::tweak! {
@@ -2967,12 +2376,12 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds 'Turn off BitLocker' option to drives context menu.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r"Drive\shell\decrypt-bde", value_name: "", value: RegistryValue::String("Turn off BitLocker"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Drive\shell\decrypt-bde", value_name: "HasLUAShield", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Drive\shell\decrypt-bde\command", value_name: "", value: RegistryValue::String(r#"PowerShell -windowstyle hidden -command "Start-Process cmd -ArgumentList '/s,/k, manage-bde -off %1' -Verb runAs""#), stock_value: RegistryValue::DeleteKey }, // Adjusted command to standard manage-bde
+                crate::reg_str!("HKCR", r"Drive\shell\decrypt-bde", "", "Turn off BitLocker", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Drive\shell\decrypt-bde", "HasLUAShield", "", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Drive\shell\decrypt-bde\command", "", r#"PowerShell -windowstyle hidden -command "Start-Process cmd -ArgumentList '/s,/k, manage-bde -off %1' -Verb runAs""#, RegistryValue::DeleteKey), // Adjusted command to standard manage-bde
             ],
             disabled_ops: Some(&[
-                 RegistryOp { hkey: "HKCR", subkey: r"Drive\shell\decrypt-bde", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                        crate::reg_del_key!("HKCR", r"Drive\shell\decrypt-bde", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -2982,14 +2391,14 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds 'Turn off display' option to Desktop context menu.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\TurnOffDisplay", value_name: "MUIVerb", value: RegistryValue::String("Turn off display"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\TurnOffDisplay", value_name: "Icon", value: RegistryValue::String("imageres.dll,-109"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\TurnOffDisplay", value_name: "Position", value: RegistryValue::String("Bottom"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\TurnOffDisplay\shell\01menu", value_name: "MUIVerb", value: RegistryValue::String("Turn off display"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\TurnOffDisplay\shell\01menu\command", value_name: "", value: RegistryValue::String(r#"powershell.exe -NoProfile -Command "(Add-Type '[DllImport(\"user32.dll\")]public static extern int SendMessage(int hWnd, int hMsg, int wParam, int lParam);' -Name a -Pas)::SendMessage(-1,0x0112,0xF170,2)""#), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\TurnOffDisplay", "MUIVerb", "Turn off display", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\TurnOffDisplay", "Icon", "imageres.dll,-109", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\TurnOffDisplay", "Position", "Bottom", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\TurnOffDisplay\shell\01menu", "MUIVerb", "Turn off display", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\TurnOffDisplay\shell\01menu\command", "", r#"powershell.exe -NoProfile -Command "(Add-Type '[DllImport(\"user32.dll\")]public static extern int SendMessage(int hWnd, int hMsg, int wParam, int lParam);' -Name a -Pas)::SendMessage(-1,0x0112,0xF170,2)""#, RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                 RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\TurnOffDisplay", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                 crate::reg_del_key!("HKCR", r"DesktopBackground\Shell\TurnOffDisplay", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -2999,19 +2408,19 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds 'Location Services' toggle context menu to Desktop.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Location", value_name: "MUIVerb", value: RegistryValue::String("Location Services"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Location", value_name: "Icon", value: RegistryValue::String("taskbarcpl.dll,-9"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Location", value_name: "Position", value: RegistryValue::String("Bottom"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Location", value_name: "SubCommands", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\Location", "MUIVerb", "Location Services", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\Location", "Icon", "taskbarcpl.dll,-9", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\Location", "Position", "Bottom", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\Location", "SubCommands", "", RegistryValue::DeleteKey),
                 // On Device
-                 RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Location\Shell\001flyout", value_name: "MUIVerb", value: RegistryValue::String("Turn On for Device"), stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Location\Shell\001flyout\command", value_name: "", value: RegistryValue::String(r#"PowerShell -windowstyle hidden -command "Start-Process cmd -ArgumentList '/s,/c, Reg Add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\location /v Value /t REG_SZ /d Allow /f' -Verb runAs""#), stock_value: RegistryValue::DeleteKey },
+                 crate::reg_str!("HKCR", r"DesktopBackground\Shell\Location\Shell\001flyout", "MUIVerb", "Turn On for Device", RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"DesktopBackground\Shell\Location\Shell\001flyout\command", "", r#"PowerShell -windowstyle hidden -command "Start-Process cmd -ArgumentList '/s,/c, Reg Add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\location /v Value /t REG_SZ /d Allow /f' -Verb runAs""#, RegistryValue::DeleteKey),
                 // Off Device
-                 RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Location\Shell\002flyout", value_name: "MUIVerb", value: RegistryValue::String("Turn Off for Device"), stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Location\Shell\002flyout\command", value_name: "", value: RegistryValue::String(r#"PowerShell -windowstyle hidden -command "Start-Process cmd -ArgumentList '/s,/c, Reg Add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\location /v Value /t REG_SZ /d Deny /f' -Verb runAs""#), stock_value: RegistryValue::DeleteKey },
+                 crate::reg_str!("HKCR", r"DesktopBackground\Shell\Location\Shell\002flyout", "MUIVerb", "Turn Off for Device", RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"DesktopBackground\Shell\Location\Shell\002flyout\command", "", r#"PowerShell -windowstyle hidden -command "Start-Process cmd -ArgumentList '/s,/c, Reg Add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\location /v Value /t REG_SZ /d Deny /f' -Verb runAs""#, RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                 RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\Location", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                 crate::reg_del_key!("HKCR", r"DesktopBackground\Shell\Location", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -3021,16 +2430,16 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds 'Unblock' option for files downloaded from the internet.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r"*\shell\unblock", value_name: "MUIVerb", value: RegistryValue::String("Unblock"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"*\shell\unblock\command", value_name: "", value: RegistryValue::String(r#"powershell.exe Unblock-File -LiteralPath '%L'"#), stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\unblock", value_name: "MUIVerb", value: RegistryValue::String("Unblock"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\unblock", value_name: "SubCommands", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\unblock\shell\001flyout", value_name: "MUIVerb", value: RegistryValue::String("Unblock files in folder"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\unblock\shell\001flyout\command", value_name: "", value: RegistryValue::String(r#"powershell.exe get-childitem -LiteralPath '%L' | Unblock-File"#), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"*\shell\unblock", "MUIVerb", "Unblock", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"*\shell\unblock\command", "", r#"powershell.exe Unblock-File -LiteralPath '%L'"#, RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"Directory\shell\unblock", "MUIVerb", "Unblock", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Directory\shell\unblock", "SubCommands", "", RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"Directory\shell\unblock\shell\001flyout", "MUIVerb", "Unblock files in folder", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Directory\shell\unblock\shell\001flyout\command", "", r#"powershell.exe get-childitem -LiteralPath '%L' | Unblock-File"#, RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                 RegistryOp { hkey: "HKCR", subkey: r"*\shell\unblock", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\unblock", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                 crate::reg_del_key!("HKCR", r"*\shell\unblock", "", RegistryValue::DeleteKey),
+                 crate::reg_del_key!("HKCR", r"Directory\shell\unblock", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -3040,18 +2449,18 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds a cascading 'Windows Security' menu to Desktop for quick access to security features.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\WindowsSecurity", value_name: "MUIVerb", value: RegistryValue::String("Windows Security"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\WindowsSecurity", value_name: "Icon", value: RegistryValue::String(r#"%ProgramFiles%\Windows Defender\EppManifest.dll,-101"#), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\WindowsSecurity", value_name: "Position", value: RegistryValue::String("Bottom"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\WindowsSecurity", value_name: "SubCommands", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\WindowsSecurity\shell\001flyout", value_name: "MUIVerb", value: RegistryValue::String("Home"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\WindowsSecurity\shell\001flyout\command", value_name: "", value: RegistryValue::String("explorer windowsdefender:"), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\WindowsSecurity", "MUIVerb", "Windows Security", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\WindowsSecurity", "Icon", r#"%ProgramFiles%\Windows Defender\EppManifest.dll,-101"#, RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\WindowsSecurity", "Position", "Bottom", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\WindowsSecurity", "SubCommands", "", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\WindowsSecurity\shell\001flyout", "MUIVerb", "Home", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\WindowsSecurity\shell\001flyout\command", "", "explorer windowsdefender:", RegistryValue::DeleteKey),
                  // Adding just one more for brevity as per pattern, user can expand if needed or we add full set
-                 RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\WindowsSecurity\shell\002flyout", value_name: "MUIVerb", value: RegistryValue::String("Virus and threat protection"), stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\WindowsSecurity\shell\002flyout\command", value_name: "", value: RegistryValue::String("explorer windowsdefender://threat"), stock_value: RegistryValue::DeleteKey },
+                 crate::reg_str!("HKCR", r"DesktopBackground\Shell\WindowsSecurity\shell\002flyout", "MUIVerb", "Virus and threat protection", RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"DesktopBackground\Shell\WindowsSecurity\shell\002flyout\command", "", "explorer windowsdefender://threat", RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                 RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\WindowsSecurity", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                 crate::reg_del_key!("HKCR", r"DesktopBackground\Shell\WindowsSecurity", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -3061,17 +2470,17 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds a cascading 'Windows Update' menu to Desktop.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\WindowsUpdate", value_name: "MUIVerb", value: RegistryValue::String("Windows Update"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\WindowsUpdate", value_name: "Icon", value: RegistryValue::String("imageres.dll,-1401"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\WindowsUpdate", value_name: "Position", value: RegistryValue::String("Bottom"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\WindowsUpdate", value_name: "SubCommands", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\WindowsUpdate\shell\001flyout", value_name: "MUIVerb", value: RegistryValue::String("Check for Updates"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\WindowsUpdate\shell\001flyout\command", value_name: "", value: RegistryValue::String("cmd /s /c USOClient StartInteractiveScan & start ms-settings:windowsupdate"), stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\WindowsUpdate\shell\002flyout", value_name: "MUIVerb", value: RegistryValue::String("Settings"), stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\WindowsUpdate\shell\002flyout\command", value_name: "", value: RegistryValue::String("explorer ms-settings:windowsupdate"), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\WindowsUpdate", "MUIVerb", "Windows Update", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\WindowsUpdate", "Icon", "imageres.dll,-1401", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\WindowsUpdate", "Position", "Bottom", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\WindowsUpdate", "SubCommands", "", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\WindowsUpdate\shell\001flyout", "MUIVerb", "Check for Updates", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\WindowsUpdate\shell\001flyout\command", "", "cmd /s /c USOClient StartInteractiveScan & start ms-settings:windowsupdate", RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"DesktopBackground\Shell\WindowsUpdate\shell\002flyout", "MUIVerb", "Settings", RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"DesktopBackground\Shell\WindowsUpdate\shell\002flyout\command", "", "explorer ms-settings:windowsupdate", RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                 RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\WindowsUpdate", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                 crate::reg_del_key!("HKCR", r"DesktopBackground\Shell\WindowsUpdate", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -3081,17 +2490,17 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds 'Component Store Cleanup' (DISM) to Desktop context menu.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\WinSxS", value_name: "MUIVerb", value: RegistryValue::String("Component Store Cleanup"), stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\WinSxS", value_name: "Icon", value: RegistryValue::String("cleanmgr.exe"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\WinSxS", value_name: "Position", value: RegistryValue::String("Bottom"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\WinSxS", value_name: "SubCommands", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\WinSxS\shell\001menu", value_name: "MUIVerb", value: RegistryValue::String("Analyze Component Store"), stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\WinSxS\shell\001menu\command", value_name: "", value: RegistryValue::String(r#"PowerShell -windowstyle hidden -command "Start-Process cmd -ArgumentList '/s,/k, DISM /Online /Cleanup-Image /AnalyzeComponentStore' -Verb runAs""#), stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\WinSxS\shell\002menu", value_name: "MUIVerb", value: RegistryValue::String("Clean Up Component Store"), stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\WinSxS\shell\002menu\command", value_name: "", value: RegistryValue::String(r#"PowerShell -windowstyle hidden -command "Start-Process cmd -ArgumentList '/s,/k, DISM /Online /Cleanup-Image /StartComponentCleanup' -Verb runAs""#), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\WinSxS", "MUIVerb", "Component Store Cleanup", RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"DesktopBackground\Shell\WinSxS", "Icon", "cleanmgr.exe", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\WinSxS", "Position", "Bottom", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\WinSxS", "SubCommands", "", RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"DesktopBackground\Shell\WinSxS\shell\001menu", "MUIVerb", "Analyze Component Store", RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"DesktopBackground\Shell\WinSxS\shell\001menu\command", "", r#"PowerShell -windowstyle hidden -command "Start-Process cmd -ArgumentList '/s,/k, DISM /Online /Cleanup-Image /AnalyzeComponentStore' -Verb runAs""#, RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"DesktopBackground\Shell\WinSxS\shell\002menu", "MUIVerb", "Clean Up Component Store", RegistryValue::DeleteKey),
+                 crate::reg_str!("HKCR", r"DesktopBackground\Shell\WinSxS\shell\002menu\command", "", r#"PowerShell -windowstyle hidden -command "Start-Process cmd -ArgumentList '/s,/k, DISM /Online /Cleanup-Image /StartComponentCleanup' -Verb runAs""#, RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                 RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\WinSxS", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                 crate::reg_del_key!("HKCR", r"DesktopBackground\Shell\WinSxS", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -3101,10 +2510,10 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Restores 'Batch File' to the 'New' context menu.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r".bat\ShellNew", value_name: "NullFile", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r".bat\ShellNew", "NullFile", "", RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                 RegistryOp { hkey: "HKCR", subkey: r".bat\ShellNew", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                crate::reg_del_key!("HKCR", r".bat\ShellNew", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -3114,11 +2523,10 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Restores 'VBScript' to the 'New' context menu.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r".vbs\ShellNew", value_name: "NullFile", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                // Note: Some systems use ItemName instead of NullFile, but NullFile is standard for blank new file
+                crate::reg_str!("HKCR", r".vbs\ShellNew", "NullFile", "", RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                 RegistryOp { hkey: "HKCR", subkey: r".vbs\ShellNew", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                crate::reg_del_key!("HKCR", r".vbs\ShellNew", "", RegistryValue::DeleteKey),
             ]),
         },
         // Batch 9
@@ -3129,10 +2537,10 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds 'Copy To Folder' option to context menu for easier file management.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r"AllFilesystemObjects\shellex\ContextMenuHandlers\{C2FBB630-2971-11D1-A18C-00C04FD75D13}", value_name: "", value: RegistryValue::String("Copy To Folder"), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"AllFilesystemObjects\shellex\ContextMenuHandlers\{C2FBB630-2971-11D1-A18C-00C04FD75D13}", "", "Copy To Folder", RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                 RegistryOp { hkey: "HKCR", subkey: r"AllFilesystemObjects\shellex\ContextMenuHandlers\{C2FBB630-2971-11D1-A18C-00C04FD75D13}", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                 crate::reg_del_key!("HKCR", r"AllFilesystemObjects\shellex\ContextMenuHandlers\{C2FBB630-2971-11D1-A18C-00C04FD75D13}", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -3142,10 +2550,10 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds 'Move To Folder' option to context menu for easier file management.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r"AllFilesystemObjects\shellex\ContextMenuHandlers\{C2FBB631-2971-11D1-A18C-00C04FD75D13}", value_name: "", value: RegistryValue::String("Move To Folder"), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"AllFilesystemObjects\shellex\ContextMenuHandlers\{C2FBB631-2971-11D1-A18C-00C04FD75D13}", "", "Move To Folder", RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                 RegistryOp { hkey: "HKCR", subkey: r"AllFilesystemObjects\shellex\ContextMenuHandlers\{C2FBB631-2971-11D1-A18C-00C04FD75D13}", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                 crate::reg_del_key!("HKCR", r"AllFilesystemObjects\shellex\ContextMenuHandlers\{C2FBB631-2971-11D1-A18C-00C04FD75D13}", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -3155,12 +2563,12 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds 'Copy Contents to Clipboard' option to quickly copy file content without opening it.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Classes\*\shell\CopyContents", value_name: "Icon", value: RegistryValue::String("DxpTaskSync.dll,-52"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Classes\*\shell\CopyContents", value_name: "MUIVerb", value: RegistryValue::String("Copy Contents to Clipboard"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Classes\*\shell\CopyContents\command", value_name: "", value: RegistryValue::String(r#"cmd /c clip <"%1""#), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKLM", r"SOFTWARE\Classes\*\shell\CopyContents", "Icon", "DxpTaskSync.dll,-52", RegistryValue::DeleteKey),
+                crate::reg_str!("HKLM", r"SOFTWARE\Classes\*\shell\CopyContents", "MUIVerb", "Copy Contents to Clipboard", RegistryValue::DeleteKey),
+                crate::reg_str!("HKLM", r"SOFTWARE\Classes\*\shell\CopyContents\command", "", r#"cmd /c clip <"%1""#, RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                 RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Classes\*\shell\CopyContents", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                 crate::reg_del_key!("HKLM", r"SOFTWARE\Classes\*\shell\CopyContents", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -3170,10 +2578,10 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Removes 'Cast to Device' from context menu if you don't stream media.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", value_name: "{7AD84985-87B4-4a16-BE58-8B72A5B390F7}", value: RegistryValue::String("Play to Menu"), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", "{7AD84985-87B4-4a16-BE58-8B72A5B390F7}", "Play to Menu", RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                 RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", value_name: "{7AD84985-87B4-4a16-BE58-8B72A5B390F7}", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                 crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked", "{7AD84985-87B4-4a16-BE58-8B72A5B390F7}", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -3184,17 +2592,17 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             effect: TweakEffect::Immediate,
             enabled_ops: &[
                 // Directory
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\OpenWTHereAsAdmin", value_name: "MUIVerb", value: RegistryValue::String("Open in Windows Terminal as administrator"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\OpenWTHereAsAdmin", value_name: "HasLUAShield", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\OpenWTHereAsAdmin\command", value_name: "", value: RegistryValue::String(r#"powershell.exe -WindowStyle Hidden "Start-Process -Verb RunAs cmd.exe -ArgumentList @('/c','start wt.exe','-d','\"""%V\.\"""')""#), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"Directory\shell\OpenWTHereAsAdmin", "MUIVerb", "Open in Windows Terminal as administrator", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Directory\shell\OpenWTHereAsAdmin", "HasLUAShield", "", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Directory\shell\OpenWTHereAsAdmin\command", "", r#"powershell.exe -WindowStyle Hidden "Start-Process -Verb RunAs cmd.exe -ArgumentList @('/c','start wt.exe','-d','\"""%V\.\"""')""#, RegistryValue::DeleteKey),
                 // Directory Background
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\OpenWTHereAsAdmin", value_name: "MUIVerb", value: RegistryValue::String("Open in Windows Terminal as administrator"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\OpenWTHereAsAdmin", value_name: "HasLUAShield", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\OpenWTHereAsAdmin\command", value_name: "", value: RegistryValue::String(r#"powershell.exe -WindowStyle Hidden "Start-Process -Verb RunAs cmd.exe -ArgumentList @('/c','start wt.exe','-d','\"""%V\.\"""')""#), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"Directory\Background\shell\OpenWTHereAsAdmin", "MUIVerb", "Open in Windows Terminal as administrator", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Directory\Background\shell\OpenWTHereAsAdmin", "HasLUAShield", "", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Directory\Background\shell\OpenWTHereAsAdmin\command", "", r#"powershell.exe -WindowStyle Hidden "Start-Process -Verb RunAs cmd.exe -ArgumentList @('/c','start wt.exe','-d','\"""%V\.\"""')""#, RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                 RegistryOp { hkey: "HKCR", subkey: r"Directory\shell\OpenWTHereAsAdmin", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\OpenWTHereAsAdmin", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                 crate::reg_del_key!("HKCR", r"Directory\shell\OpenWTHereAsAdmin", "", RegistryValue::DeleteKey),
+                 crate::reg_del_key!("HKCR", r"Directory\Background\shell\OpenWTHereAsAdmin", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -3204,13 +2612,13 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds 'Disk Cleanup' option to the context menu of drives.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r"Drive\shell\Windows.CleanUp", value_name: "CommandStateSync", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Drive\shell\Windows.CleanUp", value_name: "ExplorerCommandHandler", value: RegistryValue::String("{9cca66bb-9c78-4e59-a76f-a5e9990b8aa0}"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Drive\shell\Windows.CleanUp", value_name: "Icon", value: RegistryValue::String(r#"%SystemRoot%\System32\cleanmgr.exe,-104"#), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Drive\shell\Windows.CleanUp", value_name: "ImpliedSelectionModel", value: RegistryValue::Dword(1), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"Drive\shell\Windows.CleanUp", "CommandStateSync", "", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Drive\shell\Windows.CleanUp", "ExplorerCommandHandler", "{9cca66bb-9c78-4e59-a76f-a5e9990b8aa0}", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Drive\shell\Windows.CleanUp", "Icon", r#"%SystemRoot%\System32\cleanmgr.exe,-104"#, RegistryValue::DeleteKey),
+                crate::reg_dword!("HKCR", r"Drive\shell\Windows.CleanUp", "ImpliedSelectionModel", 1u32, RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                 RegistryOp { hkey: "HKCR", subkey: r"Drive\shell\Windows.CleanUp", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                 crate::reg_del_key!("HKCR", r"Drive\shell\Windows.CleanUp", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -3220,13 +2628,13 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds 'Kill Not Responding Tasks' to Desktop context menu.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\KillNRTasks", value_name: "MUIVerb", value: RegistryValue::String("Kill all not responding tasks"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\KillNRTasks", value_name: "Icon", value: RegistryValue::String("taskmgr.exe,-30651"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\KillNRTasks", value_name: "Position", value: RegistryValue::String("Top"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\KillNRTasks\command", value_name: "", value: RegistryValue::String(r#"CMD.exe /C (tasklist /fi "status eq Not Responding" | find /v "No tasks" && taskkill.exe /f /fi "status eq Not Responding" || echo No not-responding tasks found.) & ECHO; & <NUL: set /p junk=Press any key to close this window. & PAUSE >NUL:"#), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\KillNRTasks", "MUIVerb", "Kill all not responding tasks", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\KillNRTasks", "Icon", "taskmgr.exe,-30651", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\KillNRTasks", "Position", "Top", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"DesktopBackground\Shell\KillNRTasks\command", "", r#"CMD.exe /C (tasklist /fi "status eq Not Responding" | find /v "No tasks" && taskkill.exe /f /fi "status eq Not Responding" || echo No not-responding tasks found.) & ECHO; & <NUL: set /p junk=Press any key to close this window. & PAUSE >NUL:"#, RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                 RegistryOp { hkey: "HKCR", subkey: r"DesktopBackground\Shell\KillNRTasks", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                 crate::reg_del_key!("HKCR", r"DesktopBackground\Shell\KillNRTasks", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -3237,24 +2645,24 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             effect: TweakEffect::Immediate,
             enabled_ops: &[
                 // Directory Background
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\HiddenFiles", value_name: "MUIVerb", value: RegistryValue::String("Hidden items"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\HiddenFiles", value_name: "Icon", value: RegistryValue::String("imageres.dll,-5314"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\HiddenFiles", value_name: "Position", value: RegistryValue::String("Bottom"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\HiddenFiles", value_name: "SubCommands", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\HiddenFiles\shell\Windows.ShowHiddenFiles", value_name: "CommandStateSync", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\HiddenFiles\shell\Windows.ShowHiddenFiles", value_name: "ExplorerCommandHandler", value: RegistryValue::String("{f7300245-1f4b-41ba-8948-6fd392064494}"), stock_value: RegistryValue::DeleteKey }, // Native handler
+                crate::reg_str!("HKCR", r"Directory\Background\shell\HiddenFiles", "MUIVerb", "Hidden items", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Directory\Background\shell\HiddenFiles", "Icon", "imageres.dll,-5314", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Directory\Background\shell\HiddenFiles", "Position", "Bottom", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Directory\Background\shell\HiddenFiles", "SubCommands", "", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Directory\Background\shell\HiddenFiles\shell\Windows.ShowHiddenFiles", "CommandStateSync", "", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"Directory\Background\shell\HiddenFiles\shell\Windows.ShowHiddenFiles", "ExplorerCommandHandler", "{f7300245-1f4b-41ba-8948-6fd392064494}", RegistryValue::DeleteKey), // Native handler
 
                 // AllFilesystemObjects
-                RegistryOp { hkey: "HKCR", subkey: r"AllFilesystemObjects\shell\HiddenFiles", value_name: "MUIVerb", value: RegistryValue::String("Hidden items"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"AllFilesystemObjects\shell\HiddenFiles", value_name: "Icon", value: RegistryValue::String("imageres.dll,-5314"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"AllFilesystemObjects\shell\HiddenFiles", value_name: "Position", value: RegistryValue::String("Bottom"), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"AllFilesystemObjects\shell\HiddenFiles", value_name: "SubCommands", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"AllFilesystemObjects\shell\HiddenFiles\shell\Windows.ShowHiddenFiles", value_name: "CommandStateSync", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                RegistryOp { hkey: "HKCR", subkey: r"AllFilesystemObjects\shell\HiddenFiles\shell\Windows.ShowHiddenFiles", value_name: "ExplorerCommandHandler", value: RegistryValue::String("{f7300245-1f4b-41ba-8948-6fd392064494}"), stock_value: RegistryValue::DeleteKey },
+                crate::reg_str!("HKCR", r"AllFilesystemObjects\shell\HiddenFiles", "MUIVerb", "Hidden items", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"AllFilesystemObjects\shell\HiddenFiles", "Icon", "imageres.dll,-5314", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"AllFilesystemObjects\shell\HiddenFiles", "Position", "Bottom", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"AllFilesystemObjects\shell\HiddenFiles", "SubCommands", "", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"AllFilesystemObjects\shell\HiddenFiles\shell\Windows.ShowHiddenFiles", "CommandStateSync", "", RegistryValue::DeleteKey),
+                crate::reg_str!("HKCR", r"AllFilesystemObjects\shell\HiddenFiles\shell\Windows.ShowHiddenFiles", "ExplorerCommandHandler", "{f7300245-1f4b-41ba-8948-6fd392064494}", RegistryValue::DeleteKey),
             ],
             disabled_ops: Some(&[
-                 RegistryOp { hkey: "HKCR", subkey: r"Directory\Background\shell\HiddenFiles", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
-                 RegistryOp { hkey: "HKCR", subkey: r"AllFilesystemObjects\shell\HiddenFiles", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                 crate::reg_del_key!("HKCR", r"Directory\Background\shell\HiddenFiles", "", RegistryValue::DeleteKey),
+                 crate::reg_del_key!("HKCR", r"AllFilesystemObjects\shell\HiddenFiles", "", RegistryValue::DeleteKey),
             ]),
         },
         crate::tweak! {
@@ -3264,120 +2672,24 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             description: "Adds a 'Run with priority' submenu to executable files to easily start them with specific CPU priority.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"Software\Classes\exefile\shell\priority",
-                    value_name: "MUIVerb",
-                    value: RegistryValue::String("Run with priority"),
-                    stock_value: RegistryValue::Delete,
-                },
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"Software\Classes\exefile\shell\priority",
-                    value_name: "SubCommands",
-                    value: RegistryValue::String(""),
-                    stock_value: RegistryValue::Delete,
-                },
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"Software\Classes\exefile\shell\priority\shell\001flyout",
-                    value_name: "",
-                    value: RegistryValue::String("Realtime"),
-                    stock_value: RegistryValue::Delete,
-                },
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"Software\Classes\exefile\shell\priority\shell\001flyout\command",
-                    value_name: "",
-                    value: RegistryValue::String(r#"cmd /c start "" /Realtime "%1""#),
-                    stock_value: RegistryValue::Delete,
-                },
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"Software\Classes\exefile\shell\priority\shell\002flyout",
-                    value_name: "",
-                    value: RegistryValue::String("High"),
-                    stock_value: RegistryValue::Delete,
-                },
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"Software\Classes\exefile\shell\priority\shell\002flyout\command",
-                    value_name: "",
-                    value: RegistryValue::String(r#"cmd /c start "" /High "%1""#),
-                    stock_value: RegistryValue::Delete,
-                },
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"Software\Classes\exefile\shell\priority\shell\003flyout",
-                    value_name: "",
-                    value: RegistryValue::String("Above normal"),
-                    stock_value: RegistryValue::Delete,
-                },
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"Software\Classes\exefile\shell\priority\shell\003flyout\command",
-                    value_name: "",
-                    value: RegistryValue::String(r#"cmd /c start "" /AboveNormal "%1""#),
-                    stock_value: RegistryValue::Delete,
-                },
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"Software\Classes\exefile\shell\priority\shell\004flyout",
-                    value_name: "",
-                    value: RegistryValue::String("Normal"),
-                    stock_value: RegistryValue::Delete,
-                },
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"Software\Classes\exefile\shell\priority\shell\004flyout\command",
-                    value_name: "",
-                    value: RegistryValue::String(r#"cmd /c start "" /Normal "%1""#),
-                    stock_value: RegistryValue::Delete,
-                },
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"Software\Classes\exefile\shell\priority\shell\005flyout",
-                    value_name: "",
-                    value: RegistryValue::String("Below normal"),
-                    stock_value: RegistryValue::Delete,
-                },
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"Software\Classes\exefile\shell\priority\shell\005flyout\command",
-                    value_name: "",
-                    value: RegistryValue::String(r#"cmd /c start "" /BelowNormal "%1""#),
-                    stock_value: RegistryValue::Delete,
-                },
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"Software\Classes\exefile\shell\priority\shell\006flyout",
-                    value_name: "",
-                    value: RegistryValue::String("Low"),
-                    stock_value: RegistryValue::Delete,
-                },
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"Software\Classes\exefile\shell\priority\shell\006flyout\command",
-                    value_name: "",
-                    value: RegistryValue::String(r#"cmd /c start "" /Low "%1""#),
-                    stock_value: RegistryValue::Delete,
-                },
+                crate::reg_str!("HKLM", r"Software\Classes\exefile\shell\priority", "MUIVerb", "Run with priority", RegistryValue::Delete),
+                crate::reg_str!("HKLM", r"Software\Classes\exefile\shell\priority", "SubCommands", "", RegistryValue::Delete),
+                crate::reg_str!("HKLM", r"Software\Classes\exefile\shell\priority\shell\001flyout", "", "Realtime", RegistryValue::Delete),
+                crate::reg_str!("HKLM", r"Software\Classes\exefile\shell\priority\shell\001flyout\command", "", r#"cmd /c start "" /Realtime "%1""#, RegistryValue::Delete),
+                crate::reg_str!("HKLM", r"Software\Classes\exefile\shell\priority\shell\002flyout", "", "High", RegistryValue::Delete),
+                crate::reg_str!("HKLM", r"Software\Classes\exefile\shell\priority\shell\002flyout\command", "", r#"cmd /c start "" /High "%1""#, RegistryValue::Delete),
+                crate::reg_str!("HKLM", r"Software\Classes\exefile\shell\priority\shell\003flyout", "", "Above normal", RegistryValue::Delete),
+                crate::reg_str!("HKLM", r"Software\Classes\exefile\shell\priority\shell\003flyout\command", "", r#"cmd /c start "" /AboveNormal "%1""#, RegistryValue::Delete),
+                crate::reg_str!("HKLM", r"Software\Classes\exefile\shell\priority\shell\004flyout", "", "Normal", RegistryValue::Delete),
+                crate::reg_str!("HKLM", r"Software\Classes\exefile\shell\priority\shell\004flyout\command", "", r#"cmd /c start "" /Normal "%1""#, RegistryValue::Delete),
+                crate::reg_str!("HKLM", r"Software\Classes\exefile\shell\priority\shell\005flyout", "", "Below normal", RegistryValue::Delete),
+                crate::reg_str!("HKLM", r"Software\Classes\exefile\shell\priority\shell\005flyout\command", "", r#"cmd /c start "" /BelowNormal "%1""#, RegistryValue::Delete),
+                crate::reg_str!("HKLM", r"Software\Classes\exefile\shell\priority\shell\006flyout", "", "Low", RegistryValue::Delete),
+                crate::reg_str!("HKLM", r"Software\Classes\exefile\shell\priority\shell\006flyout\command", "", r#"cmd /c start "" /Low "%1""#, RegistryValue::Delete),
             ],
             disabled_ops: Some(&[
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"Software\Classes\exefile\shell\priority",
-                    value_name: "MUIVerb",
-                    value: RegistryValue::Delete,
-                    stock_value: RegistryValue::Delete,
-                },
-                 RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"Software\Classes\exefile\shell\priority",
-                    value_name: "SubCommands",
-                    value: RegistryValue::Delete,
-                    stock_value: RegistryValue::Delete,
-                },
+                crate::reg_del!("HKLM", r"Software\Classes\exefile\shell\priority", "MUIVerb", RegistryValue::Delete),
+                crate::reg_del!("HKLM", r"Software\Classes\exefile\shell\priority", "SubCommands", RegistryValue::Delete),
             ]),
         },
         crate::tweak! {
@@ -3386,13 +2698,9 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
                 name: "Remove 'Include in Library'",
                 description: "Removes the 'Include in library' context menu entry from folders.",
                 effect: TweakEffect::ExplorerRestart,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Classes\Folder\ShellEx\ContextMenuHandlers\Library Location",
-                        value_name: "",
-                        value: RegistryValue::DeleteKey,
-                        stock_value: RegistryValue::String("{3dad6c5d-2167-4cae-9914-f99e41c12cfa}")
-        }],
+                enabled_ops: &[
+                        crate::reg_del_key!("HKLM", r"SOFTWARE\Classes\Folder\ShellEx\ContextMenuHandlers\Library Location", "", RegistryValue::String("{3dad6c5d-2167-4cae-9914-f99e41c12cfa}")),
+        ],
                 disabled_ops: None
         },
         crate::tweak! {
@@ -3401,13 +2709,9 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
                 name: "Remove 'Share'",
                 description: "Removes the modern 'Share' context menu entry.",
                 effect: TweakEffect::ExplorerRestart,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Classes\*\shellex\ContextMenuHandlers\ModernSharing",
-                        value_name: "",
-                        value: RegistryValue::DeleteKey,
-                        stock_value: RegistryValue::DeleteKey
-        }],
+                enabled_ops: &[
+                        crate::reg_del_key!("HKLM", r"SOFTWARE\Classes\*\shellex\ContextMenuHandlers\ModernSharing", "", RegistryValue::DeleteKey),
+        ],
                 disabled_ops: None
         },
         crate::tweak! {
@@ -3417,10 +2721,10 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
                 description: "Removes the 'Give access to' (sharing) context menu entry.",
                 effect: TweakEffect::ExplorerRestart,
                 enabled_ops: &[
-                        RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Classes\*\shellex\ContextMenuHandlers\Sharing", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::String("{f81e9010-6ea4-11ce-a7ff-00aa003ca9f6}") },
-                        RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Classes\Directory\shellex\ContextMenuHandlers\Sharing", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::String("{f81e9010-6ea4-11ce-a7ff-00aa003ca9f6}") },
-                        RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Classes\Directory\Background\shellex\ContextMenuHandlers\Sharing", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::String("{f81e9010-6ea4-11ce-a7ff-00aa003ca9f6}") },
-                        RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Classes\Drive\shellex\ContextMenuHandlers\Sharing", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::String("{f81e9010-6ea4-11ce-a7ff-00aa003ca9f6}") },
+                        crate::reg_del_key!("HKLM", r"SOFTWARE\Classes\*\shellex\ContextMenuHandlers\Sharing", "", RegistryValue::String("{f81e9010-6ea4-11ce-a7ff-00aa003ca9f6}")),
+                        crate::reg_del_key!("HKLM", r"SOFTWARE\Classes\Directory\shellex\ContextMenuHandlers\Sharing", "", RegistryValue::String("{f81e9010-6ea4-11ce-a7ff-00aa003ca9f6}")),
+                        crate::reg_del_key!("HKLM", r"SOFTWARE\Classes\Directory\Background\shellex\ContextMenuHandlers\Sharing", "", RegistryValue::String("{f81e9010-6ea4-11ce-a7ff-00aa003ca9f6}")),
+                        crate::reg_del_key!("HKLM", r"SOFTWARE\Classes\Drive\shellex\ContextMenuHandlers\Sharing", "", RegistryValue::String("{f81e9010-6ea4-11ce-a7ff-00aa003ca9f6}")),
                 ],
                 disabled_ops: None
         },
@@ -3431,10 +2735,10 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
                 description: "Removes the 'Troubleshoot compatibility' context menu entry from executables.",
                 effect: TweakEffect::ExplorerRestart,
                 enabled_ops: &[
-                        RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Classes\exefile\shellex\ContextMenuHandlers\Compatibility", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::String("{1d27f844-3a1f-4410-85ac-14651078412d}") },
-                        RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Classes\lnkfile\shellex\ContextMenuHandlers\Compatibility", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Classes\batfile\shellex\ContextMenuHandlers\Compatibility", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::String("{1d27f844-3a1f-4410-85ac-14651078412d}") },
-                        RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Classes\cmdfile\shellex\ContextMenuHandlers\Compatibility", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::String("{1d27f844-3a1f-4410-85ac-14651078412d}") },
+                        crate::reg_del_key!("HKLM", r"SOFTWARE\Classes\exefile\shellex\ContextMenuHandlers\Compatibility", "", RegistryValue::String("{1d27f844-3a1f-4410-85ac-14651078412d}")),
+                        crate::reg_del_key!("HKLM", r"SOFTWARE\Classes\lnkfile\shellex\ContextMenuHandlers\Compatibility", "", RegistryValue::DeleteKey),
+                        crate::reg_del_key!("HKLM", r"SOFTWARE\Classes\batfile\shellex\ContextMenuHandlers\Compatibility", "", RegistryValue::String("{1d27f844-3a1f-4410-85ac-14651078412d}")),
+                        crate::reg_del_key!("HKLM", r"SOFTWARE\Classes\cmdfile\shellex\ContextMenuHandlers\Compatibility", "", RegistryValue::String("{1d27f844-3a1f-4410-85ac-14651078412d}")),
                 ],
                 disabled_ops: None
         },
@@ -3446,17 +2750,17 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
                         // Files
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\*\shell\DefenderExclusion", value_name: "MUIVerb", value: RegistryValue::String("Add to Defender Exclusions"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\*\shell\DefenderExclusion", value_name: "HasLUAShield", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\*\shell\DefenderExclusion\command", value_name: "", value: RegistryValue::String(r#"powershell -windowstyle hidden -command "Start-Process cmd -ArgumentList '/s,/c,powershell Add-MpPreference -ExclusionPath ''%1''' -Verb RunAs""#), stock_value: RegistryValue::DeleteKey },
+                        crate::reg_str!("HKCU", r"Software\Classes\*\shell\DefenderExclusion", "MUIVerb", "Add to Defender Exclusions", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\*\shell\DefenderExclusion", "HasLUAShield", "", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\*\shell\DefenderExclusion\command", "", r#"powershell -windowstyle hidden -command "Start-Process cmd -ArgumentList '/s,/c,powershell Add-MpPreference -ExclusionPath ''%1''' -Verb RunAs""#, RegistryValue::DeleteKey),
                         // Folders
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\Directory\shell\DefenderExclusion", value_name: "MUIVerb", value: RegistryValue::String("Add to Defender Exclusions"), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\Directory\shell\DefenderExclusion", value_name: "HasLUAShield", value: RegistryValue::String(""), stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\Directory\shell\DefenderExclusion\command", value_name: "", value: RegistryValue::String(r#"powershell -windowstyle hidden -command "Start-Process cmd -ArgumentList '/s,/c,powershell Add-MpPreference -ExclusionPath ''%1''' -Verb RunAs""#), stock_value: RegistryValue::DeleteKey },
+                        crate::reg_str!("HKCU", r"Software\Classes\Directory\shell\DefenderExclusion", "MUIVerb", "Add to Defender Exclusions", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\Directory\shell\DefenderExclusion", "HasLUAShield", "", RegistryValue::DeleteKey),
+                        crate::reg_str!("HKCU", r"Software\Classes\Directory\shell\DefenderExclusion\command", "", r#"powershell -windowstyle hidden -command "Start-Process cmd -ArgumentList '/s,/c,powershell Add-MpPreference -ExclusionPath ''%1''' -Verb RunAs""#, RegistryValue::DeleteKey),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\*\shell\DefenderExclusion", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Classes\Directory\shell\DefenderExclusion", value_name: "", value: RegistryValue::DeleteKey, stock_value: RegistryValue::DeleteKey },
+                        crate::reg_del_key!("HKCU", r"Software\Classes\*\shell\DefenderExclusion", "", RegistryValue::DeleteKey),
+                        crate::reg_del_key!("HKCU", r"Software\Classes\Directory\shell\DefenderExclusion", "", RegistryValue::DeleteKey),
                 ])
         },
         crate::tweak! {
@@ -3465,19 +2769,11 @@ pub static CONTEXT_MENU_TWEAKS: &[Tweak] = &[
             name: "Classic Context Menu",
             description: "Restores the classic Windows 10 style context menu (right-click menu).",
             effect: TweakEffect::ExplorerRestart,
-            enabled_ops: &[RegistryOp {
-                hkey: "HKCU",
-                subkey: r"Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32",
-                value_name: "",
-                value: RegistryValue::String(""),
-                stock_value: RegistryValue::DeleteKey
-            }],
-            disabled_ops: Some(&[RegistryOp {
-                hkey: "HKCU",
-                subkey: r"Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}",
-                value_name: "",
-                value: RegistryValue::DeleteKey,
-                stock_value: RegistryValue::DeleteKey
-            }])
+            enabled_ops: &[
+                crate::reg_str!("HKCU", r"Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32", "", "", RegistryValue::DeleteKey),
+            ],
+            disabled_ops: Some(&[
+                crate::reg_del_key!("HKCU", r"Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}", "", RegistryValue::DeleteKey),
+            ])
         },
 ];

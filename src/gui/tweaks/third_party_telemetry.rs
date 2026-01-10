@@ -1,7 +1,8 @@
 // Third-party Telemetry tweaks
 
-use super::{RegistryOp, RegistryValue, Tweak, TweakEffect};
+use super::{RegistryValue, Tweak, TweakEffect};
 
+// Macro to generate env var tweaks
 // Macro to generate env var tweaks
 macro_rules! env_tweak {
         ($id:expr, $name:expr, $desc:expr, $var:expr, $val:expr) => {
@@ -11,20 +12,12 @@ macro_rules! env_tweak {
                                 name: $name,
                                 description: $desc,
                                 effect: TweakEffect::Logoff,
-                                enabled_ops: &[RegistryOp {
-                                        hkey: "HKCU",
-                                        subkey: "Environment",
-                                        value_name: $var,
-                                        value: RegistryValue::String($val),
-                                        stock_value: RegistryValue::Delete
-                }],
-                                disabled_ops: Some(&[RegistryOp {
-                                        hkey: "HKCU",
-                                        subkey: "Environment",
-                                        value_name: $var,
-                                        value: RegistryValue::Delete,
-                                        stock_value: RegistryValue::Delete
-                }])
+                                enabled_ops: &[
+                                    crate::reg_str!("HKCU", "Environment", $var, $val, RegistryValue::Delete)
+                                ],
+                                disabled_ops: Some(&[
+                                    crate::reg_del!("HKCU", "Environment", $var, RegistryValue::Delete)
+                                ])
                 }
         };
 }
@@ -38,20 +31,12 @@ macro_rules! reg_tweak {
                                 name: $name,
                                 description: $desc,
                                 effect: TweakEffect::Immediate,
-                                enabled_ops: &[RegistryOp {
-                                        hkey: $hkey,
-                                        subkey: $subkey,
-                                        value_name: $value_name,
-                                        value: RegistryValue::Dword($val),
-                                        stock_value: RegistryValue::Delete
-                }],
-                                disabled_ops: Some(&[RegistryOp {
-                                        hkey: $hkey,
-                                        subkey: $subkey,
-                                        value_name: $value_name,
-                                        value: RegistryValue::Delete,
-                                        stock_value: RegistryValue::Delete
-                }])
+                                enabled_ops: &[
+                                    crate::reg_dword!($hkey, $subkey, $value_name, $val, RegistryValue::Delete)
+                                ],
+                                disabled_ops: Some(&[
+                                    crate::reg_del!($hkey, $subkey, $value_name, RegistryValue::Delete)
+                                ])
                 }
         };
 }
@@ -1578,46 +1563,11 @@ pub static THIRD_PARTY_TELEMETRY_TWEAKS: &[Tweak] = &[
                 "1"
         ),
         env_tweak!(
-                "powershell_update_check",
-                "PowerShell Update Check",
-                "Disables PowerShell update checks",
-                "POWERSHELL_UPDATECHECK",
-                "off"
-        ),
-        env_tweak!(
                 "appcd_telemetry_false",
                 "Appcd Telemetry (False)",
                 "Disables Appcd telemetry (false variant)",
                 "APPCD_TELEMETRY",
                 "false"
-        ),
-        env_tweak!(
-                "dotnet_cli_telemetry_optout",
-                ".NET CLI Telemetry Opt-out",
-                "Disables .NET CLI telemetry (true variant)",
-                "DOTNET_CLI_TELEMETRY_OPTOUT",
-                "true"
-        ),
-        env_tweak!(
-                "mldotnet_cli_telemetry_optout",
-                "ML.NET CLI Telemetry Opt-out",
-                "Disables ML.NET CLI telemetry (True variant)",
-                "MLDOTNET_CLI_TELEMETRY_OPTOUT",
-                "True"
-        ),
-        env_tweak!(
-                "mssql_cli_telemetry_optout",
-                "MSSQL CLI Telemetry Opt-out",
-                "Disables MSSQL CLI telemetry (True variant)",
-                "MSSQL_CLI_TELEMETRY_OPTOUT",
-                "True"
-        ),
-        env_tweak!(
-                "one_codex_no_telemetry",
-                "One Codex No Telemetry",
-                "Disables One Codex telemetry",
-                "ONE_CODEX_NO_TELEMETRY",
-                "true"
         ),
         env_tweak!(
                 "canvas_lms_stats_collection",
@@ -1632,13 +1582,6 @@ pub static THIRD_PARTY_TELEMETRY_TWEAKS: &[Tweak] = &[
                 "Disables MM Service Settings Security Fix Alert",
                 "MM_SERVICESETTINGS_ENABLESECURITYFIXALERT",
                 "false"
-        ),
-        env_tweak!(
-                "redirect_typo3_updater",
-                "Redirect Typo3 Updater",
-                "Disables Redirect Typo3 Core Updater",
-                "REDIRECT_TYPO3_DISABLE_CORE_UPDATER",
-                "1"
         ),
         env_tweak!(
                 "automatedlab_telemetry_optin",

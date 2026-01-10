@@ -100,6 +100,16 @@ pub struct RegistryOp
         pub stock_value: RegistryValue, // Original Windows default
 }
 
+/// A single Group Policy operation (Machine config)
+#[derive(Clone, Debug, Serialize)]
+pub struct GpoOp
+{
+        pub subkey: &'static str,
+        pub value_name: &'static str,
+        pub value: RegistryValue,
+        pub stock_value: RegistryValue,
+}
+
 #[derive(Clone, Debug, PartialEq, Serialize)]
 pub enum RegistryValue
 {
@@ -150,6 +160,8 @@ pub struct Tweak
         pub sub_tweaks: &'static [&'static Tweak],
         pub has_custom_input: bool,
         pub default_text: Option<&'static str>,
+        pub command: Option<&'static str>,
+        pub gpo_ops: Option<&'static [GpoOp]>,
 }
 
 impl Tweak
@@ -169,6 +181,8 @@ impl Tweak
                 sub_tweaks: &[],
                 has_custom_input: false,
                 default_text: None,
+                command: None,
+                gpo_ops: None,
         };
 
         #[allow(clippy::cast_possible_truncation)]
@@ -186,6 +200,168 @@ macro_rules! tweak {
             ..$crate::gui::tweaks::Tweak::DEFAULT
         }
     };
+}
+
+#[macro_export]
+macro_rules! reg_dword {
+        ($hkey:expr, $subkey:expr, $name:expr, $val:expr) => {
+                $crate::reg_dword!(
+                        $hkey,
+                        $subkey,
+                        $name,
+                        $val,
+                        $crate::gui::tweaks::RegistryValue::Delete
+                )
+        };
+        ($hkey:expr, $subkey:expr, $name:expr, $val:expr, $stock:literal) => {
+                $crate::gui::tweaks::RegistryOp {
+                        hkey: $hkey,
+                        subkey: $subkey,
+                        value_name: $name,
+                        value: $crate::gui::tweaks::RegistryValue::Dword($val),
+                        stock_value: $crate::gui::tweaks::RegistryValue::Dword($stock),
+                }
+        };
+        ($hkey:expr, $subkey:expr, $name:expr, $val:expr, $stock:expr) => {
+                $crate::gui::tweaks::RegistryOp {
+                        hkey: $hkey,
+                        subkey: $subkey,
+                        value_name: $name,
+                        value: $crate::gui::tweaks::RegistryValue::Dword($val),
+                        stock_value: $stock,
+                }
+        };
+}
+
+#[macro_export]
+macro_rules! reg_str {
+        ($hkey:expr, $subkey:expr, $name:expr, $val:expr) => {
+                $crate::reg_str!(
+                        $hkey,
+                        $subkey,
+                        $name,
+                        $val,
+                        $crate::gui::tweaks::RegistryValue::Delete
+                )
+        };
+        ($hkey:expr, $subkey:expr, $name:expr, $val:expr, $stock:literal) => {
+                $crate::gui::tweaks::RegistryOp {
+                        hkey: $hkey,
+                        subkey: $subkey,
+                        value_name: $name,
+                        value: $crate::gui::tweaks::RegistryValue::String($val),
+                        stock_value: $crate::gui::tweaks::RegistryValue::String($stock),
+                }
+        };
+        ($hkey:expr, $subkey:expr, $name:expr, $val:expr, $stock:expr) => {
+                $crate::gui::tweaks::RegistryOp {
+                        hkey: $hkey,
+                        subkey: $subkey,
+                        value_name: $name,
+                        value: $crate::gui::tweaks::RegistryValue::String($val),
+                        stock_value: $stock,
+                }
+        };
+}
+
+#[macro_export]
+macro_rules! reg_binary {
+        ($hkey:expr, $subkey:expr, $name:expr, $val:expr) => {
+                $crate::reg_binary!(
+                        $hkey,
+                        $subkey,
+                        $name,
+                        $val,
+                        $crate::gui::tweaks::RegistryValue::Delete
+                )
+        };
+        ($hkey:expr, $subkey:expr, $name:expr, $val:expr, $stock:expr) => {
+                $crate::gui::tweaks::RegistryOp {
+                        hkey: $hkey,
+                        subkey: $subkey,
+                        value_name: $name,
+                        value: $crate::gui::tweaks::RegistryValue::Binary($val),
+                        stock_value: $stock,
+                }
+        };
+}
+
+#[macro_export]
+macro_rules! reg_del {
+        ($hkey:expr, $subkey:expr, $name:expr, $stock:expr) => {
+                $crate::gui::tweaks::RegistryOp {
+                        hkey: $hkey,
+                        subkey: $subkey,
+                        value_name: $name,
+                        value: $crate::gui::tweaks::RegistryValue::Delete,
+                        stock_value: $stock,
+                }
+        };
+}
+
+#[macro_export]
+macro_rules! reg_del_key {
+        ($hkey:expr, $subkey:expr, $name:expr, $stock:expr) => {
+                $crate::gui::tweaks::RegistryOp {
+                        hkey: $hkey,
+                        subkey: $subkey,
+                        value_name: $name,
+                        value: $crate::gui::tweaks::RegistryValue::DeleteKey,
+                        stock_value: $stock,
+                }
+        };
+}
+
+#[macro_export]
+macro_rules! gpo_dword {
+        ($subkey:expr, $name:expr, $val:expr, $stock:literal) => {
+                $crate::gui::tweaks::GpoOp {
+                        subkey: $subkey,
+                        value_name: $name,
+                        value: $crate::gui::tweaks::RegistryValue::Dword($val),
+                        stock_value: $crate::gui::tweaks::RegistryValue::Dword($stock),
+                }
+        };
+        ($subkey:expr, $name:expr, $val:expr, $stock:expr) => {
+                $crate::gui::tweaks::GpoOp {
+                        subkey: $subkey,
+                        value_name: $name,
+                        value: $crate::gui::tweaks::RegistryValue::Dword($val),
+                        stock_value: $stock,
+                }
+        };
+}
+
+#[macro_export]
+macro_rules! gpo_str {
+        ($subkey:expr, $name:expr, $val:expr, $stock:literal) => {
+                $crate::gui::tweaks::GpoOp {
+                        subkey: $subkey,
+                        value_name: $name,
+                        value: $crate::gui::tweaks::RegistryValue::String($val),
+                        stock_value: $crate::gui::tweaks::RegistryValue::String($stock),
+                }
+        };
+        ($subkey:expr, $name:expr, $val:expr, $stock:expr) => {
+                $crate::gui::tweaks::GpoOp {
+                        subkey: $subkey,
+                        value_name: $name,
+                        value: $crate::gui::tweaks::RegistryValue::String($val),
+                        stock_value: $stock,
+                }
+        };
+}
+
+#[macro_export]
+macro_rules! gpo_del {
+        ($subkey:expr, $name:expr, $stock:expr) => {
+                $crate::gui::tweaks::GpoOp {
+                        subkey: $subkey,
+                        value_name: $name,
+                        value: $crate::gui::tweaks::RegistryValue::Delete,
+                        stock_value: $stock,
+                }
+        };
 }
 
 // Helper to get HKEY from string

@@ -9,37 +9,51 @@ use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
 
+macro_rules! winget_tweak {
+        ($id:expr, $name:expr, $desc:expr, $package_id:expr) => {
+                winget_tweak!($id, $name, $desc, $package_id, &[])
+        };
+        ($id:expr, $name:expr, $desc:expr, $package_id:expr, $args:expr) => {
+                crate::tweak! {
+                    id: $id,
+                    category: "software",
+                    name: $name,
+                    description: $desc,
+                    effect: TweakEffect::Immediate,
+                    enabled_ops: &[],
+                    disabled_ops: None,
+                    custom_apply: Some(|ctx| install_winget($package_id, $args, ctx))
+                }
+        };
+}
+
 pub static SOFTWARE_TWEAKS: &[Tweak] = &[
-        crate::tweak! {
-                id: "install_icaros",
-                category: "software",
-                name: "Install Icaros",
-                description: "Installs Icaros (shell extensions for video thumbnails).",
-                effect: TweakEffect::Immediate,
-                enabled_ops: &[],
-                disabled_ops: None,
-                custom_apply: Some(|ctx| install_winget("Xanashi.Icaros", &["--scope", "machine"], ctx))
-        },
-        crate::tweak! {
-                id: "install_startallback",
-                category: "software",
-                name: "Install StartAllBack",
-                description: "Installs StartAllBack (Windows 11 taskbar and start menu customization).",
-                effect: TweakEffect::Immediate,
-                enabled_ops: &[],
-                disabled_ops: None,
-                custom_apply: Some(|ctx| install_winget("StartIsBack.StartAllBack", &["--scope", "machine"], ctx))
-        },
-        crate::tweak! {
-                id: "install_fortfirewall",
-                category: "software",
-                name: "Install Fort Firewall",
-                description: "Installs Fort Firewall (simple firewall for Windows).",
-                effect: TweakEffect::Immediate,
-                enabled_ops: &[],
-                disabled_ops: None,
-                custom_apply: Some(|ctx| install_winget("NodirTemirkhodjaev.FortFirewall", &[], ctx))
-        },
+        winget_tweak!(
+                "install_icaros",
+                "Install Icaros",
+                "Installs Icaros (shell extensions for the thumbnail generation of videos, images, and other file types).",
+                "Xanashi.Icaros",
+                &["--scope", "machine"]
+        ),
+        winget_tweak!(
+                "install_startallback",
+                "Install StartAllBack",
+                "Installs StartAllBack (Windows 11 taskbar and start menu customization).",
+                "StartIsBack.StartAllBack",
+                &["--scope", "machine"]
+        ),
+        winget_tweak!(
+                "install_fortfirewall",
+                "Install Fort Firewall",
+                "Installs Fort Firewall (the most comprehensive open-source firewall for Windows).",
+                "NodirTemirkhodjaev.FortFirewall"
+        ),
+        winget_tweak!(
+                "install_7zip",
+                "Install 7-Zip",
+                "Installs 7-Zip (the best open-source file archiver).",
+                "7zip.7zip"
+        ),
 ];
 
 #[allow(clippy::unnecessary_wraps)]

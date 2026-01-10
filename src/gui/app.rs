@@ -7,6 +7,7 @@ use super::shared_state::{SharedState, WorkerContext};
 use super::state::{SelectionState, TweakStates, ViewMode};
 use super::theme;
 use super::tweaks::{CATEGORIES, Tweak, apply_tweak, get_all_tweaks, get_tweaks_for_category};
+use super::widgets;
 
 #[cfg(windows)]
 fn enforce_dark_mode(window: &eframe::Frame)
@@ -562,7 +563,7 @@ impl W11BoostApp
                         ui.vertical(|ui| {
                                 ui.horizontal(|ui| {
                                         ui.label(RichText::new(tweak.name).strong().size(16.0));
-                                        Self::render_effect_badge(ui, tweak.effect);
+                                        widgets::render_effect_badge(ui, tweak.effect);
                                 });
 
                                 ui.label(RichText::new(tweak.description).small().weak());
@@ -629,20 +630,7 @@ impl W11BoostApp
                 self.render_category_tweaks_list(ui, tweaks);
         }
 
-        fn render_effect_badge(ui: &mut egui::Ui, effect: super::tweaks::TweakEffect)
-        {
-                let (effect_text, effect_color) = match effect {
-                        super::tweaks::TweakEffect::Immediate => ("Immediate", egui::Color32::from_rgb(100, 220, 100)),
-                        super::tweaks::TweakEffect::ExplorerRestart => {
-                                ("Explorer Restart", egui::Color32::from_rgb(255, 180, 50))
-                        }
-                        super::tweaks::TweakEffect::Logoff => ("Logoff", egui::Color32::from_rgb(255, 120, 50)),
-                        super::tweaks::TweakEffect::Restart => ("Restart", egui::Color32::from_rgb(255, 80, 80)),
-                };
 
-                ui.add_space(4.0);
-                ui.label(RichText::new(effect_text).small().color(effect_color).strong());
-        }
 
         fn render_tweak_row(&mut self, ui: &mut egui::Ui, tweak: &'static Tweak)
         {
@@ -676,7 +664,7 @@ impl W11BoostApp
 
         fn render_tweak_technical_details(&self, ui: &mut egui::Ui, tweak: &'static Tweak)
         {
-                ui.label(RichText::new("Technical Details (Registry Changes)")
+                ui.label(RichText::new("Technical Details")
                         .strong()
                         .size(16.0)
                         .weak());
@@ -695,124 +683,42 @@ impl W11BoostApp
                                                 ui.set_width(ui.available_width());
                                                 
                                                 let has_real_ops = tweak.enabled_ops.iter().any(|op| !op.subkey.is_empty());
-                                                if tweak.custom_apply.is_some() && !has_real_ops {
+                                                let has_command = tweak.command.is_some();
+                                                let has_gpo = tweak.gpo_ops.is_some() && !tweak.gpo_ops.unwrap().is_empty();
+
+                                                if tweak.custom_apply.is_some() && !has_real_ops && !has_command && !has_gpo {
                                                         ui.label(RichText::new("\u{2139} This tweak uses a custom operation (PowerShell/Shell API) to apply multiple changes.").weak().italics());
+                                                }
+
+                                                if let Some(cmd) = tweak.command {
+                                                        widgets::render_command(ui, cmd);
+                                                }
+
+                                                if let Some(ops) = tweak.gpo_ops {
+                                                        for op in ops {
+                                                                widgets::render_gpo_op(ui, op);
+                                                        }
                                                 }
 
                                                 for op in tweak.enabled_ops {
                                                         if op.subkey.is_empty() { continue; }
-                                                        self.render_registry_op(ui, op);
+                                                        widgets::render_registry_op(ui, op);
                                                 }
                                         });
                         });
         }
 
-        fn render_registry_op(&self, ui: &mut egui::Ui, op: &super::tweaks::RegistryOp)
-        {
-                let value_str = match &op.value {
-                        super::tweaks::RegistryValue::Dword(v) => format!("{v} (DWORD)"),
-                        super::tweaks::RegistryValue::String(s) => format!("\"{s}\" (String)"),
-                        super::tweaks::RegistryValue::ExpandSz(s) => format!("\"{s}\" (ExpandString)"),
-                        super::tweaks::RegistryValue::Binary(v) => format!("{v:?} (Binary)"),
-                        super::tweaks::RegistryValue::Delete => "DELETE".to_string(),
-                        super::tweaks::RegistryValue::DeleteKey => "DELETE KEY".to_string(),
-                };
 
-                let stock_str = match &op.stock_value {
-                        super::tweaks::RegistryValue::Dword(v) => format!("{v} (DWORD)"),
-                        super::tweaks::RegistryValue::String(s) => format!("\"{s}\" (String)"),
-                        super::tweaks::RegistryValue::ExpandSz(s) => format!("\"{s}\" (ExpandString)"),
-                        super::tweaks::RegistryValue::Binary(v) => format!("{v:?} (Binary)"),
-                        super::tweaks::RegistryValue::Delete => "NOT PRESENT (Value)".to_string(),
-                        super::tweaks::RegistryValue::DeleteKey => "NOT PRESENT (Key)".to_string(),
-                };
 
-                ui.horizontal_wrapped(|ui| {
-                        ui.label(RichText::new(format!("{}:", op.hkey))
-                                .strong()
-                                .monospace()
-                                .size(14.0)
-                                .color(ui.style().visuals.selection.stroke.color));
-                        ui.label(RichText::new(format!("{}\\{}", op.subkey, op.value_name))
-                                .monospace()
-                                .size(14.0)
-                                .weak());
-                });
 
-                ui.horizontal_wrapped(|ui| {
-                        ui.add_space(8.0);
-                        ui.label(RichText::new("Target:")
-                                .monospace()
-                                .size(14.0)
-                                .color(Color32::from_rgb(200, 200, 200)));
-                        ui.label(RichText::new(format!(" = {}", value_str))
-                                .monospace()
-                                .size(14.0)
-                                .color(Color32::from_rgb(115, 179, 242)));
-                });
 
-                ui.horizontal_wrapped(|ui| {
-                        ui.add_space(8.0);
-                        ui.label(RichText::new("Stock: ")
-                                .monospace()
-                                .size(14.0)
-                                .color(Color32::from_rgb(200, 200, 200)));
-                        ui.label(RichText::new(format!(" = {}", stock_str))
-                                .monospace()
-                                .size(14.0)
-                                .color(Color32::from_rgb(255, 165, 0)));
-                });
 
-                ui.add_space(4.0);
-        }
-
-        fn render_tweak_description_column(&self, ui: &mut egui::Ui, tweak: &'static Tweak) {
-                ui.vertical(|ui| {
-                        ui.label(RichText::new("Description").strong().size(16.0));
-                        ui.add_space(4.0);
-                        egui::Frame::group(ui.style())
-                                .fill(ui.style().visuals.faint_bg_color)
-                                .inner_margin(8.0)
-                                .show(ui, |ui| {
-                                        ui.label(tweak.description);
-                                });
-                });
-        }
-
-        fn render_tweak_impact_column(&self, ui: &mut egui::Ui, tweak: &'static Tweak) {
-               ui.vertical(|ui| {
-                        ui.label(RichText::new("Impact & Effect").strong().size(16.0));
-                        ui.add_space(4.0);
-                        egui::Frame::group(ui.style())
-                                .fill(ui.style().visuals.faint_bg_color)
-                                .inner_margin(8.0)
-                                .show(ui, |ui| {
-                                        let desc = tweak.effect.description();
-                                        let is_logoff = desc == "Requires sign out/sign in";
-
-                                        if desc != "Requires restart" && !is_logoff {
-                                                ui.label(desc);
-                                        }
-                                        if tweak.requires_restart {
-                                                if desc != "Requires restart" {
-                                                        ui.add_space(2.0);
-                                                }
-                                                ui.label(RichText::new("\u{26A0} Requires restart")
-                                                        .color(Color32::from_rgb(255, 100, 100)));
-                                        }
-                                        if is_logoff {
-                                                ui.label(RichText::new("\u{26A0} Requires sign out/sign in")
-                                                        .color(Color32::from_rgb(255, 190, 40)));
-                                        }
-                                });
-                });
-        }
 
         fn render_tweak_metadata_panel(&mut self, ui: &mut egui::Ui, tweak: &'static Tweak)
         {
                 ui.columns(2, |columns| {
-                        self.render_tweak_description_column(&mut columns[0], tweak);
-                        self.render_tweak_impact_column(&mut columns[1], tweak);
+                        widgets::render_tweak_description_column(&mut columns[0], tweak);
+                        widgets::render_tweak_impact_column(&mut columns[1], tweak);
                 });
         }
 
@@ -906,74 +812,7 @@ impl W11BoostApp
                 }
         }
 
-        fn generate_highlight_job(text: &str, search_query: &str, theme_color: Color32) -> egui::text::LayoutJob {
-                let mut layout_job = egui::text::LayoutJob::default();
-                // We use auto wrapping with infinite width because we want multiline editing,
-                // but usually layouters are called with a specific wrap width.
-                // However, our logic appending text is independent of wrap width except for
-                // the fact that we're feeding it to the painter eventually.
-                // The `layouter` closure in egui is responsible for setting the max_width.
-                // We'll leave that for the caller to set on the result or pass in.
-                // Actually, `layout_job` holds the sections. Wrapping is applied by the widget
-                // using the job's break settings.
-                
-                if search_query.is_empty() {
-                        layout_job.append(
-                                text,
-                                0.0,
-                                egui::TextFormat {
-                                        font_id: egui::FontId::monospace(14.0),
-                                        color: theme_color,
-                                        ..Default::default()
-                                },
-                        );
-                } else {
-                        let haystack = text.to_lowercase();
-                        let needle = search_query.to_lowercase();
-                        let mut last_end = 0;
 
-                        for (start, part) in haystack.match_indices(&needle) {
-                                if start > last_end {
-                                        layout_job.append(
-                                                &text[last_end..start],
-                                                0.0,
-                                                egui::TextFormat {
-                                                        font_id: egui::FontId::monospace(14.0),
-                                                        color: theme_color,
-                                                        ..Default::default()
-                                                },
-                                        );
-                                }
-
-                                let match_end = start + part.len();
-                                layout_job.append(
-                                        &text[start..match_end],
-                                        0.0,
-                                        egui::TextFormat {
-                                                font_id: egui::FontId::monospace(14.0),
-                                                background: Color32::from_rgb(255, 255, 0),
-                                                color: Color32::BLACK,
-                                                ..Default::default()
-                                        },
-                                );
-
-                                last_end = match_end;
-                        }
-
-                        if last_end < text.len() {
-                                layout_job.append(
-                                        &text[last_end..],
-                                        0.0,
-                                        egui::TextFormat {
-                                                font_id: egui::FontId::monospace(14.0),
-                                                color: theme_color,
-                                                ..Default::default()
-                                        },
-                                );
-                        }
-                }
-                layout_job
-        }
 
         fn render_tweak_custom_input(&mut self, ui: &mut egui::Ui, tweak: &'static Tweak)
         {
@@ -996,7 +835,7 @@ impl W11BoostApp
                 let theme_color = ui.visuals().text_color();
 
                 let mut layouter = move |ui: &egui::Ui, string: &dyn egui::TextBuffer, wrap_width: f32| {
-                        let mut job = Self::generate_highlight_job(string.as_str(), &search_query, theme_color);
+                        let mut job = widgets::generate_highlight_job(string.as_str(), &search_query, theme_color);
                         job.wrap.max_width = wrap_width;
                         ui.painter().layout_job(job)
                 };
@@ -1264,16 +1103,7 @@ impl W11BoostApp
                         });
         }
 
-        fn render_log_messages_list(&self, ui: &mut egui::Ui, messages: &[String])
-        {
-                if messages.is_empty() {
-                        ui.weak("No log messages yet.");
-                } else {
-                        for msg in messages {
-                                ui.label(RichText::new(msg).monospace().size(12.0));
-                        }
-                }
-        }
+
 
         fn render_log_scroll_area(&self, ui: &mut egui::Ui, messages: &[String])
         {
@@ -1290,7 +1120,7 @@ impl W11BoostApp
                                                 bottom: 0,
                                         })
                                         .show(ui, |ui| {
-                                                self.render_log_messages_list(ui, messages);
+                                                widgets::render_log_messages_list(ui, messages);
                                         });
                         });
         }

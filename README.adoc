@@ -13,17 +13,16 @@ NOTE: This project uses AI written code, version 1.6.2 is the last version witho
 I think it's much better than prior releases, but ultimately it's up to you to decide on whether to use it.
 
 == How to use
-Run W11Boost in a virtual machine first, I'd recommend https://www.techspot.com/downloads/189-vmware-workstation-for-windows.html[VMWare Workstation] for running VMs on Windows.
-
-Doing this in a virtual machine is recommended to get a feel for what you want to do without risking your main system, and to make it easier to compare before and after in terms of RAM and CPU usage among other metrics. There is a complete uninstaller, but it fully reverts to Windows defaults for each option selected.
-
 Go to the https://github.com/felikcat/W11Boost/releases[latest releases] and download W11Boost, run it, pick out what options you want.
 
-.Notes
-- The default settings are what's recommended, beyond that is personal preference.
-- This is intended ONLY for personal use and not for corporate environments; no CLI automation will be provided.
+TIP: I would run W11Boost in a virtual machine first to verify functionality, and get a feel for what changes you want to make.
 
 image:W11Boost_GUI.png[960,720]
+
+Before W11Boost: +
+image:vmware_1.png[]
+After W11Boost (default settings): +
+image:vmware_2.png[]
 
 
 == Additional recommendations
@@ -35,6 +34,9 @@ NOTE: Third-party anti-malware programs can provide better protection, but can s
 
 - If you have an AMD CPU, grab the https://www.amd.com/en/support/download/drivers.html[latest chipset drivers] for it.
 ** For Intel CPUs, https://www.intel.com/content/www/us/en/support/articles/000005533/software/chipset-software.html[go here].
+
+- https://github.com/SimonvBez/CPUSetSetter[CPU Set Setter]. For a Ryzen 7 9800X3D, I disable core 0 to improve the FPS and stability of games: +
+image:CPUSetSetter.png[]
 
 . Replace Consumer OEM apps with their Enterprise variant. Such as replacing Lenovo Vantage with Lenovo Commercial Vantage.
 

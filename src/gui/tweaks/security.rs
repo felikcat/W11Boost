@@ -1,6 +1,6 @@
 // Security tweaks
 
-use super::{RegistryOp, RegistryValue, Tweak, TweakEffect};
+use super::{RegistryValue, Tweak, TweakEffect};
 
 pub static SECURITY_TWEAKS: &[Tweak] = &[
         crate::tweak! {
@@ -27,7 +27,11 @@ pub static SECURITY_TWEAKS: &[Tweak] = &[
                         save_registry_gpo(hkey, gpo)?;
                         ctx.report_progress();
                         Ok(())
-                })
+                }),
+                gpo_ops: Some(&[
+                        crate::gpo_str!(r"SOFTWARE\Policies\Microsoft\Windows\System", "**del.ShellSmartScreenLevel", "", RegistryValue::Delete),
+                        crate::gpo_dword!(r"SOFTWARE\Policies\Microsoft\Windows\System", "EnableSmartScreen", 0, 1),
+                ]),
         },
         crate::tweak! {
                 id: "disable_password_reveal",
@@ -35,20 +39,12 @@ pub static SECURITY_TWEAKS: &[Tweak] = &[
                 name: "Disable Password Reveal",
                 description: "Hides the password reveal button (eye icon) in password fields.",
                 effect: TweakEffect::Immediate,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"Software\Policies\Microsoft\Windows\CredUI",
-                        value_name: "DisablePasswordReveal",
-                        value: RegistryValue::Dword(1),
-                        stock_value: RegistryValue::Delete
-        }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"Software\Policies\Microsoft\Windows\CredUI",
-                        value_name: "DisablePasswordReveal",
-                        value: RegistryValue::Delete,
-                        stock_value: RegistryValue::Delete
-        }])
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"Software\Policies\Microsoft\Windows\CredUI", "DisablePasswordReveal", 1),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_del!("HKLM", r"Software\Policies\Microsoft\Windows\CredUI", "DisablePasswordReveal", RegistryValue::Delete),
+                ])
         },
         crate::tweak! {
                 id: "disable_defender",
@@ -104,6 +100,16 @@ pub static SECURITY_TWEAKS: &[Tweak] = &[
                         ctx.report_progress();
                         Ok(())
                 }),
+                gpo_ops: Some(&[
+                        crate::gpo_dword!(r"SOFTWARE\Policies\Microsoft\Windows Defender", "DisableAntiSpyware", 1, 0),
+                        crate::gpo_dword!(r"SOFTWARE\Policies\Microsoft\Windows Defender", "DisableAntiVirus", 1, 0),
+                        crate::gpo_dword!(r"SOFTWARE\Policies\Microsoft\Windows Defender", "ServiceKeepAlive", 0, 1),
+                        crate::gpo_dword!(r"SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection", "DisableRealtimeMonitoring", 1, 0),
+                        crate::gpo_dword!(r"SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection", "DisableBehaviorMonitoring", 1, 0),
+                        crate::gpo_dword!(r"SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection", "DisableIOAVProtection", 1, 0),
+                        crate::gpo_dword!(r"SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection", "DisableOnAccessProtection", 1, 0),
+                        crate::gpo_dword!(r"SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection", "DisableScriptScanning", 1, 0),
+                ]),
                 requires_restart: true
         },
         crate::tweak! {
@@ -112,20 +118,12 @@ pub static SECURITY_TWEAKS: &[Tweak] = &[
                 name: "Enable USB Write Protection",
                 description: "Prevents writing to USB storage devices.",
                 effect: TweakEffect::Immediate,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SYSTEM\CurrentControlSet\Control\StorageDevicePolicies",
-                        value_name: "WriteProtect",
-                        value: RegistryValue::Dword(1),
-                        stock_value: RegistryValue::Delete
-        }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SYSTEM\CurrentControlSet\Control\StorageDevicePolicies",
-                        value_name: "WriteProtect",
-                        value: RegistryValue::Dword(0),
-                        stock_value: RegistryValue::Delete
-        }])
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Control\StorageDevicePolicies", "WriteProtect", 1),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_del!("HKLM", r"SYSTEM\CurrentControlSet\Control\StorageDevicePolicies", "WriteProtect", RegistryValue::Delete),
+                ])
         },
         crate::tweak! {
                 id: "disable_uac",
@@ -133,20 +131,12 @@ pub static SECURITY_TWEAKS: &[Tweak] = &[
                 name: "Disable UAC",
                 description: "Disables User Account Control (UAC). Warning: Significantly reduces security.",
                 effect: TweakEffect::Restart,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System",
-                        value_name: "EnableLUA",
-                        value: RegistryValue::Dword(0),
-                        stock_value: RegistryValue::Dword(1)
-        }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System",
-                        value_name: "EnableLUA",
-                        value: RegistryValue::Dword(1),
-                        stock_value: RegistryValue::Dword(1)
-        }]),
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System", "EnableLUA", 0, 1),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System", "EnableLUA", 1, 1),
+                ]),
                 requires_restart: true
         },
         crate::tweak! {
@@ -156,36 +146,12 @@ pub static SECURITY_TWEAKS: &[Tweak] = &[
                 description: "Disables Microsoft Defender Antivirus cloud-based protection (SpyNet) and sample submission.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows Defender\Spynet",
-                                value_name: "SpyNetReporting",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows Defender\Spynet",
-                                value_name: "SubmitSamplesConsent",
-                                value: RegistryValue::Dword(2),
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows Defender\Spynet", "SpyNetReporting", 0),
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows Defender\Spynet", "SubmitSamplesConsent", 2),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows Defender\Spynet",
-                                value_name: "SpyNetReporting",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows Defender\Spynet",
-                                value_name: "SubmitSamplesConsent",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows Defender\Spynet", "SpyNetReporting", RegistryValue::Delete),
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows Defender\Spynet", "SubmitSamplesConsent", RegistryValue::Delete),
                 ])
         },
         crate::tweak! {
@@ -194,20 +160,12 @@ pub static SECURITY_TWEAKS: &[Tweak] = &[
                 name: "Disable MRT Infection Reporting",
                 description: "Prevents Malicious Software Removal Tool (MRT) from reporting infection information back to Microsoft.",
                 effect: TweakEffect::Immediate,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Policies\Microsoft\MRT",
-                        value_name: "DontReportInfectionInformation",
-                        value: RegistryValue::Dword(1),
-                        stock_value: RegistryValue::Delete
-        }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Policies\Microsoft\MRT",
-                        value_name: "DontReportInfectionInformation",
-                        value: RegistryValue::Delete,
-                        stock_value: RegistryValue::Delete
-        }])
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\MRT", "DontReportInfectionInformation", 1),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\MRT", "DontReportInfectionInformation", RegistryValue::Delete),
+                ])
         },
         crate::tweak! {
                 id: "disable_broad_file_access",
@@ -216,36 +174,12 @@ pub static SECURITY_TWEAKS: &[Tweak] = &[
                 description: "Blocks apps from accessing your entire file system without prompt.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\broadFileSystemAccess",
-                                value_name: "Value",
-                                value: RegistryValue::String("Deny"),
-                                stock_value: RegistryValue::String("Allow")
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\broadFileSystemAccess",
-                                value_name: "Value",
-                                value: RegistryValue::String("Deny"),
-                                stock_value: RegistryValue::String("Allow")
-        },
+                        crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\broadFileSystemAccess", "Value", "Deny", "Allow"),
+                        crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\broadFileSystemAccess", "Value", "Deny", "Allow"),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\broadFileSystemAccess",
-                                value_name: "Value",
-                                value: RegistryValue::String("Allow"),
-                                stock_value: RegistryValue::String("Allow")
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\broadFileSystemAccess",
-                                value_name: "Value",
-                                value: RegistryValue::String("Allow"),
-                                stock_value: RegistryValue::String("Allow")
-        },
+                        crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\broadFileSystemAccess", "Value", "Allow", "Allow"),
+                        crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\broadFileSystemAccess", "Value", "Allow", "Allow"),
                 ])
         },
         crate::tweak! {
@@ -254,20 +188,12 @@ pub static SECURITY_TWEAKS: &[Tweak] = &[
                 name: "Disable Memory Integrity (Core Isolation)",
                 description: "Disables Hypervisor-protected Code Integrity (HVCI). Can improve gaming performance but reduces security.",
                 effect: TweakEffect::Restart,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity",
-                        value_name: "Enabled",
-                        value: RegistryValue::Dword(0),
-                        stock_value: RegistryValue::Delete
-        }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity",
-                        value_name: "Enabled",
-                        value: RegistryValue::Dword(1),
-                        stock_value: RegistryValue::Dword(1)
-        }]),
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity", "Enabled", 0),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity", "Enabled", 1, 1),
+                ]),
                 requires_restart: true
         },
         crate::tweak! {
@@ -277,11 +203,11 @@ pub static SECURITY_TWEAKS: &[Tweak] = &[
                 description: "Enables a hardware-based security feature that protects against return-oriented programming (ROP) attacks.",
                 effect: TweakEffect::Restart,
                 enabled_ops: &[
-                        RegistryOp { hkey: "HKLM", subkey: r"SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management", value_name: "KernelStackProtection", value: RegistryValue::Dword(1), stock_value: RegistryValue::Delete },
-                        RegistryOp { hkey: "HKLM", subkey: r"SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelStackProtection", value_name: "Enabled", value: RegistryValue::Dword(1), stock_value: RegistryValue::Delete },
+                        crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management", "KernelStackProtection", 1),
+                        crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelStackProtection", "Enabled", 1),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp { hkey: "HKLM", subkey: r"SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management", value_name: "KernelStackProtection", value: RegistryValue::Dword(0), stock_value: RegistryValue::Dword(0) },
+                        crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management", "KernelStackProtection", 0, 0),
                 ]),
                 requires_restart: true
         },
@@ -292,10 +218,10 @@ pub static SECURITY_TWEAKS: &[Tweak] = &[
                 description: "Enables Potentially Unwanted Application (PUA) protection in Microsoft Defender.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp { hkey: "HKLM", subkey: r"Software\Policies\Microsoft\Windows Defender\MpEngine", value_name: "PUAProtection", value: RegistryValue::Dword(1), stock_value: RegistryValue::Delete },
+                        crate::reg_dword!("HKLM", r"Software\Policies\Microsoft\Windows Defender\MpEngine", "PUAProtection", 1),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp { hkey: "HKLM", subkey: r"Software\Policies\Microsoft\Windows Defender\MpEngine", value_name: "PUAProtection", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
+                        crate::reg_del!("HKLM", r"Software\Policies\Microsoft\Windows Defender\MpEngine", "PUAProtection", RegistryValue::Delete),
                 ])
         },
         crate::tweak! {
@@ -305,10 +231,10 @@ pub static SECURITY_TWEAKS: &[Tweak] = &[
                 description: "Prevents writing to removable drives unless they are protected by BitLocker.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\FVE", value_name: "RDVDenyWriteAccess", value: RegistryValue::Dword(1), stock_value: RegistryValue::Delete },
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\FVE", "RDVDenyWriteAccess", 1),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\FVE", value_name: "RDVDenyWriteAccess", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\FVE", "RDVDenyWriteAccess", RegistryValue::Delete),
                 ])
         },
         crate::tweak! {
@@ -318,10 +244,10 @@ pub static SECURITY_TWEAKS: &[Tweak] = &[
                 description: "Prevents writing to fixed data drives unless they are protected by BitLocker.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\FVE", value_name: "FDVDenyWriteAccess", value: RegistryValue::Dword(1), stock_value: RegistryValue::Delete },
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\FVE", "FDVDenyWriteAccess", 1),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\FVE", value_name: "FDVDenyWriteAccess", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\FVE", "FDVDenyWriteAccess", RegistryValue::Delete),
                 ])
         },
         crate::tweak! {
@@ -331,16 +257,16 @@ pub static SECURITY_TWEAKS: &[Tweak] = &[
                 description: "Disables SmartScreen Phishing Protection service and notifications.",
                 effect: TweakEffect::Restart,
                 enabled_ops: &[
-                        RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\Windows\WTDS\Components", value_name: "ServiceEnabled", value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete },
-                        RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\Windows\WTDS\Components", value_name: "NotifyMalicious", value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete },
-                        RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\Windows\WTDS\Components", value_name: "NotifyPasswordReuse", value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete },
-                        RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\Windows\WTDS\Components", value_name: "NotifyUnsafeApp", value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete },
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\WTDS\Components", "ServiceEnabled", 0),
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\WTDS\Components", "NotifyMalicious", 0),
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\WTDS\Components", "NotifyPasswordReuse", 0),
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\WTDS\Components", "NotifyUnsafeApp", 0),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\Windows\WTDS\Components", value_name: "ServiceEnabled", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                        RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\Windows\WTDS\Components", value_name: "NotifyMalicious", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                        RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\Windows\WTDS\Components", value_name: "NotifyPasswordReuse", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                        RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\Windows\WTDS\Components", value_name: "NotifyUnsafeApp", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\WTDS\Components", "ServiceEnabled", RegistryValue::Delete),
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\WTDS\Components", "NotifyMalicious", RegistryValue::Delete),
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\WTDS\Components", "NotifyPasswordReuse", RegistryValue::Delete),
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\WTDS\Components", "NotifyUnsafeApp", RegistryValue::Delete),
                 ]),
                 requires_restart: true
         },
@@ -350,20 +276,12 @@ pub static SECURITY_TWEAKS: &[Tweak] = &[
                 name: "Disable Smart App Control",
                 description: "Attempts to disable Smart App Control. Note: This feature is highly protected and may require a fresh Windows install or offline editing to fully disable if it was enabled during setup.",
                 effect: TweakEffect::Restart,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SYSTEM\CurrentControlSet\Control\CI\Policy",
-                        value_name: "VerifiedAndReputablePolicyState",
-                        value: RegistryValue::Dword(0),
-                        stock_value: RegistryValue::Delete // Default varies
-                }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SYSTEM\CurrentControlSet\Control\CI\Policy",
-                        value_name: "VerifiedAndReputablePolicyState",
-                        value: RegistryValue::Delete, // Revert to system default
-                        stock_value: RegistryValue::Delete
-                }]),
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Control\CI\Policy", "VerifiedAndReputablePolicyState", 0),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_del!("HKLM", r"SYSTEM\CurrentControlSet\Control\CI\Policy", "VerifiedAndReputablePolicyState", RegistryValue::Delete),
+                ]),
                 requires_restart: true
         },
         crate::tweak! {
@@ -373,12 +291,12 @@ pub static SECURITY_TWEAKS: &[Tweak] = &[
             description: "Enables or disables the Task Manager for all users.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCU", subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System", value_name: "DisableTaskMgr", value: RegistryValue::Dword(1), stock_value: RegistryValue::Delete },
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System", value_name: "DisableTaskMgr", value: RegistryValue::Dword(1), stock_value: RegistryValue::Delete },
+                crate::reg_dword!("HKCU", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System", "DisableTaskMgr", 1),
+                crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System", "DisableTaskMgr", 1),
             ],
             disabled_ops: Some(&[
-                RegistryOp { hkey: "HKCU", subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System", value_name: "DisableTaskMgr", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System", value_name: "DisableTaskMgr", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
+                crate::reg_del!("HKCU", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System", "DisableTaskMgr", RegistryValue::Delete),
+                crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System", "DisableTaskMgr", RegistryValue::Delete),
             ]),
         },
         crate::tweak! {
@@ -387,20 +305,12 @@ pub static SECURITY_TWEAKS: &[Tweak] = &[
             name: "Restrict Anonymous Access",
             description: "Restricts anonymous enumeration of SAM accounts and shares.",
             effect: TweakEffect::Restart,
-            enabled_ops: &[RegistryOp {
-                hkey: "HKLM",
-                subkey: r"SYSTEM\CurrentControlSet\Control\Lsa",
-                value_name: "restrictanonymous",
-                value: RegistryValue::Dword(1),
-                stock_value: RegistryValue::Dword(0)
-            }],
-            disabled_ops: Some(&[RegistryOp {
-                hkey: "HKLM",
-                subkey: r"SYSTEM\CurrentControlSet\Control\Lsa",
-                value_name: "restrictanonymous",
-                value: RegistryValue::Dword(0),
-                stock_value: RegistryValue::Dword(0)
-            }]),
+            enabled_ops: &[
+                crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Control\Lsa", "restrictanonymous", 1, 0),
+            ],
+            disabled_ops: Some(&[
+                crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Control\Lsa", "restrictanonymous", 0, 0),
+            ]),
             requires_restart: true
         },
 ];

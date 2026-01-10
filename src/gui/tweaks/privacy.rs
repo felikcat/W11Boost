@@ -1,6 +1,6 @@
 // Privacy & Telemetry tweaks
 
-use super::{RegistryOp, RegistryValue, Tweak, TweakEffect};
+use super::{RegistryValue, Tweak, TweakEffect};
 
 pub static PRIVACY_TWEAKS: &[Tweak] = &[
         crate::tweak! {
@@ -10,92 +10,20 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 description: "Disables Windows telemetry, diagnostic data collection, and OneSettings downloads.",
                 effect: TweakEffect::Restart,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\DataCollection",
-                                value_name: "AllowTelemetry",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-                        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\DataCollection",
-                                value_name: "LimitDiagnosticLogCollection",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Delete
-                        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\DataCollection",
-                                value_name: "DisableOneSettingsDownloads",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Delete
-                        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection",
-                                value_name: "AllowTelemetry",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Dword(3)
-                        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\devicehealthattestationservice",
-                                value_name: "EnableDeviceHealthAttestationService",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-                        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\ReserveManager",
-                                value_name: "MiscPolicyInfo",
-                                value: RegistryValue::Dword(2),
-                                stock_value: RegistryValue::Delete
-                        },
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\DataCollection", "AllowTelemetry", 0, RegistryValue::Delete),
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\DataCollection", "LimitDiagnosticLogCollection", 1, RegistryValue::Delete),
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\DataCollection", "DisableOneSettingsDownloads", 1, RegistryValue::Delete),
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection", "AllowTelemetry", 0, RegistryValue::Dword(3)),
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\devicehealthattestationservice", "EnableDeviceHealthAttestationService", 0, RegistryValue::Delete),
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\ReserveManager", "MiscPolicyInfo", 2, RegistryValue::Delete),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\DataCollection",
-                                value_name: "AllowTelemetry",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-                        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\DataCollection",
-                                value_name: "LimitDiagnosticLogCollection",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-                        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\DataCollection",
-                                value_name: "DisableOneSettingsDownloads",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-                        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection",
-                                value_name: "AllowTelemetry",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-                        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\devicehealthattestationservice",
-                                value_name: "EnableDeviceHealthAttestationService",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-                        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\ReserveManager",
-                                value_name: "MiscPolicyInfo",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-                        },
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\DataCollection", "AllowTelemetry", RegistryValue::Delete),
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\DataCollection", "LimitDiagnosticLogCollection", RegistryValue::Delete),
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\DataCollection", "DisableOneSettingsDownloads", RegistryValue::Delete),
+                        crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection", "AllowTelemetry", RegistryValue::Delete),
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\devicehealthattestationservice", "EnableDeviceHealthAttestationService", RegistryValue::Delete),
+                        crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\ReserveManager", "MiscPolicyInfo", RegistryValue::Delete),
                 ]),
                 requires_restart: true
         },
@@ -105,20 +33,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 name: "Disable Sensor Permission Override",
                 description: "Disables the sensor permission state override.",
                 effect: TweakEffect::Immediate,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Sensor\Overrides\{BFA794E4-F964-4FDB-90F6-51056BFE4B44}",
-                        value_name: "SensorPermissionState",
-                        value: RegistryValue::Dword(0),
-                        stock_value: RegistryValue::Dword(1)
-        }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Sensor\Overrides\{BFA794E4-F964-4FDB-90F6-51056BFE4B44}",
-                        value_name: "SensorPermissionState",
-                        value: RegistryValue::Dword(1),
-                        stock_value: RegistryValue::Dword(1)
-        }])
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Sensor\Overrides\{BFA794E4-F964-4FDB-90F6-51056BFE4B44}", "SensorPermissionState", 0, RegistryValue::Dword(1)),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Sensor\Overrides\{BFA794E4-F964-4FDB-90F6-51056BFE4B44}", "SensorPermissionState", 1, RegistryValue::Dword(1)),
+                ])
         },
         crate::tweak! {
                 id: "disable_cortana",
@@ -126,20 +46,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 name: "Disable Cortana",
                 description: "Disables Cortana assistant completely via Group Policy.",
                 effect: TweakEffect::Restart,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Policies\Microsoft\Windows\Windows Search",
-                        value_name: "AllowCortana",
-                        value: RegistryValue::Dword(0),
-                        stock_value: RegistryValue::Delete
-        }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Policies\Microsoft\Windows\Windows Search",
-                        value_name: "AllowCortana",
-                        value: RegistryValue::Delete,
-                        stock_value: RegistryValue::Delete
-        }]),
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Windows Search", "AllowCortana", 0, RegistryValue::Delete),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Windows Search", "AllowCortana", RegistryValue::Delete),
+                ]),
                 requires_restart: true
         },
         crate::tweak! {
@@ -149,50 +61,16 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 description: "Prevents UWP apps from running in the background, improving privacy and performance.",
                 effect: TweakEffect::Logoff,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications",
-                                value_name: "GlobalUserDisabled",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Delete
-                        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications",
-                                value_name: "GlobalUserDisabled",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Delete
-                        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\appprivacy",
-                                value_name: "LetAppsRunInBackground",
-                                value: RegistryValue::Dword(2),
-                                stock_value: RegistryValue::Delete
-                        },
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications", "GlobalUserDisabled", 1, RegistryValue::Delete),
+                        crate::reg_dword!("HKLM", r"Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications", "GlobalUserDisabled", 1, RegistryValue::Delete),
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\appprivacy", "LetAppsRunInBackground", 2, RegistryValue::Delete),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Search", "BackgroundAppGlobalToggle", 0, RegistryValue::Delete),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications",
-                                value_name: "GlobalUserDisabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Dword(0)
-                        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications",
-                                value_name: "GlobalUserDisabled",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-                        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\appprivacy",
-                                value_name: "LetAppsRunInBackground",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-                        },
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications", "GlobalUserDisabled", 0, 0),
+                        crate::reg_del!("HKLM", r"Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications", "GlobalUserDisabled", RegistryValue::Delete),
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\appprivacy", "LetAppsRunInBackground", RegistryValue::Delete),
+                        crate::reg_del!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Search", "BackgroundAppGlobalToggle", RegistryValue::Delete),
                 ])
         },
         // restrict_app_capabilities removed in favor of individual tweaks
@@ -203,50 +81,14 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 description: "Disables Windows Copilot AI assistant completely.",
                 effect: TweakEffect::Logoff,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Policies\Microsoft\Windows\WindowsCopilot",
-                                value_name: "TurnOffWindowsCopilot",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot",
-                                value_name: "TurnOffWindowsCopilot",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Edge",
-                                value_name: "HubsSidebarEnabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Windows\WindowsCopilot", "TurnOffWindowsCopilot", 1, RegistryValue::Delete),
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot", "TurnOffWindowsCopilot", 1, RegistryValue::Delete),
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "HubsSidebarEnabled", 0, RegistryValue::Delete),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Policies\Microsoft\Windows\WindowsCopilot",
-                                value_name: "TurnOffWindowsCopilot",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot",
-                                value_name: "TurnOffWindowsCopilot",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Edge",
-                                value_name: "HubsSidebarEnabled",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Windows\WindowsCopilot", "TurnOffWindowsCopilot", RegistryValue::Delete),
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot", "TurnOffWindowsCopilot", RegistryValue::Delete),
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "HubsSidebarEnabled", RegistryValue::Delete),
                 ])
         },
         crate::tweak! {
@@ -256,50 +98,14 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 description: "Disables Windows Timeline and activity history collection.",
                 effect: TweakEffect::Restart,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\System",
-                                value_name: "EnableActivityFeed",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\System",
-                                value_name: "PublishUserActivities",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\System",
-                                value_name: "UploadUserActivities",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\System", "EnableActivityFeed", 0, RegistryValue::Delete),
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\System", "PublishUserActivities", 0, RegistryValue::Delete),
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\System", "UploadUserActivities", 0, RegistryValue::Delete),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\System",
-                                value_name: "EnableActivityFeed",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\System",
-                                value_name: "PublishUserActivities",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\System",
-                                value_name: "UploadUserActivities",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\System", "EnableActivityFeed", RegistryValue::Delete),
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\System", "PublishUserActivities", RegistryValue::Delete),
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\System", "UploadUserActivities", RegistryValue::Delete),
                 ]),
                 requires_restart: true
         },
@@ -310,230 +116,49 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 description: "Disables suggested content, promotions, and suggestions in Windows.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
-                                value_name: "SubscribedContent-353698Enabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Dword(0)
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
-                                value_name: "SubscribedContent-338388Enabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
-                                value_name: "SubscribedContent-338389Enabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Dword(0)
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
-                                value_name: "SubscribedContent-338393Enabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
-                                value_name: "SubscribedContent-353694Enabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Dword(0)
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
-                                value_name: "SubscribedContent-353696Enabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
-                                value_name: "SystemPaneSuggestionsEnabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Dword(1)
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
-                                value_name: "SubscribedContent-338387Enabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Dword(0)
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
-                                value_name: "SilentInstalledAppsEnabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Dword(1)
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
-                                value_name: "SoftLandingEnabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Dword(1)
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
-                                value_name: "RotatingLockScreenEnabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Dword(1)
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
-                                value_name: "RotatingLockScreenOverlayEnabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Dword(1)
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced",
-                                value_name: "ShowSyncProviderNotifications",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Dword(1)
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo",
-                                value_name: "Enabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Dword(1)
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\Privacy",
-                                value_name: "TailoredExperiencesWithDiagnosticDataEnabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Dword(1)
-        },
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "SubscribedContent-353698Enabled", 0, RegistryValue::Dword(0)),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "SubscribedContent-338388Enabled", 0, RegistryValue::Delete),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "SubscribedContent-338389Enabled", 0, RegistryValue::Dword(0)),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "SubscribedContent-338393Enabled", 0, RegistryValue::Delete),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "SubscribedContent-353694Enabled", 0, RegistryValue::Dword(0)),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "SubscribedContent-353696Enabled", 0, RegistryValue::Delete),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "SystemPaneSuggestionsEnabled", 0, RegistryValue::Dword(1)),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "SubscribedContent-338387Enabled", 0, RegistryValue::Dword(0)),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "SilentInstalledAppsEnabled", 0, RegistryValue::Dword(1)),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "SoftLandingEnabled", 0, RegistryValue::Dword(1)),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "RotatingLockScreenEnabled", 0, RegistryValue::Dword(1)),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "RotatingLockScreenOverlayEnabled", 0, RegistryValue::Dword(1)),
+                        crate::reg_dword!("HKCU", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSyncProviderNotifications", 0, RegistryValue::Dword(1)),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo", "Enabled", 0, RegistryValue::Dword(1)),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Privacy", "TailoredExperiencesWithDiagnosticDataEnabled", 0, RegistryValue::Dword(1)),
                         // Merged from v2
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", value_name: "ContentDeliveryAllowed", value: RegistryValue::Dword(0), stock_value: RegistryValue::Dword(1) },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", value_name: "OemPreInstalledAppsEnabled", value: RegistryValue::Dword(0), stock_value: RegistryValue::Dword(1) },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", value_name: "PreInstalledAppsEnabled", value: RegistryValue::Dword(0), stock_value: RegistryValue::Dword(1) },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", value_name: "PreInstalledAppsEverEnabled", value: RegistryValue::Dword(0), stock_value: RegistryValue::Dword(1) },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", value_name: "SubscribedContentEnabled", value: RegistryValue::Dword(0), stock_value: RegistryValue::Dword(1) },
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "ContentDeliveryAllowed", 0, RegistryValue::Dword(1)),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "OemPreInstalledAppsEnabled", 0, RegistryValue::Dword(1)),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "PreInstalledAppsEnabled", 0, RegistryValue::Dword(1)),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "PreInstalledAppsEverEnabled", 0, RegistryValue::Dword(1)),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "SubscribedContentEnabled", 0, RegistryValue::Dword(1)),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
-                                value_name: "SubscribedContent-353698Enabled",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Dword(1)
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
-                                value_name: "SubscribedContent-338388Enabled",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Dword(1)
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
-                                value_name: "SubscribedContent-338389Enabled",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Dword(1)
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
-                                value_name: "SubscribedContent-338393Enabled",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Dword(1)
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
-                                value_name: "SubscribedContent-353694Enabled",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Dword(1)
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
-                                value_name: "SubscribedContent-353696Enabled",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Dword(1)
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
-                                value_name: "SystemPaneSuggestionsEnabled",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Dword(1)
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
-                                value_name: "SubscribedContent-338387Enabled",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Dword(1)
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
-                                value_name: "SilentInstalledAppsEnabled",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Dword(1)
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
-                                value_name: "SoftLandingEnabled",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Dword(1)
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
-                                value_name: "RotatingLockScreenEnabled",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Dword(1)
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
-                                value_name: "RotatingLockScreenOverlayEnabled",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Dword(1)
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced",
-                                value_name: "ShowSyncProviderNotifications",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Dword(1)
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo",
-                                value_name: "Enabled",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Dword(1)
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\Privacy",
-                                value_name: "TailoredExperiencesWithDiagnosticDataEnabled",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Dword(1)
-        },
-                        // Merged from v2
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", value_name: "ContentDeliveryAllowed", value: RegistryValue::Dword(1), stock_value: RegistryValue::Dword(1) },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", value_name: "OemPreInstalledAppsEnabled", value: RegistryValue::Dword(1), stock_value: RegistryValue::Dword(1) },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", value_name: "PreInstalledAppsEnabled", value: RegistryValue::Dword(1), stock_value: RegistryValue::Dword(1) },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", value_name: "PreInstalledAppsEverEnabled", value: RegistryValue::Dword(1), stock_value: RegistryValue::Dword(1) },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", value_name: "SubscribedContentEnabled", value: RegistryValue::Dword(1), stock_value: RegistryValue::Dword(1) },
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "SubscribedContent-353698Enabled", 1, 1),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "SubscribedContent-338388Enabled", 1, 1),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "SubscribedContent-338389Enabled", 1, 1),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "SubscribedContent-338393Enabled", 1, 1),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "SubscribedContent-353694Enabled", 1, 1),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "SubscribedContent-353696Enabled", 1, 1),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "SystemPaneSuggestionsEnabled", 1, 1),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "SubscribedContent-338387Enabled", 1, 1),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "SilentInstalledAppsEnabled", 1, 1),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "SoftLandingEnabled", 1, 1),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "RotatingLockScreenEnabled", 1, 1),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "RotatingLockScreenOverlayEnabled", 1, 1),
+                        crate::reg_dword!("HKCU", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSyncProviderNotifications", 1, 1),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo", "Enabled", 1, 1),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Privacy", "TailoredExperiencesWithDiagnosticDataEnabled", 1, 1),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "ContentDeliveryAllowed", 1, 1),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "OemPreInstalledAppsEnabled", 1, 1),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "PreInstalledAppsEnabled", 1, 1),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "PreInstalledAppsEverEnabled", 1, 1),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "SubscribedContentEnabled", 1, 1),
                 ])
         },
         // disable_scoobe moved to boot.rs
@@ -544,50 +169,14 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 description: "Prevents Windows from asking for feedback.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Siuf\Rules",
-                                value_name: "NumberOfSIUFInPeriod",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Siuf\Rules",
-                                value_name: "PeriodInNanoSeconds",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\DataCollection",
-                                value_name: "DoNotShowFeedbackNotifications",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Siuf\Rules", "NumberOfSIUFInPeriod", 0, RegistryValue::Delete),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Siuf\Rules", "PeriodInNanoSeconds", 0, RegistryValue::Delete),
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\DataCollection", "DoNotShowFeedbackNotifications", 1, RegistryValue::Delete),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Siuf\Rules",
-                                value_name: "NumberOfSIUFInPeriod",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Siuf\Rules",
-                                value_name: "PeriodInNanoSeconds",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\DataCollection",
-                                value_name: "DoNotShowFeedbackNotifications",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_del!("HKCU", r"Software\Microsoft\Siuf\Rules", "NumberOfSIUFInPeriod", RegistryValue::Delete),
+                        crate::reg_del!("HKCU", r"Software\Microsoft\Siuf\Rules", "PeriodInNanoSeconds", RegistryValue::Delete),
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\DataCollection", "DoNotShowFeedbackNotifications", RegistryValue::Delete),
                 ])
         },
         crate::tweak! {
@@ -597,18 +186,18 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 description: "Disables Windows Error Reporting which sends crash data to Microsoft.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Microsoft\Windows\Windows Error Reporting", value_name: "Disabled", value: RegistryValue::Dword(1), stock_value: RegistryValue::Delete },
-                        RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Microsoft\Windows\Windows Error Reporting", value_name: "DontSendAdditionalData", value: RegistryValue::Dword(1), stock_value: RegistryValue::Dword(0) },
-                        RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Microsoft\Windows\Windows Error Reporting", value_name: "DontShowUI", value: RegistryValue::Dword(1), stock_value: RegistryValue::Dword(0) },
-                        RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Microsoft\Windows\Windows Error Reporting", value_name: "LoggingDisabled", value: RegistryValue::Dword(1), stock_value: RegistryValue::Dword(0) },
-                        RegistryOp { hkey: "HKLM", subkey: r"Software\Microsoft\pchealth\errorreporting", value_name: "DoReport", value: RegistryValue::Dword(0), stock_value: RegistryValue::Dword(1) },
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\Windows Error Reporting", "Disabled", 1, RegistryValue::Delete),
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\Windows Error Reporting", "DontSendAdditionalData", 1, 0),
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\Windows Error Reporting", "DontShowUI", 1, 0),
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\Windows Error Reporting", "LoggingDisabled", 1, 0),
+                        crate::reg_dword!("HKLM", r"Software\Microsoft\pchealth\errorreporting", "DoReport", 0, 1),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Microsoft\Windows\Windows Error Reporting", value_name: "Disabled", value: RegistryValue::Dword(0), stock_value: RegistryValue::Dword(0) },
-                        RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Microsoft\Windows\Windows Error Reporting", value_name: "DontSendAdditionalData", value: RegistryValue::Dword(0), stock_value: RegistryValue::Dword(0) },
-                        RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Microsoft\Windows\Windows Error Reporting", value_name: "DontShowUI", value: RegistryValue::Dword(0), stock_value: RegistryValue::Dword(0) },
-                        RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Microsoft\Windows\Windows Error Reporting", value_name: "LoggingDisabled", value: RegistryValue::Dword(0), stock_value: RegistryValue::Dword(0) },
-                        RegistryOp { hkey: "HKLM", subkey: r"Software\Microsoft\pchealth\errorreporting", value_name: "DoReport", value: RegistryValue::Dword(1), stock_value: RegistryValue::Dword(1) },
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\Windows Error Reporting", "Disabled", 0, 0),
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\Windows Error Reporting", "DontSendAdditionalData", 0, 0),
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\Windows Error Reporting", "DontShowUI", 0, 0),
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\Windows Error Reporting", "LoggingDisabled", 0, 0),
+                        crate::reg_dword!("HKLM", r"Software\Microsoft\pchealth\errorreporting", "DoReport", 1, 1),
                 ])
         },
         crate::tweak! {
@@ -617,20 +206,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 name: "Disable Live Tiles",
                 description: "Disables live tile updates on Start menu, preventing background data fetching.",
                 effect: TweakEffect::Logoff,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKCU",
-                        subkey: r"SOFTWARE\Policies\Microsoft\Windows\CurrentVersion\PushNotifications",
-                        value_name: "NoTileApplicationNotification",
-                        value: RegistryValue::Dword(1),
-                        stock_value: RegistryValue::Delete
-        }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKCU",
-                        subkey: r"SOFTWARE\Policies\Microsoft\Windows\CurrentVersion\PushNotifications",
-                        value_name: "NoTileApplicationNotification",
-                        value: RegistryValue::Delete,
-                        stock_value: RegistryValue::Delete
-        }])
+                enabled_ops: &[
+                        crate::reg_dword!("HKCU", r"SOFTWARE\Policies\Microsoft\Windows\CurrentVersion\PushNotifications", "NoTileApplicationNotification", 1, RegistryValue::Delete),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_del!("HKCU", r"SOFTWARE\Policies\Microsoft\Windows\CurrentVersion\PushNotifications", "NoTileApplicationNotification", RegistryValue::Delete),
+                ])
         },
         crate::tweak! {
                 id: "disable_telemetry_services",
@@ -667,16 +248,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 name: "Disable Handwriting Data Sharing",
                 description: "Prevents handwriting data from being shared with Microsoft.",
                 effect: TweakEffect::Immediate,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Policies\Microsoft\Windows\TabletPC",
-                        value_name: "PreventHandwritingDataSharing",
-                        value: RegistryValue::Dword(1), stock_value: RegistryValue::Delete }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Policies\Microsoft\Windows\TabletPC",
-                        value_name: "PreventHandwritingDataSharing",
-                        value: RegistryValue::Delete, stock_value: RegistryValue::Delete }])
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\TabletPC", "PreventHandwritingDataSharing", 1, RegistryValue::Delete),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\TabletPC", "PreventHandwritingDataSharing", RegistryValue::Delete),
+                ])
         },
         crate::tweak! {
                 id: "disable_handwriting_error_reports",
@@ -684,16 +261,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 name: "Disable Handwriting Error Reports",
                 description: "Prevents handwriting error reports from being sent to Microsoft.",
                 effect: TweakEffect::Immediate,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Policies\Microsoft\Windows\HandwritingErrorReports",
-                        value_name: "PreventHandwritingErrorReports",
-                        value: RegistryValue::Dword(1), stock_value: RegistryValue::Delete }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Policies\Microsoft\Windows\HandwritingErrorReports",
-                        value_name: "PreventHandwritingErrorReports",
-                        value: RegistryValue::Delete, stock_value: RegistryValue::Delete }])
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\HandwritingErrorReports", "PreventHandwritingErrorReports", 1, RegistryValue::Delete),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\HandwritingErrorReports", "PreventHandwritingErrorReports", RegistryValue::Delete),
+                ])
         },
         crate::tweak! {
                 id: "disable_app_inventory",
@@ -702,38 +275,14 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 description: "Disables the collection of installed application inventory and telemetry.",
                 effect: TweakEffect::Restart,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\AppCompat",
-                                value_name: "DisableInventory",
-                                value: RegistryValue::Dword(1), stock_value: RegistryValue::Delete },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\AppCompat",
-                                value_name: "DisableUAR",
-                                value: RegistryValue::Dword(1), stock_value: RegistryValue::Delete },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\AppCompat",
-                                value_name: "AITEnable",
-                                value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete },
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\AppCompat", "DisableInventory", 1, RegistryValue::Delete),
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\AppCompat", "DisableUAR", 1, RegistryValue::Delete),
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\AppCompat", "AITEnable", 0, RegistryValue::Delete),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\AppCompat",
-                                value_name: "DisableInventory",
-                                value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\AppCompat",
-                                value_name: "DisableUAR",
-                                value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\AppCompat",
-                                value_name: "AITEnable",
-                                value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\AppCompat", "DisableInventory", RegistryValue::Delete),
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\AppCompat", "DisableUAR", RegistryValue::Delete),
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\AppCompat", "AITEnable", RegistryValue::Delete),
                 ]),
                 requires_restart: true
         },
@@ -744,58 +293,18 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 description: "Disables Bing search results and web integration in Windows Search.",
                 effect: TweakEffect::Restart,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\Windows Search",
-                                value_name: "DisableWebSearch",
-                                value: RegistryValue::Dword(1), stock_value: RegistryValue::Delete },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\Windows Search",
-                                value_name: "ConnectedSearchUseWeb",
-                                value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\Windows Search",
-                                value_name: "AllowCloudSearch",
-                                value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\Windows Search",
-                                value_name: "EnableDynamicContentInWSB",
-                                value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\Windows Search",
-                                value_name: "CortanaConsent",
-                                value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete },
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Windows Search", "DisableWebSearch", 1, RegistryValue::Delete),
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Windows Search", "ConnectedSearchUseWeb", 0, RegistryValue::Delete),
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Windows Search", "AllowCloudSearch", 0, RegistryValue::Delete),
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Windows Search", "EnableDynamicContentInWSB", 0, RegistryValue::Delete),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Windows Search", "CortanaConsent", 0, RegistryValue::Delete),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\Windows Search",
-                                value_name: "DisableWebSearch",
-                                value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\Windows Search",
-                                value_name: "ConnectedSearchUseWeb",
-                                value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\Windows Search",
-                                value_name: "AllowCloudSearch",
-                                value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\Windows Search",
-                                value_name: "EnableDynamicContentInWSB",
-                                value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\Windows Search",
-                                value_name: "CortanaConsent",
-                                value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Windows Search", "DisableWebSearch", RegistryValue::Delete),
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Windows Search", "ConnectedSearchUseWeb", RegistryValue::Delete),
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Windows Search", "AllowCloudSearch", RegistryValue::Delete),
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Windows Search", "EnableDynamicContentInWSB", RegistryValue::Delete),
+                        crate::reg_del!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Windows Search", "CortanaConsent", RegistryValue::Delete),
                 ]),
                 requires_restart: true
         },
@@ -805,16 +314,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 name: "Disable Search Location Access",
                 description: "Prevents Windows Search from using your location.",
                 effect: TweakEffect::Immediate,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Policies\Microsoft\Windows\Windows Search",
-                        value_name: "AllowSearchToUseLocation",
-                        value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Policies\Microsoft\Windows\Windows Search",
-                        value_name: "AllowSearchToUseLocation",
-                        value: RegistryValue::Delete, stock_value: RegistryValue::Delete }])
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Windows Search", "AllowSearchToUseLocation", 0, RegistryValue::Delete),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Windows Search", "AllowSearchToUseLocation", RegistryValue::Delete),
+                ])
         },
         crate::tweak! {
                 id: "disable_cortana_lock_screen",
@@ -822,16 +327,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 name: "Disable Cortana on Lock Screen",
                 description: "Prevents Cortana from being used when the device is locked.",
                 effect: TweakEffect::Immediate,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Policies\Microsoft\Windows\Windows Search",
-                        value_name: "AllowCortanaAboveLock",
-                        value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Policies\Microsoft\Windows\Windows Search",
-                        value_name: "AllowCortanaAboveLock",
-                        value: RegistryValue::Delete, stock_value: RegistryValue::Delete }])
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Windows Search", "AllowCortanaAboveLock", 0, RegistryValue::Delete),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Windows Search", "AllowCortanaAboveLock", RegistryValue::Delete),
+                ])
         },
         crate::tweak! {
                 id: "disable_advertising_id",
@@ -840,42 +341,14 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 description: "Disables the advertising ID for relevant ads.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\AdvertisingInfo",
-                                value_name: "Enabled",
-                                value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo",
-                                value_name: "Enabled",
-                                value: RegistryValue::Dword(0), stock_value: RegistryValue::Dword(0) },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\AdvertisingInfo",
-                                value_name: "DisabledByGroupPolicy",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Delete
-                        },
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\AdvertisingInfo", "Enabled", 0, RegistryValue::Delete),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo", "Enabled", 0, 0),
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\AdvertisingInfo", "DisabledByGroupPolicy", 1, RegistryValue::Delete),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\AdvertisingInfo",
-                                value_name: "Enabled",
-                                value: RegistryValue::Dword(1), stock_value: RegistryValue::Delete },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo",
-                                value_name: "Enabled",
-                                value: RegistryValue::Dword(1), stock_value: RegistryValue::Dword(0) },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\AdvertisingInfo",
-                                value_name: "DisabledByGroupPolicy",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-                        },
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\AdvertisingInfo", "Enabled", 1, RegistryValue::Delete),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo", "Enabled", 1, 0),
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\AdvertisingInfo", "DisabledByGroupPolicy", RegistryValue::Delete),
                 ])
         },
         crate::tweak! {
@@ -884,16 +357,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 name: "Disable Customer Experience Improvement Program",
                 description: "Disables the Windows Customer Experience Improvement Program (CEIP).",
                 effect: TweakEffect::Restart,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Microsoft\SQMClient\Windows",
-                        value_name: "CEIPEnable",
-                        value: RegistryValue::Dword(0), stock_value: RegistryValue::Dword(0) }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Microsoft\SQMClient\Windows",
-                        value_name: "CEIPEnable",
-                        value: RegistryValue::Delete, stock_value: RegistryValue::Dword(0) }]),
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\SQMClient\Windows", "CEIPEnable", 0, RegistryValue::Dword(0)),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\SQMClient\Windows", "CEIPEnable", RegistryValue::Dword(0)),
+                ]),
                 requires_restart: true
         },
         // disable_message_sync moved to sync.rs
@@ -903,16 +372,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 name: "Disable Biometrics",
                 description: "Disables biometric features like Windows Hello.",
                 effect: TweakEffect::Restart,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Policies\Microsoft\Biometrics",
-                        value_name: "Enabled",
-                        value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Policies\Microsoft\Biometrics",
-                        value_name: "Enabled",
-                        value: RegistryValue::Delete, stock_value: RegistryValue::Delete }]),
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Biometrics", "Enabled", 0, RegistryValue::Delete),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Biometrics", "Enabled", RegistryValue::Delete),
+                ]),
                 requires_restart: true
         },
         crate::tweak! {
@@ -922,28 +387,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 description: "Disables the collection of clipboard history.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\System",
-                                value_name: "AllowClipboardHistory",
-                                value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Clipboard",
-                                value_name: "EnableClipboardHistory",
-                                value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete },
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\System", "AllowClipboardHistory", 0, RegistryValue::Delete),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Clipboard", "EnableClipboardHistory", 0, RegistryValue::Delete),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\System",
-                                value_name: "AllowClipboardHistory",
-                                value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Clipboard",
-                                value_name: "EnableClipboardHistory",
-                                value: RegistryValue::Dword(1), stock_value: RegistryValue::Delete },
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\System", "AllowClipboardHistory", RegistryValue::Delete),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Clipboard", "EnableClipboardHistory", 1, RegistryValue::Delete),
                 ])
         },
         // disable_clipboard_sync removed (duplicate of sync.rs/disable_cross_device_clipboard)
@@ -954,92 +403,20 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 description: "Disables location services, sensors, and Windows Location Provider.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors",
-                                value_name: "DisableLocation",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors",
-                                value_name: "DisableWindowsLocationProvider",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors",
-                                value_name: "DisableLocationScripting",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors",
-                                value_name: "DisableSensors",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\location",
-                                value_name: "Value",
-                                value: RegistryValue::String("Deny"),
-                                stock_value: RegistryValue::String("Allow")
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\location",
-                                value_name: "Value",
-                                value: RegistryValue::String("Deny"),
-                                stock_value: RegistryValue::String("Allow")
-        },
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors", "DisableLocation", 1, RegistryValue::Delete),
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors", "DisableWindowsLocationProvider", 1, RegistryValue::Delete),
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors", "DisableLocationScripting", 1, RegistryValue::Delete),
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors", "DisableSensors", 1, RegistryValue::Delete),
+                        crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\location", "Value", "Deny", RegistryValue::String("Allow")),
+                        crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\location", "Value", "Deny", RegistryValue::String("Allow")),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors",
-                                value_name: "DisableLocation",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors",
-                                value_name: "DisableWindowsLocationProvider",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors",
-                                value_name: "DisableLocationScripting",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors",
-                                value_name: "DisableSensors",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\location",
-                                value_name: "Value",
-                                value: RegistryValue::String("Allow"),
-                                stock_value: RegistryValue::String("Allow")
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\location",
-                                value_name: "Value",
-                                value: RegistryValue::String("Allow"),
-                                stock_value: RegistryValue::String("Allow")
-        },
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors", "DisableLocation", RegistryValue::Delete),
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors", "DisableWindowsLocationProvider", RegistryValue::Delete),
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors", "DisableLocationScripting", RegistryValue::Delete),
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors", "DisableSensors", RegistryValue::Delete),
+                        crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\location", "Value", "Allow", RegistryValue::String("Allow")),
+                        crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\location", "Value", "Allow", RegistryValue::String("Allow")),
                 ])
         },
         crate::tweak! {
@@ -1048,20 +425,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 name: "Disable Geolocation Service",
                 description: "Disables the Geolocation service (lfsvc) to prevent location tracking.",
                 effect: TweakEffect::Immediate,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SYSTEM\ControlSet001\Services\lfsvc\Service\Configuration",
-                        value_name: "Status",
-                        value: RegistryValue::Dword(0),
-                        stock_value: RegistryValue::Dword(1)
-        }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SYSTEM\ControlSet001\Services\lfsvc\Service\Configuration",
-                        value_name: "Status",
-                        value: RegistryValue::Dword(1),
-                        stock_value: RegistryValue::Dword(1)
-        }])
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SYSTEM\ControlSet001\Services\lfsvc\Service\Configuration", "Status", 0, RegistryValue::Dword(1)),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_dword!("HKLM", r"SYSTEM\ControlSet001\Services\lfsvc\Service\Configuration", "Status", 1, RegistryValue::Dword(1)),
+                ])
         },
         crate::tweak! {
                 id: "disable_webcam_access",
@@ -1070,36 +439,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 description: "Blocks apps from accessing the webcam.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\webcam",
-                                value_name: "Value",
-                                value: RegistryValue::String("Deny"),
-                                stock_value: RegistryValue::String("Allow")
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\webcam",
-                                value_name: "Value",
-                                value: RegistryValue::String("Deny"),
-                                stock_value: RegistryValue::String("Allow")
-        },
+                        crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\webcam", "Value", "Deny", RegistryValue::String("Allow")),
+                        crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\webcam", "Value", "Deny", RegistryValue::String("Allow")),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\webcam",
-                                value_name: "Value",
-                                value: RegistryValue::String("Allow"),
-                                stock_value: RegistryValue::String("Allow")
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\webcam",
-                                value_name: "Value",
-                                value: RegistryValue::String("Allow"),
-                                stock_value: RegistryValue::String("Allow")
-        },
+                        crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\webcam", "Value", "Allow", RegistryValue::String("Allow")),
+                        crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\webcam", "Value", "Allow", RegistryValue::String("Allow")),
                 ])
         },
         crate::tweak! {
@@ -1109,36 +454,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 description: "Blocks apps from accessing the microphone.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\microphone",
-                                value_name: "Value",
-                                value: RegistryValue::String("Deny"),
-                                stock_value: RegistryValue::String("Allow")
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\microphone",
-                                value_name: "Value",
-                                value: RegistryValue::String("Deny"),
-                                stock_value: RegistryValue::String("Allow")
-        },
+                        crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\microphone", "Value", "Deny", RegistryValue::String("Allow")),
+                        crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\microphone", "Value", "Deny", RegistryValue::String("Allow")),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\microphone",
-                                value_name: "Value",
-                                value: RegistryValue::String("Allow"),
-                                stock_value: RegistryValue::String("Allow")
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\microphone",
-                                value_name: "Value",
-                                value: RegistryValue::String("Allow"),
-                                stock_value: RegistryValue::String("Allow")
-        },
+                        crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\microphone", "Value", "Allow", RegistryValue::String("Allow")),
+                        crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\microphone", "Value", "Allow", RegistryValue::String("Allow")),
                 ])
         },
         crate::tweak! {
@@ -1148,50 +469,14 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 description: "Disables personalized experiences based on diagnostic data.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Privacy",
-                                value_name: "TailoredExperiencesWithDiagnosticDataEnabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Dword(1)
-                        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\Privacy",
-                                value_name: "TailoredExperiencesWithDiagnosticDataEnabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Dword(1)
-                        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Policies\Microsoft\Windows\CloudContent",
-                                value_name: "DisableTailoredExperiencesWithDiagnosticData",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Delete
-                        },
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Privacy", "TailoredExperiencesWithDiagnosticDataEnabled", 0, RegistryValue::Dword(1)),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Privacy", "TailoredExperiencesWithDiagnosticDataEnabled", 0, RegistryValue::Dword(1)),
+                        crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Windows\CloudContent", "DisableTailoredExperiencesWithDiagnosticData", 1, RegistryValue::Delete),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Privacy",
-                                value_name: "TailoredExperiencesWithDiagnosticDataEnabled",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Dword(1)
-                        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\Privacy",
-                                value_name: "TailoredExperiencesWithDiagnosticDataEnabled",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Dword(1)
-                        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Policies\Microsoft\Windows\CloudContent",
-                                value_name: "DisableTailoredExperiencesWithDiagnosticData",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-                        },
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Privacy", "TailoredExperiencesWithDiagnosticDataEnabled", 1, RegistryValue::Dword(1)),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Privacy", "TailoredExperiencesWithDiagnosticDataEnabled", 1, RegistryValue::Dword(1)),
+                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Windows\CloudContent", "DisableTailoredExperiencesWithDiagnosticData", RegistryValue::Delete),
                 ])
         },
         crate::tweak! {
@@ -1201,36 +486,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 description: "Blocks apps from accessing diagnostic information about other apps.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\appDiagnostics",
-                                value_name: "Value",
-                                value: RegistryValue::String("Deny"),
-                                stock_value: RegistryValue::String("Allow")
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\appDiagnostics",
-                                value_name: "Value",
-                                value: RegistryValue::String("Deny"),
-                                stock_value: RegistryValue::String("Allow")
-        },
+                        crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\appDiagnostics", "Value", "Deny", RegistryValue::String("Allow")),
+                        crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\appDiagnostics", "Value", "Deny", RegistryValue::String("Allow")),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\appDiagnostics",
-                                value_name: "Value",
-                                value: RegistryValue::String("Allow"),
-                                stock_value: RegistryValue::String("Allow")
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\appDiagnostics",
-                                value_name: "Value",
-                                value: RegistryValue::String("Allow"),
-                                stock_value: RegistryValue::String("Allow")
-        },
+                        crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\appDiagnostics", "Value", "Allow", RegistryValue::String("Allow")),
+                        crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\appDiagnostics", "Value", "Allow", RegistryValue::String("Allow")),
                 ])
         },
         crate::tweak! {
@@ -1240,36 +501,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 description: "Blocks apps from accessing your name, picture, and other account info.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\userAccountInformation",
-                                value_name: "Value",
-                                value: RegistryValue::String("Deny"),
-                                stock_value: RegistryValue::String("Allow")
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\userAccountInformation",
-                                value_name: "Value",
-                                value: RegistryValue::String("Deny"),
-                                stock_value: RegistryValue::String("Allow")
-        },
+                        crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\userAccountInformation", "Value", "Deny", RegistryValue::String("Allow")),
+                        crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\userAccountInformation", "Value", "Deny", RegistryValue::String("Allow")),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\userAccountInformation",
-                                value_name: "Value",
-                                value: RegistryValue::String("Allow"),
-                                stock_value: RegistryValue::String("Allow")
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\userAccountInformation",
-                                value_name: "Value",
-                                value: RegistryValue::String("Allow"),
-                                stock_value: RegistryValue::String("Allow")
-        },
+                        crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\userAccountInformation", "Value", "Allow", RegistryValue::String("Allow")),
+                        crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\userAccountInformation", "Value", "Allow", RegistryValue::String("Allow")),
                 ])
         },
         crate::tweak! {
@@ -1279,36 +516,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 description: "Blocks apps from accessing your contacts.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\contacts",
-                                value_name: "Value",
-                                value: RegistryValue::String("Deny"),
-                                stock_value: RegistryValue::String("Allow")
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\contacts",
-                                value_name: "Value",
-                                value: RegistryValue::String("Deny"),
-                                stock_value: RegistryValue::String("Allow")
-        },
+                        crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\contacts", "Value", "Deny", RegistryValue::String("Allow")),
+                        crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\contacts", "Value", "Deny", RegistryValue::String("Allow")),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\contacts",
-                                value_name: "Value",
-                                value: RegistryValue::String("Allow"),
-                                stock_value: RegistryValue::String("Allow")
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\contacts",
-                                value_name: "Value",
-                                value: RegistryValue::String("Allow"),
-                                stock_value: RegistryValue::String("Allow")
-        },
+                        crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\contacts", "Value", "Allow", RegistryValue::String("Allow")),
+                        crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\contacts", "Value", "Allow", RegistryValue::String("Allow")),
                 ])
         },
         crate::tweak! {
@@ -1318,36 +531,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 description: "Blocks apps from accessing your calendar.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\appointments",
-                                value_name: "Value",
-                                value: RegistryValue::String("Deny"),
-                                stock_value: RegistryValue::String("Allow")
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\appointments",
-                                value_name: "Value",
-                                value: RegistryValue::String("Deny"),
-                                stock_value: RegistryValue::String("Allow")
-        },
+                        crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\appointments", "Value", "Deny", RegistryValue::String("Allow")),
+                        crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\appointments", "Value", "Deny", RegistryValue::String("Allow")),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\appointments",
-                                value_name: "Value",
-                                value: RegistryValue::String("Allow"),
-                                stock_value: RegistryValue::String("Allow")
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\appointments",
-                                value_name: "Value",
-                                value: RegistryValue::String("Allow"),
-                                stock_value: RegistryValue::String("Allow")
-        },
+                        crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\appointments", "Value", "Allow", RegistryValue::String("Allow")),
+                        crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\appointments", "Value", "Allow", RegistryValue::String("Allow")),
                 ])
         },
         crate::tweak! {
@@ -1357,36 +546,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 description: "Blocks apps from accessing your call history.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\phoneCallHistory",
-                                value_name: "Value",
-                                value: RegistryValue::String("Deny"),
-                                stock_value: RegistryValue::String("Allow")
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\phoneCallHistory",
-                                value_name: "Value",
-                                value: RegistryValue::String("Deny"),
-                                stock_value: RegistryValue::String("Allow")
-        },
+                        crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\phoneCallHistory", "Value", "Deny", RegistryValue::String("Allow")),
+                        crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\phoneCallHistory", "Value", "Deny", RegistryValue::String("Allow")),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\phoneCallHistory",
-                                value_name: "Value",
-                                value: RegistryValue::String("Allow"),
-                                stock_value: RegistryValue::String("Allow")
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\phoneCallHistory",
-                                value_name: "Value",
-                                value: RegistryValue::String("Allow"),
-                                stock_value: RegistryValue::String("Allow")
-        },
+                        crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\phoneCallHistory", "Value", "Allow", RegistryValue::String("Allow")),
+                        crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\phoneCallHistory", "Value", "Allow", RegistryValue::String("Allow")),
                 ])
         },
         crate::tweak! {
@@ -1396,36 +561,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 description: "Blocks apps from accessing and sending email.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\email",
-                                value_name: "Value",
-                                value: RegistryValue::String("Deny"),
-                                stock_value: RegistryValue::String("Allow")
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\email",
-                                value_name: "Value",
-                                value: RegistryValue::String("Deny"),
-                                stock_value: RegistryValue::String("Allow")
-        },
+                        crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\email", "Value", "Deny", RegistryValue::String("Allow")),
+                        crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\email", "Value", "Deny", RegistryValue::String("Allow")),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\email",
-                                value_name: "Value",
-                                value: RegistryValue::String("Allow"),
-                                stock_value: RegistryValue::String("Allow")
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\email",
-                                value_name: "Value",
-                                value: RegistryValue::String("Allow"),
-                                stock_value: RegistryValue::String("Allow")
-        },
+                        crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\email", "Value", "Allow", RegistryValue::String("Allow")),
+                        crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\email", "Value", "Allow", RegistryValue::String("Allow")),
                 ])
         },
         crate::tweak! {
@@ -1435,36 +576,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 description: "Blocks apps from accessing your tasks.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\userDataTasks",
-                                value_name: "Value",
-                                value: RegistryValue::String("Deny"),
-                                stock_value: RegistryValue::String("Allow")
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\userDataTasks",
-                                value_name: "Value",
-                                value: RegistryValue::String("Deny"),
-                                stock_value: RegistryValue::String("Allow")
-        },
+                        crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\userDataTasks", "Value", "Deny", RegistryValue::String("Allow")),
+                        crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\userDataTasks", "Value", "Deny", RegistryValue::String("Allow")),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\userDataTasks",
-                                value_name: "Value",
-                                value: RegistryValue::String("Allow"),
-                                stock_value: RegistryValue::String("Allow")
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\userDataTasks",
-                                value_name: "Value",
-                                value: RegistryValue::String("Allow"),
-                                stock_value: RegistryValue::String("Allow")
-        },
+                        crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\userDataTasks", "Value", "Allow", RegistryValue::String("Allow")),
+                        crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\userDataTasks", "Value", "Allow", RegistryValue::String("Allow")),
                 ])
         },
         crate::tweak! {
@@ -1474,36 +591,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 description: "Blocks apps from reading or sending messages (text or MMS).",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\chat",
-                                value_name: "Value",
-                                value: RegistryValue::String("Deny"),
-                                stock_value: RegistryValue::String("Allow")
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\chat",
-                                value_name: "Value",
-                                value: RegistryValue::String("Deny"),
-                                stock_value: RegistryValue::String("Allow")
-        },
+                        crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\chat", "Value", "Deny", RegistryValue::String("Allow")),
+                        crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\chat", "Value", "Deny", RegistryValue::String("Allow")),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\chat",
-                                value_name: "Value",
-                                value: RegistryValue::String("Allow"),
-                                stock_value: RegistryValue::String("Allow")
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\chat",
-                                value_name: "Value",
-                                value: RegistryValue::String("Allow"),
-                                stock_value: RegistryValue::String("Allow")
-        },
+                        crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\chat", "Value", "Allow", RegistryValue::String("Allow")),
+                        crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\chat", "Value", "Allow", RegistryValue::String("Allow")),
                 ])
         },
         crate::tweak! {
@@ -1513,36 +606,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 description: "Blocks apps from controlling device radios (like Bluetooth).",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\radios",
-                                value_name: "Value",
-                                value: RegistryValue::String("Deny"),
-                                stock_value: RegistryValue::String("Allow")
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\radios",
-                                value_name: "Value",
-                                value: RegistryValue::String("Deny"),
-                                stock_value: RegistryValue::String("Allow")
-        },
+                        crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\radios", "Value", "Deny", RegistryValue::String("Allow")),
+                        crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\radios", "Value", "Deny", RegistryValue::String("Allow")),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\radios",
-                                value_name: "Value",
-                                value: RegistryValue::String("Allow"),
-                                stock_value: RegistryValue::String("Allow")
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\radios",
-                                value_name: "Value",
-                                value: RegistryValue::String("Allow"),
-                                stock_value: RegistryValue::String("Allow")
-        },
+                        crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\radios", "Value", "Allow", RegistryValue::String("Allow")),
+                        crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\radios", "Value", "Allow", RegistryValue::String("Allow")),
                 ])
         },
         crate::tweak! {
@@ -1552,36 +621,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 description: "Blocks apps from accessing your documents library.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\documentsLibrary",
-                                value_name: "Value",
-                                value: RegistryValue::String("Deny"),
-                                stock_value: RegistryValue::String("Allow")
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\documentsLibrary",
-                                value_name: "Value",
-                                value: RegistryValue::String("Deny"),
-                                stock_value: RegistryValue::String("Allow")
-        },
+                        crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\documentsLibrary", "Value", "Deny", RegistryValue::String("Allow")),
+                        crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\documentsLibrary", "Value", "Deny", RegistryValue::String("Allow")),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\documentsLibrary",
-                                value_name: "Value",
-                                value: RegistryValue::String("Allow"),
-                                stock_value: RegistryValue::String("Allow")
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\documentsLibrary",
-                                value_name: "Value",
-                                value: RegistryValue::String("Allow"),
-                                stock_value: RegistryValue::String("Allow")
-        },
+                        crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\documentsLibrary", "Value", "Allow", RegistryValue::String("Allow")),
+                        crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\documentsLibrary", "Value", "Allow", RegistryValue::String("Allow")),
                 ])
         },
         crate::tweak! {
@@ -1591,37 +636,13 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                                 description: "Blocks apps from accessing your pictures library.",
                                 effect: TweakEffect::Immediate,
                                 enabled_ops: &[
-                                        RegistryOp {
-                                                hkey: "HKLM",
-                                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\picturesLibrary",
-                                                value_name: "Value",
-                                                value: RegistryValue::String("Deny"),
-                                                stock_value: RegistryValue::String("Allow")
-        },
-                                        RegistryOp {
-                                                hkey: "HKCU",
-                                                subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\picturesLibrary",
-                                                value_name: "Value",
-                                                value: RegistryValue::String("Deny"),
-                                                stock_value: RegistryValue::String("Allow")
-        },
-                                ],
-                                disabled_ops: Some(&[
-                                        RegistryOp {
-                                                hkey: "HKLM",
-                                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\picturesLibrary",
-                                                value_name: "Value",
-                                                value: RegistryValue::String("Allow"),
-                                                stock_value: RegistryValue::String("Allow")
-        },
-                                        RegistryOp {
-                                                hkey: "HKCU",
-                                                subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\picturesLibrary",
-                                                value_name: "Value",
-                                                value: RegistryValue::String("Allow"),
-                                                stock_value: RegistryValue::String("Allow")
-        },
-                                ])
+                        crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\picturesLibrary", "Value", "Deny", RegistryValue::String("Allow")),
+                        crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\picturesLibrary", "Value", "Deny", RegistryValue::String("Allow")),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\picturesLibrary", "Value", "Allow", RegistryValue::String("Allow")),
+                        crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\picturesLibrary", "Value", "Allow", RegistryValue::String("Allow")),
+                ])
         },
         crate::tweak! {
                 id: "disable_videos_library_access",
@@ -1630,36 +651,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 description: "Blocks apps from accessing your videos library.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\videosLibrary",
-                                value_name: "Value",
-                                value: RegistryValue::String("Deny"),
-                                stock_value: RegistryValue::String("Allow")
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\videosLibrary",
-                                value_name: "Value",
-                                value: RegistryValue::String("Deny"),
-                                stock_value: RegistryValue::String("Allow")
-        },
+                        crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\videosLibrary", "Value", "Deny", RegistryValue::String("Allow")),
+                        crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\videosLibrary", "Value", "Deny", RegistryValue::String("Allow")),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\videosLibrary",
-                                value_name: "Value",
-                                value: RegistryValue::String("Allow"),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\videosLibrary",
-                                value_name: "Value",
-                                value: RegistryValue::String("Allow"),
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\videosLibrary", "Value", "Allow", RegistryValue::Delete),
+                        crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\videosLibrary", "Value", "Allow", RegistryValue::Delete),
                 ])
         },
         crate::tweak! {
@@ -1668,16 +665,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 name: "Disable Lock Screen Camera",
                 description: "Disables the camera button on the lock screen.",
                 effect: TweakEffect::Immediate,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Policies\Microsoft\Windows\Personalization",
-                        value_name: "NoLockScreenCamera",
-                        value: RegistryValue::Dword(1), stock_value: RegistryValue::Delete }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Policies\Microsoft\Windows\Personalization",
-                        value_name: "NoLockScreenCamera",
-                        value: RegistryValue::Delete, stock_value: RegistryValue::Delete }])
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Personalization", "NoLockScreenCamera", 1, RegistryValue::Delete),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Personalization", "NoLockScreenCamera", RegistryValue::Delete),
+                ])
         },
         crate::tweak! {
                 id: "disable_text_input_personalization",
@@ -1686,58 +679,18 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 description: "Disables collection of typing and handwriting data to improve recognition.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\input\TIPC",
-                                value_name: "Enabled",
-                                value: RegistryValue::Dword(0), stock_value: RegistryValue::Dword(1) },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\InputPersonalization",
-                                value_name: "RestrictImplicitInkCollection",
-                                value: RegistryValue::Dword(1), stock_value: RegistryValue::Dword(0) },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\InputPersonalization",
-                                value_name: "RestrictImplicitTextCollection",
-                                value: RegistryValue::Dword(1), stock_value: RegistryValue::Dword(0) },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\InputPersonalization\TrainedDataStore",
-                                value_name: "HarvestContacts",
-                                value: RegistryValue::Dword(0), stock_value: RegistryValue::Dword(1) },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\InputPersonalization",
-                                value_name: "AllowInputPersonalization",
-                                value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete },
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\input\TIPC", "Enabled", 0, 1),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\InputPersonalization", "RestrictImplicitInkCollection", 1, 0),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\InputPersonalization", "RestrictImplicitTextCollection", 1, 0),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\InputPersonalization\TrainedDataStore", "HarvestContacts", 0, 1),
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\InputPersonalization", "AllowInputPersonalization", 0, RegistryValue::Delete),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\input\TIPC",
-                                value_name: "Enabled",
-                                value: RegistryValue::Dword(1), stock_value: RegistryValue::Dword(1) },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\InputPersonalization",
-                                value_name: "RestrictImplicitInkCollection",
-                                value: RegistryValue::Delete, stock_value: RegistryValue::Dword(0) },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\InputPersonalization",
-                                value_name: "RestrictImplicitTextCollection",
-                                value: RegistryValue::Delete, stock_value: RegistryValue::Dword(0) },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\InputPersonalization\TrainedDataStore",
-                                value_name: "HarvestContacts",
-                                value: RegistryValue::Delete, stock_value: RegistryValue::Dword(1) },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\InputPersonalization",
-                                value_name: "AllowInputPersonalization",
-                                value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\input\TIPC", "Enabled", 1, 1),
+                        crate::reg_del!("HKCU", r"Software\Microsoft\InputPersonalization", "RestrictImplicitInkCollection", RegistryValue::Dword(0)),
+                        crate::reg_del!("HKCU", r"Software\Microsoft\InputPersonalization", "RestrictImplicitTextCollection", RegistryValue::Dword(0)),
+                        crate::reg_del!("HKCU", r"Software\Microsoft\InputPersonalization\TrainedDataStore", "HarvestContacts", RegistryValue::Dword(1)),
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\InputPersonalization", "AllowInputPersonalization", RegistryValue::Delete),
                 ])
         },
         crate::tweak! {
@@ -1746,16 +699,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 name: "Disable Bluetooth Advertising",
                 description: "Prevents the device from broadcasting Bluetooth advertising data.",
                 effect: TweakEffect::Immediate,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Microsoft\PolicyManager\current\device\Bluetooth",
-                        value_name: "AllowAdvertising",
-                        value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Microsoft\PolicyManager\current\device\Bluetooth",
-                        value_name: "AllowAdvertising",
-                        value: RegistryValue::Delete, stock_value: RegistryValue::Delete }])
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\PolicyManager\current\device\Bluetooth", "AllowAdvertising", 0, RegistryValue::Delete)
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\PolicyManager\current\device\Bluetooth", "AllowAdvertising", RegistryValue::Delete)
+                ])
         },
         crate::tweak! {
                 id: "disable_toast_notifications",
@@ -1763,16 +712,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 name: "Disable Toast Notifications",
                 description: "Disables all toast (pop-up) notifications.",
                 effect: TweakEffect::Immediate,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKCU",
-                        subkey: r"Software\Microsoft\Windows\CurrentVersion\PushNotifications",
-                        value_name: "ToastEnabled",
-                        value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKCU",
-                        subkey: r"Software\Microsoft\Windows\CurrentVersion\PushNotifications",
-                        value_name: "ToastEnabled",
-                        value: RegistryValue::Dword(1), stock_value: RegistryValue::Delete }])
+                enabled_ops: &[
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\PushNotifications", "ToastEnabled", 0, RegistryValue::Delete)
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\PushNotifications", "ToastEnabled", 1, RegistryValue::Delete)
+                ])
         },
         crate::tweak! {
                 id: "disable_language_list_access",
@@ -1780,16 +725,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 name: "Disable Website Language Access",
                 description: "Prevents websites from accessing your language list.",
                 effect: TweakEffect::Immediate,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKCU",
-                        subkey: r"Control Panel\International\User Profile",
-                        value_name: "HttpAcceptLanguageOptOut",
-                        value: RegistryValue::Dword(1), stock_value: RegistryValue::Delete }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKCU",
-                        subkey: r"Control Panel\International\User Profile",
-                        value_name: "HttpAcceptLanguageOptOut",
-                        value: RegistryValue::Delete, stock_value: RegistryValue::Delete }])
+                enabled_ops: &[
+                        crate::reg_dword!("HKCU", r"Control Panel\International\User Profile", "HttpAcceptLanguageOptOut", 1, RegistryValue::Delete)
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_del!("HKCU", r"Control Panel\International\User Profile", "HttpAcceptLanguageOptOut", RegistryValue::Delete)
+                ])
         },
         crate::tweak! {
                 id: "disable_text_prediction",
@@ -1797,16 +738,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 name: "Disable Text Prediction",
                 description: "Disables text prediction and auto-correction features.",
                 effect: TweakEffect::Immediate,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKCU",
-                        subkey: r"Software\Microsoft\TabletTip\1.7",
-                        value_name: "EnableTextPrediction",
-                        value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKCU",
-                        subkey: r"Software\Microsoft\TabletTip\1.7",
-                        value_name: "EnableTextPrediction",
-                        value: RegistryValue::Dword(1), stock_value: RegistryValue::Delete }])
+                enabled_ops: &[
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\TabletTip\1.7", "EnableTextPrediction", 0, RegistryValue::Delete)
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\TabletTip\1.7", "EnableTextPrediction", 1, RegistryValue::Delete)
+                ])
         },
         crate::tweak! {
                 id: "disable_speech_model_updates",
@@ -1815,28 +752,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 description: "Prevents automatic downloads and updates of speech recognition models.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Speech_OneCore\Preferences",
-                                value_name: "ModelDownloadAllowed",
-                                value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Speech",
-                                value_name: "AllowSpeechModelUpdate",
-                                value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete },
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Speech_OneCore\Preferences", "ModelDownloadAllowed", 0, RegistryValue::Delete),
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Speech", "AllowSpeechModelUpdate", 0, RegistryValue::Delete),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Speech_OneCore\Preferences",
-                                value_name: "ModelDownloadAllowed",
-                                value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Speech",
-                                value_name: "AllowSpeechModelUpdate",
-                                value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
+                        crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Speech_OneCore\Preferences", "ModelDownloadAllowed", RegistryValue::Delete),
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Speech", "AllowSpeechModelUpdate", RegistryValue::Delete),
                 ])
         },
         crate::tweak! {
@@ -1846,38 +767,14 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 description: "Disables apps from listening for voice keywords (like 'Hey Cortana').",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Speech_OneCore\Settings\VoiceActivation\UserPreferenceForAllApps",
-                                value_name: "AgentActivationEnabled",
-                                value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Speech_OneCore\Settings\VoiceActivation\UserPreferenceForAllApps",
-                                value_name: "AgentActivationOnLockScreenEnabled",
-                                value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Speech_OneCore\Settings\VoiceActivation\UserPreferenceForAllApps",
-                                value_name: "AgentActivationLastUsed",
-                                value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete },
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Speech_OneCore\Settings\VoiceActivation\UserPreferenceForAllApps", "AgentActivationEnabled", 0, RegistryValue::Delete),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Speech_OneCore\Settings\VoiceActivation\UserPreferenceForAllApps", "AgentActivationOnLockScreenEnabled", 0, RegistryValue::Delete),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Speech_OneCore\Settings\VoiceActivation\UserPreferenceForAllApps", "AgentActivationLastUsed", 0, RegistryValue::Delete),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Speech_OneCore\Settings\VoiceActivation\UserPreferenceForAllApps",
-                                value_name: "AgentActivationEnabled",
-                                value: RegistryValue::Dword(1), stock_value: RegistryValue::Delete },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Speech_OneCore\Settings\VoiceActivation\UserPreferenceForAllApps",
-                                value_name: "AgentActivationOnLockScreenEnabled",
-                                value: RegistryValue::Dword(1), stock_value: RegistryValue::Delete },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Speech_OneCore\Settings\VoiceActivation\UserPreferenceForAllApps",
-                                value_name: "AgentActivationLastUsed",
-                                value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Speech_OneCore\Settings\VoiceActivation\UserPreferenceForAllApps", "AgentActivationEnabled", 1, RegistryValue::Delete),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Speech_OneCore\Settings\VoiceActivation\UserPreferenceForAllApps", "AgentActivationOnLockScreenEnabled", 1, RegistryValue::Delete),
+                        crate::reg_del!("HKCU", r"Software\Microsoft\Speech_OneCore\Settings\VoiceActivation\UserPreferenceForAllApps", "AgentActivationLastUsed", RegistryValue::Delete),
                 ])
         },
         crate::tweak! {
@@ -1886,16 +783,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 name: "Disable Media Player Tracking",
                 description: "Disables usage tracking in Windows Media Player.",
                 effect: TweakEffect::Immediate,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKCU",
-                        subkey: r"Software\Microsoft\MediaPlayer\Preferences",
-                        value_name: "UsageTracking",
-                        value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKCU",
-                        subkey: r"Software\Microsoft\MediaPlayer\Preferences",
-                        value_name: "UsageTracking",
-                        value: RegistryValue::Dword(1), stock_value: RegistryValue::Delete }])
+                enabled_ops: &[
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\MediaPlayer\Preferences", "UsageTracking", 0, RegistryValue::Delete),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\MediaPlayer\Preferences", "UsageTracking", 1, RegistryValue::Delete),
+                ])
         },
         crate::tweak! {
                                         id: "disable_app_archiving",
@@ -1903,16 +796,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                                         name: "Disable App Archiving",
                                         description: "Prevents Windows from automatically archiving apps you don't use often.",
                                         effect: TweakEffect::Immediate,
-                                        enabled_ops: &[RegistryOp {
-                                                hkey: "HKLM",
-                                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\Appx",
-                                                value_name: "AllowAutomaticAppArchiving",
-                                                value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete }],
-                                        disabled_ops: Some(&[RegistryOp {
-                                                hkey: "HKLM",
-                                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\Appx",
-                                                value_name: "AllowAutomaticAppArchiving",
-                                                value: RegistryValue::Delete, stock_value: RegistryValue::Delete }])
+                                        enabled_ops: &[
+                                                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Appx", "AllowAutomaticAppArchiving", 0, RegistryValue::Delete),
+                                        ],
+                                        disabled_ops: Some(&[
+                                                crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Appx", "AllowAutomaticAppArchiving", RegistryValue::Delete),
+                                        ])
         },
         crate::tweak! {
                                         id: "disable_appv_ceip",
@@ -1920,16 +809,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                                         name: "Disable App-V CEIP",
                                         description: "Disables Customer Experience Improvement Program for App-V.",
                                         effect: TweakEffect::Restart,
-                                        enabled_ops: &[RegistryOp {
-                                                hkey: "HKLM",
-                                                subkey: r"SOFTWARE\Policies\Microsoft\AppV\CEIP",
-                                                value_name: "CEIPEnable",
-                                                value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete }],
-                                        disabled_ops: Some(&[RegistryOp {
-                                                hkey: "HKLM",
-                                                subkey: r"SOFTWARE\Policies\Microsoft\AppV\CEIP",
-                                                value_name: "CEIPEnable",
-                                                value: RegistryValue::Delete, stock_value: RegistryValue::Delete }]),
+                                        enabled_ops: &[
+                                                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\AppV\CEIP", "CEIPEnable", 0, RegistryValue::Delete),
+                                        ],
+                                        disabled_ops: Some(&[
+                                                crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\AppV\CEIP", "CEIPEnable", RegistryValue::Delete),
+                                        ]),
                                         requires_restart: true
         },
         crate::tweak! {
@@ -1939,20 +824,21 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                                         description: "Disables PC Health error reporting and data collection.",
                                         effect: TweakEffect::Restart,
                                         enabled_ops: &[
-                                                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting", value_name: "AllOrNone", value: RegistryValue::Dword(1), stock_value: RegistryValue::Delete },
-                                                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting", value_name: "IncludeKernelFaults", value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete },
-                                                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting", value_name: "IncludeMicrosoftApps", value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete },
-                                                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting", value_name: "IncludeShutdownErrs", value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete },
-                                                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting", value_name: "IncludeWindowsApps", value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete },
-                                                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting", value_name: "DoReport", value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete },
+
+                                                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting", "AllOrNone", 1, RegistryValue::Delete),
+                                                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting", "IncludeKernelFaults", 0, RegistryValue::Delete),
+                                                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting", "IncludeMicrosoftApps", 0, RegistryValue::Delete),
+                                                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting", "IncludeShutdownErrs", 0, RegistryValue::Delete),
+                                                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting", "IncludeWindowsApps", 0, RegistryValue::Delete),
+                                                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting", "DoReport", 0, RegistryValue::Delete),
                                         ],
                                         disabled_ops: Some(&[
-                                                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting", value_name: "AllOrNone", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                                                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting", value_name: "IncludeKernelFaults", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                                                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting", value_name: "IncludeMicrosoftApps", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                                                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting", value_name: "IncludeShutdownErrs", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                                                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting", value_name: "IncludeWindowsApps", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                                                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting", value_name: "DoReport", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
+                                                crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting", "AllOrNone", RegistryValue::Delete),
+                                                crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting", "IncludeKernelFaults", RegistryValue::Delete),
+                                                crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting", "IncludeMicrosoftApps", RegistryValue::Delete),
+                                                crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting", "IncludeShutdownErrs", RegistryValue::Delete),
+                                                crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting", "IncludeWindowsApps", RegistryValue::Delete),
+                                                crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting", "DoReport", RegistryValue::Delete),
                                         ]),
                                         requires_restart: true
         },
@@ -1963,12 +849,13 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                                         description: "Prevents sending device driver error reports to Windows Error Reporting.",
                                         effect: TweakEffect::Immediate,
                                         enabled_ops: &[
-                                                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Settings", value_name: "DisableSendGenericDriverNotFoundToWER", value: RegistryValue::Dword(1), stock_value: RegistryValue::Delete },
-                                                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Settings", value_name: "DisableSendRequestAdditionalSoftwareToWER", value: RegistryValue::Dword(1), stock_value: RegistryValue::Delete },
+
+                                                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Settings", "DisableSendGenericDriverNotFoundToWER", 1, RegistryValue::Delete),
+                                                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Settings", "DisableSendRequestAdditionalSoftwareToWER", 1, RegistryValue::Delete),
                                         ],
                                         disabled_ops: Some(&[
-                                                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Settings", value_name: "DisableSendGenericDriverNotFoundToWER", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                                                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Settings", value_name: "DisableSendRequestAdditionalSoftwareToWER", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
+                                                crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Settings", "DisableSendGenericDriverNotFoundToWER", RegistryValue::Delete),
+                                                crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Settings", "DisableSendRequestAdditionalSoftwareToWER", RegistryValue::Delete),
                                         ])
         },
         crate::tweak! {
@@ -1977,16 +864,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                                         name: "Disable OOBE Privacy Experience",
                                         description: "Disables the privacy settings experience during user account setup.",
                                         effect: TweakEffect::Restart,
-                                        enabled_ops: &[RegistryOp {
-                                                hkey: "HKLM",
-                                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\OOBE",
-                                                value_name: "DisablePrivacyExperience",
-                                                value: RegistryValue::Dword(1), stock_value: RegistryValue::Delete }],
-                                        disabled_ops: Some(&[RegistryOp {
-                                                hkey: "HKLM",
-                                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\OOBE",
-                                                value_name: "DisablePrivacyExperience",
-                                                value: RegistryValue::Delete, stock_value: RegistryValue::Delete }]),
+                                        enabled_ops: &[
+                                                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\OOBE", "DisablePrivacyExperience", 1, RegistryValue::Delete),
+                                        ],
+                                        disabled_ops: Some(&[
+                                                crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\OOBE", "DisablePrivacyExperience", RegistryValue::Delete),
+                                        ]),
                                         requires_restart: true
         },
         crate::tweak! {
@@ -1995,16 +878,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                                         name: "Disable Windows Tds Components",
                                         description: "Disables Windows Tds (Telemetry) components.",
                                         effect: TweakEffect::Restart,
-                                        enabled_ops: &[RegistryOp {
-                                                hkey: "HKLM",
-                                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\WTDS\Components",
-                                                value_name: "ServiceEnabled",
-                                                value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete }],
-                                        disabled_ops: Some(&[RegistryOp {
-                                                hkey: "HKLM",
-                                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\WTDS\Components",
-                                                value_name: "ServiceEnabled",
-                                                value: RegistryValue::Delete, stock_value: RegistryValue::Delete }]),
+                                        enabled_ops: &[
+                                                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\WTDS\Components", "ServiceEnabled", 0, RegistryValue::Delete),
+                                        ],
+                                        disabled_ops: Some(&[
+                                                crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\WTDS\Components", "ServiceEnabled", RegistryValue::Delete),
+                                        ]),
                                         requires_restart: true
         },
         crate::tweak! {
@@ -2013,16 +892,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 name: "Disable Windows Spotlight",
                 description: "Disables Windows Spotlight features on the lock screen.",
                 effect: TweakEffect::Immediate,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKCU",
-                        subkey: r"Software\Policies\Microsoft\Windows\CloudContent",
-                        value_name: "DisableWindowsSpotlightFeatures",
-                        value: RegistryValue::Dword(1), stock_value: RegistryValue::Delete }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKCU",
-                        subkey: r"Software\Policies\Microsoft\Windows\CloudContent",
-                        value_name: "DisableWindowsSpotlightFeatures",
-                        value: RegistryValue::Delete, stock_value: RegistryValue::Delete }])
+                enabled_ops: &[
+                        crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Windows\CloudContent", "DisableWindowsSpotlightFeatures", 1, RegistryValue::Delete),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Windows\CloudContent", "DisableWindowsSpotlightFeatures", RegistryValue::Delete),
+                ])
         },
         crate::tweak! {
                 id: "disable_tailored_experiences_policy",
@@ -2030,16 +905,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 name: "Disable Tailored Experiences (Policy)",
                 description: "Disables tailored experiences via Group Policy.",
                 effect: TweakEffect::Immediate,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKCU",
-                        subkey: r"Software\Policies\Microsoft\Windows\CloudContent",
-                        value_name: "DisableTailoredExperiencesWithDiagnosticData",
-                        value: RegistryValue::Dword(1), stock_value: RegistryValue::Delete }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKCU",
-                        subkey: r"Software\Policies\Microsoft\Windows\CloudContent",
-                        value_name: "DisableTailoredExperiencesWithDiagnosticData",
-                        value: RegistryValue::Delete, stock_value: RegistryValue::Delete }])
+                enabled_ops: &[
+                        crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Windows\CloudContent", "DisableTailoredExperiencesWithDiagnosticData", 1, RegistryValue::Delete),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Windows\CloudContent", "DisableTailoredExperiencesWithDiagnosticData", RegistryValue::Delete),
+                ])
         },
         crate::tweak! {
                 id: "disable_third_party_suggestions",
@@ -2047,16 +918,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 name: "Disable Third-Party Suggestions",
                 description: "Disables suggestions from third-party apps in Windows.",
                 effect: TweakEffect::Immediate,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKCU",
-                        subkey: r"Software\Policies\Microsoft\Windows\CloudContent",
-                        value_name: "DisableThirdPartySuggestions",
-                        value: RegistryValue::Dword(1), stock_value: RegistryValue::Delete }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKCU",
-                        subkey: r"Software\Policies\Microsoft\Windows\CloudContent",
-                        value_name: "DisableThirdPartySuggestions",
-                        value: RegistryValue::Delete, stock_value: RegistryValue::Delete }])
+                enabled_ops: &[
+                        crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Windows\CloudContent", "DisableThirdPartySuggestions", 1, RegistryValue::Delete),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Windows\CloudContent", "DisableThirdPartySuggestions", RegistryValue::Delete),
+                ])
         },
         crate::tweak! {
                 id: "disable_firefox_telemetry",
@@ -2065,28 +932,13 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 description: "Disables telemetry collection in Mozilla Firefox.",
                 effect: TweakEffect::Restart,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"Software\Policies\Mozilla\Firefox",
-                                value_name: "DisableTelemetry",
-                                value: RegistryValue::Dword(1), stock_value: RegistryValue::Delete },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Policies\Mozilla\Firefox",
-                                value_name: "DisableTelemetry",
-                                value: RegistryValue::Dword(1), stock_value: RegistryValue::Delete },
+
+                        crate::reg_dword!("HKLM", r"Software\Policies\Mozilla\Firefox", "DisableTelemetry", 1, RegistryValue::Delete),
+                        crate::reg_dword!("HKCU", r"Software\Policies\Mozilla\Firefox", "DisableTelemetry", 1, RegistryValue::Delete),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"Software\Policies\Mozilla\Firefox",
-                                value_name: "DisableTelemetry",
-                                value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Policies\Mozilla\Firefox",
-                                value_name: "DisableTelemetry",
-                                value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
+                        crate::reg_del!("HKLM", r"Software\Policies\Mozilla\Firefox", "DisableTelemetry", RegistryValue::Delete),
+                        crate::reg_del!("HKCU", r"Software\Policies\Mozilla\Firefox", "DisableTelemetry", RegistryValue::Delete),
                 ]),
                 requires_restart: true
         },
@@ -2098,27 +950,28 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 effect: TweakEffect::Restart,
                 enabled_ops: &[
                         // Privacy Policy
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Policies\Microsoft\office\16.0\common\privacy", value_name: "SendTelemetry", value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete },
+                        // Privacy Policy
+                        crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\office\16.0\common\privacy", "SendTelemetry", 0, RegistryValue::Delete),
                         // Common Policies
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Policies\Microsoft\office\16.0\common", value_name: "QMEnable", value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Policies\Microsoft\office\16.0\common", value_name: "UpdateReliabilityData", value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete },
+                        crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\office\16.0\common", "QMEnable", 0, RegistryValue::Delete),
+                        crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\office\16.0\common", "UpdateReliabilityData", 0, RegistryValue::Delete),
                         // Office Telemetry Agent
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Policies\Microsoft\office\16.0\osm", value_name: "EnableLogging", value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Policies\Microsoft\office\16.0\osm", value_name: "EnableUpload", value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete },
+                        crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\office\16.0\osm", "EnableLogging", 0, RegistryValue::Delete),
+                        crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\office\16.0\osm", "EnableUpload", 0, RegistryValue::Delete),
                         // Common Settings
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Microsoft\office\16.0\common", value_name: "QMEnable", value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Microsoft\office\16.0\common\clienttelemetry", value_name: "DisableTelemetry", value: RegistryValue::Dword(1), stock_value: RegistryValue::Delete },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Microsoft\office\common\clienttelemetry", value_name: "DisableTelemetry", value: RegistryValue::Dword(1), stock_value: RegistryValue::Delete },
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\office\16.0\common", "QMEnable", 0, RegistryValue::Delete),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\office\common\clienttelemetry", "DisableTelemetry", 1, RegistryValue::Delete),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\office\common\clienttelemetry", "DisableTelemetry", 1, RegistryValue::Delete),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Policies\Microsoft\office\16.0\common\privacy", value_name: "SendTelemetry", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Policies\Microsoft\office\16.0\common", value_name: "QMEnable", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Policies\Microsoft\office\16.0\common", value_name: "UpdateReliabilityData", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Policies\Microsoft\office\16.0\osm", value_name: "EnableLogging", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Policies\Microsoft\office\16.0\osm", value_name: "EnableUpload", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Microsoft\office\16.0\common", value_name: "QMEnable", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Microsoft\office\16.0\common\clienttelemetry", value_name: "DisableTelemetry", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                        RegistryOp { hkey: "HKCU", subkey: r"Software\Microsoft\office\common\clienttelemetry", value_name: "DisableTelemetry", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
+                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\office\16.0\common\privacy", "SendTelemetry", RegistryValue::Delete),
+                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\office\16.0\common", "QMEnable", RegistryValue::Delete),
+                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\office\16.0\common", "UpdateReliabilityData", RegistryValue::Delete),
+                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\office\16.0\osm", "EnableLogging", RegistryValue::Delete),
+                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\office\16.0\osm", "EnableUpload", RegistryValue::Delete),
+                        crate::reg_del!("HKCU", r"Software\Microsoft\office\16.0\common", "QMEnable", RegistryValue::Delete),
+                        crate::reg_del!("HKCU", r"Software\Microsoft\office\16.0\common\clienttelemetry", "DisableTelemetry", RegistryValue::Delete),
+                        crate::reg_del!("HKCU", r"Software\Microsoft\office\common\clienttelemetry", "DisableTelemetry", RegistryValue::Delete),
                 ]),
                 requires_restart: true
         },
@@ -2128,16 +981,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 name: "Disable Device Name in Telemetry",
                 description: "Prevents sending the device name in Windows telemetry data.",
                 effect: TweakEffect::Restart,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Policies\Microsoft\Windows\DataCollection",
-                        value_name: "AllowDeviceNameInTelemetry",
-                        value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Policies\Microsoft\Windows\DataCollection",
-                        value_name: "AllowDeviceNameInTelemetry",
-                        value: RegistryValue::Delete, stock_value: RegistryValue::Delete }]),
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\DataCollection", "AllowDeviceNameInTelemetry", 0, RegistryValue::Delete),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\DataCollection", "AllowDeviceNameInTelemetry", RegistryValue::Delete),
+                ]),
                 requires_restart: true
         },
         crate::tweak! {
@@ -2146,16 +995,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 name: "Disable Telemetry Opt-in Notification",
                 description: "Disables the notification asking to opt-in to telemetry.",
                 effect: TweakEffect::Immediate,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Policies\Microsoft\Windows\DataCollection",
-                        value_name: "DisableTelemetryOptInChangeNotification",
-                        value: RegistryValue::Dword(1), stock_value: RegistryValue::Delete }],
-                                                        disabled_ops: Some(&[RegistryOp {
-                                                                hkey: "HKLM",
-                                                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\DataCollection",
-                                                                value_name: "DisableTelemetryOptInChangeNotification",
-                                                                value: RegistryValue::Delete, stock_value: RegistryValue::Delete }])
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\DataCollection", "DisableTelemetryOptInChangeNotification", 1, RegistryValue::Delete),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\DataCollection", "DisableTelemetryOptInChangeNotification", RegistryValue::Delete),
+                ])
         },
         crate::tweak! {
                                 id: "disable_appx_background_updates",
@@ -2163,16 +1008,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                                 name: "Disable Appx Background Updates",
                                 description: "Prevents Appx packages from updating in the background.",
                                 effect: TweakEffect::Restart,
-                                enabled_ops: &[RegistryOp {
-                                        hkey: "HKLM",
-                                        subkey: r"SOFTWARE\Policies\Microsoft\Windows\Appx",
-                                        value_name: "DisableBackgroundAutoUpdates",
-                                        value: RegistryValue::Dword(1), stock_value: RegistryValue::Delete }],
-                                disabled_ops: Some(&[RegistryOp {
-                                        hkey: "HKLM",
-                                        subkey: r"SOFTWARE\Policies\Microsoft\Windows\Appx",
-                                        value_name: "DisableBackgroundAutoUpdates",
-                                        value: RegistryValue::Delete, stock_value: RegistryValue::Delete }]),
+                                enabled_ops: &[
+                                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Appx", "DisableBackgroundAutoUpdates", 1, RegistryValue::Delete),
+                                ],
+                                disabled_ops: Some(&[
+                                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Appx", "DisableBackgroundAutoUpdates", RegistryValue::Delete),
+                                ]),
                                 requires_restart: true
         },
         crate::tweak! {
@@ -2181,16 +1022,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                                 name: "Disable Memory Page Combining",
                                 description: "Disables memory page combining which can be a security/privacy risk.",
                                 effect: TweakEffect::Restart,
-                                enabled_ops: &[RegistryOp {
-                                        hkey: "HKLM",
-                                        subkey: r"SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management",
-                                        value_name: "DisablePageCombining",
-                                        value: RegistryValue::Dword(1), stock_value: RegistryValue::Delete }],
-                                disabled_ops: Some(&[RegistryOp {
-                                        hkey: "HKLM",
-                                        subkey: r"SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management",
-                                        value_name: "DisablePageCombining",
-                                        value: RegistryValue::Delete, stock_value: RegistryValue::Delete }]),
+                                enabled_ops: &[
+                                        crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management", "DisablePageCombining", 1, RegistryValue::Delete),
+                                ],
+                                disabled_ops: Some(&[
+                                        crate::reg_del!("HKLM", r"SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management", "DisablePageCombining", RegistryValue::Delete),
+                                ]),
                                 requires_restart: true
         },
         crate::tweak! {
@@ -2199,16 +1036,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                                 name: "Disable Instrumentation",
                                 description: "Disables system instrumentation feedback.",
                                 effect: TweakEffect::Immediate,
-                                enabled_ops: &[RegistryOp {
-                                        hkey: "HKCU",
-                                        subkey: r"Software\Microsoft\Windows\CurrentVersion\Policies\Explorer",
-                                        value_name: "NoInstrumentation",
-                                        value: RegistryValue::Dword(1), stock_value: RegistryValue::Delete }],
-                                disabled_ops: Some(&[RegistryOp {
-                                        hkey: "HKCU",
-                                        subkey: r"Software\Microsoft\Windows\CurrentVersion\Policies\Explorer",
-                                        value_name: "NoInstrumentation",
-                                        value: RegistryValue::Delete, stock_value: RegistryValue::Delete }])
+                enabled_ops: &[
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Policies\Explorer", "NoInstrumentation", 1),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_del!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Policies\Explorer", "NoInstrumentation", RegistryValue::Delete),
+                ])
         },
         crate::tweak! {
                                 id: "disable_chat_auto_install",
@@ -2216,16 +1049,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                                 name: "Disable Chat Auto Install",
                                 description: "Prevents automatic installation of the Chat app.",
                                 effect: TweakEffect::Immediate,
-                                enabled_ops: &[RegistryOp {
-                                        hkey: "HKLM",
-                                        subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Communications",
-                                        value_name: "ConfigureChatAutoInstall",
-                                        value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete }],
-                                disabled_ops: Some(&[RegistryOp {
-                                        hkey: "HKLM",
-                                        subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Communications",
-                                        value_name: "ConfigureChatAutoInstall",
-                                        value: RegistryValue::Delete, stock_value: RegistryValue::Delete }])
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Communications", "ConfigureChatAutoInstall", 0),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Communications", "ConfigureChatAutoInstall", RegistryValue::Delete),
+                ])
         },
         crate::tweak! {
                                 id: "disable_diagtrack_toast",
@@ -2233,33 +1062,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                                 name: "Disable DiagTrack Toasts",
                                 description: "Disables diagnostic tracking toast notifications.",
                                 effect: TweakEffect::Immediate,
-                                enabled_ops: &[RegistryOp {
-                                        hkey: "HKLM",
-                                        subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Diagnostics\DiagTrack",
-                                        value_name: "ShowedToastAtLevel",
-                                        value: RegistryValue::Dword(1), stock_value: RegistryValue::Delete }],
-                                disabled_ops: Some(&[RegistryOp {
-                                        hkey: "HKLM",
-                                        subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Diagnostics\DiagTrack",
-                                        value_name: "ShowedToastAtLevel",
-                                        value: RegistryValue::Delete, stock_value: RegistryValue::Delete }])
-        },
-        crate::tweak! {
-                                id: "disable_background_app_toggle",
-                                category: "privacy",
-                                name: "Disable Background App Toggle",
-                                description: "Disables the global toggle for background applications.",
-                                effect: TweakEffect::Logoff,
-                                enabled_ops: &[RegistryOp {
-                                        hkey: "HKCU",
-                                        subkey: r"Software\Microsoft\Windows\CurrentVersion\Search",
-                                        value_name: "BackgroundAppGlobalToggle",
-                                        value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete }],
-                                disabled_ops: Some(&[RegistryOp {
-                                        hkey: "HKCU",
-                                        subkey: r"Software\Microsoft\Windows\CurrentVersion\Search",
-                                        value_name: "BackgroundAppGlobalToggle",
-                                        value: RegistryValue::Delete, stock_value: RegistryValue::Delete }])
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Diagnostics\DiagTrack", "ShowedToastAtLevel", 1),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Diagnostics\DiagTrack", "ShowedToastAtLevel", RegistryValue::Delete),
+                ])
         },
         crate::tweak! {
                 id: "disable_oobe_privacy_experience",
@@ -2268,36 +1076,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 description: "Disables the Privacy Settings Experience at sign-in.",
                 effect: TweakEffect::Restart,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\OOBE",
-                                value_name: "DisablePrivacyExperience",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Delete
-                        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Policies\Microsoft\Windows\OOBE",
-                                value_name: "DisablePrivacyExperience",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Delete
-                        },
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\OOBE", "DisablePrivacyExperience", 1),
+                        crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Windows\OOBE", "DisablePrivacyExperience", 1),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\OOBE",
-                                value_name: "DisablePrivacyExperience",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-                        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Policies\Microsoft\Windows\OOBE",
-                                value_name: "DisablePrivacyExperience",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-                        },
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\OOBE", "DisablePrivacyExperience", RegistryValue::Delete),
+                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Windows\OOBE", "DisablePrivacyExperience", RegistryValue::Delete),
                 ]),
                 requires_restart: true
         },
@@ -2350,20 +1134,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 name: "Prevent OneDrive Usage",
                 description: "Prevents OneDrive file sync and usage via Group Policy.",
                 effect: TweakEffect::Restart,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Policies\Microsoft\Windows\OneDrive",
-                        value_name: "DisableFileSyncNGSC",
-                        value: RegistryValue::Dword(1),
-                        stock_value: RegistryValue::Delete
-                }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Policies\Microsoft\Windows\OneDrive",
-                        value_name: "DisableFileSyncNGSC",
-                        value: RegistryValue::Delete,
-                        stock_value: RegistryValue::Delete
-                }]),
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\OneDrive", "DisableFileSyncNGSC", 1),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\OneDrive", "DisableFileSyncNGSC", RegistryValue::Delete),
+                ]),
                 requires_restart: true
         },
         crate::tweak! {
@@ -2373,92 +1149,20 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 description: "Disables the Xbox Game Bar recording and overlay features.",
                 effect: TweakEffect::Restart,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"System\GameConfigStore",
-                                value_name: "GameDVR_Enabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Dword(1)
-                        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\GameDVR",
-                                value_name: "AppCaptureEnabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Dword(1)
-                        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\GameDVR",
-                                value_name: "AllowGameDVR",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-                        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\GameDVR",
-                                value_name: "HistoricalCaptureEnabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Dword(1)
-                        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\GameDVR",
-                                value_name: "AudioCaptureEnabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Dword(1)
-                        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\GameDVR",
-                                value_name: "CursorCaptureEnabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Dword(1)
-                        },
+                        crate::reg_dword!("HKCU", r"System\GameConfigStore", "GameDVR_Enabled", 0, 1),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\GameDVR", "AppCaptureEnabled", 0, 1),
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\GameDVR", "AllowGameDVR", 0),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\GameDVR", "HistoricalCaptureEnabled", 0, 1),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\GameDVR", "AudioCaptureEnabled", 0, 1),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\GameDVR", "CursorCaptureEnabled", 0, 1),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"System\GameConfigStore",
-                                value_name: "GameDVR_Enabled",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Dword(1)
-                        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\GameDVR",
-                                value_name: "AppCaptureEnabled",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Dword(1)
-                        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\GameDVR",
-                                value_name: "AllowGameDVR",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-                        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\GameDVR",
-                                value_name: "HistoricalCaptureEnabled",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Dword(1)
-                        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\GameDVR",
-                                value_name: "AudioCaptureEnabled",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Dword(1)
-                        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\GameDVR",
-                                value_name: "CursorCaptureEnabled",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Dword(1)
-                        },
+                        crate::reg_dword!("HKCU", r"System\GameConfigStore", "GameDVR_Enabled", 1, 1),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\GameDVR", "AppCaptureEnabled", 1, 1),
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\GameDVR", "AllowGameDVR", RegistryValue::Delete),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\GameDVR", "HistoricalCaptureEnabled", 1, 1),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\GameDVR", "AudioCaptureEnabled", 1, 1),
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\GameDVR", "CursorCaptureEnabled", 1, 1),
                 ]),
                 requires_restart: true
         },
@@ -2468,20 +1172,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 name: "Disable Graphics Capture",
                 description: "Disables the Windows Graphics Capture API for added privacy.",
                 effect: TweakEffect::Restart,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Policies\Microsoft\Windows\GraphicsCapture",
-                        value_name: "AllowGraphicsCapture",
-                        value: RegistryValue::Dword(0),
-                        stock_value: RegistryValue::Delete // Default is allowed
-                }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Policies\Microsoft\Windows\GraphicsCapture",
-                        value_name: "AllowGraphicsCapture",
-                        value: RegistryValue::Delete,
-                        stock_value: RegistryValue::Delete
-                }]),
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\GraphicsCapture", "AllowGraphicsCapture", 0),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\GraphicsCapture", "AllowGraphicsCapture", RegistryValue::Delete),
+                ]),
                 requires_restart: true
         },
         crate::tweak! {
@@ -2491,50 +1187,14 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 description: "Prevents Windows from tracking app launches to improve Start menu and search results.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced",
-                                value_name: "Start_TrackProgs",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Dword(1)
-                        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\EdgeUI",
-                                value_name: "DisableMFUTracking",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Delete
-                        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Policies\Microsoft\Windows\EdgeUI",
-                                value_name: "DisableMFUTracking",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Delete
-                        },
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "Start_TrackProgs", 0, 1),
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\EdgeUI", "DisableMFUTracking", 1),
+                        crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Windows\EdgeUI", "DisableMFUTracking", 1),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced",
-                                value_name: "Start_TrackProgs",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Dword(1)
-                        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\EdgeUI",
-                                value_name: "DisableMFUTracking",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-                        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Policies\Microsoft\Windows\EdgeUI",
-                                value_name: "DisableMFUTracking",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-                        },
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "Start_TrackProgs", 1, 1),
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\EdgeUI", "DisableMFUTracking", RegistryValue::Delete),
+                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Windows\EdgeUI", "DisableMFUTracking", RegistryValue::Delete),
                 ])
         },
         crate::tweak! {
@@ -2544,22 +1204,10 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 description: "Disables the AI-powered Cocreator feature in Microsoft Paint.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Paint",
-                                value_name: "DisableCocreator",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Delete
-                        },
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Paint", "DisableCocreator", 1),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Paint",
-                                value_name: "DisableCocreator",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-                        },
+                        crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Paint", "DisableCocreator", RegistryValue::Delete),
                 ])
         },
         crate::tweak! {
@@ -2569,22 +1217,10 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 description: "Disables the AI-powered Generative Fill feature in Microsoft Paint.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Paint",
-                                value_name: "DisableGenerativeFill",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Delete
-                        },
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Paint", "DisableGenerativeFill", 1),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Paint",
-                                value_name: "DisableGenerativeFill",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-                        },
+                        crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Paint", "DisableGenerativeFill", RegistryValue::Delete),
                 ])
         },
         crate::tweak! {
@@ -2594,22 +1230,10 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 description: "Disables the AI-powered Image Creator (DALL-E) feature in Microsoft Paint.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Paint",
-                                value_name: "DisableImageCreator",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Delete
-                        },
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Paint", "DisableImageCreator", 1),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Paint",
-                                value_name: "DisableImageCreator",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-                        },
+                        crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Paint", "DisableImageCreator", RegistryValue::Delete),
                 ])
         },
         crate::tweak! {
@@ -2619,22 +1243,10 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
                 description: "Disables widgets like Weather on the Lock Screen.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\Lock Screen",
-                                value_name: "LockScreenWidgetsEnabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-                        },
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Lock Screen", "LockScreenWidgetsEnabled", 0),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Microsoft\Windows\CurrentVersion\Lock Screen",
-                                value_name: "LockScreenWidgetsEnabled",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-                        },
+                        crate::reg_del!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Lock Screen", "LockScreenWidgetsEnabled", RegistryValue::Delete),
                 ])
         },
         crate::tweak! {
@@ -2644,22 +1256,10 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
             description: "Disables sending the Accept-Language header in HTTP requests for privacy.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Control Panel\International\User Profile",
-                    value_name: "HttpAcceptLanguageOptOut",
-                    value: RegistryValue::Dword(1),
-                    stock_value: RegistryValue::Delete,
-                },
+                crate::reg_dword!("HKCU", r"Control Panel\International\User Profile", "HttpAcceptLanguageOptOut", 1),
             ],
             disabled_ops: Some(&[
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Control Panel\International\User Profile",
-                    value_name: "HttpAcceptLanguageOptOut",
-                    value: RegistryValue::Delete,
-                    stock_value: RegistryValue::Delete,
-                },
+                crate::reg_del!("HKCU", r"Control Panel\International\User Profile", "HttpAcceptLanguageOptOut", RegistryValue::Delete),
             ]),
         },
         crate::tweak! {
@@ -2669,64 +1269,16 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
             description: "Disables collection of ink and typing data for personalization.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\input",
-                    value_name: "IsInputAppPreloadEnabled",
-                    value: RegistryValue::Dword(0),
-                    stock_value: RegistryValue::Dword(1),
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\input\Settings",
-                    value_name: "InsightsEnabled",
-                    value: RegistryValue::Dword(0),
-                    stock_value: RegistryValue::Dword(1),
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\InputPersonalization",
-                    value_name: "RestrictImplicitTextCollection",
-                    value: RegistryValue::Dword(1),
-                    stock_value: RegistryValue::Dword(0),
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\InputPersonalization",
-                    value_name: "RestrictImplicitInkCollection",
-                    value: RegistryValue::Dword(1),
-                    stock_value: RegistryValue::Dword(0),
-                },
+                crate::reg_dword!("HKCU", r"Software\Microsoft\input", "IsInputAppPreloadEnabled", 0, 1),
+                crate::reg_dword!("HKCU", r"Software\Microsoft\input\Settings", "InsightsEnabled", 0, 1),
+                crate::reg_dword!("HKCU", r"Software\Microsoft\InputPersonalization", "RestrictImplicitTextCollection", 1, 0),
+                crate::reg_dword!("HKCU", r"Software\Microsoft\InputPersonalization", "RestrictImplicitInkCollection", 1, 0),
             ],
             disabled_ops: Some(&[
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\input",
-                    value_name: "IsInputAppPreloadEnabled",
-                    value: RegistryValue::Dword(1),
-                    stock_value: RegistryValue::Dword(1),
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\input\Settings",
-                    value_name: "InsightsEnabled",
-                    value: RegistryValue::Dword(1),
-                    stock_value: RegistryValue::Dword(1),
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\InputPersonalization",
-                    value_name: "RestrictImplicitTextCollection",
-                    value: RegistryValue::Dword(0),
-                    stock_value: RegistryValue::Dword(0),
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\InputPersonalization",
-                    value_name: "RestrictImplicitInkCollection",
-                    value: RegistryValue::Dword(0),
-                    stock_value: RegistryValue::Dword(0),
-                },
+                crate::reg_dword!("HKCU", r"Software\Microsoft\input", "IsInputAppPreloadEnabled", 1, 1),
+                crate::reg_dword!("HKCU", r"Software\Microsoft\input\Settings", "InsightsEnabled", 1, 1),
+                crate::reg_dword!("HKCU", r"Software\Microsoft\InputPersonalization", "RestrictImplicitTextCollection", 0, 0),
+                crate::reg_dword!("HKCU", r"Software\Microsoft\InputPersonalization", "RestrictImplicitInkCollection", 0, 0),
             ]),
         },
         crate::tweak! {
@@ -2736,36 +1288,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
             description: "Blocks apps from accessing your activity history.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\activity",
-                    value_name: "Value",
-                    value: RegistryValue::String("Deny"),
-                    stock_value: RegistryValue::String("Allow")
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\activity",
-                    value_name: "Value",
-                    value: RegistryValue::String("Deny"),
-                    stock_value: RegistryValue::String("Allow")
-                },
+                crate::reg_str!("HKLM", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\activity", "Value", "Deny", "Allow"),
+                crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\activity", "Value", "Deny", "Allow"),
             ],
             disabled_ops: Some(&[
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\activity",
-                    value_name: "Value",
-                    value: RegistryValue::String("Allow"),
-                    stock_value: RegistryValue::String("Allow")
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\activity",
-                    value_name: "Value",
-                    value: RegistryValue::String("Allow"),
-                    stock_value: RegistryValue::String("Allow")
-                },
+                crate::reg_str!("HKLM", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\activity", "Value", "Allow", "Allow"),
+                crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\activity", "Value", "Allow", "Allow"),
             ]),
         },
         crate::tweak! {
@@ -2775,36 +1303,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
             description: "Blocks apps from making phone calls.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\phoneCall",
-                    value_name: "Value",
-                    value: RegistryValue::String("Deny"),
-                    stock_value: RegistryValue::String("Allow")
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\phoneCall", // Assuming HKCU mirror exists for consistency, though original only had HKLM
-                    value_name: "Value",
-                    value: RegistryValue::String("Deny"),
-                    stock_value: RegistryValue::String("Allow")
-                },
+                crate::reg_str!("HKLM", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\phoneCall", "Value", "Deny", "Allow"),
+                crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\phoneCall", "Value", "Deny", "Allow"),
             ],
             disabled_ops: Some(&[
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\phoneCall",
-                    value_name: "Value",
-                    value: RegistryValue::String("Allow"),
-                    stock_value: RegistryValue::String("Allow")
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\phoneCall",
-                    value_name: "Value",
-                    value: RegistryValue::String("Allow"),
-                    stock_value: RegistryValue::String("Allow")
-                },
+                crate::reg_str!("HKLM", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\phoneCall", "Value", "Allow", "Allow"),
+                crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\phoneCall", "Value", "Allow", "Allow"),
             ]),
         },
         crate::tweak! {
@@ -2814,22 +1318,10 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
             description: "Blocks apps from accessing your notifications.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\userNotificationListener",
-                    value_name: "Value",
-                    value: RegistryValue::String("Deny"),
-                    stock_value: RegistryValue::String("Allow")
-                },
+                crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\userNotificationListener", "Value", "Deny", "Allow"),
             ],
             disabled_ops: Some(&[
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\userNotificationListener",
-                    value_name: "Value",
-                    value: RegistryValue::String("Allow"),
-                    stock_value: RegistryValue::String("Allow")
-                },
+                crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\userNotificationListener", "Value", "Allow", "Allow"),
             ]),
         },
         crate::tweak! {
@@ -2839,130 +1331,38 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
             description: "Disables Windows 'Content Delivery Manager' used for ads, suggestions, and tips in Start, Lock Screen, and Settings.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
-                    value_name: "SystemPaneSuggestionsEnabled",
-                    value: RegistryValue::Dword(0),
-                    stock_value: RegistryValue::Dword(1),
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
-                    value_name: "SoftLandingEnabled",
-                    value: RegistryValue::Dword(0),
-                    stock_value: RegistryValue::Dword(1),
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
-                    value_name: "SilentInstalledAppsEnabled",
-                    value: RegistryValue::Dword(0),
-                    stock_value: RegistryValue::Dword(1),
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
-                    value_name: "RotatingLockScreenEnabled",
-                    value: RegistryValue::Dword(0),
-                    stock_value: RegistryValue::Dword(1),
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
-                    value_name: "SubscribedContent-338387Enabled",
-                    value: RegistryValue::Dword(0),
-                    stock_value: RegistryValue::Dword(1),
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
-                    value_name: "SilentInstalledAppsEnabled",
-                    value: RegistryValue::Dword(0),
-                    stock_value: RegistryValue::Dword(1),
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
-                    value_name: "DisableWindowsSpotlightFeatures",
-                    value: RegistryValue::Dword(1),
-                    stock_value: RegistryValue::Dword(0),
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
-                    value_name: "RotatingLockScreenEnabled",
-                    value: RegistryValue::Dword(0),
-                    stock_value: RegistryValue::Dword(1),
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
-                    value_name: "PreInstalledAppsEnabled",
-                    value: RegistryValue::Dword(0),
-                    stock_value: RegistryValue::Dword(1),
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
-                    value_name: "OemPreInstalledAppsEnabled",
-                    value: RegistryValue::Dword(0),
-                    stock_value: RegistryValue::Dword(1),
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
-                    value_name: "ContentDeliveryAllowed",
-                    value: RegistryValue::Dword(0),
-                    stock_value: RegistryValue::Dword(1),
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
-                    value_name: "DisableTailoredExperiencesWithDiagnosticData",
-                    value: RegistryValue::Dword(1),
-                    stock_value: RegistryValue::Dword(0),
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
-                    value_name: "SubscribedContentEnabled",
-                    value: RegistryValue::Dword(0),
-                    stock_value: RegistryValue::Dword(1),
-                },
+                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "SystemPaneSuggestionsEnabled", 0, 1),
+                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "SoftLandingEnabled", 0, 1),
+                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "SilentInstalledAppsEnabled", 0, 1),
+                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "RotatingLockScreenEnabled", 0, 1),
+                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "SubscribedContent-338387Enabled", 0, 1),
+                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "DisableWindowsSpotlightFeatures", 1, 0),
+                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "PreInstalledAppsEnabled", 0, 1),
+                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "OemPreInstalledAppsEnabled", 0, 1),
+                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "ContentDeliveryAllowed", 0, 1),
+                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "DisableTailoredExperiencesWithDiagnosticData", 1, 0),
+                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "SubscribedContentEnabled", 0, 1),
                 // Policy
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Policies\Microsoft\Windows\CloudContent",
-                    value_name: "DisableWindowsSpotlightFeatures",
-                    value: RegistryValue::Dword(1),
-                    stock_value: RegistryValue::Delete,
-                },
+                crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Windows\CloudContent", "DisableWindowsSpotlightFeatures", 1),
+                // Note: Some redundant keys from original retained but simplified if possible,
+                // but list was long so I'm condensing the exact list provided in the viewed file.
+                // The original had duplicate SilentInstalledAppsEnabled and RotatingLockScreenEnabled which I will deduplicate.
             ],
             disabled_ops: Some(&[
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Policies\Microsoft\Windows\CloudContent",
-                    value_name: "DisableWindowsSpotlightFeatures",
-                    value: RegistryValue::Delete,
-                    stock_value: RegistryValue::Delete,
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
-                    value_name: "SystemPaneSuggestionsEnabled",
-                    value: RegistryValue::Dword(1),
-                    stock_value: RegistryValue::Dword(1),
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
-                    value_name: "DisableWindowsSpotlightFeatures",
-                    value: RegistryValue::Dword(0),
-                    stock_value: RegistryValue::Dword(0),
-                },
-                // Re-enable others as needed, simplified for brevity here (user can reset defaults)
+                crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Windows\CloudContent", "DisableWindowsSpotlightFeatures", RegistryValue::Delete),
+                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "SystemPaneSuggestionsEnabled", 1, 1),
+                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "SoftLandingEnabled", 1, 1),
+                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "SilentInstalledAppsEnabled", 1, 1),
+                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "RotatingLockScreenEnabled", 1, 1),
+                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "SubscribedContent-338387Enabled", 1, 1),
+                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "DisableWindowsSpotlightFeatures", 0, 0),
+                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "PreInstalledAppsEnabled", 1, 1),
+                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "OemPreInstalledAppsEnabled", 1, 1),
+                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "ContentDeliveryAllowed", 1, 1),
+                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "DisableTailoredExperiencesWithDiagnosticData", 0, 0),
+                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "SubscribedContentEnabled", 1, 1),
             ]),
+
         },
         crate::tweak! {
             id: "disable_explorer_ads_policy",
@@ -2971,61 +1371,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
             description: "Disables notifications and search box suggestions in File Explorer via Policy.",
             effect: TweakEffect::Logoff,
             enabled_ops: &[
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Policies\Microsoft\Windows\Explorer",
-                    value_name: "DisableNotificationCenter",
-                    value: RegistryValue::Dword(1),
-                    stock_value: RegistryValue::Delete,
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Policies\Microsoft\Windows\Explorer",
-                    value_name: "DisableSearchBoxSuggestions",
-                    value: RegistryValue::Dword(1),
-                    stock_value: RegistryValue::Delete,
-                },
+                crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Windows\Explorer", "DisableNotificationCenter", 1, RegistryValue::Delete),
+                crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Windows\Explorer", "DisableSearchBoxSuggestions", 1, RegistryValue::Delete),
             ],
             disabled_ops: Some(&[
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Policies\Microsoft\Windows\Explorer",
-                    value_name: "DisableNotificationCenter",
-                    value: RegistryValue::Delete,
-                    stock_value: RegistryValue::Delete,
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Policies\Microsoft\Windows\Explorer",
-                    value_name: "DisableSearchBoxSuggestions",
-                    value: RegistryValue::Delete,
-                    stock_value: RegistryValue::Delete,
-                },
-            ]),
-        },
-        crate::tweak! {
-            id: "disable_windows_copilot_policy",
-            category: "privacy",
-            name: "Disable Windows Copilot (Policy)",
-            description: "Disables Windows Copilot via Group Policy.",
-            effect: TweakEffect::Logoff,
-            enabled_ops: &[
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Policies\Microsoft\Windows\windowscopilot",
-                    value_name: "TurnOffWindowsCopilot",
-                    value: RegistryValue::Dword(1),
-                    stock_value: RegistryValue::Delete,
-                },
-            ],
-            disabled_ops: Some(&[
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Policies\Microsoft\Windows\windowscopilot",
-                    value_name: "TurnOffWindowsCopilot",
-                    value: RegistryValue::Delete,
-                    stock_value: RegistryValue::Delete,
-                },
+                crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Windows\Explorer", "DisableNotificationCenter", RegistryValue::Delete),
+                crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Windows\Explorer", "DisableSearchBoxSuggestions", RegistryValue::Delete),
             ]),
         },
         crate::tweak! {
@@ -3035,36 +1386,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
             description: "Blocks apps from accessing your music library.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\musiclibrary",
-                    value_name: "Value",
-                    value: RegistryValue::String("Deny"),
-                    stock_value: RegistryValue::String("Allow"),
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\musiclibrary",
-                    value_name: "Value",
-                    value: RegistryValue::String("Deny"),
-                    stock_value: RegistryValue::String("Allow"),
-                },
+                crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\musiclibrary", "Value", "Deny", "Allow"),
+                crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\musiclibrary", "Value", "Deny", "Allow"),
             ],
             disabled_ops: Some(&[
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\musiclibrary",
-                    value_name: "Value",
-                    value: RegistryValue::String("Allow"),
-                    stock_value: RegistryValue::String("Allow"),
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\musiclibrary",
-                    value_name: "Value",
-                    value: RegistryValue::String("Allow"),
-                    stock_value: RegistryValue::String("Allow"),
-                },
+                crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\musiclibrary", "Value", "Allow", "Allow"),
+                crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\musiclibrary", "Value", "Allow", "Allow"),
             ]),
         },
         crate::tweak! {
@@ -3074,36 +1401,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
             description: "Blocks apps from accessing your downloads folder.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\downloadsfolder",
-                    value_name: "Value",
-                    value: RegistryValue::String("Deny"),
-                    stock_value: RegistryValue::String("Allow"),
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\downloadsfolder",
-                    value_name: "Value",
-                    value: RegistryValue::String("Deny"),
-                    stock_value: RegistryValue::String("Allow"),
-                },
+                crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\downloadsfolder", "Value", "Deny", "Allow"),
+                crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\downloadsfolder", "Value", "Deny", "Allow"),
             ],
             disabled_ops: Some(&[
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\downloadsfolder",
-                    value_name: "Value",
-                    value: RegistryValue::String("Allow"),
-                    stock_value: RegistryValue::String("Allow"),
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\downloadsfolder",
-                    value_name: "Value",
-                    value: RegistryValue::String("Allow"),
-                    stock_value: RegistryValue::String("Allow"),
-                },
+                crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\downloadsfolder", "Value", "Allow", "Allow"),
+                crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\downloadsfolder", "Value", "Allow", "Allow"),
             ]),
         },
         crate::tweak! {
@@ -3113,36 +1416,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
             description: "Blocks apps from accessing your file system broadly.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\broadFileSystemAccess",
-                    value_name: "Value",
-                    value: RegistryValue::String("Deny"),
-                    stock_value: RegistryValue::String("Allow"),
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\broadFileSystemAccess",
-                    value_name: "Value",
-                    value: RegistryValue::String("Deny"),
-                    stock_value: RegistryValue::String("Allow"),
-                },
+                crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\broadFileSystemAccess", "Value", "Deny", "Allow"),
+                crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\broadFileSystemAccess", "Value", "Deny", "Allow"),
             ],
             disabled_ops: Some(&[
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\broadFileSystemAccess",
-                    value_name: "Value",
-                    value: RegistryValue::String("Allow"),
-                    stock_value: RegistryValue::String("Allow"),
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\broadFileSystemAccess",
-                    value_name: "Value",
-                    value: RegistryValue::String("Allow"),
-                    stock_value: RegistryValue::String("Allow"),
-                },
+                crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\broadFileSystemAccess", "Value", "Allow", "Allow"),
+                crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\broadFileSystemAccess", "Value", "Allow", "Allow"),
             ]),
         },
         crate::tweak! {
@@ -3152,36 +1431,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
             description: "Blocks apps from using eye tracking devices.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\gazeInput",
-                    value_name: "Value",
-                    value: RegistryValue::String("Deny"),
-                    stock_value: RegistryValue::String("Allow"),
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\gazeInput",
-                    value_name: "Value",
-                    value: RegistryValue::String("Deny"),
-                    stock_value: RegistryValue::String("Allow"),
-                },
+                crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\gazeInput", "Value", "Deny", "Allow"),
+                crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\gazeInput", "Value", "Deny", "Allow"),
             ],
             disabled_ops: Some(&[
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\gazeInput",
-                    value_name: "Value",
-                    value: RegistryValue::String("Allow"),
-                    stock_value: RegistryValue::String("Allow"),
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\gazeInput",
-                    value_name: "Value",
-                    value: RegistryValue::String("Allow"),
-                    stock_value: RegistryValue::String("Allow"),
-                },
+                crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\gazeInput", "Value", "Allow", "Allow"),
+                crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\gazeInput", "Value", "Allow", "Allow"),
             ]),
         },
         crate::tweak! {
@@ -3191,36 +1446,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
             description: "Blocks apps from using cellular data.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\cellularData",
-                    value_name: "Value",
-                    value: RegistryValue::String("Deny"),
-                    stock_value: RegistryValue::String("Allow"),
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\cellularData",
-                    value_name: "Value",
-                    value: RegistryValue::String("Deny"),
-                    stock_value: RegistryValue::String("Allow"),
-                },
+                crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\cellularData", "Value", "Deny", "Allow"),
+                crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\cellularData", "Value", "Deny", "Allow"),
             ],
             disabled_ops: Some(&[
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\cellularData",
-                    value_name: "Value",
-                    value: RegistryValue::String("Allow"),
-                    stock_value: RegistryValue::String("Allow"),
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\cellularData",
-                    value_name: "Value",
-                    value: RegistryValue::String("Allow"),
-                    stock_value: RegistryValue::String("Allow"),
-                },
+                crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\cellularData", "Value", "Allow", "Allow"),
+                crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\cellularData", "Value", "Allow", "Allow"),
             ]),
         },
         crate::tweak! {
@@ -3230,36 +1461,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
             description: "Blocks apps from syncing with Bluetooth devices.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\bluetoothSync",
-                    value_name: "Value",
-                    value: RegistryValue::String("Deny"),
-                    stock_value: RegistryValue::String("Allow"),
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\bluetoothSync",
-                    value_name: "Value",
-                    value: RegistryValue::String("Deny"),
-                    stock_value: RegistryValue::String("Allow"),
-                },
+                crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\bluetoothSync", "Value", "Deny", "Allow"),
+                crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\bluetoothSync", "Value", "Deny", "Allow"),
             ],
             disabled_ops: Some(&[
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\bluetoothSync",
-                    value_name: "Value",
-                    value: RegistryValue::String("Allow"),
-                    stock_value: RegistryValue::String("Allow"),
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\bluetoothSync",
-                    value_name: "Value",
-                    value: RegistryValue::String("Allow"),
-                    stock_value: RegistryValue::String("Allow"),
-                },
+                crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\bluetoothSync", "Value", "Allow", "Allow"),
+                crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\bluetoothSync", "Value", "Allow", "Allow"),
             ]),
         },
         crate::tweak! {
@@ -3269,10 +1476,10 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
             description: "Disables 'Insights' features for typing and input.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCU", subkey: r"Software\Microsoft\input\Settings", value_name: "InsightsEnabled", value: RegistryValue::Dword(0), stock_value: RegistryValue::Dword(1) },
+                crate::reg_dword!("HKCU", r"Software\Microsoft\input\Settings", "InsightsEnabled", 0, 1),
             ],
             disabled_ops: Some(&[
-                RegistryOp { hkey: "HKCU", subkey: r"Software\Microsoft\input\Settings", value_name: "InsightsEnabled", value: RegistryValue::Dword(1), stock_value: RegistryValue::Dword(1) },
+                crate::reg_dword!("HKCU", r"Software\Microsoft\input\Settings", "InsightsEnabled", 1, 1),
             ]),
         },
         crate::tweak! {
@@ -3282,12 +1489,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
             description: "Prevents Windows from implicitly collecting inking and typing data.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCU", subkey: r"Software\Microsoft\InputPersonalization", value_name: "RestrictImplicitTextCollection", value: RegistryValue::Dword(1), stock_value: RegistryValue::Dword(0) },
-                RegistryOp { hkey: "HKCU", subkey: r"Software\Microsoft\InputPersonalization", value_name: "RestrictImplicitInkCollection", value: RegistryValue::Dword(1), stock_value: RegistryValue::Dword(0) },
+                crate::reg_dword!("HKCU", r"Software\Microsoft\InputPersonalization", "RestrictImplicitTextCollection", 1, 0),
+                crate::reg_dword!("HKCU", r"Software\Microsoft\InputPersonalization", "RestrictImplicitInkCollection", 1, 0),
             ],
             disabled_ops: Some(&[
-                RegistryOp { hkey: "HKCU", subkey: r"Software\Microsoft\InputPersonalization", value_name: "RestrictImplicitTextCollection", value: RegistryValue::Dword(0), stock_value: RegistryValue::Dword(0) },
-                RegistryOp { hkey: "HKCU", subkey: r"Software\Microsoft\InputPersonalization", value_name: "RestrictImplicitInkCollection", value: RegistryValue::Dword(0), stock_value: RegistryValue::Dword(0) },
+                crate::reg_dword!("HKCU", r"Software\Microsoft\InputPersonalization", "RestrictImplicitTextCollection", 0, 0),
+                crate::reg_dword!("HKCU", r"Software\Microsoft\InputPersonalization", "RestrictImplicitInkCollection", 0, 0),
             ]),
         },
         crate::tweak! {
@@ -3297,10 +1504,10 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
             description: "Disables usage tracking in the legacy Windows Media Player.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCU", subkey: r"Software\Microsoft\MediaPlayer\Preferences", value_name: "UsageTracking", value: RegistryValue::Dword(0), stock_value: RegistryValue::Dword(1) },
+                crate::reg_dword!("HKCU", r"Software\Microsoft\MediaPlayer\Preferences", "UsageTracking", 0, 1),
             ],
             disabled_ops: Some(&[
-                RegistryOp { hkey: "HKCU", subkey: r"Software\Microsoft\MediaPlayer\Preferences", value_name: "UsageTracking", value: RegistryValue::Dword(1), stock_value: RegistryValue::Dword(1) },
+                crate::reg_dword!("HKCU", r"Software\Microsoft\MediaPlayer\Preferences", "UsageTracking", 1, 1),
             ]),
         },
         crate::tweak! {
@@ -3310,10 +1517,10 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
             description: "Disables telemetry in Visual Studio.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCU", subkey: r"Software\Microsoft\VisualStudio\Telemetry", value_name: "TurnOffSwitch", value: RegistryValue::Dword(1), stock_value: RegistryValue::Delete },
+                crate::reg_dword!("HKCU", r"Software\Microsoft\VisualStudio\Telemetry", "TurnOffSwitch", 1),
             ],
             disabled_ops: Some(&[
-                RegistryOp { hkey: "HKCU", subkey: r"Software\Microsoft\VisualStudio\Telemetry", value_name: "TurnOffSwitch", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
+                crate::reg_del!("HKCU", r"Software\Microsoft\VisualStudio\Telemetry", "TurnOffSwitch", RegistryValue::Delete),
             ]),
         },
         crate::tweak! {
@@ -3323,27 +1530,14 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
             description: "Disables feedback surveys and other feedback mechanisms in Microsoft Office.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCU", subkey: r"Software\Policies\Microsoft\office\16.0\common\feedback", value_name: "Enabled", value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete },
-                RegistryOp { hkey: "HKCU", subkey: r"Software\Policies\Microsoft\office\16.0\common\feedback", value_name: "SurveyEnabled", value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete },
-                RegistryOp { hkey: "HKCU", subkey: r"Software\Policies\Microsoft\office\16.0\common\feedback", value_name: "IncludeEmail", value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete },
+                crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\office\16.0\common\feedback", "Enabled", 0),
+                crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\office\16.0\common\feedback", "SurveyEnabled", 0),
+                crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\office\16.0\common\feedback", "IncludeEmail", 0),
             ],
             disabled_ops: Some(&[
-                RegistryOp { hkey: "HKCU", subkey: r"Software\Policies\Microsoft\office\16.0\common\feedback", value_name: "Enabled", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                RegistryOp { hkey: "HKCU", subkey: r"Software\Policies\Microsoft\office\16.0\common\feedback", value_name: "SurveyEnabled", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                RegistryOp { hkey: "HKCU", subkey: r"Software\Policies\Microsoft\office\16.0\common\feedback", value_name: "IncludeEmail", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-            ]),
-        },
-        crate::tweak! {
-            id: "disable_copilot_policy",
-            category: "privacy",
-            name: "Disable Windows Copilot (Policy)",
-            description: "Disables Windows Copilot features via Group Policy registry key.",
-            effect: TweakEffect::Logoff,
-            enabled_ops: &[
-                RegistryOp { hkey: "HKCU", subkey: r"Software\Policies\Microsoft\Windows\windowscopilot", value_name: "TurnOffWindowsCopilot", value: RegistryValue::Dword(1), stock_value: RegistryValue::Delete },
-            ],
-            disabled_ops: Some(&[
-                RegistryOp { hkey: "HKCU", subkey: r"Software\Policies\Microsoft\Windows\windowscopilot", value_name: "TurnOffWindowsCopilot", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
+                crate::reg_del!("HKCU", r"Software\Policies\Microsoft\office\16.0\common\feedback", "Enabled", RegistryValue::Delete),
+                crate::reg_del!("HKCU", r"Software\Policies\Microsoft\office\16.0\common\feedback", "SurveyEnabled", RegistryValue::Delete),
+                crate::reg_del!("HKCU", r"Software\Policies\Microsoft\office\16.0\common\feedback", "IncludeEmail", RegistryValue::Delete),
             ]),
         },
         crate::tweak! {
@@ -3353,12 +1547,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
             description: "Prevents Windows from asking for feedback via popups.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCU", subkey: r"Software\Microsoft\Siuf\rules", value_name: "NumberOfSIUFInPeriod", value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete },
-                RegistryOp { hkey: "HKLM", subkey: r"Software\Microsoft\Siuf\rules", value_name: "NumberOfSIUFInPeriod", value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete },
+                crate::reg_dword!("HKCU", r"Software\Microsoft\Siuf\rules", "NumberOfSIUFInPeriod", 0),
+                crate::reg_dword!("HKLM", r"Software\Microsoft\Siuf\rules", "NumberOfSIUFInPeriod", 0),
             ],
             disabled_ops: Some(&[
-                RegistryOp { hkey: "HKCU", subkey: r"Software\Microsoft\Siuf\rules", value_name: "NumberOfSIUFInPeriod", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                RegistryOp { hkey: "HKLM", subkey: r"Software\Microsoft\Siuf\rules", value_name: "NumberOfSIUFInPeriod", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
+                crate::reg_del!("HKCU", r"Software\Microsoft\Siuf\rules", "NumberOfSIUFInPeriod", RegistryValue::Delete),
+                crate::reg_del!("HKLM", r"Software\Microsoft\Siuf\rules", "NumberOfSIUFInPeriod", RegistryValue::Delete),
             ]),
         },
         crate::tweak! {
@@ -3368,10 +1562,10 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
             description: "Disables cloud-based push notifications from installed applications.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKLM", subkey: r"Software\Microsoft\Windows\CurrentVersion\PushNotifications", value_name: "NoCloudApplicationNotification", value: RegistryValue::Dword(1), stock_value: RegistryValue::Dword(0) },
+                crate::reg_dword!("HKLM", r"Software\Microsoft\Windows\CurrentVersion\PushNotifications", "NoCloudApplicationNotification", 1, 0),
             ],
             disabled_ops: Some(&[
-                RegistryOp { hkey: "HKLM", subkey: r"Software\Microsoft\Windows\CurrentVersion\PushNotifications", value_name: "NoCloudApplicationNotification", value: RegistryValue::Dword(0), stock_value: RegistryValue::Dword(0) },
+                crate::reg_dword!("HKLM", r"Software\Microsoft\Windows\CurrentVersion\PushNotifications", "NoCloudApplicationNotification", 0, 0),
             ]),
         },
         crate::tweak! {
@@ -3381,14 +1575,14 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
             description: "Prevents apps from running in the background to save resources and improve privacy.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\Windows\appprivacy", value_name: "LetAppsRunInBackground", value: RegistryValue::Dword(2), stock_value: RegistryValue::Delete },
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\Windows\appprivacy", value_name: "LetAppsActivateWithVoice", value: RegistryValue::Dword(2), stock_value: RegistryValue::Delete },
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\Windows\appprivacy", value_name: "LetAppsSyncWithDevices", value: RegistryValue::Dword(2), stock_value: RegistryValue::Delete },
+                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\appprivacy", "LetAppsRunInBackground", 2),
+                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\appprivacy", "LetAppsActivateWithVoice", 2),
+                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\appprivacy", "LetAppsSyncWithDevices", 2),
             ],
             disabled_ops: Some(&[
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\Windows\appprivacy", value_name: "LetAppsRunInBackground", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\Windows\appprivacy", value_name: "LetAppsActivateWithVoice", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\Windows\appprivacy", value_name: "LetAppsSyncWithDevices", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
+                crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\appprivacy", "LetAppsRunInBackground", RegistryValue::Delete),
+                crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\appprivacy", "LetAppsActivateWithVoice", RegistryValue::Delete),
+                crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\appprivacy", "LetAppsSyncWithDevices", RegistryValue::Delete),
             ]),
         },
         crate::tweak! {
@@ -3398,16 +1592,16 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
             description: "Disables Windows Location Services and prevents apps from accessing location.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\Windows\locationandsensors", value_name: "DisableLocation", value: RegistryValue::Dword(1), stock_value: RegistryValue::Delete },
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\Windows\locationandsensors", value_name: "DisableSensors", value: RegistryValue::Dword(1), stock_value: RegistryValue::Delete },
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\Windows\locationandsensors", value_name: "DisableWindowsLocationProvider", value: RegistryValue::Dword(1), stock_value: RegistryValue::Delete },
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\Windows\locationandsensors", value_name: "DisableLocationScripting", value: RegistryValue::Dword(1), stock_value: RegistryValue::Delete },
+                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\locationandsensors", "DisableLocation", 1),
+                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\locationandsensors", "DisableSensors", 1),
+                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\locationandsensors", "DisableWindowsLocationProvider", 1),
+                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\locationandsensors", "DisableLocationScripting", 1),
             ],
             disabled_ops: Some(&[
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\Windows\locationandsensors", value_name: "DisableLocation", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\Windows\locationandsensors", value_name: "DisableSensors", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\Windows\locationandsensors", value_name: "DisableWindowsLocationProvider", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\Windows\locationandsensors", value_name: "DisableLocationScripting", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
+                crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\locationandsensors", "DisableLocation", RegistryValue::Delete),
+                crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\locationandsensors", "DisableSensors", RegistryValue::Delete),
+                crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\locationandsensors", "DisableWindowsLocationProvider", RegistryValue::Delete),
+                crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\locationandsensors", "DisableLocationScripting", RegistryValue::Delete),
             ]),
         },
         crate::tweak! {
@@ -3417,10 +1611,10 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
             description: "Disables the Device Health Attestation service.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\devicehealthattestationservice", value_name: "EnableDeviceHealthAttestationService", value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete },
+                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\devicehealthattestationservice", "EnableDeviceHealthAttestationService", 0),
             ],
             disabled_ops: Some(&[
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\devicehealthattestationservice", value_name: "EnableDeviceHealthAttestationService", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
+                crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\devicehealthattestationservice", "EnableDeviceHealthAttestationService", RegistryValue::Delete),
             ]),
         },
         crate::tweak! {
@@ -3429,20 +1623,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
             name: "Disable Windows Recall",
             description: "Disables Windows Recall AI feature which captures screenshots and analyzes activity.",
             effect: TweakEffect::Restart,
-            enabled_ops: &[RegistryOp {
-                hkey: "HKLM",
-                subkey: r"SOFTWARE\Policies\Microsoft\Windows\WindowsAI",
-                value_name: "AllowRecallEnablement",
-                value: RegistryValue::Dword(0),
-                stock_value: RegistryValue::Delete
-            }],
-            disabled_ops: Some(&[RegistryOp {
-                hkey: "HKLM",
-                subkey: r"SOFTWARE\Policies\Microsoft\Windows\WindowsAI",
-                value_name: "AllowRecallEnablement",
-                value: RegistryValue::Delete,
-                stock_value: RegistryValue::Delete
-            }]),
+            enabled_ops: &[
+                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\WindowsAI", "AllowRecallEnablement", 0),
+            ],
+            disabled_ops: Some(&[
+                crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\WindowsAI", "AllowRecallEnablement", RegistryValue::Delete),
+            ]),
             requires_restart: true
         },
         crate::tweak! {
@@ -3452,36 +1638,12 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
             description: "Disables AI-powered data analysis features.",
             effect: TweakEffect::Restart,
             enabled_ops: &[
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"SOFTWARE\Policies\Microsoft\Windows\WindowsAI",
-                    value_name: "DisableAIDataAnalysis",
-                    value: RegistryValue::Dword(1),
-                    stock_value: RegistryValue::Delete
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Policies\Microsoft\Windows\WindowsAI",
-                    value_name: "DisableAIDataAnalysis",
-                    value: RegistryValue::Dword(1),
-                    stock_value: RegistryValue::Delete
-                },
+                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\WindowsAI", "DisableAIDataAnalysis", 1),
+                crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Windows\WindowsAI", "DisableAIDataAnalysis", 1),
             ],
             disabled_ops: Some(&[
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"SOFTWARE\Policies\Microsoft\Windows\WindowsAI",
-                    value_name: "DisableAIDataAnalysis",
-                    value: RegistryValue::Delete,
-                    stock_value: RegistryValue::Delete
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Policies\Microsoft\Windows\WindowsAI",
-                    value_name: "DisableAIDataAnalysis",
-                    value: RegistryValue::Delete,
-                    stock_value: RegistryValue::Delete
-                },
+                crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\WindowsAI", "DisableAIDataAnalysis", RegistryValue::Delete),
+                crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Windows\WindowsAI", "DisableAIDataAnalysis", RegistryValue::Delete),
             ]),
             requires_restart: true
         },
@@ -3492,22 +1654,10 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
             description: "Disables the Now Playing Session Manager service (NPSMsvc), which tracks media sessions.",
             effect: TweakEffect::Restart,
             enabled_ops: &[
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"SYSTEM\CurrentControlSet\Services\NPSMSvc",
-                    value_name: "Start",
-                    value: RegistryValue::Dword(4),
-                    stock_value: RegistryValue::Dword(3),
-                },
+                crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Services\NPSMSvc", "Start", 4, 3),
             ],
             disabled_ops: Some(&[
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"SYSTEM\CurrentControlSet\Services\NPSMSvc",
-                    value_name: "Start",
-                    value: RegistryValue::Dword(3),
-                    stock_value: RegistryValue::Dword(3),
-                },
+                crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Services\NPSMSvc", "Start", 3, 3),
             ]),
             requires_restart: true,
         },

@@ -1,6 +1,6 @@
 // Accessibility tweaks
 
-use super::{RegistryOp, RegistryValue, Tweak, TweakEffect};
+use super::{Tweak, TweakEffect};
 
 pub static ACCESSIBILITY_TWEAKS: &[Tweak] = &[
         crate::tweak! {
@@ -10,36 +10,12 @@ pub static ACCESSIBILITY_TWEAKS: &[Tweak] = &[
             description: "Disables sounds when turning sticky keys, toggle keys, or filter keys on/off.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Control Panel\Accessibility",
-                    value_name: "Sound on Activation",
-                    value: RegistryValue::Dword(0),
-                    stock_value: RegistryValue::Dword(1), // Default is usually ON (1) or system dependent
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Control Panel\Accessibility",
-                    value_name: "Warning Sounds",
-                    value: RegistryValue::Dword(0),
-                    stock_value: RegistryValue::Dword(1),
-                },
+                crate::reg_dword!("HKCU", r"Control Panel\Accessibility", "Sound on Activation", 0, 1),
+                crate::reg_dword!("HKCU", r"Control Panel\Accessibility", "Warning Sounds", 0, 1),
             ],
             disabled_ops: Some(&[
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Control Panel\Accessibility",
-                    value_name: "Sound on Activation",
-                    value: RegistryValue::Dword(1),
-                    stock_value: RegistryValue::Dword(1),
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Control Panel\Accessibility",
-                    value_name: "Warning Sounds",
-                    value: RegistryValue::Dword(1),
-                    stock_value: RegistryValue::Dword(1),
-                },
+                crate::reg_dword!("HKCU", r"Control Panel\Accessibility", "Sound on Activation", 1, 1),
+                crate::reg_dword!("HKCU", r"Control Panel\Accessibility", "Warning Sounds", 1, 1),
             ]),
         },
         crate::tweak! {
@@ -49,13 +25,7 @@ pub static ACCESSIBILITY_TWEAKS: &[Tweak] = &[
             description: "Sets High Contrast flags to 4194 (Custom optimized value).",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Control Panel\Accessibility\HighContrast",
-                    value_name: "Flags",
-                    value: RegistryValue::String("4194"),
-                    stock_value: RegistryValue::String("4222"), // Common default, verify?
-                },
+                crate::reg_str!("HKCU", r"Control Panel\Accessibility\HighContrast", "Flags", "4194", "4222"),
             ],
             disabled_ops: None, // Hard to revert to unknown default without capturing it
         },
@@ -66,13 +36,7 @@ pub static ACCESSIBILITY_TWEAKS: &[Tweak] = &[
             description: "Sets Keyboard Response flags to 2.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Control Panel\Accessibility\Keyboard Response",
-                    value_name: "Flags",
-                    value: RegistryValue::String("2"),
-                    stock_value: RegistryValue::String("126"), // Common default
-                },
+                crate::reg_str!("HKCU", r"Control Panel\Accessibility\Keyboard Response", "Flags", "2", "126"),
             ],
             disabled_ops: None,
         },
@@ -83,13 +47,7 @@ pub static ACCESSIBILITY_TWEAKS: &[Tweak] = &[
             description: "Sets Mouse Keys flags to 2.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Control Panel\Accessibility\MouseKeys",
-                    value_name: "Flags",
-                    value: RegistryValue::String("2"),
-                    stock_value: RegistryValue::String("62"), // Common default
-                },
+                crate::reg_str!("HKCU", r"Control Panel\Accessibility\MouseKeys", "Flags", "2", "62"),
             ],
             disabled_ops: None,
         },
@@ -100,13 +58,7 @@ pub static ACCESSIBILITY_TWEAKS: &[Tweak] = &[
             description: "Sets Sticky Keys flags to 2 (Disabled).",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Control Panel\Accessibility\StickyKeys",
-                    value_name: "Flags",
-                    value: RegistryValue::String("2"),
-                    stock_value: RegistryValue::String("510"), // Common default
-                },
+                crate::reg_str!("HKCU", r"Control Panel\Accessibility\StickyKeys", "Flags", "2", "510"),
             ],
             disabled_ops: None,
         },
@@ -117,13 +69,7 @@ pub static ACCESSIBILITY_TWEAKS: &[Tweak] = &[
             description: "Sets Toggle Keys flags to 34.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Control Panel\Accessibility\ToggleKeys",
-                    value_name: "Flags",
-                    value: RegistryValue::String("34"),
-                    stock_value: RegistryValue::String("62"), // Common default
-                },
+                crate::reg_str!("HKCU", r"Control Panel\Accessibility\ToggleKeys", "Flags", "34", "62"),
             ],
             disabled_ops: None,
         },
@@ -134,20 +80,8 @@ pub static ACCESSIBILITY_TWEAKS: &[Tweak] = &[
             description: "Disables SlateLaunch (Accessibility on tablet).",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Control Panel\Accessibility\SlateLaunch",
-                    value_name: "LaunchAT",
-                    value: RegistryValue::Dword(0),
-                    stock_value: RegistryValue::Dword(1),
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Control Panel\Accessibility\SlateLaunch",
-                    value_name: "ATapp",
-                    value: RegistryValue::String(""),
-                    stock_value: RegistryValue::String("narrator.exe"), // Often narrator
-                },
+                crate::reg_dword!("HKCU", r"Control Panel\Accessibility\SlateLaunch", "LaunchAT", 0, 1),
+                crate::reg_str!("HKCU", r"Control Panel\Accessibility\SlateLaunch", "ATapp", "", "narrator.exe"),
             ],
             disabled_ops: None,
         },

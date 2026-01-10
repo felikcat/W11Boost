@@ -1,6 +1,6 @@
 // Power & Sleep tweaks
 
-use super::{RegistryOp, RegistryValue, Tweak, TweakEffect};
+use super::{RegistryValue, Tweak, TweakEffect};
 
 pub static POWER_TWEAKS: &[Tweak] = &[
         crate::tweak! {
@@ -9,20 +9,12 @@ pub static POWER_TWEAKS: &[Tweak] = &[
                 name: "Disable Hibernation",
                 description: "Globally disables hibernation and removes hiberfil.sys.",
                 effect: TweakEffect::Restart,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SYSTEM\CurrentControlSet\Control\Power",
-                        value_name: "HibernateEnabledDefault",
-                        value: RegistryValue::Dword(0),
-                        stock_value: RegistryValue::Dword(1)
-        }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SYSTEM\CurrentControlSet\Control\Power",
-                        value_name: "HibernateEnabledDefault",
-                        value: RegistryValue::Dword(1),
-                        stock_value: RegistryValue::Dword(1)
-        }]),
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Control\Power", "HibernateEnabledDefault", 0, 1),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Control\Power", "HibernateEnabledDefault", 1, 1),
+                ]),
                 requires_restart: true
         },
         crate::tweak! {
@@ -32,36 +24,12 @@ pub static POWER_TWEAKS: &[Tweak] = &[
                 description: "Disables hybrid sleep mode on both battery and AC power.",
                 effect: TweakEffect::Restart,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"Software\Policies\Microsoft\Power\PowerSettings\94ac6d29-73ce-41a6-809f-6363ba21b47e",
-                                value_name: "DCSettingIndex",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"Software\Policies\Microsoft\Power\PowerSettings\94ac6d29-73ce-41a6-809f-6363ba21b47e",
-                                value_name: "ACSettingIndex",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_dword!("HKLM", r"Software\Policies\Microsoft\Power\PowerSettings\94ac6d29-73ce-41a6-809f-6363ba21b47e", "DCSettingIndex", 0),
+                        crate::reg_dword!("HKLM", r"Software\Policies\Microsoft\Power\PowerSettings\94ac6d29-73ce-41a6-809f-6363ba21b47e", "ACSettingIndex", 0),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"Software\Policies\Microsoft\Power\PowerSettings\94ac6d29-73ce-41a6-809f-6363ba21b47e",
-                                value_name: "DCSettingIndex",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"Software\Policies\Microsoft\Power\PowerSettings\94ac6d29-73ce-41a6-809f-6363ba21b47e",
-                                value_name: "ACSettingIndex",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_del!("HKLM", r"Software\Policies\Microsoft\Power\PowerSettings\94ac6d29-73ce-41a6-809f-6363ba21b47e", "DCSettingIndex", RegistryValue::Delete),
+                        crate::reg_del!("HKLM", r"Software\Policies\Microsoft\Power\PowerSettings\94ac6d29-73ce-41a6-809f-6363ba21b47e", "ACSettingIndex", RegistryValue::Delete),
                 ]),
                 requires_restart: true
         },
@@ -72,36 +40,12 @@ pub static POWER_TWEAKS: &[Tweak] = &[
                 description: "Prevents system from sleeping when idle (both battery and AC).",
                 effect: TweakEffect::Restart,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"Software\Policies\Microsoft\Power\PowerSettings\29F6C1DB-86DA-48C5-9FDB-F2B67B1F44DA",
-                                value_name: "DCSettingIndex",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"Software\Policies\Microsoft\Power\PowerSettings\29F6C1DB-86DA-48C5-9FDB-F2B67B1F44DA",
-                                value_name: "ACSettingIndex",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_dword!("HKLM", r"Software\Policies\Microsoft\Power\PowerSettings\29F6C1DB-86DA-48C5-9FDB-F2B67B1F44DA", "DCSettingIndex", 0),
+                        crate::reg_dword!("HKLM", r"Software\Policies\Microsoft\Power\PowerSettings\29F6C1DB-86DA-48C5-9FDB-F2B67B1F44DA", "ACSettingIndex", 0),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"Software\Policies\Microsoft\Power\PowerSettings\29F6C1DB-86DA-48C5-9FDB-F2B67B1F44DA",
-                                value_name: "DCSettingIndex",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"Software\Policies\Microsoft\Power\PowerSettings\29F6C1DB-86DA-48C5-9FDB-F2B67B1F44DA",
-                                value_name: "ACSettingIndex",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_del!("HKLM", r"Software\Policies\Microsoft\Power\PowerSettings\29F6C1DB-86DA-48C5-9FDB-F2B67B1F44DA", "DCSettingIndex", RegistryValue::Delete),
+                        crate::reg_del!("HKLM", r"Software\Policies\Microsoft\Power\PowerSettings\29F6C1DB-86DA-48C5-9FDB-F2B67B1F44DA", "ACSettingIndex", RegistryValue::Delete),
                 ]),
                 requires_restart: true
         },
@@ -112,36 +56,12 @@ pub static POWER_TWEAKS: &[Tweak] = &[
                 description: "Prevents system from hibernating when idle (both battery and AC).",
                 effect: TweakEffect::Restart,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"Software\Policies\Microsoft\Power\PowerSettings\9D7815A6-7EE4-497E-8888-515A05F02364",
-                                value_name: "DCSettingIndex",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"Software\Policies\Microsoft\Power\PowerSettings\9D7815A6-7EE4-497E-8888-515A05F02364",
-                                value_name: "ACSettingIndex",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_dword!("HKLM", r"Software\Policies\Microsoft\Power\PowerSettings\9D7815A6-7EE4-497E-8888-515A05F02364", "DCSettingIndex", 0),
+                        crate::reg_dword!("HKLM", r"Software\Policies\Microsoft\Power\PowerSettings\9D7815A6-7EE4-497E-8888-515A05F02364", "ACSettingIndex", 0),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"Software\Policies\Microsoft\Power\PowerSettings\9D7815A6-7EE4-497E-8888-515A05F02364",
-                                value_name: "DCSettingIndex",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"Software\Policies\Microsoft\Power\PowerSettings\9D7815A6-7EE4-497E-8888-515A05F02364",
-                                value_name: "ACSettingIndex",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_del!("HKLM", r"Software\Policies\Microsoft\Power\PowerSettings\9D7815A6-7EE4-497E-8888-515A05F02364", "DCSettingIndex", RegistryValue::Delete),
+                        crate::reg_del!("HKLM", r"Software\Policies\Microsoft\Power\PowerSettings\9D7815A6-7EE4-497E-8888-515A05F02364", "ACSettingIndex", RegistryValue::Delete),
                 ]),
                 requires_restart: true
         },
@@ -152,36 +72,12 @@ pub static POWER_TWEAKS: &[Tweak] = &[
                 description: "Prevents sleep during unattended system sessions.",
                 effect: TweakEffect::Restart,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"Software\Policies\Microsoft\Power\PowerSettings\7bc4a2f9-d8fc-4469-b07b-33eb785aaca0",
-                                value_name: "DCSettingIndex",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"Software\Policies\Microsoft\Power\PowerSettings\7bc4a2f9-d8fc-4469-b07b-33eb785aaca0",
-                                value_name: "ACSettingIndex",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_dword!("HKLM", r"Software\Policies\Microsoft\Power\PowerSettings\7bc4a2f9-d8fc-4469-b07b-33eb785aaca0", "DCSettingIndex", 0),
+                        crate::reg_dword!("HKLM", r"Software\Policies\Microsoft\Power\PowerSettings\7bc4a2f9-d8fc-4469-b07b-33eb785aaca0", "ACSettingIndex", 0),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"Software\Policies\Microsoft\Power\PowerSettings\7bc4a2f9-d8fc-4469-b07b-33eb785aaca0",
-                                value_name: "DCSettingIndex",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"Software\Policies\Microsoft\Power\PowerSettings\7bc4a2f9-d8fc-4469-b07b-33eb785aaca0",
-                                value_name: "ACSettingIndex",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_del!("HKLM", r"Software\Policies\Microsoft\Power\PowerSettings\7bc4a2f9-d8fc-4469-b07b-33eb785aaca0", "DCSettingIndex", RegistryValue::Delete),
+                        crate::reg_del!("HKLM", r"Software\Policies\Microsoft\Power\PowerSettings\7bc4a2f9-d8fc-4469-b07b-33eb785aaca0", "ACSettingIndex", RegistryValue::Delete),
                 ]),
                 requires_restart: true
         },
@@ -191,20 +87,12 @@ pub static POWER_TWEAKS: &[Tweak] = &[
                 name: "Hide Hibernate in Power Menu",
                 description: "Removes the Hibernate option from the Start Menu power options.",
                 effect: TweakEffect::Immediate,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings",
-                        value_name: "ShowHibernateOption",
-                        value: RegistryValue::Dword(0),
-                        stock_value: RegistryValue::Delete
-        }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings",
-                        value_name: "ShowHibernateOption",
-                        value: RegistryValue::Dword(1),
-                        stock_value: RegistryValue::Dword(1)
-        }])
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings", "ShowHibernateOption", 0),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings", "ShowHibernateOption", 1, 1),
+                ])
         },
         crate::tweak! {
                 id: "hide_sleep_option",
@@ -212,20 +100,12 @@ pub static POWER_TWEAKS: &[Tweak] = &[
                 name: "Hide Sleep in Power Menu",
                 description: "Removes the Sleep option from the Start Menu power options.",
                 effect: TweakEffect::Immediate,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings",
-                        value_name: "ShowSleepOption",
-                        value: RegistryValue::Dword(0),
-                        stock_value: RegistryValue::Delete
-        }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings",
-                        value_name: "ShowSleepOption",
-                        value: RegistryValue::Dword(1),
-                        stock_value: RegistryValue::Dword(1)
-        }])
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings", "ShowSleepOption", 0),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings", "ShowSleepOption", 1, 1),
+                ])
         },
         crate::tweak! {
                 id: "disable_fast_startup",
@@ -234,36 +114,12 @@ pub static POWER_TWEAKS: &[Tweak] = &[
                 description: "Disables Fast Startup (hybrid boot) for cleaner shutdowns.",
                 effect: TweakEffect::Restart,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SYSTEM\CurrentControlSet\Control\Session Manager\Power",
-                                value_name: "HiberbootEnabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Dword(1)
-        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\System",
-                                value_name: "HiberbootEnabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Control\Session Manager\Power", "HiberbootEnabled", 0, 1),
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\System", "HiberbootEnabled", 0),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SYSTEM\CurrentControlSet\Control\Session Manager\Power",
-                                value_name: "HiberbootEnabled",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Dword(1)
-        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Windows\System",
-                                value_name: "HiberbootEnabled",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Control\Session Manager\Power", "HiberbootEnabled", 1, 1),
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\System", "HiberbootEnabled", RegistryValue::Delete),
                 ]),
                 requires_restart: true
         },
@@ -274,14 +130,14 @@ pub static POWER_TWEAKS: &[Tweak] = &[
                 description: "Removes the Lock option from the account picture and power menus.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Microsoft\PolicyManager\default\Start\HideLock", value_name: "value", value: RegistryValue::Dword(1), stock_value: RegistryValue::Dword(0) },
-                        RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings", value_name: "ShowLockOption", value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete },
-                        RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\Windows\Explorer", value_name: "ShowLockOption", value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete },
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\PolicyManager\default\Start\HideLock", "value", 1, 0),
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings", "ShowLockOption", 0),
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Explorer", "ShowLockOption", 0),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Microsoft\PolicyManager\default\Start\HideLock", value_name: "value", value: RegistryValue::Dword(0), stock_value: RegistryValue::Dword(0) },
-                        RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings", value_name: "ShowLockOption", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                        RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\Windows\Explorer", value_name: "ShowLockOption", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\PolicyManager\default\Start\HideLock", "value", 0, 0),
+                        crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings", "ShowLockOption", RegistryValue::Delete),
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Explorer", "ShowLockOption", RegistryValue::Delete),
                 ])
         },
         crate::tweak! {
@@ -290,20 +146,12 @@ pub static POWER_TWEAKS: &[Tweak] = &[
             name: "Enable Fast Shutdown",
             description: "Reduces the time Windows waits for services to stop during shutdown.",
             effect: TweakEffect::Immediate,
-            enabled_ops: &[RegistryOp {
-                hkey: "HKLM",
-                subkey: r"SYSTEM\CurrentControlSet\Control",
-                value_name: "WaitToKillServiceTimeout",
-                value: RegistryValue::String("2000"), // 2 seconds
-                stock_value: RegistryValue::String("5000") // Default is usually 5000 (5s)
-            }],
-            disabled_ops: Some(&[RegistryOp {
-                hkey: "HKLM",
-                subkey: r"SYSTEM\CurrentControlSet\Control",
-                value_name: "WaitToKillServiceTimeout",
-                value: RegistryValue::String("5000"),
-                stock_value: RegistryValue::String("5000")
-            }]),
+            enabled_ops: &[
+                crate::reg_str!("HKLM", r"SYSTEM\CurrentControlSet\Control", "WaitToKillServiceTimeout", "2000", "5000"),
+            ],
+            disabled_ops: Some(&[
+                crate::reg_str!("HKLM", r"SYSTEM\CurrentControlSet\Control", "WaitToKillServiceTimeout", "5000", "5000"),
+            ]),
         },
         crate::tweak! {
             id: "toggle_screensaver",
@@ -312,12 +160,12 @@ pub static POWER_TWEAKS: &[Tweak] = &[
             description: "Enables or disables the screen saver and sign-in on resume.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp { hkey: "HKCU", subkey: r"Control Panel\Desktop", value_name: "SCRNSAVE.EXE", value: RegistryValue::Delete, stock_value: RegistryValue::String(r"C:\Windows\System32\scrnsave.scr") },
-                RegistryOp { hkey: "HKCU", subkey: r"Control Panel\Desktop", value_name: "ScreenSaverIsSecure", value: RegistryValue::String("0"), stock_value: RegistryValue::String("1") },
+                crate::reg_del!("HKCU", r"Control Panel\Desktop", "SCRNSAVE.EXE", RegistryValue::String(r"C:\Windows\System32\scrnsave.scr")),
+                crate::reg_str!("HKCU", r"Control Panel\Desktop", "ScreenSaverIsSecure", "0", "1"),
             ],
             disabled_ops: Some(&[
-                RegistryOp { hkey: "HKCU", subkey: r"Control Panel\Desktop", value_name: "SCRNSAVE.EXE", value: RegistryValue::String(r"C:\Windows\System32\scrnsave.scr"), stock_value: RegistryValue::Delete },
-                RegistryOp { hkey: "HKCU", subkey: r"Control Panel\Desktop", value_name: "ScreenSaverIsSecure", value: RegistryValue::String("1"), stock_value: RegistryValue::String("0") },
+                crate::reg_str!("HKCU", r"Control Panel\Desktop", "SCRNSAVE.EXE", r"C:\Windows\System32\scrnsave.scr", RegistryValue::Delete),
+                crate::reg_str!("HKCU", r"Control Panel\Desktop", "ScreenSaverIsSecure", "1", "0"),
             ]),
         },
 ];

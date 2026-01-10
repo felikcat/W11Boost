@@ -1,6 +1,6 @@
 // Boot & Logon tweaks
 
-use super::{RegistryOp, RegistryValue, Tweak, TweakEffect};
+use super::{RegistryValue, Tweak, TweakEffect};
 
 pub static BOOT_TWEAKS: &[Tweak] = &[
         crate::tweak! {
@@ -9,20 +9,12 @@ pub static BOOT_TWEAKS: &[Tweak] = &[
                 name: "Disable Lock Screen",
                 description: "Disables the lock screen, going directly to login.",
                 effect: TweakEffect::Restart,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Policies\Microsoft\Windows\Personalization",
-                        value_name: "NoLockScreen",
-                        value: RegistryValue::Dword(1),
-                        stock_value: RegistryValue::Delete
-        }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Policies\Microsoft\Windows\Personalization",
-                        value_name: "NoLockScreen",
-                        value: RegistryValue::Delete,
-                        stock_value: RegistryValue::Delete
-        }]),
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Personalization", "NoLockScreen", 1, RegistryValue::Delete),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Personalization", "NoLockScreen", RegistryValue::Delete),
+                ]),
                 requires_restart: true
         },
         crate::tweak! {
@@ -31,20 +23,12 @@ pub static BOOT_TWEAKS: &[Tweak] = &[
                 name: "Verbose Logon Messages",
                 description: "Shows detailed status messages during startup and shutdown.",
                 effect: TweakEffect::Immediate,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System",
-                        value_name: "VerboseStatus",
-                        value: RegistryValue::Dword(1),
-                        stock_value: RegistryValue::Delete
-        }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System",
-                        value_name: "VerboseStatus",
-                        value: RegistryValue::Delete,
-                        stock_value: RegistryValue::Delete
-        }])
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System", "VerboseStatus", 1, RegistryValue::Delete),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System", "VerboseStatus", RegistryValue::Delete),
+                ])
         },
         crate::tweak! {
                 id: "enable_startup_sound",
@@ -53,36 +37,12 @@ pub static BOOT_TWEAKS: &[Tweak] = &[
                 description: "Enables the Windows startup sound.",
                 effect: TweakEffect::Restart,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\LogonUI\BootAnimation",
-                                value_name: "DisableStartupSound",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Dword(1)
-        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\EditionOverrides",
-                                value_name: "UserSetting_DisableStartupSound",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\LogonUI\BootAnimation", "DisableStartupSound", 0, 1),
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\EditionOverrides", "UserSetting_DisableStartupSound", 0, RegistryValue::Delete),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\LogonUI\BootAnimation",
-                                value_name: "DisableStartupSound",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Dword(1)
-        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\EditionOverrides",
-                                value_name: "UserSetting_DisableStartupSound",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Dword(1)
-        },
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\LogonUI\BootAnimation", "DisableStartupSound", 1, 1),
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\EditionOverrides", "UserSetting_DisableStartupSound", 1, 1),
                 ]),
                 requires_restart: true
         },
@@ -92,20 +52,12 @@ pub static BOOT_TWEAKS: &[Tweak] = &[
                 name: "NumLock On at Login",
                 description: "Enables NumLock by default on the login screen.",
                 effect: TweakEffect::Immediate,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKCU", // Uses HKU\.DEFAULT
-                        subkey: r".DEFAULT\Control Panel\Keyboard",
-                        value_name: "InitialKeyboardIndicators",
-                        value: RegistryValue::String("2147483650"),
-                        stock_value: RegistryValue::Delete
-        }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKCU",
-                        subkey: r".DEFAULT\Control Panel\Keyboard",
-                        value_name: "InitialKeyboardIndicators",
-                        value: RegistryValue::String("2147483648"),
-                        stock_value: RegistryValue::String("2147483648")
-        }])
+                enabled_ops: &[
+                        crate::reg_str!("HKCU", r".DEFAULT\Control Panel\Keyboard", "InitialKeyboardIndicators", "2147483650", RegistryValue::Delete),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_str!("HKCU", r".DEFAULT\Control Panel\Keyboard", "InitialKeyboardIndicators", "2147483648", "2147483648"),
+                ])
         },
         crate::tweak! {
                 id: "disable_login_blur",
@@ -113,20 +65,12 @@ pub static BOOT_TWEAKS: &[Tweak] = &[
                 name: "Disable Login Screen Blur",
                 description: "Disables the acrylic blur effect on the login screen background.",
                 effect: TweakEffect::Immediate,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Policies\Microsoft\Windows\System",
-                        value_name: "DisableAcrylicBackgroundOnLogon",
-                        value: RegistryValue::Dword(1),
-                        stock_value: RegistryValue::Delete
-        }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Policies\Microsoft\Windows\System",
-                        value_name: "DisableAcrylicBackgroundOnLogon",
-                        value: RegistryValue::Delete,
-                        stock_value: RegistryValue::Delete
-        }])
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\System", "DisableAcrylicBackgroundOnLogon", 1, RegistryValue::Delete),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\System", "DisableAcrylicBackgroundOnLogon", RegistryValue::Delete),
+                ])
         },
         crate::tweak! {
                 id: "reduce_startup_delay",
@@ -134,20 +78,12 @@ pub static BOOT_TWEAKS: &[Tweak] = &[
                 name: "Reduce Startup Delay",
                 description: "Reduces the delay before desktop apps start loading after login.",
                 effect: TweakEffect::Restart,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKCU",
-                        subkey: r"Software\Microsoft\Windows\CurrentVersion\Explorer\Serialize",
-                        value_name: "StartupDelayInMSec",
-                        value: RegistryValue::Dword(0),
-                        stock_value: RegistryValue::Delete
-        }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKCU",
-                        subkey: r"Software\Microsoft\Windows\CurrentVersion\Explorer\Serialize",
-                        value_name: "StartupDelayInMSec",
-                        value: RegistryValue::Delete,
-                        stock_value: RegistryValue::Delete
-        }]),
+                enabled_ops: &[
+                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\Serialize", "StartupDelayInMSec", 0, RegistryValue::Delete),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_del!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\Serialize", "StartupDelayInMSec", RegistryValue::Delete),
+                ]),
                 requires_restart: true
         },
         crate::tweak! {
@@ -176,20 +112,12 @@ pub static BOOT_TWEAKS: &[Tweak] = &[
                 name: "Don't Display Last Username",
                 description: "Hides the last logged-in username on the login screen for better privacy.",
                 effect: TweakEffect::Immediate,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System",
-                        value_name: "DontDisplayLastUserName",
-                        value: RegistryValue::Dword(1),
-                        stock_value: RegistryValue::Dword(0)
-        }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System",
-                        value_name: "DontDisplayLastUserName",
-                        value: RegistryValue::Dword(0),
-                        stock_value: RegistryValue::Dword(0)
-        }])
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System", "DontDisplayLastUserName", 1, 0),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System", "DontDisplayLastUserName", 0, 0),
+                ])
         },
         crate::tweak! {
                 id: "hide_network_icon_signin",
@@ -197,20 +125,12 @@ pub static BOOT_TWEAKS: &[Tweak] = &[
                 name: "Hide Network Icon on Sign-in",
                 description: "Hides the network connectivity icon from the sign-in screen.",
                 effect: TweakEffect::Immediate,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Policies\Microsoft\Windows\System",
-                        value_name: "DontDisplayNetworkSelectionUI",
-                        value: RegistryValue::Dword(1),
-                        stock_value: RegistryValue::Delete
-        }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Policies\Microsoft\Windows\System",
-                        value_name: "DontDisplayNetworkSelectionUI",
-                        value: RegistryValue::Delete,
-                        stock_value: RegistryValue::Delete
-        }])
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\System", "DontDisplayNetworkSelectionUI", 1, RegistryValue::Delete),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\System", "DontDisplayNetworkSelectionUI", RegistryValue::Delete),
+                ])
         },
         crate::tweak! {
             id: "disable_logon_animation",
@@ -219,22 +139,10 @@ pub static BOOT_TWEAKS: &[Tweak] = &[
             description: "Disables the animation on the logon screen.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\Authentication\LogonUI",
-                    value_name: "AnimationDisabled",
-                    value: RegistryValue::Dword(1),
-                    stock_value: RegistryValue::Delete,
-                },
+                crate::reg_dword!("HKLM", r"Software\Microsoft\Windows\CurrentVersion\Authentication\LogonUI", "AnimationDisabled", 1, RegistryValue::Delete),
             ],
             disabled_ops: Some(&[
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\Authentication\LogonUI",
-                    value_name: "AnimationDisabled",
-                    value: RegistryValue::Delete,
-                    stock_value: RegistryValue::Delete,
-                },
+                crate::reg_del!("HKLM", r"Software\Microsoft\Windows\CurrentVersion\Authentication\LogonUI", "AnimationDisabled", RegistryValue::Delete),
             ]),
         },
         crate::tweak! {
@@ -243,20 +151,12 @@ pub static BOOT_TWEAKS: &[Tweak] = &[
             name: "Remove Power Button from Sign-in Screen",
             description: "Hides the power/shutdown button from the Windows sign-in screen.",
             effect: TweakEffect::Immediate,
-            enabled_ops: &[RegistryOp {
-                hkey: "HKLM",
-                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System",
-                value_name: "shutdownwithoutlogon",
-                value: RegistryValue::Dword(0),
-                stock_value: RegistryValue::Dword(1)
-            }],
-            disabled_ops: Some(&[RegistryOp {
-                hkey: "HKLM",
-                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System",
-                value_name: "shutdownwithoutlogon",
-                value: RegistryValue::Dword(1),
-                stock_value: RegistryValue::Dword(1)
-            }]),
+            enabled_ops: &[
+                crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System", "shutdownwithoutlogon", 0, 1),
+            ],
+            disabled_ops: Some(&[
+                crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System", "shutdownwithoutlogon", 1, 1),
+            ]),
         },
         crate::tweak! {
             id: "disable_scoobe",
@@ -265,36 +165,12 @@ pub static BOOT_TWEAKS: &[Tweak] = &[
             description: "Disables the 'Let's finish setting up your device' (SCOOBE) screen.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\UserProfileEngagement",
-                    value_name: "ScoobeSystemSettingEnabled",
-                    value: RegistryValue::Dword(0),
-                    stock_value: RegistryValue::Delete
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
-                    value_name: "SubscribedContent-310093Enabled",
-                    value: RegistryValue::Dword(0),
-                    stock_value: RegistryValue::Dword(1)
-                },
+                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\UserProfileEngagement", "ScoobeSystemSettingEnabled", 0, RegistryValue::Delete),
+                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "SubscribedContent-310093Enabled", 0, 1),
             ],
             disabled_ops: Some(&[
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\UserProfileEngagement",
-                    value_name: "ScoobeSystemSettingEnabled",
-                    value: RegistryValue::Dword(1),
-                    stock_value: RegistryValue::Dword(1)
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
-                    value_name: "SubscribedContent-310093Enabled",
-                    value: RegistryValue::Dword(1),
-                    stock_value: RegistryValue::Dword(1)
-                },
+                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\UserProfileEngagement", "ScoobeSystemSettingEnabled", 1, 1),
+                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "SubscribedContent-310093Enabled", 1, 1),
             ])
         },
 ];

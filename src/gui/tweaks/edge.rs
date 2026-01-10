@@ -1,6 +1,6 @@
 // Microsoft Edge tweaks
 
-use super::{RegistryOp, RegistryValue, Tweak, TweakEffect};
+use super::{RegistryValue, Tweak, TweakEffect};
 
 pub static EDGE_TWEAKS: &[Tweak] = &[
         crate::tweak! {
@@ -9,20 +9,12 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                 name: "Disable Edge Updates",
                 description: "Prevents Microsoft Edge from auto-updating.",
                 effect: TweakEffect::Immediate,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Policies\Microsoft\EdgeUpdate",
-                        value_name: "UpdateDefault",
-                        value: RegistryValue::Dword(0),
-                        stock_value: RegistryValue::Delete
-        }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Policies\Microsoft\EdgeUpdate",
-                        value_name: "UpdateDefault",
-                        value: RegistryValue::Delete,
-                        stock_value: RegistryValue::Delete
-        }])
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\EdgeUpdate", "UpdateDefault", 0),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\EdgeUpdate", "UpdateDefault", RegistryValue::Delete),
+                ])
         },
         crate::tweak! {
                 id: "disable_edge_sidebar",
@@ -30,20 +22,12 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                 name: "Disable Edge Sidebar",
                 description: "Disables the sidebar in Microsoft Edge.",
                 effect: TweakEffect::Immediate,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Policies\Microsoft\Edge",
-                        value_name: "HubsSidebarEnabled",
-                        value: RegistryValue::Dword(0),
-                        stock_value: RegistryValue::Delete
-        }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Policies\Microsoft\Edge",
-                        value_name: "HubsSidebarEnabled",
-                        value: RegistryValue::Delete,
-                        stock_value: RegistryValue::Delete
-        }])
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "HubsSidebarEnabled", 0),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "HubsSidebarEnabled", RegistryValue::Delete),
+                ])
         },
         crate::tweak! {
                 id: "disable_edge_first_run",
@@ -52,36 +36,12 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                 description: "Prevents Edge from importing browser data on first run.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Edge",
-                                value_name: "ImportOnEachLaunch",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Edge",
-                                value_name: "AutoImportAtFirstRun",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "ImportOnEachLaunch", 0),
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "AutoImportAtFirstRun", 0),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Edge",
-                                value_name: "ImportOnEachLaunch",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Edge",
-                                value_name: "AutoImportAtFirstRun",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "ImportOnEachLaunch", RegistryValue::Delete),
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "AutoImportAtFirstRun", RegistryValue::Delete),
                 ])
         },
         crate::tweak! {
@@ -91,29 +51,11 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                 description: "Prevents Microsoft Edge from creating a desktop shortcut after updates.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\EdgeUpdate",
-                                value_name: "CreateDesktopShortcut{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\EdgeUpdate",
-                                value_name: "CreateDesktopShortcut{2CD8A007-E189-409D-A2C8-9AF4EF3C72AA}",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\EdgeUpdate", "CreateDesktopShortcut{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}", 0),
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\EdgeUpdate", "CreateDesktopShortcut{2CD8A007-E189-409D-A2C8-9AF4EF3C72AA}", 0),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\EdgeUpdate",
-                                value_name: "CreateDesktopShortcut{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\EdgeUpdate", "CreateDesktopShortcut{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}", RegistryValue::Delete),
                 ])
         },
         crate::tweak! {
@@ -122,20 +64,12 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                 name: "Disable Edge Personalization",
                 description: "Disables Edge's personalization features and reporting.",
                 effect: TweakEffect::Immediate,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Policies\Microsoft\Edge",
-                        value_name: "PersonalizationReportingEnabled",
-                        value: RegistryValue::Dword(0),
-                        stock_value: RegistryValue::Delete
-        }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Policies\Microsoft\Edge",
-                        value_name: "PersonalizationReportingEnabled",
-                        value: RegistryValue::Delete,
-                        stock_value: RegistryValue::Delete
-        }])
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "PersonalizationReportingEnabled", 0),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "PersonalizationReportingEnabled", RegistryValue::Delete),
+                ])
         },
         crate::tweak! {
                 id: "enable_edge_do_not_track",
@@ -144,36 +78,12 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                 description: "Enables the 'Do Not Track' request in Microsoft Edge.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Edge",
-                                value_name: "ConfigureDoNotTrack",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Policies\Microsoft\Edge",
-                                value_name: "ConfigureDoNotTrack",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "ConfigureDoNotTrack", 1),
+                        crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Edge", "ConfigureDoNotTrack", 1),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Edge",
-                                value_name: "ConfigureDoNotTrack",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Policies\Microsoft\Edge",
-                                value_name: "ConfigureDoNotTrack",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "ConfigureDoNotTrack", RegistryValue::Delete),
+                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Edge", "ConfigureDoNotTrack", RegistryValue::Delete),
                 ])
         },
         crate::tweak! {
@@ -183,36 +93,12 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                 description: "Prevents websites from checking if you have a payment method saved.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Edge",
-                                value_name: "PaymentMethodQueryEnabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Policies\Microsoft\Edge",
-                                value_name: "PaymentMethodQueryEnabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "PaymentMethodQueryEnabled", 0),
+                        crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Edge", "PaymentMethodQueryEnabled", 0),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Edge",
-                                value_name: "PaymentMethodQueryEnabled",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Policies\Microsoft\Edge",
-                                value_name: "PaymentMethodQueryEnabled",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "PaymentMethodQueryEnabled", RegistryValue::Delete),
+                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Edge", "PaymentMethodQueryEnabled", RegistryValue::Delete),
                 ])
         },
         crate::tweak! {
@@ -222,36 +108,12 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                 description: "Disables Microsoft Search in Bing from the address bar.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Edge",
-                                value_name: "AddressBarMicrosoftSearchInBingProviderEnabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Policies\Microsoft\Edge",
-                                value_name: "AddressBarMicrosoftSearchInBingProviderEnabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "AddressBarMicrosoftSearchInBingProviderEnabled", 0),
+                        crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Edge", "AddressBarMicrosoftSearchInBingProviderEnabled", 0),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Edge",
-                                value_name: "AddressBarMicrosoftSearchInBingProviderEnabled",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Policies\Microsoft\Edge",
-                                value_name: "AddressBarMicrosoftSearchInBingProviderEnabled",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "AddressBarMicrosoftSearchInBingProviderEnabled", RegistryValue::Delete),
+                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Edge", "AddressBarMicrosoftSearchInBingProviderEnabled", RegistryValue::Delete),
                 ])
         },
         crate::tweak! {
@@ -261,36 +123,12 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                 description: "Disables the user feedback feature in Microsoft Edge.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Edge",
-                                value_name: "UserFeedbackAllowed",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Policies\Microsoft\Edge",
-                                value_name: "UserFeedbackAllowed",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "UserFeedbackAllowed", 0),
+                        crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Edge", "UserFeedbackAllowed", 0),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Edge",
-                                value_name: "UserFeedbackAllowed",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Policies\Microsoft\Edge",
-                                value_name: "UserFeedbackAllowed",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "UserFeedbackAllowed", RegistryValue::Delete),
+                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Edge", "UserFeedbackAllowed", RegistryValue::Delete),
                 ])
         },
         crate::tweak! {
@@ -300,64 +138,16 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                 description: "Disables credit card and address autofill in Edge.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Edge",
-                                value_name: "AutofillCreditCardEnabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Policies\Microsoft\Edge",
-                                value_name: "AutofillCreditCardEnabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Edge",
-                                value_name: "AutofillAddressEnabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Policies\Microsoft\Edge",
-                                value_name: "AutofillAddressEnabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "AutofillCreditCardEnabled", 0),
+                        crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Edge", "AutofillCreditCardEnabled", 0),
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "AutofillAddressEnabled", 0),
+                        crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Edge", "AutofillAddressEnabled", 0),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Edge",
-                                value_name: "AutofillCreditCardEnabled",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Policies\Microsoft\Edge",
-                                value_name: "AutofillCreditCardEnabled",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Edge",
-                                value_name: "AutofillAddressEnabled",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Policies\Microsoft\Edge",
-                                value_name: "AutofillAddressEnabled",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "AutofillCreditCardEnabled", RegistryValue::Delete),
+                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Edge", "AutofillCreditCardEnabled", RegistryValue::Delete),
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "AutofillAddressEnabled", RegistryValue::Delete),
+                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Edge", "AutofillAddressEnabled", RegistryValue::Delete),
                 ])
         },
         crate::tweak! {
@@ -367,36 +157,12 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                 description: "Disables search suggestions in the Edge address bar.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Edge",
-                                value_name: "SearchSuggestEnabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Policies\Microsoft\Edge",
-                                value_name: "SearchSuggestEnabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "SearchSuggestEnabled", 0),
+                        crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Edge", "SearchSuggestEnabled", 0),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Edge",
-                                value_name: "SearchSuggestEnabled",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Policies\Microsoft\Edge",
-                                value_name: "SearchSuggestEnabled",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "SearchSuggestEnabled", RegistryValue::Delete),
+                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Edge", "SearchSuggestEnabled", RegistryValue::Delete),
                 ])
         },
         crate::tweak! {
@@ -406,36 +172,12 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                 description: "Disables the shopping assistant in Microsoft Edge.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Edge",
-                                value_name: "EdgeShoppingAssistantEnabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Policies\Microsoft\Edge",
-                                value_name: "EdgeShoppingAssistantEnabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "EdgeShoppingAssistantEnabled", 0),
+                        crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Edge", "EdgeShoppingAssistantEnabled", 0),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Edge",
-                                value_name: "EdgeShoppingAssistantEnabled",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Policies\Microsoft\Edge",
-                                value_name: "EdgeShoppingAssistantEnabled",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "EdgeShoppingAssistantEnabled", RegistryValue::Delete),
+                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Edge", "EdgeShoppingAssistantEnabled", RegistryValue::Delete),
                 ])
         },
         crate::tweak! {
@@ -445,36 +187,12 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                 description: "Disables the ability to sign in to Microsoft Edge.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Edge",
-                                value_name: "BrowserSignin",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Policies\Microsoft\Edge",
-                                value_name: "BrowserSignin",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "BrowserSignin", 0),
+                        crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Edge", "BrowserSignin", 0),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Edge",
-                                value_name: "BrowserSignin",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Policies\Microsoft\Edge",
-                                value_name: "BrowserSignin",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "BrowserSignin", RegistryValue::Delete),
+                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Edge", "BrowserSignin", RegistryValue::Delete),
                 ])
         },
         crate::tweak! {
@@ -484,36 +202,12 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                 description: "Disables the built-in password manager in Microsoft Edge.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Edge",
-                                value_name: "PasswordManagerEnabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Policies\Microsoft\Edge",
-                                value_name: "PasswordManagerEnabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "PasswordManagerEnabled", 0),
+                        crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Edge", "PasswordManagerEnabled", 0),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Edge",
-                                value_name: "PasswordManagerEnabled",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Policies\Microsoft\Edge",
-                                value_name: "PasswordManagerEnabled",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "PasswordManagerEnabled", RegistryValue::Delete),
+                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Edge", "PasswordManagerEnabled", RegistryValue::Delete),
                 ])
         },
         crate::tweak! {
@@ -523,36 +217,12 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                 description: "Disables Microsoft Defender SmartScreen in Edge.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Edge",
-                                value_name: "SmartScreenEnabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Policies\Microsoft\Edge",
-                                value_name: "SmartScreenEnabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "SmartScreenEnabled", 0),
+                        crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Edge", "SmartScreenEnabled", 0),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Edge",
-                                value_name: "SmartScreenEnabled",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Policies\Microsoft\Edge",
-                                value_name: "SmartScreenEnabled",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "SmartScreenEnabled", RegistryValue::Delete),
+                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Edge", "SmartScreenEnabled", RegistryValue::Delete),
                 ])
         },
         crate::tweak! {
@@ -562,36 +232,12 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                 description: "Disables the typosquatting checker in Edge.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Edge",
-                                value_name: "TyposquattingCheckerEnabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Policies\Microsoft\Edge",
-                                value_name: "TyposquattingCheckerEnabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "TyposquattingCheckerEnabled", 0),
+                        crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Edge", "TyposquattingCheckerEnabled", 0),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Edge",
-                                value_name: "TyposquattingCheckerEnabled",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Policies\Microsoft\Edge",
-                                value_name: "TyposquattingCheckerEnabled",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "TyposquattingCheckerEnabled", RegistryValue::Delete),
+                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Edge", "TyposquattingCheckerEnabled", RegistryValue::Delete),
                 ])
         },
         crate::tweak! {
@@ -601,36 +247,12 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                 description: "Prevents Microsoft Edge from prelaunching or running in the background for startup boost.",
                 effect: TweakEffect::Logoff,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\MicrosoftEdge\Main",
-                                value_name: "AllowPrelaunch",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-                        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Edge",
-                                value_name: "StartupBoostEnabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-                        },
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\MicrosoftEdge\Main", "AllowPrelaunch", 0),
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "StartupBoostEnabled", 0),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\MicrosoftEdge\Main",
-                                value_name: "AllowPrelaunch",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-                        },
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Edge",
-                                value_name: "StartupBoostEnabled",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-                        },
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\MicrosoftEdge\Main", "AllowPrelaunch", RegistryValue::Delete),
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "StartupBoostEnabled", RegistryValue::Delete),
                 ])
         },
         crate::tweak! {
@@ -639,20 +261,12 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                 name: "Disable Edge Address Bar Dropdown",
                 description: "Disables the dropdown suggestions in the Edge address bar.",
                 effect: TweakEffect::Immediate,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Microsoft\PolicyManager\current\device\Browser",
-                        value_name: "AllowAddressBarDropdown",
-                        value: RegistryValue::Dword(0),
-                        stock_value: RegistryValue::Delete
-        }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Microsoft\PolicyManager\current\device\Browser",
-                        value_name: "AllowAddressBarDropdown",
-                        value: RegistryValue::Delete,
-                        stock_value: RegistryValue::Delete
-        }])
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\PolicyManager\current\device\Browser", "AllowAddressBarDropdown", 0),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\PolicyManager\current\device\Browser", "AllowAddressBarDropdown", RegistryValue::Delete),
+                ])
         },
         crate::tweak! {
                 id: "disable_legacy_edge_features",
@@ -661,78 +275,18 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                 description: "Disables tracking and suggestions in Legacy Microsoft Edge.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\Main",
-                                value_name: "DoNotTrack",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\Main",
-                                value_name: "ShowSearchSuggestionsGlobal",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\Main",
-                                value_name: "Use FormSuggest",
-                                value: RegistryValue::String("no"),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\Main",
-                                value_name: "OptimizeWindowsSearchResultsForScreenReaders",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\FlipAhead",
-                                value_name: "FPEnabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_dword!("HKCU", r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\Main", "DoNotTrack", 1),
+                        crate::reg_dword!("HKCU", r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\Main", "ShowSearchSuggestionsGlobal", 0),
+                        crate::reg_str!("HKCU", r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\Main", "Use FormSuggest", "no"),
+                        crate::reg_dword!("HKCU", r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\Main", "OptimizeWindowsSearchResultsForScreenReaders", 0),
+                        crate::reg_dword!("HKCU", r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\FlipAhead", "FPEnabled", 0),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\Main",
-                                value_name: "DoNotTrack",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\Main",
-                                value_name: "ShowSearchSuggestionsGlobal",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\Main",
-                                value_name: "Use FormSuggest",
-                                value: RegistryValue::String("yes"),
-                                stock_value: RegistryValue::String("yes")
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\Main",
-                                value_name: "OptimizeWindowsSearchResultsForScreenReaders",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\FlipAhead",
-                                value_name: "FPEnabled",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_del!("HKCU", r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\Main", "DoNotTrack", RegistryValue::Delete),
+                        crate::reg_del!("HKCU", r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\Main", "ShowSearchSuggestionsGlobal", RegistryValue::Delete),
+                        crate::reg_str!("HKCU", r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\Main", "Use FormSuggest", "yes"),
+                        crate::reg_del!("HKCU", r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\Main", "OptimizeWindowsSearchResultsForScreenReaders", RegistryValue::Delete),
+                        crate::reg_del!("HKCU", r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\FlipAhead", "FPEnabled", RegistryValue::Delete),
                 ])
         },
         crate::tweak! {
@@ -742,36 +296,12 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                 description: "Disables Cortana and search history in Legacy Microsoft Edge.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\ServiceUI",
-                                value_name: "EnableCortana",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\ServiceUI\ShowSearchHistory",
-                                value_name: "",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_dword!("HKCU", r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\ServiceUI", "EnableCortana", 0),
+                        crate::reg_dword!("HKCU", r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\ServiceUI\ShowSearchHistory", "", 0),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\ServiceUI",
-                                value_name: "EnableCortana",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\ServiceUI\ShowSearchHistory",
-                                value_name: "",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_del!("HKCU", r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\ServiceUI", "EnableCortana", RegistryValue::Delete),
+                        crate::reg_del!("HKCU", r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\ServiceUI\ShowSearchHistory", "", RegistryValue::Delete),
                 ])
         },
         crate::tweak! {
@@ -780,20 +310,12 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                 name: "Disable Edge Encrypted Media",
                 description: "Disables Encrypted Media Extensions (EME) in Microsoft Edge.",
                 effect: TweakEffect::Immediate,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKCU",
-                        subkey: r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\Privacy",
-                        value_name: "EnableEncryptedMediaExtensions",
-                        value: RegistryValue::Dword(0),
-                        stock_value: RegistryValue::Delete
-        }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKCU",
-                        subkey: r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\Privacy",
-                        value_name: "EnableEncryptedMediaExtensions",
-                        value: RegistryValue::Delete,
-                        stock_value: RegistryValue::Delete
-        }])
+                enabled_ops: &[
+                        crate::reg_dword!("HKCU", r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\Privacy", "EnableEncryptedMediaExtensions", 0),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_del!("HKCU", r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\Privacy", "EnableEncryptedMediaExtensions", RegistryValue::Delete),
+                ])
         },
         crate::tweak! {
                 id: "disable_edge_tab_preloading",
@@ -801,20 +323,12 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                 name: "Disable Edge Tab Preloading",
                 description: "Prevents Edge from preloading tabs for faster browsing.",
                 effect: TweakEffect::Immediate,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Policies\Microsoft\MicrosoftEdge\TabPreloader",
-                        value_name: "AllowTabPreloading",
-                        value: RegistryValue::Dword(0),
-                        stock_value: RegistryValue::Delete
-        }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Policies\Microsoft\MicrosoftEdge\TabPreloader",
-                        value_name: "AllowTabPreloading",
-                        value: RegistryValue::Delete,
-                        stock_value: RegistryValue::Delete
-        }])
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\MicrosoftEdge\TabPreloader", "AllowTabPreloading", 0),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\MicrosoftEdge\TabPreloader", "AllowTabPreloading", RegistryValue::Delete),
+                ])
         },
         crate::tweak! {
                 id: "disable_edge_phishing_filter",
@@ -822,20 +336,12 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                 name: "Disable Edge Phishing Filter",
                 description: "Disables the phishing filter in Microsoft Edge.",
                 effect: TweakEffect::Immediate,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKCU",
-                        subkey: r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\PhishingFilter",
-                        value_name: "EnabledV9",
-                        value: RegistryValue::Dword(0),
-                        stock_value: RegistryValue::Delete
-        }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKCU",
-                        subkey: r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\PhishingFilter",
-                        value_name: "EnabledV9",
-                        value: RegistryValue::Delete,
-                        stock_value: RegistryValue::Delete
-        }])
+                enabled_ops: &[
+                        crate::reg_dword!("HKCU", r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\PhishingFilter", "EnabledV9", 0),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_del!("HKCU", r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\PhishingFilter", "EnabledV9", RegistryValue::Delete),
+                ])
         },
         crate::tweak! {
                 id: "disable_edge_clsid_policy",
@@ -843,20 +349,12 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                 name: "Disable Edge CLSID Policy",
                 description: "Disables a specific CLSID policy related to Microsoft Edge extensions.",
                 effect: TweakEffect::Immediate,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Ext\CLSID",
-                        value_name: "{1FD49718-1D00-4B19-AF5F-070AF6D5D54C}",
-                        value: RegistryValue::Dword(0),
-                        stock_value: RegistryValue::String("1")
-        }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Ext\CLSID",
-                        value_name: "{1FD49718-1D00-4B19-AF5F-070AF6D5D54C}",
-                        value: RegistryValue::Delete,
-                        stock_value: RegistryValue::String("1")
-        }])
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Ext\CLSID", "{1FD49718-1D00-4B19-AF5F-070AF6D5D54C}", 0, RegistryValue::String("1")),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Ext\CLSID", "{1FD49718-1D00-4B19-AF5F-070AF6D5D54C}", RegistryValue::String("1")),
+                ])
         },
         crate::tweak! {
                 id: "disable_edge_local_providers",
@@ -865,36 +363,12 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                 description: "Disables local providers for suggestions in Microsoft Edge.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Edge",
-                                value_name: "LocalProvidersEnabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Policies\Microsoft\Edge",
-                                value_name: "LocalProvidersEnabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "LocalProvidersEnabled", 0),
+                        crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Edge", "LocalProvidersEnabled", 0),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Edge",
-                                value_name: "LocalProvidersEnabled",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Policies\Microsoft\Edge",
-                                value_name: "LocalProvidersEnabled",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "LocalProvidersEnabled", RegistryValue::Delete),
+                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Edge", "LocalProvidersEnabled", RegistryValue::Delete),
                 ])
         },
         crate::tweak! {
@@ -904,36 +378,12 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                 description: "Disables the web widget in Microsoft Edge.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Edge",
-                                value_name: "WebWidgetAllowed",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Policies\Microsoft\Edge",
-                                value_name: "WebWidgetAllowed",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "WebWidgetAllowed", 0),
+                        crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Edge", "WebWidgetAllowed", 0),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Edge",
-                                value_name: "WebWidgetAllowed",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Policies\Microsoft\Edge",
-                                value_name: "WebWidgetAllowed",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "WebWidgetAllowed", RegistryValue::Delete),
+                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Edge", "WebWidgetAllowed", RegistryValue::Delete),
                 ])
         },
         crate::tweak! {
@@ -943,36 +393,12 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                 description: "Disables Microsoft Editor proofing services in Edge.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Edge",
-                                value_name: "MicrosoftEditorProofingEnabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Policies\Microsoft\Edge",
-                                value_name: "MicrosoftEditorProofingEnabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "MicrosoftEditorProofingEnabled", 0),
+                        crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Edge", "MicrosoftEditorProofingEnabled", 0),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Edge",
-                                value_name: "MicrosoftEditorProofingEnabled",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Policies\Microsoft\Edge",
-                                value_name: "MicrosoftEditorProofingEnabled",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "MicrosoftEditorProofingEnabled", RegistryValue::Delete),
+                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Edge", "MicrosoftEditorProofingEnabled", RegistryValue::Delete),
                 ])
         },
         crate::tweak! {
@@ -982,36 +408,12 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                 description: "Disables using a web service to resolve navigation errors in Edge.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Edge",
-                                value_name: "ResolveNavigationErrorsUseWebService",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Policies\Microsoft\Edge",
-                                value_name: "ResolveNavigationErrorsUseWebService",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "ResolveNavigationErrorsUseWebService", 0),
+                        crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Edge", "ResolveNavigationErrorsUseWebService", 0),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Edge",
-                                value_name: "ResolveNavigationErrorsUseWebService",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Policies\Microsoft\Edge",
-                                value_name: "ResolveNavigationErrorsUseWebService",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "ResolveNavigationErrorsUseWebService", RegistryValue::Delete),
+                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Edge", "ResolveNavigationErrorsUseWebService", RegistryValue::Delete),
                 ])
         },
         crate::tweak! {
@@ -1021,36 +423,12 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                 description: "Disables alternate error pages in Microsoft Edge.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Edge",
-                                value_name: "AlternateErrorPagesEnabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Policies\Microsoft\Edge",
-                                value_name: "AlternateErrorPagesEnabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "AlternateErrorPagesEnabled", 0),
+                        crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Edge", "AlternateErrorPagesEnabled", 0),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Edge",
-                                value_name: "AlternateErrorPagesEnabled",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Policies\Microsoft\Edge",
-                                value_name: "AlternateErrorPagesEnabled",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "AlternateErrorPagesEnabled", RegistryValue::Delete),
+                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Edge", "AlternateErrorPagesEnabled", RegistryValue::Delete),
                 ])
         },
         crate::tweak! {
@@ -1060,36 +438,12 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                 description: "Sets Edge network prediction options to 'off' (2).",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Edge",
-                                value_name: "NetworkPredictionOptions",
-                                value: RegistryValue::Dword(2),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Policies\Microsoft\Edge",
-                                value_name: "NetworkPredictionOptions",
-                                value: RegistryValue::Dword(2),
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "NetworkPredictionOptions", 2),
+                        crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Edge", "NetworkPredictionOptions", 2),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Edge",
-                                value_name: "NetworkPredictionOptions",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Policies\Microsoft\Edge",
-                                value_name: "NetworkPredictionOptions",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "NetworkPredictionOptions", RegistryValue::Delete),
+                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Edge", "NetworkPredictionOptions", RegistryValue::Delete),
                 ])
         },
         crate::tweak! {
@@ -1099,36 +453,12 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                 description: "Disables site safety services in Microsoft Edge.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Edge",
-                                value_name: "SiteSafetyServicesEnabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Policies\Microsoft\Edge",
-                                value_name: "SiteSafetyServicesEnabled",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "SiteSafetyServicesEnabled", 0),
+                        crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Edge", "SiteSafetyServicesEnabled", 0),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKLM",
-                                subkey: r"SOFTWARE\Policies\Microsoft\Edge",
-                                value_name: "SiteSafetyServicesEnabled",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Software\Policies\Microsoft\Edge",
-                                value_name: "SiteSafetyServicesEnabled",
-                                value: RegistryValue::Delete,
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "SiteSafetyServicesEnabled", RegistryValue::Delete),
+                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Edge", "SiteSafetyServicesEnabled", RegistryValue::Delete),
                 ])
         },
 ];

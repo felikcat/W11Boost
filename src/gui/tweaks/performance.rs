@@ -1,6 +1,6 @@
 // Performance tweaks
 
-use super::{RegistryOp, RegistryValue, Tweak, TweakEffect};
+use super::{RegistryValue, Tweak, TweakEffect};
 use winsafe;
 
 pub static QOS_GAMES_LIST: &str = "100orange.exe;100orange_x86.exe;7DaysToDie.exe;AbioticFactor.exe;AC3MP.exe;AC4BFMP.exe;ACBMP.exe;ACC.exe;\
@@ -71,36 +71,12 @@ pub static PERFORMANCE_TWEAKS: &[Tweak] = &[
                 description: "Disables window animations for faster, snappier UI.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Control Panel\Desktop\WindowMetrics",
-                                value_name: "MinAnimate",
-                                value: RegistryValue::String("0"),
-                                stock_value: RegistryValue::String("0")
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced",
-                                value_name: "TaskbarAnimations",
-                                value: RegistryValue::Dword(0),
-                                stock_value: RegistryValue::Dword(1)
-        },
+                        crate::reg_str!("HKCU", r"Control Panel\Desktop\WindowMetrics", "MinAnimate", "0", "0"),
+                        crate::reg_dword!("HKCU", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "TaskbarAnimations", 0, 1),
                 ],
                 disabled_ops: Some(&[
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Control Panel\Desktop\WindowMetrics",
-                                value_name: "MinAnimate",
-                                value: RegistryValue::String("1"),
-                                stock_value: RegistryValue::String("0")
-        },
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced",
-                                value_name: "TaskbarAnimations",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Dword(1)
-        },
+                        crate::reg_str!("HKCU", r"Control Panel\Desktop\WindowMetrics", "MinAnimate", "1", "0"),
+                        crate::reg_dword!("HKCU", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "TaskbarAnimations", 1, 1),
                 ])
         },
         crate::tweak! {
@@ -109,20 +85,12 @@ pub static PERFORMANCE_TWEAKS: &[Tweak] = &[
                 name: "Disable Aero Peek",
                 description: "Disables the Aero Peek feature (preview desktop when hovering taskbar).",
                 effect: TweakEffect::Immediate,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKCU",
-                        subkey: r"SOFTWARE\Microsoft\Windows\DWM",
-                        value_name: "EnableAeroPeek",
-                        value: RegistryValue::Dword(0),
-                        stock_value: RegistryValue::Dword(1)
-        }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKCU",
-                        subkey: r"SOFTWARE\Microsoft\Windows\DWM",
-                        value_name: "EnableAeroPeek",
-                        value: RegistryValue::Dword(1),
-                        stock_value: RegistryValue::Dword(1)
-        }])
+                enabled_ops: &[
+                        crate::reg_dword!("HKCU", r"SOFTWARE\Microsoft\Windows\DWM", "EnableAeroPeek", 0, 1),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_dword!("HKCU", r"SOFTWARE\Microsoft\Windows\DWM", "EnableAeroPeek", 1, 1),
+                ])
         },
         crate::tweak! {
                 id: "disable_power_throttling",
@@ -130,20 +98,12 @@ pub static PERFORMANCE_TWEAKS: &[Tweak] = &[
                 name: "Disable Power Throttling",
                 description: "Disables CPU power throttling for background apps. May increase power usage.",
                 effect: TweakEffect::Restart,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SYSTEM\CurrentControlSet\Control\Power\PowerThrottling",
-                        value_name: "PowerThrottlingOff",
-                        value: RegistryValue::Dword(1),
-                        stock_value: RegistryValue::Delete
-        }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SYSTEM\CurrentControlSet\Control\Power\PowerThrottling",
-                        value_name: "PowerThrottlingOff",
-                        value: RegistryValue::Delete,
-                        stock_value: RegistryValue::Delete
-        }]),
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Control\Power\PowerThrottling", "PowerThrottlingOff", 1, RegistryValue::Delete),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_del!("HKLM", r"SYSTEM\CurrentControlSet\Control\Power\PowerThrottling", "PowerThrottlingOff", RegistryValue::Delete),
+                ]),
                 requires_restart: true
         },
         crate::tweak! {
@@ -152,20 +112,12 @@ pub static PERFORMANCE_TWEAKS: &[Tweak] = &[
                 name: "Disable Fault Tolerant Heap",
                 description: "Disables FTH which mitigates application crashes but uses resources.",
                 effect: TweakEffect::Restart,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Microsoft\FTH",
-                        value_name: "Enabled",
-                        value: RegistryValue::Dword(0),
-                        stock_value: RegistryValue::Dword(1)
-                }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Microsoft\FTH",
-                        value_name: "Enabled",
-                        value: RegistryValue::Dword(1),
-                        stock_value: RegistryValue::Dword(1)
-                }]),
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\FTH", "Enabled", 0, 1),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\FTH", "Enabled", 1, 1),
+                ]),
                 requires_restart: true
         },
         crate::tweak! {
@@ -174,20 +126,12 @@ pub static PERFORMANCE_TWEAKS: &[Tweak] = &[
                 name: "Disable Scheduled Diagnostics",
                 description: "Prevents automatic system diagnostics from running in the background.",
                 effect: TweakEffect::Immediate,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"Software\Microsoft\Windows\ScheduledDiagnostics",
-                        value_name: "EnabledExecution",
-                        value: RegistryValue::Dword(0),
-                        stock_value: RegistryValue::Dword(1)
-                }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"Software\Microsoft\Windows\ScheduledDiagnostics",
-                        value_name: "EnabledExecution",
-                        value: RegistryValue::Dword(1),
-                        stock_value: RegistryValue::Dword(1)
-                }])
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"Software\Microsoft\Windows\ScheduledDiagnostics", "EnabledExecution", 0, 1),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_dword!("HKLM", r"Software\Microsoft\Windows\ScheduledDiagnostics", "EnabledExecution", 1, 1),
+                ])
         },
         crate::tweak! {
                 id: "ntfs_nonpaged_pool",
@@ -195,20 +139,12 @@ pub static PERFORMANCE_TWEAKS: &[Tweak] = &[
                 name: "Increase NTFS Memory Usage",
                 description: "Increases NTFS memory cache for better disk performance.",
                 effect: TweakEffect::Restart,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SYSTEM\CurrentControlSet\Control\FileSystem",
-                        value_name: "NtfsMemoryUsage",
-                        value: RegistryValue::Dword(2),
-                        stock_value: RegistryValue::Dword(1)
-                }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SYSTEM\CurrentControlSet\Control\FileSystem",
-                        value_name: "NtfsMemoryUsage",
-                        value: RegistryValue::Dword(1),
-                        stock_value: RegistryValue::Dword(1)
-                }]),
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Control\FileSystem", "NtfsMemoryUsage", 2, 1),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Control\FileSystem", "NtfsMemoryUsage", 1, 1),
+                ]),
                 requires_restart: true
         },
         crate::tweak! {
@@ -217,20 +153,12 @@ pub static PERFORMANCE_TWEAKS: &[Tweak] = &[
                 name: "Disable Paging Executive",
                 description: "Keeps kernel drivers in memory instead of paging them to disk.",
                 effect: TweakEffect::Restart,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management",
-                        value_name: "DisablePagingExecutive",
-                        value: RegistryValue::Dword(1),
-                        stock_value: RegistryValue::Dword(0)
-                }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management",
-                        value_name: "DisablePagingExecutive",
-                        value: RegistryValue::Dword(0),
-                        stock_value: RegistryValue::Dword(0)
-                }]),
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management", "DisablePagingExecutive", 1, 0),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management", "DisablePagingExecutive", 0, 0),
+                ]),
                 requires_restart: true
         },
         crate::tweak! {
@@ -239,20 +167,12 @@ pub static PERFORMANCE_TWEAKS: &[Tweak] = &[
                 name: "Optimize System Responsiveness",
                 description: "Prioritizes system tasks over multimedia tasks.",
                 effect: TweakEffect::Restart,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile",
-                        value_name: "SystemResponsiveness",
-                        value: RegistryValue::Dword(0),
-                        stock_value: RegistryValue::Dword(20) // Default varies but often 20
-                }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile",
-                        value_name: "SystemResponsiveness",
-                        value: RegistryValue::Dword(20),
-                        stock_value: RegistryValue::Dword(20)
-                }]),
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile", "SystemResponsiveness", 0, 20),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile", "SystemResponsiveness", 20, 20),
+                ]),
                 requires_restart: true
         },
         crate::tweak! {
@@ -261,20 +181,12 @@ pub static PERFORMANCE_TWEAKS: &[Tweak] = &[
                 name: "Optimize Processor Scheduling",
                 description: "Optimizes CPU scheduling for best performance of foreground apps.",
                 effect: TweakEffect::Restart,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SYSTEM\CurrentControlSet\Control\PriorityControl",
-                        value_name: "Win32PrioritySeparation",
-                        value: RegistryValue::Dword(38), // 0x26 - Optimized for foreground
-                        stock_value: RegistryValue::Dword(2) // Default often 2
-                }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SYSTEM\CurrentControlSet\Control\PriorityControl",
-                        value_name: "Win32PrioritySeparation",
-                        value: RegistryValue::Dword(2),
-                        stock_value: RegistryValue::Dword(2)
-                }]),
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Control\PriorityControl", "Win32PrioritySeparation", 38, 2),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Control\PriorityControl", "Win32PrioritySeparation", 2, 2),
+                ]),
                 requires_restart: true
         },
         crate::tweak! {
@@ -283,20 +195,12 @@ pub static PERFORMANCE_TWEAKS: &[Tweak] = &[
                 name: "Disable Bandwidth Throttling",
                 description: "Disables network bandwidth throttling for non-multimedia traffic.",
                 effect: TweakEffect::Restart,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Policies\Microsoft\Windows\Psched",
-                        value_name: "NonBestEffortLimit",
-                        value: RegistryValue::Dword(0),
-                        stock_value: RegistryValue::Delete // Often not present
-                }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Policies\Microsoft\Windows\Psched",
-                        value_name: "NonBestEffortLimit",
-                        value: RegistryValue::Delete,
-                        stock_value: RegistryValue::Delete
-                }]),
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Psched", "NonBestEffortLimit", 0, RegistryValue::Delete),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Psched", "NonBestEffortLimit", RegistryValue::Delete),
+                ]),
                 requires_restart: true
         },
         crate::tweak! {
@@ -305,20 +209,12 @@ pub static PERFORMANCE_TWEAKS: &[Tweak] = &[
                 name: "Disable NTFS Last Access Update",
                 description: "Disables updating the 'Last Accessed' timestamp on files to improve disk performance.",
                 effect: TweakEffect::Restart,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SYSTEM\CurrentControlSet\Control\FileSystem",
-                        value_name: "NtfsDisableLastAccessUpdate",
-                        value: RegistryValue::Dword(1),
-                        stock_value: RegistryValue::Dword(0) // Default is usually 2 or 3 (managed) or 0 (enabled)
-                }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SYSTEM\CurrentControlSet\Control\FileSystem",
-                        value_name: "NtfsDisableLastAccessUpdate",
-                        value: RegistryValue::Dword(2), // Restore to default (managed)
-                        stock_value: RegistryValue::Dword(2)
-                }]),
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Control\FileSystem", "NtfsDisableLastAccessUpdate", 1, 0),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Control\FileSystem", "NtfsDisableLastAccessUpdate", 2, 2),
+                ]),
                 requires_restart: true
         },
         crate::tweak! {
@@ -327,20 +223,12 @@ pub static PERFORMANCE_TWEAKS: &[Tweak] = &[
                 name: "Disable Windows Experimentation",
                 description: "Disables Microsoft experimentation features.",
                 effect: TweakEffect::Restart,
-                enabled_ops: &[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Microsoft\PolicyManager\default\System\AllowExperimentation",
-                        value_name: "value",
-                        value: RegistryValue::Dword(0),
-                        stock_value: RegistryValue::Delete
-                }],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKLM",
-                        subkey: r"SOFTWARE\Microsoft\PolicyManager\default\System\AllowExperimentation",
-                        value_name: "value",
-                        value: RegistryValue::Delete,
-                        stock_value: RegistryValue::Delete
-                }]),
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\PolicyManager\default\System\AllowExperimentation", "value", 0, RegistryValue::Delete),
+                ],
+                disabled_ops: Some(&[
+                        crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\PolicyManager\default\System\AllowExperimentation", "value", RegistryValue::Delete),
+                ]),
                 requires_restart: true
         },
         crate::tweak! {
@@ -350,64 +238,16 @@ pub static PERFORMANCE_TWEAKS: &[Tweak] = &[
             description: "Enables Auto Game Mode and disables Game Bar features.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\GameBar",
-                    value_name: "AutoGameModeEnabled",
-                    value: RegistryValue::Dword(1),
-                    stock_value: RegistryValue::Dword(1),
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\GameBar",
-                    value_name: "AllowAutoGameMode",
-                    value: RegistryValue::Dword(1),
-                    stock_value: RegistryValue::Dword(1),
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\GameBar",
-                    value_name: "UseNexusForGameBarEnabled",
-                    value: RegistryValue::Dword(0),
-                    stock_value: RegistryValue::Dword(1),
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\GameBar",
-                    value_name: "ShowStartupPanel",
-                    value: RegistryValue::Dword(0),
-                    stock_value: RegistryValue::Dword(1),
-                },
+                crate::reg_dword!("HKCU", r"Software\Microsoft\GameBar", "AutoGameModeEnabled", 1, 1),
+                crate::reg_dword!("HKCU", r"Software\Microsoft\GameBar", "AllowAutoGameMode", 1, 1),
+                crate::reg_dword!("HKCU", r"Software\Microsoft\GameBar", "UseNexusForGameBarEnabled", 0, 1),
+                crate::reg_dword!("HKCU", r"Software\Microsoft\GameBar", "ShowStartupPanel", 0, 1),
             ],
             disabled_ops: Some(&[
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\GameBar",
-                    value_name: "AutoGameModeEnabled",
-                    value: RegistryValue::Dword(1),
-                    stock_value: RegistryValue::Dword(1),
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\GameBar",
-                    value_name: "AllowAutoGameMode",
-                    value: RegistryValue::Dword(1),
-                    stock_value: RegistryValue::Dword(1),
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\GameBar",
-                    value_name: "UseNexusForGameBarEnabled",
-                    value: RegistryValue::Dword(1),
-                    stock_value: RegistryValue::Dword(1),
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\GameBar",
-                    value_name: "ShowStartupPanel",
-                    value: RegistryValue::Dword(1),
-                    stock_value: RegistryValue::Dword(1),
-                },
+                crate::reg_dword!("HKCU", r"Software\Microsoft\GameBar", "AutoGameModeEnabled", 1, 1),
+                crate::reg_dword!("HKCU", r"Software\Microsoft\GameBar", "AllowAutoGameMode", 1, 1),
+                crate::reg_dword!("HKCU", r"Software\Microsoft\GameBar", "UseNexusForGameBarEnabled", 1, 1),
+                crate::reg_dword!("HKCU", r"Software\Microsoft\GameBar", "ShowStartupPanel", 1, 1),
             ]),
         },
         crate::tweak! {
@@ -417,22 +257,10 @@ pub static PERFORMANCE_TWEAKS: &[Tweak] = &[
             description: "Enables DirectX Swap Effect Upgrade for better performance.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\DirectX\GraphicsSettings",
-                    value_name: "SwapEffectUpgradeCache",
-                    value: RegistryValue::Dword(1),
-                    stock_value: RegistryValue::Delete,
-                },
+                crate::reg_dword!("HKCU", r"Software\Microsoft\DirectX\GraphicsSettings", "SwapEffectUpgradeCache", 1, RegistryValue::Delete),
             ],
             disabled_ops: Some(&[
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\DirectX\GraphicsSettings",
-                    value_name: "SwapEffectUpgradeCache",
-                    value: RegistryValue::Delete,
-                    stock_value: RegistryValue::Delete,
-                },
+                crate::reg_del!("HKCU", r"Software\Microsoft\DirectX\GraphicsSettings", "SwapEffectUpgradeCache", RegistryValue::Delete),
             ]),
         },
         crate::tweak! {
@@ -442,64 +270,16 @@ pub static PERFORMANCE_TWEAKS: &[Tweak] = &[
             description: "Disables background recording of gameplay (GameDVR) to save resources.",
             effect: TweakEffect::Immediate,
             enabled_ops: &[
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\GameDVR",
-                    value_name: "HistoricalCaptureEnabled",
-                    value: RegistryValue::Dword(0),
-                    stock_value: RegistryValue::Dword(1),
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\GameDVR",
-                    value_name: "AppCaptureEnabled",
-                    value: RegistryValue::Dword(0),
-                    stock_value: RegistryValue::Dword(1),
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"System\GameConfigStore",
-                    value_name: "GameDVR_Enabled",
-                    value: RegistryValue::Dword(0),
-                    stock_value: RegistryValue::Dword(1),
-                },
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"SOFTWARE\Policies\Microsoft\Windows\GameDVR",
-                    value_name: "AllowGameDVR",
-                    value: RegistryValue::Dword(0),
-                    stock_value: RegistryValue::Delete,
-                },
+                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\GameDVR", "HistoricalCaptureEnabled", 0, 1),
+                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\GameDVR", "AppCaptureEnabled", 0, 1),
+                crate::reg_dword!("HKCU", r"System\GameConfigStore", "GameDVR_Enabled", 0, 1),
+                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\GameDVR", "AllowGameDVR", 0, RegistryValue::Delete),
             ],
             disabled_ops: Some(&[
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\GameDVR",
-                    value_name: "HistoricalCaptureEnabled",
-                    value: RegistryValue::Dword(1),
-                    stock_value: RegistryValue::Dword(1),
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Software\Microsoft\Windows\CurrentVersion\GameDVR",
-                    value_name: "AppCaptureEnabled",
-                    value: RegistryValue::Dword(1),
-                    stock_value: RegistryValue::Dword(1),
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"System\GameConfigStore",
-                    value_name: "GameDVR_Enabled",
-                    value: RegistryValue::Dword(1),
-                    stock_value: RegistryValue::Dword(1),
-                },
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"SOFTWARE\Policies\Microsoft\Windows\GameDVR",
-                    value_name: "AllowGameDVR",
-                    value: RegistryValue::Delete,
-                    stock_value: RegistryValue::Delete,
-                },
+                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\GameDVR", "HistoricalCaptureEnabled", 1, 1),
+                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\GameDVR", "AppCaptureEnabled", 1, 1),
+                crate::reg_dword!("HKCU", r"System\GameConfigStore", "GameDVR_Enabled", 1, 1),
+                crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\GameDVR", "AllowGameDVR", RegistryValue::Delete),
             ]),
         },
         crate::tweak! {
@@ -572,22 +352,10 @@ pub static PERFORMANCE_TWEAKS: &[Tweak] = &[
             description: "Configures the system timer resolution for lower latency.",
             effect: TweakEffect::Restart,
             enabled_ops: &[
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"SOFTWARE\Policies\Microsoft\Windows\Psched",
-                    value_name: "TimerResolution",
-                    value: RegistryValue::Dword(1),
-                    stock_value: RegistryValue::Delete,
-                },
+                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Psched", "TimerResolution", 1, RegistryValue::Delete),
             ],
             disabled_ops: Some(&[
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"SOFTWARE\Policies\Microsoft\Windows\Psched",
-                    value_name: "TimerResolution",
-                    value: RegistryValue::Delete,
-                    stock_value: RegistryValue::Delete,
-                },
+                crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Psched", "TimerResolution", RegistryValue::Delete),
             ]),
             requires_restart: true,
         },
@@ -598,22 +366,10 @@ pub static PERFORMANCE_TWEAKS: &[Tweak] = &[
             description: "Disables network throttling mechanism for non-multimedia traffic (default limits ~10 packets/ms).",
             effect: TweakEffect::Restart,
             enabled_ops: &[
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile",
-                    value_name: "NetworkThrottlingIndex",
-                    value: RegistryValue::Dword(0xffffffff),
-                    stock_value: RegistryValue::Dword(10), // Default is decimal 10 (0x0a)
-                },
+                crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile", "NetworkThrottlingIndex", 0xffffffff, 10),
             ],
             disabled_ops: Some(&[
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile",
-                    value_name: "NetworkThrottlingIndex",
-                    value: RegistryValue::Dword(10),
-                    stock_value: RegistryValue::Dword(10),
-                },
+                crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile", "NetworkThrottlingIndex", 10, 10),
             ]),
             requires_restart: true,
         },
@@ -624,50 +380,14 @@ pub static PERFORMANCE_TWEAKS: &[Tweak] = &[
             description: "Sets the system scheduler priority for gaming tasks to High.",
             effect: TweakEffect::Restart,
             enabled_ops: &[
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games",
-                    value_name: "Priority",
-                    value: RegistryValue::Dword(6),
-                    stock_value: RegistryValue::Dword(2),
-                },
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games",
-                    value_name: "Scheduling Category",
-                    value: RegistryValue::String("High"),
-                    stock_value: RegistryValue::String("Medium"),
-                },
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games",
-                    value_name: "SFIO Priority",
-                    value: RegistryValue::String("High"),
-                    stock_value: RegistryValue::String("Normal"),
-                },
+                crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games", "Priority", 6, 2),
+                crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games", "Scheduling Category", "High", "Medium"),
+                crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games", "SFIO Priority", "High", "Normal"),
             ],
             disabled_ops: Some(&[
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games",
-                    value_name: "Priority",
-                    value: RegistryValue::Dword(2),
-                    stock_value: RegistryValue::Dword(2),
-                },
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games",
-                    value_name: "Scheduling Category",
-                    value: RegistryValue::String("Medium"),
-                    stock_value: RegistryValue::String("Medium"),
-                },
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games",
-                    value_name: "SFIO Priority",
-                    value: RegistryValue::String("Normal"),
-                    stock_value: RegistryValue::String("Normal"),
-                },
+                crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games", "Priority", 2, 2),
+                crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games", "Scheduling Category", "Medium", "Medium"),
+                crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games", "SFIO Priority", "Normal", "Normal"),
             ]),
             requires_restart: true,
         },
@@ -691,6 +411,7 @@ pub static PERFORMANCE_TWEAKS: &[Tweak] = &[
                 let _ = crate::run_powershell_command(cmd);
                 Ok(())
             }),
+            command: Some("Get-WmiObject MSPower_DeviceEnable -Namespace root\\wmi | ForEach-Object { $_.enable = $false; $_.psbase.put() }"),
         },
         crate::tweak! {
             id: "disable_driver_updates",
@@ -699,50 +420,14 @@ pub static PERFORMANCE_TWEAKS: &[Tweak] = &[
             description: "Prevents Windows Update from automatically installing drivers.",
             effect: TweakEffect::Restart,
             enabled_ops: &[
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\DriverSearching",
-                    value_name: "SearchOrderConfig",
-                    value: RegistryValue::Dword(0),
-                    stock_value: RegistryValue::Dword(1),
-                },
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\DeviceSetup\Settings",
-                    value_name: "PreventDeviceDriverUpdate",
-                    value: RegistryValue::Dword(1),
-                    stock_value: RegistryValue::Dword(0),
-                },
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate",
-                    value_name: "ExcludeWUDriversInQualityUpdate",
-                    value: RegistryValue::Dword(1),
-                    stock_value: RegistryValue::Delete,
-                },
+                crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\DriverSearching", "SearchOrderConfig", 0, 1),
+                crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\DeviceSetup\Settings", "PreventDeviceDriverUpdate", 1, 0),
+                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate", "ExcludeWUDriversInQualityUpdate", 1, RegistryValue::Delete),
             ],
             disabled_ops: Some(&[
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\DriverSearching",
-                    value_name: "SearchOrderConfig",
-                    value: RegistryValue::Dword(1),
-                    stock_value: RegistryValue::Dword(1),
-                },
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\DeviceSetup\Settings",
-                    value_name: "PreventDeviceDriverUpdate",
-                    value: RegistryValue::Dword(0),
-                    stock_value: RegistryValue::Dword(0),
-                },
-                RegistryOp {
-                    hkey: "HKLM",
-                    subkey: r"SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate",
-                    value_name: "ExcludeWUDriversInQualityUpdate",
-                    value: RegistryValue::Delete,
-                    stock_value: RegistryValue::Delete,
-                },
+                crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\DriverSearching", "SearchOrderConfig", 1, 1),
+                crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\DeviceSetup\Settings", "PreventDeviceDriverUpdate", 0, 0),
+                crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate", "ExcludeWUDriversInQualityUpdate", RegistryValue::Delete),
             ]),
             requires_restart: true,
         },
@@ -754,25 +439,25 @@ pub static PERFORMANCE_TWEAKS: &[Tweak] = &[
             effect: TweakEffect::Restart,
             enabled_ops: &[
                 // Edge
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\Edge", value_name: "BackgroundModeEnabled", value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete },
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\Edge", value_name: "StartupBoostEnabled", value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete },
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\Edge", value_name: "UserFeedbackAllowed", value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete },
+                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "BackgroundModeEnabled", 0, RegistryValue::Delete),
+                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "StartupBoostEnabled", 0, RegistryValue::Delete),
+                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "UserFeedbackAllowed", 0, RegistryValue::Delete),
                 // Chrome
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Google\Chrome", value_name: "BackgroundModeEnabled", value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete },
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Google\Chrome", value_name: "MetricsReportingEnabled", value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete },
+                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Google\Chrome", "BackgroundModeEnabled", 0, RegistryValue::Delete),
+                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Google\Chrome", "MetricsReportingEnabled", 0, RegistryValue::Delete),
                 // Brave
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\BraveSoftware\Brave", value_name: "BackgroundModeEnabled", value: RegistryValue::Dword(0), stock_value: RegistryValue::Delete },
+                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\BraveSoftware\Brave", "BackgroundModeEnabled", 0, RegistryValue::Delete),
             ],
             disabled_ops: Some(&[
                 // Edge
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\Edge", value_name: "BackgroundModeEnabled", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\Edge", value_name: "StartupBoostEnabled", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Microsoft\Edge", value_name: "UserFeedbackAllowed", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
+                crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "BackgroundModeEnabled", RegistryValue::Delete),
+                crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "StartupBoostEnabled", RegistryValue::Delete),
+                crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "UserFeedbackAllowed", RegistryValue::Delete),
                 // Chrome
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Google\Chrome", value_name: "BackgroundModeEnabled", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\Google\Chrome", value_name: "MetricsReportingEnabled", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
+                crate::reg_del!("HKLM", r"SOFTWARE\Policies\Google\Chrome", "BackgroundModeEnabled", RegistryValue::Delete),
+                crate::reg_del!("HKLM", r"SOFTWARE\Policies\Google\Chrome", "MetricsReportingEnabled", RegistryValue::Delete),
                 // Brave
-                RegistryOp { hkey: "HKLM", subkey: r"SOFTWARE\Policies\BraveSoftware\Brave", value_name: "BackgroundModeEnabled", value: RegistryValue::Delete, stock_value: RegistryValue::Delete },
+                crate::reg_del!("HKLM", r"SOFTWARE\Policies\BraveSoftware\Brave", "BackgroundModeEnabled", RegistryValue::Delete),
             ]),
             requires_restart: true,
         },
@@ -783,50 +468,14 @@ pub static PERFORMANCE_TWEAKS: &[Tweak] = &[
             description: "Reduces the time Windows waits for hung apps to close during shutdown or when force-closing.",
             effect: TweakEffect::Restart,
             enabled_ops: &[
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Control Panel\Desktop",
-                    value_name: "WaitToKillAppTimeout",
-                    value: RegistryValue::String("2000"), // 2 seconds
-                    stock_value: RegistryValue::String("20000"), // Default 20 sec
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Control Panel\Desktop",
-                    value_name: "HungAppTimeout",
-                    value: RegistryValue::String("1000"), // 1 second
-                    stock_value: RegistryValue::String("5000"), // Default 5 sec
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Control Panel\Desktop",
-                    value_name: "AutoEndTasks",
-                    value: RegistryValue::String("1"),
-                    stock_value: RegistryValue::String("0"),
-                },
+                crate::reg_str!("HKCU", r"Control Panel\Desktop", "WaitToKillAppTimeout", "2000", "20000"),
+                crate::reg_str!("HKCU", r"Control Panel\Desktop", "HungAppTimeout", "1000", "5000"),
+                crate::reg_str!("HKCU", r"Control Panel\Desktop", "AutoEndTasks", "1", "0"),
             ],
             disabled_ops: Some(&[
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Control Panel\Desktop",
-                    value_name: "WaitToKillAppTimeout",
-                    value: RegistryValue::String("20000"),
-                    stock_value: RegistryValue::String("20000"),
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Control Panel\Desktop",
-                    value_name: "HungAppTimeout",
-                    value: RegistryValue::String("5000"),
-                    stock_value: RegistryValue::String("5000"),
-                },
-                RegistryOp {
-                    hkey: "HKCU",
-                    subkey: r"Control Panel\Desktop",
-                    value_name: "AutoEndTasks",
-                    value: RegistryValue::String("0"),
-                    stock_value: RegistryValue::String("0"),
-                },
+                crate::reg_str!("HKCU", r"Control Panel\Desktop", "WaitToKillAppTimeout", "20000", "20000"),
+                crate::reg_str!("HKCU", r"Control Panel\Desktop", "HungAppTimeout", "5000", "5000"),
+                crate::reg_str!("HKCU", r"Control Panel\Desktop", "AutoEndTasks", "0", "0"),
             ]),
             requires_restart: true,
         },
@@ -837,44 +486,43 @@ pub static PERFORMANCE_TWEAKS: &[Tweak] = &[
                 description: "Sets visual effects to performance mode while keeping useful effects enabled.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects",
-                                value_name: "VisualFXSetting",
-                                value: RegistryValue::Dword(3),
-                                stock_value: RegistryValue::Delete
-        },
+                        crate::reg_dword!("HKCU", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects", "VisualFXSetting", 3, RegistryValue::Delete),
                         // Keep listview alpha selection
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced",
-                                value_name: "ListviewAlphaSelect",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Dword(1)
-        },
+                        crate::reg_dword!("HKCU", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ListviewAlphaSelect", 1, 1),
                         // Keep listview shadows
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced",
-                                value_name: "ListviewShadow",
-                                value: RegistryValue::Dword(1),
-                                stock_value: RegistryValue::Dword(1)
-        },
+                        crate::reg_dword!("HKCU", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ListviewShadow", 1, 1),
                         // Keep font smoothing
-                        RegistryOp {
-                                hkey: "HKCU",
-                                subkey: r"Control Panel\Desktop",
-                                value_name: "FontSmoothing",
-                                value: RegistryValue::String("2"),
-                                stock_value: RegistryValue::String("2")
-                        }
+                        crate::reg_str!("HKCU", r"Control Panel\Desktop", "FontSmoothing", "2", "2"),
                 ],
-                disabled_ops: Some(&[RegistryOp {
-                        hkey: "HKCU",
-                        subkey: r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects",
-                        value_name: "VisualFXSetting",
-                        value: RegistryValue::Dword(0),
-                        stock_value: RegistryValue::Delete
-                }])
+                disabled_ops: Some(&[
+                        crate::reg_del!("HKCU", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects", "VisualFXSetting", RegistryValue::Delete),
+                ])
+        },
+        crate::tweak! {
+            id: "optimize_platform_tick",
+            category: "performance",
+            name: "Optimize Platform Tick & Timers",
+            description: "Optimizes system timers by disabling dynamic tick and enhancing TSC synchronization (BCD).",
+            effect: TweakEffect::Restart,
+            enabled_ops: &[],
+            disabled_ops: None,
+            custom_apply: Some(|ctx| {
+                ctx.post_status("Optimizing platform tick...");
+                let _ = crate::run_system_command("bcdedit", &["/deletevalue", "useplatformclock"]);
+                let _ = crate::run_system_command("bcdedit", &["/deletevalue", "useplatformtick"]);
+                let _ = crate::run_system_command("bcdedit", &["/set", "disabledynamictick", "yes"]);
+                let _ = crate::run_system_command("bcdedit", &["/set", "tscsyncpolicy", "enhanced"]);
+                Ok(())
+            }),
+            custom_revert: Some(|ctx| {
+                ctx.post_status("Reverting platform tick optimization...");
+                let _ = crate::run_system_command("bcdedit", &["/deletevalue", "useplatformclock"]);
+                let _ = crate::run_system_command("bcdedit", &["/deletevalue", "useplatformtick"]);
+                let _ = crate::run_system_command("bcdedit", &["/deletevalue", "disabledynamictick"]);
+                let _ = crate::run_system_command("bcdedit", &["/deletevalue", "tscsyncpolicy"]);
+                Ok(())
+            }),
+            requires_restart: true,
+            command: Some("bcdedit /deletevalue useplatformclock\nbcdedit /deletevalue useplatformtick\nbcdedit /set disabledynamictick yes\nbcdedit /set tscsyncpolicy enhanced"),
         },
 ];
