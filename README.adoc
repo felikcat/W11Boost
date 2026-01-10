@@ -13,7 +13,7 @@ endif::[]
 == W11Boost
 A sizable customization suite for Windows 10 and 11 that can also repair your system in terms of tweaks (not file corruption), and is small enough to be distributed via Discord or other social media platforms.
 
-W11Boost does make a system restore point and can apply Windows defaults on its own if for any reason it's unsatisfactory.
+W11Boost does automatically make a system restore point if for any reason it's unsatisfactory; this works even if system restore points are disabled.
 
 image:https://sonarcloud.io/images/project_badges/sonarcloud-highlight.svg[link=https://sonarcloud.io/summary/new_code?id=felikcat_W11Boost]
 
