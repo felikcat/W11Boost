@@ -1,6 +1,6 @@
 // System Tools tweaks
 
-use super::{RegistryValue, Tweak, TweakEffect};
+use super::{Tweak, TweakEffect};
 
 pub static TOOLS_TWEAKS: &[Tweak] = &[
         crate::tweak! {
@@ -16,14 +16,7 @@ pub static TOOLS_TWEAKS: &[Tweak] = &[
                         crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows Photo Viewer\Capabilities\FileAssociations", ".jpg", "PhotoViewer.FileAssoc.Tiff", RegistryValue::Delete),
                         crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows Photo Viewer\Capabilities\FileAssociations", ".png", "PhotoViewer.FileAssoc.Tiff", RegistryValue::Delete),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows Photo Viewer\Capabilities\FileAssociations", ".bmp", RegistryValue::Delete),
-                        crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows Photo Viewer\Capabilities\FileAssociations", ".gif", RegistryValue::Delete),
-                        crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows Photo Viewer\Capabilities\FileAssociations", ".jpeg", RegistryValue::Delete),
-                        crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows Photo Viewer\Capabilities\FileAssociations", ".jpg", RegistryValue::Delete),
-                        crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows Photo Viewer\Capabilities\FileAssociations", ".png", RegistryValue::Delete),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "restore_point_frequency",
                 category: "tools",
@@ -33,10 +26,7 @@ pub static TOOLS_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\SystemRestore", "SystemRestorePointCreationFrequency", 0),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\SystemRestore", "SystemRestorePointCreationFrequency", RegistryValue::Delete),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "enable_registry_backup",
                 category: "tools",
@@ -46,10 +36,7 @@ pub static TOOLS_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Control\Session Manager\Configuration Manager", "EnablePeriodicBackup", 1),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SYSTEM\CurrentControlSet\Control\Session Manager\Configuration Manager", "EnablePeriodicBackup", RegistryValue::Delete),
-                ]),
-                requires_restart: true
+                                requires_restart: true
         },
         crate::tweak! {
                 id: "disable_auto_maintenance",
@@ -60,10 +47,7 @@ pub static TOOLS_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\Maintenance", "MaintenanceDisabled", 1),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\Maintenance", "MaintenanceDisabled", RegistryValue::Delete),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "reset_windows_store",
                 category: "tools",
@@ -71,8 +55,7 @@ pub static TOOLS_TWEAKS: &[Tweak] = &[
                 description: "Resets the Microsoft Store cache and re-registers the app.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[],
-                disabled_ops: None,
-                custom_apply: Some(|ctx| {
+                                custom_apply: Some(|ctx| {
                         ctx.post_status("Running wsreset.exe -i...");
                         crate::run_system_command("wsreset.exe", &["-i"])?;
                         ctx.report_progress();
@@ -89,11 +72,7 @@ pub static TOOLS_TWEAKS: &[Tweak] = &[
                         crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\OEMInformation", "Manufacturer", "W11Boost", RegistryValue::Delete),
                         crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\OEMInformation", "SupportURL", "https://github.com/Admin/W11Boost", RegistryValue::Delete),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\OEMInformation", "Manufacturer", RegistryValue::Delete),
-                        crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\OEMInformation", "SupportURL", RegistryValue::Delete),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "set_registered_owner",
                 category: "tools",
@@ -103,8 +82,5 @@ pub static TOOLS_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows NT\CurrentVersion", "RegisteredOwner", "W11Boost User", "epic"),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows NT\CurrentVersion", "RegisteredOwner", "Windows User", "Windows User"),
-                ])
-        },
+                },
 ];

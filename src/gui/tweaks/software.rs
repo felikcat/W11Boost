@@ -21,8 +21,7 @@ macro_rules! winget_tweak {
                     description: $desc,
                     effect: TweakEffect::Immediate,
                     enabled_ops: &[],
-                    disabled_ops: None,
-                    custom_apply: Some(|ctx| install_winget($package_id, $args, ctx))
+                                        custom_apply: Some(|ctx| install_winget($package_id, $args, ctx))
                 }
         };
 }

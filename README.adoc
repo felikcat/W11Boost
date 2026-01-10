@@ -10,13 +10,19 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
-NOTE: This project uses AI written code, version 1.6.2 is the last version without AI use. +
-I think it's much better than prior releases, but ultimately it's up to you to decide on whether to use it.
+== W11Boost
+A sizable customization suite for Windows 10 and 11 that can also repair your system in terms of tweaks (not file corruption), and is small enough to be distributed via Discord or other social media platforms.
+
+W11Boost does make a system restore point and can apply Windows defaults on its own if for any reason it's unsatisfactory.
+
+image:https://sonarcloud.io/images/project_badges/sonarcloud-highlight.svg[link=https://sonarcloud.io/summary/new_code?id=felikcat_W11Boost]
 
 == How to use
-Go to the https://github.com/felikcat/W11Boost/releases[latest releases] and download W11Boost, run it, pick out what options you want.
+. Go to the https://github.com/felikcat/W11Boost/releases[latest releases] to download W11Boost.
 
-TIP: I would run W11Boost in a virtual machine first to verify functionality, and get a feel for what changes you want to make.
+. Run W11Boost in a virtual machine first to verify functionality, and get a feel for what changes you want to make.
+
+- There are default changes that some people won't want, such as preventing as much connections to Microsoft as much as possible; that includes any form of cloud syncing / convienence features that sacrifice your privacy and add some weight to your system.
 
 image:W11Boost_GUI.png[960,720]
 

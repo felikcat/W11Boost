@@ -39,9 +39,6 @@ path = "src/lib.rs"
 name = "W11Boost"
 path = "src/main.rs"
 
-[[bin]]
-name = "registry-dump"
-path = "src/bin/registry-dump.rs"
 
 [package.metadata.winresource]
 CompanyName = "felikcat"
@@ -53,15 +50,18 @@ ProductName = "W11Boost"
 # A balance between runtime performance, size, and keeping compile times low
 [profile.release]
 strip = true
-opt-level = "s"
-lto = "thin"
+opt-level = "z"
+lto = "fat"
 
 [dependencies]
 anyhow = "1.0.100"
-eframe = { version = "0.33.3", default-features = false, features = ["glow", "default_fonts"] }
+eframe = { version = "0.33.3", default-features = false, features = [
+    "glow",
+    "default_fonts",
+] }
 serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-rfd = "0.17"
+serde_json = "1.0.149"
+rfd = "0.17.1"
 raw-window-handle = "0.6"
 rayon = "1.11"
 
@@ -73,6 +73,7 @@ features = [
     "Win32_UI_WindowsAndMessaging",
     "Win32_System_Registry",
     "Win32_Security",
+    "Win32_Security_Authorization",
     "Win32_System_Threading",
     "Win32_System_Services",
     "Win32_System_Diagnostics_ToolHelp",
@@ -80,6 +81,11 @@ features = [
     "Win32_System_Com",
     "Win32_System_GroupPolicy",
     "Win32_Graphics_Dwm",
+    "Win32_System_Environment",
+    "Win32_Storage_FileSystem",
+    "Win32_System_Pipes",
+    "Win32_System_IO",
+    "Win32_System_SystemInformation",
 ]
 
 [build-dependencies]

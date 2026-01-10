@@ -4,7 +4,7 @@ use std::sync::{Arc, Mutex};
 
 use super::config::{TweakConfig, get_config_dir};
 use super::shared_state::{SharedState, WorkerContext};
-use super::state::{SelectionState, TweakStates, ViewMode};
+use super::state::{SelectionState, TweakStates, ViewMode, NavigationEntry};
 use super::theme;
 use super::tweaks::{CATEGORIES, Tweak, apply_tweak, get_all_tweaks, get_tweaks_for_category};
 use super::widgets;
@@ -33,6 +33,9 @@ pub struct W11BoostApp
         // State for searching within custom input boxes
         pub input_search_query: String,
         pub input_search_visible: bool,
+        // Navigation history
+        pub back_stack: Vec<NavigationEntry>,
+        pub forward_stack: Vec<NavigationEntry>,
 }
 
 impl W11BoostApp
@@ -71,6 +74,8 @@ impl W11BoostApp
                         dark_mode_enforced: false,
                         input_search_query: String::new(),
                         input_search_visible: false,
+                        back_stack: Vec::new(),
+                        forward_stack: Vec::new(),
                 }
         }
 
@@ -96,7 +101,7 @@ impl W11BoostApp
                         .collect()
         }
 
-        fn spawn_tweaks_worker(&self, ctx: egui::Context)
+        fn spawn_tweaks_worker(&self, ctx: egui::Context, skip_restore_point: bool)
         {
                 let enabled_tweaks = self.get_enabled_tweaks();
                 let total_ops: u32 = enabled_tweaks.iter().map(|t| t.op_count()).sum();
@@ -111,6 +116,40 @@ impl W11BoostApp
                 std::thread::spawn(move || {
                         let worker_ctx = WorkerContext::new(shared, ctx, total_ops, input_values);
 
+                        if !skip_restore_point {
+                                worker_ctx.post_status("Creating System Restore Point...");
+
+                                // Logic to create a system restore point
+                                // 1. Force SystemRestorePointCreationFrequency to 0 to bypass the 24h limit.
+                                // 2. Create the restore point.
+                                // 3. Revert SystemRestorePointCreationFrequency if the user did NOT enable the tweak to remove the limit.
+
+                                let restore_point_tweak_id = "restore_point_frequency";
+                                let restore_point_limit_removed = tweak_ids.contains(&restore_point_tweak_id);
+
+                                // Ensure we can create a restore point by setting frequency to 0
+                                let _ = crate::common::run_system_command("reg", &["add", r"HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\SystemRestore", "/v", "SystemRestorePointCreationFrequency", "/t", "REG_DWORD", "/d", "0", "/f"]);
+
+                                // Force enable System Protection for C: drive
+                                if let Err(e) = crate::common::run_powershell_command("Enable-ComputerRestore -Drive 'C:\\'") {
+                                        worker_ctx.post_error(format!("Failed to enable System Protection: {}", e));
+                                }
+
+                                // Attempt to create the restore point
+                                // We use Checkpoint-Computer which is available on Win10/11
+                                if let Err(e) = crate::common::run_powershell_command("Checkpoint-Computer -Description 'W11Boost Auto-Restore' -RestorePointType 'MODIFY_SETTINGS' -ErrorAction SilentlyContinue") {
+                                        worker_ctx.post_error(format!("Failed to create restore point: {}", e));
+                                }
+
+                                // Revert the registry change if the user didn't ask for it
+                                if !restore_point_limit_removed {
+                                        // Default behavior is usually that the key doesn't exist or is set to default (we delete it to be safe/clean)
+                                        let _ = crate::common::run_system_command("reg", &["delete", r"HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\SystemRestore", "/v", "SystemRestorePointCreationFrequency", "/f"]);
+                                }
+                        } else {
+                                worker_ctx.post_status("Skipping Restore Point...");
+                        }
+
                         tweak_ids.into_par_iter().for_each(|tweak_id| {
                                 // Find the tweak again in the static data
                                 if let Some(tweak) = get_all_tweaks().into_iter().find(|t| t.id == tweak_id) {
@@ -124,26 +163,6 @@ impl W11BoostApp
                 });
         }
 
-        fn spawn_remove_worker(&self, ctx: egui::Context)
-        {
-                let enabled_tweaks = self.get_enabled_tweaks();
-                let total_ops = enabled_tweaks.len() as u32;
-                let shared = Arc::clone(&self.shared);
-
-                // Collect tweaks to revert
-                let tweaks_to_revert: Vec<&'static Tweak> = enabled_tweaks;
-                let input_values = self.tweak_states.input_values.clone();
-
-                std::thread::spawn(move || {
-                        let worker_ctx = WorkerContext::new(shared, ctx, total_ops, input_values);
-                        let result = crate::gui::remove_w11boost::run_revert(&worker_ctx, tweaks_to_revert);
-
-                        match result {
-                                Ok(()) => worker_ctx.post_complete(),
-                                Err(e) => worker_ctx.post_error(format!("{e}")),
-                        }
-                });
-        }
 
         fn save_config(&self)
         {
@@ -205,6 +224,64 @@ impl W11BoostApp
                 }
         }
 
+        fn current_nav_state(&self) -> NavigationEntry
+        {
+                NavigationEntry {
+                        mode: self.mode,
+                        selected_category: self.selection.selected_category.clone(),
+                        selected_tweak: self.selection.selected_tweak.clone(),
+                        search_query: self.search_query.clone(),
+                }
+        }
+
+        fn apply_nav_state(&mut self, state: NavigationEntry)
+        {
+                self.mode = state.mode;
+                self.selection.selected_category = state.selected_category;
+                self.selection.selected_tweak = state.selected_tweak;
+                self.search_query = state.search_query;
+        }
+
+        fn navigate_to(&mut self, mode: ViewMode, category: Option<String>, tweak: Option<String>)
+        {
+                // Capture current state
+                let current = self.current_nav_state();
+
+                // Only push to history if new state is different
+                let new_state = NavigationEntry {
+                        mode,
+                        selected_category: category.clone(),
+                        selected_tweak: tweak.clone(),
+                        search_query: self.search_query.clone(), // Preserve search query by default
+                };
+
+                if current != new_state {
+                        self.back_stack.push(current);
+                        self.forward_stack.clear();
+                        self.apply_nav_state(new_state);
+                }
+        }
+
+        fn navigate_back(&mut self)
+        {
+                if let Some(prev) = self.back_stack.pop() {
+                        let current = self.current_nav_state();
+                        self.forward_stack.push(current);
+                        self.apply_nav_state(prev);
+                }
+        }
+
+        fn navigate_forward(&mut self)
+        {
+                if let Some(next) = self.forward_stack.pop() {
+                        let current = self.current_nav_state();
+                        self.back_stack.push(current);
+                        self.apply_nav_state(next);
+                }
+        }
+
+        /// Render the left sidebar with category tree
+
         /// Render the left sidebar with category tree
         pub fn render_sidebar(&mut self, ui: &mut egui::Ui)
         {
@@ -225,9 +302,7 @@ impl W11BoostApp
                                         .fill(ui.style().visuals.faint_bg_color))
                                         .clicked()
                                 {
-                                        self.selection.selected_category = None;
-                                        self.selection.selected_tweak = None;
-                                        self.mode = ViewMode::Tweaks;
+                                        self.navigate_to(ViewMode::Tweaks, None, None);
                                 }
                         });
 
@@ -353,9 +428,7 @@ impl W11BoostApp
                 );
 
                 if response.clicked() {
-                        self.selection.selected_category = Some(category.id.to_string());
-                        self.selection.selected_tweak = None;
-                        self.mode = ViewMode::Tweaks;
+                        self.navigate_to(ViewMode::Tweaks, Some(category.id.to_string()), None);
 
                         // Toggle expansion on click
                         self.selection
@@ -389,9 +462,11 @@ impl W11BoostApp
                                 );
 
                                 if response.clicked() {
-                                        self.selection.selected_category = Some(category_id.to_string());
-                                        self.selection.selected_tweak = Some(tweak.id.to_string());
-                                        self.mode = ViewMode::Tweaks;
+                                        self.navigate_to(
+                                                ViewMode::Tweaks,
+                                                Some(category_id.to_string()),
+                                                Some(tweak.id.to_string()),
+                                        );
                                 }
                         }
                 });
@@ -413,8 +488,8 @@ impl W11BoostApp
                         ViewMode::ConfirmApply => {
                                 self.render_confirm_apply(ui);
                         }
-                        ViewMode::ConfirmRemove => {
-                                self.render_confirm_remove(ui);
+                        ViewMode::ConfirmRestorePoint => {
+                                self.render_confirm_restore_point(ui);
                         }
                         ViewMode::ConfirmUnsetAll => {
                                 self.render_confirm_unset_all(ui);
@@ -428,7 +503,7 @@ impl W11BoostApp
         fn render_selected_tweaks(&mut self, ui: &mut egui::Ui)
         {
                 if ui.button(RichText::new("\u{2190}  Back to Tweaks").strong()).clicked() {
-                        self.mode = ViewMode::Tweaks;
+                        self.navigate_back();
                 }
                 ui.add_space(20.0);
 
@@ -477,9 +552,7 @@ impl W11BoostApp
                         ));
 
                 if ui.add(button).on_hover_text(category.description).clicked() {
-                        self.selection.selected_category = Some(category.id.to_string());
-                        self.selection.selected_tweak = None;
-                        self.mode = ViewMode::Tweaks;
+                        self.navigate_to(ViewMode::Tweaks, Some(category.id.to_string()), None);
                 }
         }
 
@@ -489,7 +562,7 @@ impl W11BoostApp
                 ui.vertical_centered(|ui| {
                         ui.heading(RichText::new("Welcome to W11Boost").size(32.0).strong());
                         ui.add_space(12.0);
-                        ui.label(RichText::new("A sizeable customization suite.").size(16.0).weak());
+                        ui.label(RichText::new("A sizable customization suite.").size(16.0).weak());
                         ui.add_space(20.0);
                         
                         ui.group(|ui| {
@@ -563,7 +636,6 @@ impl W11BoostApp
                         ui.vertical(|ui| {
                                 ui.horizontal(|ui| {
                                         ui.label(RichText::new(tweak.name).strong().size(16.0));
-                                        widgets::render_effect_badge(ui, tweak.effect);
                                 });
 
                                 ui.label(RichText::new(tweak.description).small().weak());
@@ -658,7 +730,11 @@ impl W11BoostApp
                 });
 
                 if response.clicked() {
-                        self.selection.selected_tweak = Some(tweak.id.to_string());
+                        self.navigate_to(
+                                ViewMode::Tweaks,
+                                self.selection.selected_category.clone(),
+                                Some(tweak.id.to_string()),
+                        );
                 }
         }
 
@@ -716,10 +792,7 @@ impl W11BoostApp
 
         fn render_tweak_metadata_panel(&mut self, ui: &mut egui::Ui, tweak: &'static Tweak)
         {
-                ui.columns(2, |columns| {
-                        widgets::render_tweak_description_column(&mut columns[0], tweak);
-                        widgets::render_tweak_impact_column(&mut columns[1], tweak);
-                });
+                widgets::render_tweak_description_column(ui, tweak);
         }
 
         fn render_tweak_subtweak_list(&mut self, ui: &mut egui::Ui, tweak: &'static Tweak)
@@ -761,7 +834,11 @@ impl W11BoostApp
                 if ui.button(RichText::new("\u{2190}  Back to category").strong())
                         .clicked()
                 {
-                        self.selection.selected_tweak = None;
+                        self.navigate_to(
+                                ViewMode::Tweaks,
+                                self.selection.selected_category.clone(),
+                                None,
+                        );
                 }
                 ui.add_space(24.0);
 
@@ -912,7 +989,7 @@ impl W11BoostApp
                         )
                         .clicked()
                         {
-                                self.mode = ViewMode::Tweaks;
+                                self.navigate_back();
                         }
                 });
         }
@@ -933,45 +1010,112 @@ impl W11BoostApp
 
                         ui.add_space(8.0);
                         ui.label(RichText::new(
-                                "\u{26A0} It is highly recommended to create a System Restore point first.",
+                                "\u{2139} An automatic System Restore point will be created before applying changes.",
                         )
-                        .color(Color32::from_rgb(255, 180, 50)));
+                        .color(Color32::from_rgb(100, 200, 255)));
 
                         ui.add_space(40.0);
 
                         self.render_confirm_buttons(ui, "Apply Changes", None, |slf, ctx| {
-                                slf.spawn_tweaks_worker(ctx.clone());
-                                slf.mode = ViewMode::Tweaks;
+                                // Check for existing restore point
+                                // Command: Get-ComputerRestorePoint | Where-Object { $_.Description -eq 'W11Boost Auto-Restore' }
+                                let (success, stdout, _) = crate::common::run_system_command_output(
+                                        "powershell.exe",
+                                        &[
+                                                "-NoProfile",
+                                                "-Command",
+                                                "Get-ComputerRestorePoint | Where-Object { $_.Description -eq 'W11Boost Auto-Restore' }",
+                                        ],
+                                ).unwrap_or((false, String::new(), String::new()));
+
+                                if success && !stdout.trim().is_empty() {
+                                        // Found existing restore point
+                                        slf.navigate_to(ViewMode::ConfirmRestorePoint, slf.selection.selected_category.clone(), slf.selection.selected_tweak.clone());
+                                } else {
+                                        // No existing restore point or error checking, proceed as usual
+                                        slf.spawn_tweaks_worker(ctx.clone(), false);
+                                        slf.navigate_back();
+                                }
                         });
                 });
         }
 
-        fn render_confirm_remove(&mut self, ui: &mut egui::Ui)
+        fn render_confirm_restore_point(&mut self, ui: &mut egui::Ui)
         {
                 ui.vertical_centered(|ui| {
                         ui.add_space(60.0);
-                        ui.heading(RichText::new("Remove W11Boost?").size(36.0).strong());
+                        ui.heading(RichText::new("Restore Point Exists").size(36.0).strong());
                         ui.add_space(16.0);
 
                         ui.label(RichText::new(
-                                "This will attempt to revert all registry changes made by this application.",
+                                "A 'W11Boost Auto-Restore' point was already created recently.",
                         )
                         .size(18.0)
                         .weak());
+                        
                         ui.add_space(8.0);
-                        ui.label(RichText::new("Are you sure you want to continue?")
-                                .strong()
-                                .color(Color32::from_rgb(255, 100, 100)));
+                        ui.label("You can skip creating a new one to save time, or create another one just in case.");
 
                         ui.add_space(40.0);
 
-                        let remove_color = Color32::from_rgb(140, 60, 60);
-                        self.render_confirm_buttons(ui, "Confirm Removal", Some(remove_color), |slf, ctx| {
-                                slf.spawn_remove_worker(ctx.clone());
-                                slf.mode = ViewMode::Tweaks;
+                        ui.horizontal(|ui| {
+                                ui.add_space(ui.available_width() / 2.0 - 230.0);
+
+                                // Create New Button
+                                if ui.add(
+                                        egui::Button::new(RichText::new("Create New").strong().size(18.0))
+                                                .min_size(egui::vec2(140.0, 44.0))
+                                                .fill(ui.style().visuals.selection.stroke.color)
+                                )
+                                .clicked()
+                                {
+                                        self.spawn_tweaks_worker(ui.ctx().clone(), false);
+                                        // Navigate back twice (ConfirmRestorePoint -> ConfirmApply -> Tweaks)
+                                        // Or just clear stack and go to Tweaks? navigate_back puts us in ConfirmApply which isn't ideal after starting.
+                                        // Let's rely on the fact that we came from ConfirmApply, so popping once goes there.
+                                        // But we want to go "back" to the main view usually.
+                                        // Implementing "navigate_back" takes us to ConfirmApply.
+                                        // Ideally we want to exit the confirmation flow.
+                                        // Let's just pop twice manually or do what navigate_back does but twice?
+                                        // For now, let's just go back to where we were before ConfirmApply
+                                        // Which means popping twice from back_stack?
+                                        // Actually spawn_tweaks_worker is async, we should probably just return to the main view.
+                                        // Let's assume the previous flow: ConfirmApply -> navigate_back() (which was main view).
+                                        // So we need to go back twice.
+                                        self.navigate_back(); // To ConfirmApply
+                                        self.navigate_back(); // To Main View
+                                }
+
+                                ui.add_space(16.0);
+
+                                // Skip Button
+                                if ui.add(
+                                        egui::Button::new(RichText::new("Skip & Apply").strong().size(18.0))
+                                                .min_size(egui::vec2(140.0, 44.0))
+                                                .fill(Color32::from_rgb(100, 180, 100)) // Greenish
+                                )
+                                .clicked()
+                                {
+                                        self.spawn_tweaks_worker(ui.ctx().clone(), true);
+                                        self.navigate_back();
+                                        self.navigate_back();
+                                }
+
+                                ui.add_space(16.0);
+
+                                // Cancel Button
+                                if ui.add(
+                                        egui::Button::new(RichText::new("Cancel").size(18.0))
+                                                .min_size(egui::vec2(120.0, 44.0))
+                                )
+                                .clicked()
+                                {
+                                        self.navigate_back();
+                                }
                         });
                 });
         }
+
 
         fn render_confirm_unset_all(&mut self, ui: &mut egui::Ui)
         {
@@ -996,7 +1140,7 @@ impl W11BoostApp
                                         *state = false;
                                 }
                                 slf.autosave();
-                                slf.mode = ViewMode::Tweaks;
+                                slf.navigate_back();
                         });
                 });
         }
@@ -1032,13 +1176,9 @@ impl W11BoostApp
         }
 
         fn render_bottom_buttons_nav(&mut self, ui: &mut egui::Ui) {
-             if ui.button("Remove W11Boost").clicked() {
-                    self.mode = ViewMode::ConfirmRemove;
-            }
-
-            if ui.button("Show Selected").clicked() {
-                    self.mode = ViewMode::SelectedTweaks;
-            }
+             if ui.button("Show Selected").clicked() {
+                     self.navigate_to(ViewMode::SelectedTweaks, self.selection.selected_category.clone(), self.selection.selected_tweak.clone());
+             }
 
             ui.separator();
 
@@ -1050,9 +1190,9 @@ impl W11BoostApp
                     self.load_config();
             }
 
-            if ui.button("Unset all tweaks").clicked() {
-                    self.mode = ViewMode::ConfirmUnsetAll;
-            }
+             if ui.button("Unset all tweaks").clicked() {
+                     self.navigate_to(ViewMode::ConfirmUnsetAll, self.selection.selected_category.clone(), self.selection.selected_tweak.clone());
+             }
 
             ui.separator();
 
@@ -1078,7 +1218,7 @@ impl W11BoostApp
                                 .clicked()
                                 && enabled_count > 0
                         {
-                                self.mode = ViewMode::ConfirmApply;
+                                self.navigate_to(ViewMode::ConfirmApply, self.selection.selected_category.clone(), self.selection.selected_tweak.clone());
                         }
 
                         self.render_bottom_buttons_nav(ui);
@@ -1193,7 +1333,23 @@ impl W11BoostApp
                                 bottom: 0,
                         }))
                         .show(ctx, |ui| {
-                                ScrollArea::vertical().auto_shrink([false, false]).show(ui, |ui| {
+                                // Use a unique ID based on the current view state to persist scroll position
+                                let scroll_id = if let Some(tweak) = &self.selection.selected_tweak {
+                                        format!("scroll_tweak_{}", tweak)
+                                } else if let Some(cat) = &self.selection.selected_category {
+                                        format!("scroll_cat_{}", cat)
+                                } else {
+                                        match self.mode {
+                                                ViewMode::Tweaks => "scroll_main".to_string(),
+                                                ViewMode::SelectedTweaks => "scroll_selected".to_string(),
+                                                _ => "scroll_other".to_string(),
+                                        }
+                                };
+                                
+                                ScrollArea::vertical()
+                                        .id_salt(scroll_id)
+                                        .auto_shrink([false, false])
+                                        .show(ui, |ui| {
                                         ui.set_min_width(ui.available_width());
                                         egui::Frame::NONE
                                                 .inner_margin(egui::Margin {
@@ -1214,6 +1370,15 @@ impl eframe::App for W11BoostApp
 {
         fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame)
         {
+                // Handle mouse navigation (Back/Forward)
+                ctx.input(|i| {
+                        if i.pointer.button_pressed(egui::PointerButton::Extra1) {
+                                self.navigate_back();
+                        } else if i.pointer.button_pressed(egui::PointerButton::Extra2) {
+                                self.navigate_forward();
+                        }
+                });
+
                 #[cfg(windows)]
                 if !self.dark_mode_enforced {
                         enforce_dark_mode(frame);

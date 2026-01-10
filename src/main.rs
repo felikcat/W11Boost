@@ -20,29 +20,59 @@
         clippy::question_mark_used
 )]
 
+use w11boost::common;
 use w11boost::gui;
 
 use std::panic;
-use windows::Win32::UI::WindowsAndMessaging::{MB_ICONERROR, MB_OK, MessageBoxW};
-use windows::core::PCWSTR;
 
-fn show_error_box(title: &str, message: &str)
+fn is_network_path() -> bool
 {
-        let msg_wide: Vec<u16> = message.encode_utf16().chain(std::iter::once(0)).collect();
-        let title_wide: Vec<u16> = title.encode_utf16().chain(std::iter::once(0)).collect();
-        unsafe {
-                MessageBoxW(
-                        None,
-                        PCWSTR(msg_wide.as_ptr()),
-                        PCWSTR(title_wide.as_ptr()),
-                        MB_OK | MB_ICONERROR,
-                );
-        }
+        let Ok(exe_path) = std::env::current_exe() else {
+                return false;
+        };
+
+        let path_str = exe_path.to_string_lossy();
+        // UNC paths start with \\ (e.g., \\server\share\...)
+        path_str.starts_with(r"\\")
 }
 
 fn main()
 {
-        // Set up panic handler to show message box
+        let args: Vec<String> = std::env::args().collect();
+
+        // Check for service mode first
+        if args.len() > 1 && args[1] == "--service" {
+                if let Err(e) = w11boost::service::run() {
+                        // We can't easily log to GUI, so just log to file
+                        common::log_debug("service", &format!("Service run failed: {}", e));
+                }
+                return;
+        }
+
+        common::log_debug("main", &format!("main() started, args: {:?}", args));
+
+        // Block running from network drives - TrustedInstaller cannot access UNC paths
+        if is_network_path() {
+                common::log_debug("main", "ERROR: Running from network drive detected, exiting");
+                rfd::MessageDialog::new()
+			.set_title("W11Boost")
+			.set_description("W11Boost cannot run from a network drive.\n\nPlease copy the files to a local drive and try again.")
+			.set_level(rfd::MessageLevel::Error)
+			.show();
+                return;
+        }
+
+        common::log_debug("main", "Local path verified, starting GUI mode");
+        // Start W11BoostSvc for privileged operations (Mandatory coupling)
+        if let Err(e) = w11boost::service_client::ensure_service_running() {
+                common::log_debug("main", &format!("Failed to start service: {}", e));
+                eprintln!("Service Error: Failed to start background service:\n{}", e);
+                // We continue? Yes, but features will fail.
+        } else {
+                common::log_debug("main", "Service started successfully");
+        }
+
+        // Set up panic handler to log to stderr
         panic::set_hook(Box::new(|info| {
                 let location = info
                         .location()
@@ -57,10 +87,12 @@ fn main()
                         format!("Panic occurred\n\nLocation: {location}")
                 };
 
-                show_error_box("W11Boost Panic", &msg);
+                eprintln!("{}", msg);
+                common::log_debug("main", &format!("PANIC: {}", msg));
         }));
 
         if let Err(e) = gui::run_gui() {
-                show_error_box("W11Boost Error", &format!("W11Boost -> run_gui() failed.\nError: {e}"));
+                eprintln!("W11Boost Error: run_gui() failed.\nError: {}", e);
+                common::log_debug("main", &format!("GUI Error: {}", e));
         }
 }

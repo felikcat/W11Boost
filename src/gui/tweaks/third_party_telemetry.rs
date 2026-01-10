@@ -1,6 +1,6 @@
 // Third-party Telemetry tweaks
 
-use super::{RegistryValue, Tweak, TweakEffect};
+use super::{Tweak, TweakEffect};
 
 // Macro to generate env var tweaks
 // Macro to generate env var tweaks
@@ -15,10 +15,7 @@ macro_rules! env_tweak {
                                 enabled_ops: &[
                                     crate::reg_str!("HKCU", "Environment", $var, $val, RegistryValue::Delete)
                                 ],
-                                disabled_ops: Some(&[
-                                    crate::reg_del!("HKCU", "Environment", $var, RegistryValue::Delete)
-                                ])
-                }
+                                }
         };
 }
 
@@ -34,10 +31,7 @@ macro_rules! reg_tweak {
                                 enabled_ops: &[
                                     crate::reg_dword!($hkey, $subkey, $value_name, $val, RegistryValue::Delete)
                                 ],
-                                disabled_ops: Some(&[
-                                    crate::reg_del!($hkey, $subkey, $value_name, RegistryValue::Delete)
-                                ])
-                }
+                                }
         };
 }
 

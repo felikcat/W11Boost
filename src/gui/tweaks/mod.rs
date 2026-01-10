@@ -17,7 +17,7 @@ mod online_data;
 mod performance;
 mod power;
 mod privacy;
-
+mod repair;
 mod security;
 mod software;
 mod sync;
@@ -48,6 +48,7 @@ pub use online_data::ONLINE_DATA_TWEAKS;
 pub use performance::PERFORMANCE_TWEAKS;
 pub use power::POWER_TWEAKS;
 pub use privacy::PRIVACY_TWEAKS;
+pub use repair::REPAIR_TWEAKS;
 
 pub use security::SECURITY_TWEAKS;
 pub use software::SOFTWARE_TWEAKS;
@@ -97,7 +98,6 @@ pub struct RegistryOp
         pub subkey: &'static str,
         pub value_name: &'static str,
         pub value: RegistryValue,
-        pub stock_value: RegistryValue, // Original Windows default
 }
 
 /// A single Group Policy operation (Machine config)
@@ -107,7 +107,6 @@ pub struct GpoOp
         pub subkey: &'static str,
         pub value_name: &'static str,
         pub value: RegistryValue,
-        pub stock_value: RegistryValue,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize)]
@@ -150,11 +149,8 @@ pub struct Tweak
         pub description: &'static str,
         pub effect: TweakEffect,
         pub enabled_ops: &'static [RegistryOp],
-        pub disabled_ops: Option<&'static [RegistryOp]>, // Operations to revert
         #[serde(skip)]
         pub custom_apply: Option<TweakFn>,
-        #[serde(skip)]
-        pub custom_revert: Option<TweakFn>,
         pub requires_restart: bool,
         pub is_hidden: bool,
         pub sub_tweaks: &'static [&'static Tweak],
@@ -173,9 +169,7 @@ impl Tweak
                 description: "",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[],
-                disabled_ops: None,
                 custom_apply: None,
-                custom_revert: None,
                 requires_restart: false,
                 is_hidden: false,
                 sub_tweaks: &[],
@@ -219,7 +213,6 @@ macro_rules! reg_dword {
                         subkey: $subkey,
                         value_name: $name,
                         value: $crate::gui::tweaks::RegistryValue::Dword($val),
-                        stock_value: $crate::gui::tweaks::RegistryValue::Dword($stock),
                 }
         };
         ($hkey:expr, $subkey:expr, $name:expr, $val:expr, $stock:expr) => {
@@ -228,7 +221,6 @@ macro_rules! reg_dword {
                         subkey: $subkey,
                         value_name: $name,
                         value: $crate::gui::tweaks::RegistryValue::Dword($val),
-                        stock_value: $stock,
                 }
         };
 }
@@ -250,7 +242,6 @@ macro_rules! reg_str {
                         subkey: $subkey,
                         value_name: $name,
                         value: $crate::gui::tweaks::RegistryValue::String($val),
-                        stock_value: $crate::gui::tweaks::RegistryValue::String($stock),
                 }
         };
         ($hkey:expr, $subkey:expr, $name:expr, $val:expr, $stock:expr) => {
@@ -259,7 +250,6 @@ macro_rules! reg_str {
                         subkey: $subkey,
                         value_name: $name,
                         value: $crate::gui::tweaks::RegistryValue::String($val),
-                        stock_value: $stock,
                 }
         };
 }
@@ -281,7 +271,6 @@ macro_rules! reg_binary {
                         subkey: $subkey,
                         value_name: $name,
                         value: $crate::gui::tweaks::RegistryValue::Binary($val),
-                        stock_value: $stock,
                 }
         };
 }
@@ -294,7 +283,6 @@ macro_rules! reg_del {
                         subkey: $subkey,
                         value_name: $name,
                         value: $crate::gui::tweaks::RegistryValue::Delete,
-                        stock_value: $stock,
                 }
         };
 }
@@ -307,7 +295,6 @@ macro_rules! reg_del_key {
                         subkey: $subkey,
                         value_name: $name,
                         value: $crate::gui::tweaks::RegistryValue::DeleteKey,
-                        stock_value: $stock,
                 }
         };
 }
@@ -319,7 +306,6 @@ macro_rules! gpo_dword {
                         subkey: $subkey,
                         value_name: $name,
                         value: $crate::gui::tweaks::RegistryValue::Dword($val),
-                        stock_value: $crate::gui::tweaks::RegistryValue::Dword($stock),
                 }
         };
         ($subkey:expr, $name:expr, $val:expr, $stock:expr) => {
@@ -327,7 +313,6 @@ macro_rules! gpo_dword {
                         subkey: $subkey,
                         value_name: $name,
                         value: $crate::gui::tweaks::RegistryValue::Dword($val),
-                        stock_value: $stock,
                 }
         };
 }
@@ -339,7 +324,6 @@ macro_rules! gpo_str {
                         subkey: $subkey,
                         value_name: $name,
                         value: $crate::gui::tweaks::RegistryValue::String($val),
-                        stock_value: $crate::gui::tweaks::RegistryValue::String($stock),
                 }
         };
         ($subkey:expr, $name:expr, $val:expr, $stock:expr) => {
@@ -347,7 +331,6 @@ macro_rules! gpo_str {
                         subkey: $subkey,
                         value_name: $name,
                         value: $crate::gui::tweaks::RegistryValue::String($val),
-                        stock_value: $stock,
                 }
         };
 }
@@ -359,7 +342,6 @@ macro_rules! gpo_del {
                         subkey: $subkey,
                         value_name: $name,
                         value: $crate::gui::tweaks::RegistryValue::Delete,
-                        stock_value: $stock,
                 }
         };
 }
@@ -409,20 +391,6 @@ pub fn apply_tweak(tweak: &Tweak, ctx: &Arc<WorkerContext>) -> Result<()>
 
 /// Revert a single tweak
 #[allow(dead_code)]
-pub fn revert_tweak(tweak: &Tweak, ctx: &Arc<WorkerContext>) -> Result<()>
-{
-        if let Some(custom_fn) = tweak.custom_revert {
-                return custom_fn(ctx);
-        }
-
-        if let Some(ops) = tweak.disabled_ops {
-                for op in ops {
-                        execute_registry_op(op, ctx, "Reverting")?;
-                }
-        }
-
-        Ok(())
-}
 
 // ============================================================================
 // CATEGORY DEFINITIONS
@@ -438,6 +406,11 @@ pub static CATEGORIES: &[TweakCategory] = &[
                 id: "privacy",
                 name: "Privacy & Telemetry",
                 description: "Control Windows data collection, telemetry, and privacy settings",
+        },
+        TweakCategory {
+                id: "repair",
+                name: "Repair & Restore",
+                description: "Restore default Windows behavior and fix common issues",
         },
         TweakCategory {
                 id: "debloat",
@@ -552,6 +525,7 @@ const ALL_TWEAK_LISTS: &[&[Tweak]] = &[
         SECURITY_TWEAKS,
         CONTEXT_MENU_TWEAKS,
         FORENSICS_TWEAKS,
+        REPAIR_TWEAKS,
         POWER_TWEAKS,
         SYNC_TWEAKS,
         ONLINE_DATA_TWEAKS,

@@ -2,6 +2,9 @@
 
 pub mod common;
 pub mod gui;
+pub mod ipc;
+pub mod service;
+pub mod service_client;
 pub mod trusted_installer;
 
 pub use common::{

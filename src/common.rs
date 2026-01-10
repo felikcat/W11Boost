@@ -7,6 +7,27 @@ use std::path::PathBuf;
 use std::process::Command;
 use std::sync::OnceLock;
 use windows::Win32::System::Com::{CLSCTX_INPROC_SERVER, COINIT_APARTMENTTHREADED, CoCreateInstance, CoInitializeEx};
+
+pub fn log_debug(component: &str, msg: &str)
+{
+        let _ = std::fs::create_dir_all(r"C:\ProgramData\W11Boost");
+        let Ok(mut file) = OpenOptions::new()
+                .create(true)
+                .append(true)
+                .open(format!(r"C:\ProgramData\W11Boost\{}_debug.log", component))
+        else {
+                return;
+        };
+
+        unsafe {
+                let time = windows::Win32::System::SystemInformation::GetLocalTime();
+                let _ = writeln!(
+                        file,
+                        "[{:02}:{:02}:{:02}] {}",
+                        time.wHour, time.wMinute, time.wSecond, msg
+                );
+        }
+}
 use windows::Win32::System::GroupPolicy::{
         CLSID_GroupPolicyObject, GPO_OPEN_LOAD_REGISTRY, GPO_SECTION_MACHINE, IGroupPolicyObject,
         REGISTRY_EXTENSION_GUID,
@@ -21,6 +42,10 @@ use winsafe::{
         self as w, GetLocalTime, HKEY, RegistryValue,
         co::{self, KNOWNFOLDERID},
 };
+
+use crate::ipc::{RegRoot, ServiceCommand};
+use crate::service_client;
+use crate::trusted_installer;
 
 static CACHE: Cache = Cache::new();
 
@@ -51,11 +76,14 @@ impl Cache
 
 fn log_path() -> Result<PathBuf>
 {
-        let documents_dir =
-                get_windows_path(&KNOWNFOLDERID::Documents).context("Failed to get Documents folder for logging")?;
+        // Use ProgramData (Common AppData) so that both the user-mode GUI and the SYSTEM-mode service
+        // can write to the same log location without permission issues (SYSTEM often lacks a Documents folder).
+        let program_data_dir = get_windows_path(&KNOWNFOLDERID::ProgramData)
+                .context("Failed to get ProgramData folder for logging")?;
 
-        let mut log_path = PathBuf::from(documents_dir);
+        let mut log_path = PathBuf::from(program_data_dir);
         log_path.push("W11Boost");
+        log_path.push("Logs");
 
         if !log_path.exists() {
                 fs::create_dir_all(&log_path).context(format!("Failed to create log directory at {:?}", log_path))?;
@@ -73,7 +101,29 @@ pub fn get_windows_path(folder_id: &KNOWNFOLDERID) -> Result<String>
 pub fn set_dword(hkey: &HKEY, subkey: &str, value_name: &str, value: u32) -> Result<()>
 {
         let hkey_text = get_hkey_text(hkey);
-        let use_ti = is_hklm(hkey);
+        let is_hklm = is_hklm(hkey);
+
+        // If HKLM and we are NOT TrustedInstaller, delegate to Service
+        if is_hklm && !trusted_installer::is_trusted_installer() {
+                let root = if *hkey == HKEY::LOCAL_MACHINE {
+                        RegRoot::HKLM
+                } else {
+                        return Err(anyhow!("Unsupported root for service delegation"));
+                };
+                let cmd = ServiceCommand::WriteRegDword {
+                        root,
+                        subkey: subkey.to_string(),
+                        value: value_name.to_string(),
+                        data: value,
+                };
+                match service_client::send_command(cmd) {
+                        Ok(crate::ipc::ServiceResponse::Success) => return Ok(()),
+                        Ok(crate::ipc::ServiceResponse::Error(msg)) => return Err(anyhow!("Service error: {}", msg)),
+                        Err(e) => return Err(anyhow!("Failed to communicate with W11BoostSvc: {}", e)),
+                }
+        }
+
+        let use_ti = is_hklm; // Legacy var name for local logic
 
         let set_result = {
                 let _ti_guard = if use_ti {
@@ -82,6 +132,7 @@ pub fn set_dword(hkey: &HKEY, subkey: &str, value_name: &str, value: u32) -> Res
                         None
                 };
 
+                // ... rest of local logic
                 let result = hkey.RegCreateKeyEx(subkey, None, co::REG_OPTION::NON_VOLATILE, co::KEY::WRITE, None);
 
                 let (key, _) = match result {
@@ -128,7 +179,28 @@ pub fn set_dword(hkey: &HKEY, subkey: &str, value_name: &str, value: u32) -> Res
 pub fn set_string(hkey: &HKEY, subkey: &str, value_name: &str, value: &str) -> Result<()>
 {
         let hkey_text = get_hkey_text(hkey);
-        let use_ti = is_hklm(hkey);
+        let is_hklm = is_hklm(hkey);
+
+        if is_hklm && !trusted_installer::is_trusted_installer() {
+                let root = if *hkey == HKEY::LOCAL_MACHINE {
+                        RegRoot::HKLM
+                } else {
+                        return Err(anyhow!("Unsupported root for service delegation"));
+                };
+                let cmd = ServiceCommand::WriteRegString {
+                        root,
+                        subkey: subkey.to_string(),
+                        value: value_name.to_string(),
+                        data: value.to_string(),
+                };
+                match service_client::send_command(cmd) {
+                        Ok(crate::ipc::ServiceResponse::Success) => return Ok(()),
+                        Ok(crate::ipc::ServiceResponse::Error(msg)) => return Err(anyhow!("Service error: {}", msg)),
+                        Err(e) => return Err(anyhow!("Failed to communicate with W11BoostSvc: {}", e)),
+                }
+        }
+
+        let use_ti = is_hklm;
 
         let result = {
                 let _ti_guard = if use_ti {
@@ -331,7 +403,26 @@ pub fn set_binary(hkey: &HKEY, subkey: &str, value_name: &str, value: &[u8]) -> 
 pub fn remove_subkey(hkey: &HKEY, subkey: &str) -> Result<()>
 {
         let hkey_text = get_hkey_text(hkey);
-        let use_ti = is_hklm(hkey);
+        let is_hklm = is_hklm(hkey);
+
+        if is_hklm && !trusted_installer::is_trusted_installer() {
+                let root = if *hkey == HKEY::LOCAL_MACHINE {
+                        RegRoot::HKLM
+                } else {
+                        return Err(anyhow!("Unsupported root for service delegation"));
+                };
+                let cmd = ServiceCommand::DeleteRegKey {
+                        root,
+                        subkey: subkey.to_string(),
+                };
+                match service_client::send_command(cmd) {
+                        Ok(crate::ipc::ServiceResponse::Success) => return Ok(()),
+                        Ok(crate::ipc::ServiceResponse::Error(msg)) => return Err(anyhow!("Service error: {}", msg)),
+                        Err(e) => return Err(anyhow!("Failed to communicate with W11BoostSvc: {}", e)),
+                }
+        }
+
+        let use_ti = is_hklm;
 
         let result = {
                 let _ti_guard = if use_ti {
@@ -363,7 +454,27 @@ pub fn remove_subkey(hkey: &HKEY, subkey: &str) -> Result<()>
 pub fn delete_value(hkey: &HKEY, subkey: &str, value_name: &str) -> Result<()>
 {
         let hkey_text = get_hkey_text(hkey);
-        let use_ti = is_hklm(hkey);
+        let is_hklm = is_hklm(hkey);
+
+        if is_hklm && !trusted_installer::is_trusted_installer() {
+                let root = if *hkey == HKEY::LOCAL_MACHINE {
+                        RegRoot::HKLM
+                } else {
+                        return Err(anyhow!("Unsupported root for service delegation"));
+                };
+                let cmd = ServiceCommand::DeleteRegValue {
+                        root,
+                        subkey: subkey.to_string(),
+                        value: value_name.to_string(),
+                };
+                match service_client::send_command(cmd) {
+                        Ok(crate::ipc::ServiceResponse::Success) => return Ok(()),
+                        Ok(crate::ipc::ServiceResponse::Error(msg)) => return Err(anyhow!("Service error: {}", msg)),
+                        Err(e) => return Err(anyhow!("Failed to communicate with W11BoostSvc: {}", e)),
+                }
+        }
+
+        let use_ti = is_hklm;
 
         let result = {
                 let _ti_guard = if use_ti {
@@ -405,7 +516,6 @@ pub fn delete_value(hkey: &HKEY, subkey: &str, value_name: &str) -> Result<()>
                 )),
         }
 }
-
 pub fn check_dword(hkey: &HKEY, subkey: &str, value_name: &str, expected_value: u32) -> Result<bool>
 {
         let hkey_text = get_hkey_text(hkey);

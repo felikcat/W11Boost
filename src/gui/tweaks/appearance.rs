@@ -13,11 +13,7 @@ pub static APPEARANCE_TWEAKS: &[Tweak] = &[
                         crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", "AppsUseLightTheme", 0, 1),
                         crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", "SystemUsesLightTheme", 0, 1),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", "AppsUseLightTheme", 1, 1),
-                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", "SystemUsesLightTheme", 1, 1),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "colored_titlebars",
                 category: "appearance",
@@ -27,10 +23,7 @@ pub static APPEARANCE_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\DWM", "ColorPrevalence", 1, 0),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\DWM", "ColorPrevalence", 0, 0),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "disable_transparency",
                 category: "appearance",
@@ -40,10 +33,7 @@ pub static APPEARANCE_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", "EnableTransparency", 0, 0),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", "EnableTransparency", 1, 0),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "menu_show_delay",
                 category: "appearance",
@@ -53,8 +43,5 @@ pub static APPEARANCE_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_str!("HKCU", r"Control Panel\Desktop", "MenuShowDelay", "0", "400"),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_str!("HKCU", r"Control Panel\Desktop", "MenuShowDelay", "400", "400"),
-                ]),
-        },
+                        },
 ];

@@ -13,8 +13,7 @@ pub static DEBLOAT_TWEAKS: &[Tweak] = &[
                 description: "Uninstalls the legacy Microsoft Teams app.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[],
-                disabled_ops: None,
-                custom_apply: Some(|ctx| remove_package("MicrosoftTeams", ctx))
+                                custom_apply: Some(|ctx| remove_package("MicrosoftTeams", ctx))
         },
         crate::tweak! {
                 id: "debloat_teams",
@@ -23,8 +22,7 @@ pub static DEBLOAT_TWEAKS: &[Tweak] = &[
                 description: "Uninstalls the new Microsoft Teams app.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[],
-                disabled_ops: None,
-                custom_apply: Some(|ctx| remove_package("MSTeams", ctx))
+                                custom_apply: Some(|ctx| remove_package("MSTeams", ctx))
         },
         crate::tweak! {
                 id: "debloat_copilot",
@@ -33,8 +31,7 @@ pub static DEBLOAT_TWEAKS: &[Tweak] = &[
                 description: "Uninstalls the Microsoft Copilot app.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[],
-                disabled_ops: None,
-                custom_apply: Some(|ctx| remove_package("Microsoft.Copilot", ctx))
+                                custom_apply: Some(|ctx| remove_package("Microsoft.Copilot", ctx))
         },
         crate::tweak! {
                 id: "debloat_cortana",
@@ -43,8 +40,7 @@ pub static DEBLOAT_TWEAKS: &[Tweak] = &[
                 description: "Uninstalls the Cortana app.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[],
-                disabled_ops: None,
-                custom_apply: Some(|ctx| remove_package("Microsoft.549981C3F5F10", ctx))
+                                custom_apply: Some(|ctx| remove_package("Microsoft.549981C3F5F10", ctx))
         },
         crate::tweak! {
                 id: "debloat_clipchamp",
@@ -53,8 +49,7 @@ pub static DEBLOAT_TWEAKS: &[Tweak] = &[
                 description: "Uninstalls the Clipchamp video editor.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[],
-                disabled_ops: None,
-                custom_apply: Some(|ctx| remove_package("Clipchamp.Clipchamp", ctx))
+                                custom_apply: Some(|ctx| remove_package("Clipchamp.Clipchamp", ctx))
         },
         crate::tweak! {
                 id: "debloat_disney",
@@ -63,8 +58,7 @@ pub static DEBLOAT_TWEAKS: &[Tweak] = &[
                 description: "Uninstalls the Disney+ app.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[],
-                disabled_ops: None,
-                custom_apply: Some(|ctx| remove_package("Disney.37853FC22B2CE", ctx))
+                                custom_apply: Some(|ctx| remove_package("Disney.37853FC22B2CE", ctx))
         },
         crate::tweak! {
                 id: "debloat_spotify",
@@ -73,8 +67,7 @@ pub static DEBLOAT_TWEAKS: &[Tweak] = &[
                 description: "Uninstalls the Spotify app.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[],
-                disabled_ops: None,
-                custom_apply: Some(|ctx| remove_package("SpotifyAB.SpotifyMusic", ctx))
+                                custom_apply: Some(|ctx| remove_package("SpotifyAB.SpotifyMusic", ctx))
         },
         crate::tweak! {
                 id: "debloat_films_tv",
@@ -83,8 +76,7 @@ pub static DEBLOAT_TWEAKS: &[Tweak] = &[
                 description: "Uninstalls the Films and TV (Zune Video) app.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[],
-                disabled_ops: None,
-                custom_apply: Some(|ctx| remove_package("Microsoft.ZuneVideo", ctx))
+                                custom_apply: Some(|ctx| remove_package("Microsoft.ZuneVideo", ctx))
         },
         crate::tweak! {
                 id: "debloat_solitaire",
@@ -93,8 +85,7 @@ pub static DEBLOAT_TWEAKS: &[Tweak] = &[
                 description: "Uninstalls Microsoft Solitaire Collection.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[],
-                disabled_ops: None,
-                custom_apply: Some(|ctx| remove_package("Microsoft.MicrosoftSolitaireCollection", ctx))
+                                custom_apply: Some(|ctx| remove_package("Microsoft.MicrosoftSolitaireCollection", ctx))
         },
         crate::tweak! {
                 id: "debloat_mail_calendar",
@@ -103,8 +94,7 @@ pub static DEBLOAT_TWEAKS: &[Tweak] = &[
                 description: "Uninstalls Windows Mail and Calendar apps.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[],
-                disabled_ops: None,
-                custom_apply: Some(|ctx| remove_package("microsoft.windowscommunicationsapps", ctx))
+                                custom_apply: Some(|ctx| remove_package("microsoft.windowscommunicationsapps", ctx))
         },
         crate::tweak! {
                 id: "debloat_skype",
@@ -113,8 +103,7 @@ pub static DEBLOAT_TWEAKS: &[Tweak] = &[
                 description: "Uninstalls the Skype app.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[],
-                disabled_ops: None,
-                custom_apply: Some(|ctx| remove_package("Microsoft.SkypeApp", ctx))
+                                custom_apply: Some(|ctx| remove_package("Microsoft.SkypeApp", ctx))
         },
         crate::tweak! {
                 id: "debloat_people",
@@ -123,8 +112,7 @@ pub static DEBLOAT_TWEAKS: &[Tweak] = &[
                 description: "Uninstalls the People app.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[],
-                disabled_ops: None,
-                custom_apply: Some(|ctx| remove_package("Microsoft.People", ctx))
+                                custom_apply: Some(|ctx| remove_package("Microsoft.People", ctx))
         },
         crate::tweak! {
                 id: "debloat_office_hub",
@@ -133,8 +121,7 @@ pub static DEBLOAT_TWEAKS: &[Tweak] = &[
                 description: "Uninstalls the Microsoft Office Hub (Get Office) app.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[],
-                disabled_ops: None,
-                custom_apply: Some(|ctx| remove_package("Microsoft.MicrosoftOfficeHub", ctx))
+                                custom_apply: Some(|ctx| remove_package("Microsoft.MicrosoftOfficeHub", ctx))
         },
         crate::tweak! {
                 id: "debloat_onenote",
@@ -143,8 +130,7 @@ pub static DEBLOAT_TWEAKS: &[Tweak] = &[
                 description: "Uninstalls the OneNote app.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[],
-                disabled_ops: None,
-                custom_apply: Some(|ctx| remove_package("Microsoft.Office.OneNote", ctx))
+                                custom_apply: Some(|ctx| remove_package("Microsoft.Office.OneNote", ctx))
         },
         crate::tweak! {
                 id: "debloat_outlook",
@@ -153,8 +139,7 @@ pub static DEBLOAT_TWEAKS: &[Tweak] = &[
                 description: "Uninstalls the new Outlook for Windows.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[],
-                disabled_ops: None,
-                custom_apply: Some(|ctx| remove_package("Microsoft.OutlookForWindows", ctx))
+                                custom_apply: Some(|ctx| remove_package("Microsoft.OutlookForWindows", ctx))
         },
         crate::tweak! {
                 id: "debloat_todo",
@@ -163,8 +148,7 @@ pub static DEBLOAT_TWEAKS: &[Tweak] = &[
                 description: "Uninstalls Microsoft To Do.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[],
-                disabled_ops: None,
-                custom_apply: Some(|ctx| remove_package("Microsoft.Todos", ctx))
+                                custom_apply: Some(|ctx| remove_package("Microsoft.Todos", ctx))
         },
         crate::tweak! {
                 id: "debloat_weather",
@@ -173,8 +157,7 @@ pub static DEBLOAT_TWEAKS: &[Tweak] = &[
                 description: "Uninstalls the Bing Weather app.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[],
-                disabled_ops: None,
-                custom_apply: Some(|ctx| remove_package("Microsoft.BingWeather", ctx))
+                                custom_apply: Some(|ctx| remove_package("Microsoft.BingWeather", ctx))
         },
         crate::tweak! {
                 id: "debloat_news",
@@ -183,8 +166,7 @@ pub static DEBLOAT_TWEAKS: &[Tweak] = &[
                 description: "Uninstalls the Bing News app.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[],
-                disabled_ops: None,
-                custom_apply: Some(|ctx| remove_package("Microsoft.BingNews", ctx))
+                                custom_apply: Some(|ctx| remove_package("Microsoft.BingNews", ctx))
         },
         crate::tweak! {
                 id: "debloat_bing_search",
@@ -193,8 +175,7 @@ pub static DEBLOAT_TWEAKS: &[Tweak] = &[
                 description: "Uninstalls the Bing Search app.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[],
-                disabled_ops: None,
-                custom_apply: Some(|ctx| remove_package("Microsoft.BingSearch", ctx))
+                                custom_apply: Some(|ctx| remove_package("Microsoft.BingSearch", ctx))
         },
         crate::tweak! {
                 id: "debloat_get_help",
@@ -203,8 +184,7 @@ pub static DEBLOAT_TWEAKS: &[Tweak] = &[
                 description: "Uninstalls the Get Help app.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[],
-                disabled_ops: None,
-                custom_apply: Some(|ctx| remove_package("Microsoft.GetHelp", ctx))
+                                custom_apply: Some(|ctx| remove_package("Microsoft.GetHelp", ctx))
         },
         crate::tweak! {
                 id: "debloat_tips",
@@ -213,8 +193,7 @@ pub static DEBLOAT_TWEAKS: &[Tweak] = &[
                 description: "Uninstalls the Windows Tips app.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[],
-                disabled_ops: None,
-                custom_apply: Some(|ctx| remove_package("Microsoft.Getstarted", ctx))
+                                custom_apply: Some(|ctx| remove_package("Microsoft.Getstarted", ctx))
         },
         crate::tweak! {
                 id: "debloat_feedback_hub",
@@ -223,8 +202,7 @@ pub static DEBLOAT_TWEAKS: &[Tweak] = &[
                 description: "Uninstalls the Feedback Hub app.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[],
-                disabled_ops: None,
-                custom_apply: Some(|ctx| remove_package("Microsoft.WindowsFeedbackHub", ctx))
+                                custom_apply: Some(|ctx| remove_package("Microsoft.WindowsFeedbackHub", ctx))
         },
         crate::tweak! {
                 id: "debloat_power_automate",
@@ -233,8 +211,7 @@ pub static DEBLOAT_TWEAKS: &[Tweak] = &[
                 description: "Uninstalls Power Automate Desktop.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[],
-                disabled_ops: None,
-                custom_apply: Some(|ctx| remove_package("Microsoft.PowerAutomateDesktop", ctx))
+                                custom_apply: Some(|ctx| remove_package("Microsoft.PowerAutomateDesktop", ctx))
         },
         crate::tweak! {
                 id: "debloat_dev_home",
@@ -243,8 +220,7 @@ pub static DEBLOAT_TWEAKS: &[Tweak] = &[
                 description: "Uninstalls Microsoft Dev Home.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[],
-                disabled_ops: None,
-                custom_apply: Some(|ctx| remove_package("Microsoft.Windows.DevHome", ctx))
+                                custom_apply: Some(|ctx| remove_package("Microsoft.Windows.DevHome", ctx))
         },
         crate::tweak! {
                 id: "debloat_3d_viewer",
@@ -253,8 +229,7 @@ pub static DEBLOAT_TWEAKS: &[Tweak] = &[
                 description: "Uninstalls the 3D Viewer app.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[],
-                disabled_ops: None,
-                custom_apply: Some(|ctx| remove_package("Microsoft.Microsoft3DViewer", ctx))
+                                custom_apply: Some(|ctx| remove_package("Microsoft.Microsoft3DViewer", ctx))
         },
         crate::tweak! {
                 id: "debloat_paint_3d",
@@ -263,8 +238,7 @@ pub static DEBLOAT_TWEAKS: &[Tweak] = &[
                 description: "Uninstalls Paint 3D.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[],
-                disabled_ops: None,
-                custom_apply: Some(|ctx| remove_package("Microsoft.MSPaint", ctx))
+                                custom_apply: Some(|ctx| remove_package("Microsoft.MSPaint", ctx))
         },
         crate::tweak! {
                 id: "debloat_mixed_reality",
@@ -273,8 +247,7 @@ pub static DEBLOAT_TWEAKS: &[Tweak] = &[
                 description: "Uninstalls the Mixed Reality Portal.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[],
-                disabled_ops: None,
-                custom_apply: Some(|ctx| remove_package("Microsoft.MixedReality.Portal", ctx))
+                                custom_apply: Some(|ctx| remove_package("Microsoft.MixedReality.Portal", ctx))
         },
         crate::tweak! {
                 id: "debloat_family",
@@ -283,8 +256,7 @@ pub static DEBLOAT_TWEAKS: &[Tweak] = &[
                 description: "Uninstalls the Microsoft Family app.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[],
-                disabled_ops: None,
-                custom_apply: Some(|ctx| remove_package("MicrosoftCorporationII.MicrosoftFamily", ctx))
+                                custom_apply: Some(|ctx| remove_package("MicrosoftCorporationII.MicrosoftFamily", ctx))
         },
         crate::tweak! {
                 id: "debloat_sticky_notes",
@@ -293,8 +265,7 @@ pub static DEBLOAT_TWEAKS: &[Tweak] = &[
                 description: "Uninstalls Microsoft Sticky Notes.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[],
-                disabled_ops: None,
-                custom_apply: Some(|ctx| remove_package("Microsoft.MicrosoftStickyNotes", ctx))
+                                custom_apply: Some(|ctx| remove_package("Microsoft.MicrosoftStickyNotes", ctx))
         },
         crate::tweak! {
                 id: "debloat_maps",
@@ -303,8 +274,7 @@ pub static DEBLOAT_TWEAKS: &[Tweak] = &[
                 description: "Uninstalls Windows Maps.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[],
-                disabled_ops: None,
-                custom_apply: Some(|ctx| remove_package("Microsoft.WindowsMaps", ctx))
+                                custom_apply: Some(|ctx| remove_package("Microsoft.WindowsMaps", ctx))
         },
         crate::tweak! {
             id: "remove_mixed_reality_settings",
@@ -315,10 +285,7 @@ pub static DEBLOAT_TWEAKS: &[Tweak] = &[
             enabled_ops: &[
                 crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Holographic", "FirstRunSucceeded", 0, 1),
             ],
-            disabled_ops: Some(&[
-                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Holographic", "FirstRunSucceeded", 1, 1),
-            ]),
-        },
+                    },
 ];
 
 fn remove_package(package_name: &str, ctx: &Arc<WorkerContext>) -> Result<()>

@@ -1,6 +1,6 @@
 // Microsoft Edge tweaks
 
-use super::{RegistryValue, Tweak, TweakEffect};
+use super::{Tweak, TweakEffect};
 
 pub static EDGE_TWEAKS: &[Tweak] = &[
         crate::tweak! {
@@ -12,10 +12,7 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\EdgeUpdate", "UpdateDefault", 0),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\EdgeUpdate", "UpdateDefault", RegistryValue::Delete),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "disable_edge_sidebar",
                 category: "edge",
@@ -25,10 +22,7 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "HubsSidebarEnabled", 0),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "HubsSidebarEnabled", RegistryValue::Delete),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "disable_edge_first_run",
                 category: "edge",
@@ -39,11 +33,7 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "ImportOnEachLaunch", 0),
                         crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "AutoImportAtFirstRun", 0),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "ImportOnEachLaunch", RegistryValue::Delete),
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "AutoImportAtFirstRun", RegistryValue::Delete),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "disable_edge_shortcut",
                 category: "edge",
@@ -54,10 +44,7 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\EdgeUpdate", "CreateDesktopShortcut{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}", 0),
                         crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\EdgeUpdate", "CreateDesktopShortcut{2CD8A007-E189-409D-A2C8-9AF4EF3C72AA}", 0),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\EdgeUpdate", "CreateDesktopShortcut{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}", RegistryValue::Delete),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "disable_edge_personalization",
                 category: "edge",
@@ -67,10 +54,7 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "PersonalizationReportingEnabled", 0),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "PersonalizationReportingEnabled", RegistryValue::Delete),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "enable_edge_do_not_track",
                 category: "edge",
@@ -81,11 +65,7 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "ConfigureDoNotTrack", 1),
                         crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Edge", "ConfigureDoNotTrack", 1),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "ConfigureDoNotTrack", RegistryValue::Delete),
-                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Edge", "ConfigureDoNotTrack", RegistryValue::Delete),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "disable_edge_payment_query",
                 category: "edge",
@@ -96,11 +76,7 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "PaymentMethodQueryEnabled", 0),
                         crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Edge", "PaymentMethodQueryEnabled", 0),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "PaymentMethodQueryEnabled", RegistryValue::Delete),
-                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Edge", "PaymentMethodQueryEnabled", RegistryValue::Delete),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "disable_edge_bing_search",
                 category: "edge",
@@ -111,11 +87,7 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "AddressBarMicrosoftSearchInBingProviderEnabled", 0),
                         crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Edge", "AddressBarMicrosoftSearchInBingProviderEnabled", 0),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "AddressBarMicrosoftSearchInBingProviderEnabled", RegistryValue::Delete),
-                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Edge", "AddressBarMicrosoftSearchInBingProviderEnabled", RegistryValue::Delete),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "disable_edge_feedback",
                 category: "edge",
@@ -126,11 +98,7 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "UserFeedbackAllowed", 0),
                         crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Edge", "UserFeedbackAllowed", 0),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "UserFeedbackAllowed", RegistryValue::Delete),
-                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Edge", "UserFeedbackAllowed", RegistryValue::Delete),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "disable_edge_autofill",
                 category: "edge",
@@ -143,13 +111,7 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "AutofillAddressEnabled", 0),
                         crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Edge", "AutofillAddressEnabled", 0),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "AutofillCreditCardEnabled", RegistryValue::Delete),
-                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Edge", "AutofillCreditCardEnabled", RegistryValue::Delete),
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "AutofillAddressEnabled", RegistryValue::Delete),
-                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Edge", "AutofillAddressEnabled", RegistryValue::Delete),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "disable_edge_search_suggestions",
                 category: "edge",
@@ -160,11 +122,7 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "SearchSuggestEnabled", 0),
                         crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Edge", "SearchSuggestEnabled", 0),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "SearchSuggestEnabled", RegistryValue::Delete),
-                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Edge", "SearchSuggestEnabled", RegistryValue::Delete),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "disable_edge_shopping",
                 category: "edge",
@@ -175,11 +133,7 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "EdgeShoppingAssistantEnabled", 0),
                         crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Edge", "EdgeShoppingAssistantEnabled", 0),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "EdgeShoppingAssistantEnabled", RegistryValue::Delete),
-                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Edge", "EdgeShoppingAssistantEnabled", RegistryValue::Delete),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "disable_edge_signin",
                 category: "edge",
@@ -190,11 +144,7 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "BrowserSignin", 0),
                         crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Edge", "BrowserSignin", 0),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "BrowserSignin", RegistryValue::Delete),
-                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Edge", "BrowserSignin", RegistryValue::Delete),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "disable_edge_password_manager",
                 category: "edge",
@@ -205,11 +155,7 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "PasswordManagerEnabled", 0),
                         crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Edge", "PasswordManagerEnabled", 0),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "PasswordManagerEnabled", RegistryValue::Delete),
-                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Edge", "PasswordManagerEnabled", RegistryValue::Delete),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "disable_edge_smartscreen",
                 category: "edge",
@@ -220,11 +166,7 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "SmartScreenEnabled", 0),
                         crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Edge", "SmartScreenEnabled", 0),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "SmartScreenEnabled", RegistryValue::Delete),
-                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Edge", "SmartScreenEnabled", RegistryValue::Delete),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "disable_edge_typosquatting",
                 category: "edge",
@@ -235,11 +177,7 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "TyposquattingCheckerEnabled", 0),
                         crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Edge", "TyposquattingCheckerEnabled", 0),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "TyposquattingCheckerEnabled", RegistryValue::Delete),
-                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Edge", "TyposquattingCheckerEnabled", RegistryValue::Delete),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "disable_edge_prelaunch",
                 category: "edge",
@@ -250,11 +188,7 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\MicrosoftEdge\Main", "AllowPrelaunch", 0),
                         crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "StartupBoostEnabled", 0),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\MicrosoftEdge\Main", "AllowPrelaunch", RegistryValue::Delete),
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "StartupBoostEnabled", RegistryValue::Delete),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "disable_edge_address_bar_dropdown",
                 category: "edge",
@@ -264,10 +198,7 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\PolicyManager\current\device\Browser", "AllowAddressBarDropdown", 0),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\PolicyManager\current\device\Browser", "AllowAddressBarDropdown", RegistryValue::Delete),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "disable_legacy_edge_features",
                 category: "edge",
@@ -281,14 +212,7 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                         crate::reg_dword!("HKCU", r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\Main", "OptimizeWindowsSearchResultsForScreenReaders", 0),
                         crate::reg_dword!("HKCU", r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\FlipAhead", "FPEnabled", 0),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKCU", r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\Main", "DoNotTrack", RegistryValue::Delete),
-                        crate::reg_del!("HKCU", r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\Main", "ShowSearchSuggestionsGlobal", RegistryValue::Delete),
-                        crate::reg_str!("HKCU", r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\Main", "Use FormSuggest", "yes"),
-                        crate::reg_del!("HKCU", r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\Main", "OptimizeWindowsSearchResultsForScreenReaders", RegistryValue::Delete),
-                        crate::reg_del!("HKCU", r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\FlipAhead", "FPEnabled", RegistryValue::Delete),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "disable_edge_cortana_search",
                 category: "edge",
@@ -299,11 +223,7 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                         crate::reg_dword!("HKCU", r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\ServiceUI", "EnableCortana", 0),
                         crate::reg_dword!("HKCU", r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\ServiceUI\ShowSearchHistory", "", 0),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKCU", r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\ServiceUI", "EnableCortana", RegistryValue::Delete),
-                        crate::reg_del!("HKCU", r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\ServiceUI\ShowSearchHistory", "", RegistryValue::Delete),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "disable_edge_eme",
                 category: "edge",
@@ -313,10 +233,7 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_dword!("HKCU", r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\Privacy", "EnableEncryptedMediaExtensions", 0),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKCU", r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\Privacy", "EnableEncryptedMediaExtensions", RegistryValue::Delete),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "disable_edge_tab_preloading",
                 category: "edge",
@@ -326,10 +243,7 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\MicrosoftEdge\TabPreloader", "AllowTabPreloading", 0),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\MicrosoftEdge\TabPreloader", "AllowTabPreloading", RegistryValue::Delete),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "disable_edge_phishing_filter",
                 category: "edge",
@@ -339,10 +253,7 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_dword!("HKCU", r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\PhishingFilter", "EnabledV9", 0),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKCU", r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\microsoft.microsoftedge_8wekyb3d8bbwe\MicrosoftEdge\PhishingFilter", "EnabledV9", RegistryValue::Delete),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "disable_edge_clsid_policy",
                 category: "edge",
@@ -352,10 +263,7 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Ext\CLSID", "{1FD49718-1D00-4B19-AF5F-070AF6D5D54C}", 0, RegistryValue::String("1")),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Ext\CLSID", "{1FD49718-1D00-4B19-AF5F-070AF6D5D54C}", RegistryValue::String("1")),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "disable_edge_local_providers",
                 category: "edge",
@@ -366,11 +274,7 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "LocalProvidersEnabled", 0),
                         crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Edge", "LocalProvidersEnabled", 0),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "LocalProvidersEnabled", RegistryValue::Delete),
-                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Edge", "LocalProvidersEnabled", RegistryValue::Delete),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "disable_edge_web_widget",
                 category: "edge",
@@ -381,11 +285,7 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "WebWidgetAllowed", 0),
                         crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Edge", "WebWidgetAllowed", 0),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "WebWidgetAllowed", RegistryValue::Delete),
-                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Edge", "WebWidgetAllowed", RegistryValue::Delete),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "disable_edge_proofing",
                 category: "edge",
@@ -396,11 +296,7 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "MicrosoftEditorProofingEnabled", 0),
                         crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Edge", "MicrosoftEditorProofingEnabled", 0),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "MicrosoftEditorProofingEnabled", RegistryValue::Delete),
-                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Edge", "MicrosoftEditorProofingEnabled", RegistryValue::Delete),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "disable_edge_nav_error_web_service",
                 category: "edge",
@@ -411,11 +307,7 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "ResolveNavigationErrorsUseWebService", 0),
                         crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Edge", "ResolveNavigationErrorsUseWebService", 0),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "ResolveNavigationErrorsUseWebService", RegistryValue::Delete),
-                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Edge", "ResolveNavigationErrorsUseWebService", RegistryValue::Delete),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "disable_edge_alternate_error_pages",
                 category: "edge",
@@ -426,11 +318,7 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "AlternateErrorPagesEnabled", 0),
                         crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Edge", "AlternateErrorPagesEnabled", 0),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "AlternateErrorPagesEnabled", RegistryValue::Delete),
-                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Edge", "AlternateErrorPagesEnabled", RegistryValue::Delete),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "optimize_edge_network_prediction",
                 category: "edge",
@@ -441,11 +329,7 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "NetworkPredictionOptions", 2),
                         crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Edge", "NetworkPredictionOptions", 2),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "NetworkPredictionOptions", RegistryValue::Delete),
-                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Edge", "NetworkPredictionOptions", RegistryValue::Delete),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "disable_edge_site_safety",
                 category: "edge",
@@ -456,9 +340,5 @@ pub static EDGE_TWEAKS: &[Tweak] = &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "SiteSafetyServicesEnabled", 0),
                         crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Edge", "SiteSafetyServicesEnabled", 0),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "SiteSafetyServicesEnabled", RegistryValue::Delete),
-                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Edge", "SiteSafetyServicesEnabled", RegistryValue::Delete),
-                ])
-        },
+                },
 ];

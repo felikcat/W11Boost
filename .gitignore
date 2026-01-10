@@ -5,6 +5,7 @@
 GEMINI.md
 /.agent
 /resources
-registry-dump-*.log
 implemented_tweaks_inventory.md
 *.log
+*.py
+*.txt

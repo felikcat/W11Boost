@@ -1,6 +1,6 @@
 // Desktop & Taskbar tweaks
 
-use super::{RegistryValue, Tweak, TweakEffect};
+use super::{Tweak, TweakEffect};
 
 pub static DESKTOP_TWEAKS: &[Tweak] = &[
         crate::tweak! {
@@ -12,10 +12,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "DisallowShaking", 1, RegistryValue::Delete),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "DisallowShaking", 0, RegistryValue::Delete),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "show_seconds_clock",
                 category: "desktop",
@@ -25,10 +22,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_dword!("HKCU", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSecondsInSystemClock", 1, RegistryValue::Delete),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_dword!("HKCU", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSecondsInSystemClock", 0, RegistryValue::Delete),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "taskbar_end_task",
                 category: "desktop",
@@ -38,10 +32,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced\TaskbarDeveloperSettings", "TaskbarEndTask", 1, RegistryValue::Delete),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced\TaskbarDeveloperSettings", "TaskbarEndTask", 0, RegistryValue::Delete),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "taskbar_never_combine",
                 category: "desktop",
@@ -52,10 +43,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
                         crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "TaskbarGlomLevel", 2, 0),
                         crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "MMTaskbarGlomLevel", 2, 0),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "TaskbarGlomLevel", 0, 0),
-                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "MMTaskbarGlomLevel", 0, 0),
-                ]), // Explorer restart is handled by effect
+                 // Explorer restart is handled by effect
         },
         crate::tweak! {
                 id: "hide_task_view",
@@ -66,10 +54,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_dword!("HKCU", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowTaskViewButton", 0, RegistryValue::Delete),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_dword!("HKCU", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowTaskViewButton", 1, 1),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "hide_task_view",
                 category: "desktop",
@@ -79,10 +64,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_dword!("HKCU", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowTaskViewButton", 0, RegistryValue::Delete),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_dword!("HKCU", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowTaskViewButton", 1, 1),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "hide_task_view_policy",
                 category: "desktop",
@@ -92,10 +74,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Explorer", "HideTaskViewButton", 1, RegistryValue::Delete),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Explorer", "HideTaskViewButton", RegistryValue::Delete),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "hide_search_box",
                 category: "desktop",
@@ -106,11 +85,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
                         crate::reg_dword!("HKCU", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Search", "SearchboxTaskbarMode", 0, 2),
                         crate::reg_dword!("HKCU", r"SOFTWARE\Policies\Microsoft\Windows\Explorer", "DisableSearchBoxSuggestions", 1, RegistryValue::Delete),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_dword!("HKCU", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Search", "SearchboxTaskbarMode", 2, 2),
-                        crate::reg_del!("HKCU", r"SOFTWARE\Policies\Microsoft\Windows\Explorer", "DisableSearchBoxSuggestions", RegistryValue::Delete),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "hide_chat_icon",
                 category: "desktop",
@@ -120,10 +95,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_dword!("HKCU", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "TaskbarMn", 0, RegistryValue::Delete),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_dword!("HKCU", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "TaskbarMn", 1, 1),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "disable_chat_icon_policy",
                 category: "desktop",
@@ -133,10 +105,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Windows Chat", "ChatIcon", 3, RegistryValue::Delete),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Windows Chat", "ChatIcon", RegistryValue::Delete),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "last_active_click",
                 category: "desktop",
@@ -146,10 +115,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "LastActiveClick", 1, RegistryValue::Delete),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "LastActiveClick", RegistryValue::Delete),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "disable_notification_center",
                 category: "desktop",
@@ -159,10 +125,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_dword!("HKCU", r"SOFTWARE\Policies\Microsoft\Windows\Explorer", "DisableNotificationCenter", 1, RegistryValue::Delete),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKCU", r"SOFTWARE\Policies\Microsoft\Windows\Explorer", "DisableNotificationCenter", RegistryValue::Delete),
-                ]),
-                requires_restart: true
+                                requires_restart: true
         },
         crate::tweak! {
                 id: "remove_shortcut_arrow",
@@ -173,10 +136,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Icons", "29", r"%windir%\System32\shell32.dll,51", RegistryValue::Delete),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Icons", "29", RegistryValue::Delete),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "taskbar_button_width",
                 category: "desktop",
@@ -186,10 +146,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_str!("HKCU", r"Control Panel\Desktop\WindowMetrics", "MinWidth", "38", RegistryValue::Delete),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKCU", r"Control Panel\Desktop\WindowMetrics", "MinWidth", RegistryValue::Delete),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "taskbar_flash_count",
                 category: "desktop",
@@ -199,10 +156,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_dword!("HKCU", r"Control Panel\Desktop", "ForegroundFlashCount", 0, 7),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_dword!("HKCU", r"Control Panel\Desktop", "ForegroundFlashCount", 7, 7),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "hide_meet_now",
                 category: "desktop",
@@ -213,11 +167,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer", "HideSCAMeetNow", 1, RegistryValue::Delete),
                         crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Policies\Explorer", "HideSCAMeetNow", 1, RegistryValue::Delete),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer", "HideSCAMeetNow", RegistryValue::Delete),
-                        crate::reg_del!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Policies\Explorer", "HideSCAMeetNow", RegistryValue::Delete),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "disable_news_interests",
                 category: "desktop",
@@ -228,11 +178,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Dsh", "AllowNewsAndInterests", 0, RegistryValue::Delete),
                         crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\PolicyManager\default\NewsAndInterests\AllowNewsAndInterests", "value", 0, 1),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Dsh", "AllowNewsAndInterests", RegistryValue::Delete),
-                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\PolicyManager\default\NewsAndInterests\AllowNewsAndInterests", "value", 1, 1),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "hide_people_button",
                 category: "desktop",
@@ -242,10 +188,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced\People", "PeopleBand", 0, RegistryValue::Delete),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced\People", "PeopleBand", 1, 1),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "disable_search_highlights",
                 category: "desktop",
@@ -255,10 +198,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\SearchSettings", "IsDynamicSearchBoxEnabled", 0, RegistryValue::Delete),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\SearchSettings", "IsDynamicSearchBoxEnabled", 1, 1),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "disable_start_recommendations",
                 category: "desktop",
@@ -269,11 +209,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
                         crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "Start_TrackProgs", 0, RegistryValue::Delete),
                         crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "Start_TrackDocs", 0, RegistryValue::Delete),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "Start_TrackProgs", 1, 1),
-                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "Start_TrackDocs", 1, 1),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "add_desktop_search_box",
                 category: "desktop",
@@ -283,10 +219,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "DesktopSearchBox", 1, RegistryValue::Delete),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "DesktopSearchBox", 0, RegistryValue::Delete),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "remove_bluetooth_icon",
                 category: "desktop",
@@ -296,10 +229,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_dword!("HKCU", r"Control Panel\Bluetooth", "Notification Area Icon", 0, 1),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_dword!("HKCU", r"Control Panel\Bluetooth", "Notification Area Icon", 1, 1),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "remove_ask_copilot_taskbar",
                 category: "desktop",
@@ -309,10 +239,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "TaskbarCompanion", 0, 1),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "TaskbarCompanion", 1, 1),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "disable_web_search",
                 category: "desktop",
@@ -323,11 +250,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
                         crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Search", "BingSearchEnabled", 0, RegistryValue::Delete),
                         crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Windows\Explorer", "DisableSearchBoxSuggestions", 1, RegistryValue::Delete),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Search", "BingSearchEnabled", 1, RegistryValue::Delete),
-                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Windows\Explorer", "DisableSearchBoxSuggestions", RegistryValue::Delete),
-                ])
-        },
+                },
         crate::tweak! {
             id: "remove_desktop_search_box",
             category: "desktop",
@@ -337,10 +260,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
             enabled_ops: &[
                 crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "DesktopSearchBox", 0, 1),
             ],
-            disabled_ops: Some(&[
-                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "DesktopSearchBox", 1, 1),
-            ]),
-        },
+                    },
         crate::tweak! {
             id: "remove_spotlight_icon",
             category: "desktop",
@@ -351,11 +271,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
                 crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel", "{2cc5ca98-6485-489a-920e-b3e88a6ccce3}", 1, RegistryValue::Delete),
                 crate::reg_del_key!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\Desktop\NameSpace\{2cc5ca98-6485-489a-920e-b3e88a6ccce3}", "", RegistryValue::String("Windows Spotlight")),
             ],
-            disabled_ops: Some(&[
-                crate::reg_del!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel", "{2cc5ca98-6485-489a-920e-b3e88a6ccce3}", RegistryValue::Delete),
-                crate::reg_str!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\Desktop\NameSpace\{2cc5ca98-6485-489a-920e-b3e88a6ccce3}", "", "Windows Spotlight", "Windows Spotlight"),
-            ]),
-        },
+                    },
         crate::tweak! {
             id: "remove_this_pc_desktop_icon",
             category: "desktop",
@@ -420,10 +336,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
             enabled_ops: &[
                 crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel", "{018D5C66-4533-4307-9B53-224DE2ED1FE6}", 1, 0),
             ],
-            disabled_ops: Some(&[
-                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel", "{018D5C66-4533-4307-9B53-224DE2ED1FE6}", 0, 0), // Default is usually shown if installed
-            ]),
-        },
+                    },
         crate::tweak! {
             id: "drag_full_windows",
             category: "desktop",
@@ -433,10 +346,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
             enabled_ops: &[
                 crate::reg_str!("HKCU", r"Control Panel\Desktop", "DragFullWindows", "0", "1"),
             ],
-            disabled_ops: Some(&[
-                crate::reg_str!("HKCU", r"Control Panel\Desktop", "DragFullWindows", "1", "1"),
-            ]),
-        },
+                    },
         crate::tweak! {
             id: "foreground_lock_timeout",
             category: "desktop",
@@ -446,10 +356,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
             enabled_ops: &[
                 crate::reg_dword!("HKCU", r"Control Panel\Desktop", "ForegroundLockTimeout", 0, 200000),
             ],
-            disabled_ops: Some(&[
-                crate::reg_dword!("HKCU", r"Control Panel\Desktop", "ForegroundLockTimeout", 200000, 200000),
-            ]),
-        },
+                    },
         crate::tweak! {
             id: "jpeg_import_quality",
             category: "desktop",
@@ -459,10 +366,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
             enabled_ops: &[
                 crate::reg_dword!("HKCU", r"Control Panel\Desktop", "JPEGImportQuality", 100, RegistryValue::Delete),
             ],
-            disabled_ops: Some(&[
-                crate::reg_del!("HKCU", r"Control Panel\Desktop", "JPEGImportQuality", RegistryValue::Delete),
-            ]),
-        },
+                    },
         crate::tweak! {
             id: "hide_recommended_section",
             category: "desktop",
@@ -473,11 +377,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
                 crate::reg_dword!("HKLM", r"Software\Policies\Microsoft\Windows\Explorer", "HideRecommendedSection", 1, RegistryValue::Delete),
                 crate::reg_dword!("HKLM", r"Software\Microsoft\PolicyManager\current\device\start", "HideRecommendedSection", 1, RegistryValue::Delete),
             ],
-            disabled_ops: Some(&[
-                crate::reg_del!("HKLM", r"Software\Policies\Microsoft\Windows\Explorer", "HideRecommendedSection", RegistryValue::Delete),
-                crate::reg_del!("HKLM", r"Software\Microsoft\PolicyManager\current\device\start", "HideRecommendedSection", RegistryValue::Delete),
-            ]),
-        },
+                    },
         crate::tweak! {
             id: "show_libraries_desktop",
             category: "desktop",
@@ -487,10 +387,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
             enabled_ops: &[
                 crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel", "{031E4825-7B94-4DC3-B131-E946B44C8DD5}", 0, 1),
             ],
-            disabled_ops: Some(&[
-                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel", "{031E4825-7B94-4DC3-B131-E946B44C8DD5}", 1, 1),
-            ]),
-        },
+                    },
         crate::tweak! {
             id: "disable_copilot_taskbar",
             category: "desktop",
@@ -500,10 +397,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
             enabled_ops: &[
                 crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowCopilotButton", 0, RegistryValue::Delete),
             ],
-            disabled_ops: Some(&[
-                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowCopilotButton", 1, RegistryValue::Delete),
-            ]),
-        },
+                    },
         crate::tweak! {
             id: "remove_notification_bell",
             category: "desktop",
@@ -513,10 +407,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
             enabled_ops: &[
                 crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowNotificationIcon", 0, 1),
             ],
-            disabled_ops: Some(&[
-                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowNotificationIcon", 1, 1),
-            ]),
-        },
+                    },
         crate::tweak! {
             id: "hide_security_notification_icon",
             category: "desktop",
@@ -526,10 +417,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
             enabled_ops: &[
                 crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows Defender Security Center\Systray", "HideSystray", 1, RegistryValue::Delete),
             ],
-            disabled_ops: Some(&[
-                crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows Defender Security Center\Systray", "HideSystray", RegistryValue::Delete),
-            ]),
-            requires_restart: true
+                        requires_restart: true
         },
         crate::tweak! {
             id: "taskbar_left_align",
@@ -540,10 +428,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
             enabled_ops: &[
                 crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "TaskbarAl", 0, RegistryValue::Delete),
             ],
-            disabled_ops: Some(&[
-                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "TaskbarAl", 1, 1),
-            ]),
-        },
+                    },
         crate::tweak! {
             id: "small_taskbar",
             category: "desktop",
@@ -553,10 +438,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
             enabled_ops: &[
                 crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "TaskbarSi", 0, RegistryValue::Delete),
             ],
-            disabled_ops: Some(&[
-                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "TaskbarSi", 1, 1),
-            ]),
-        },
+                    },
         crate::tweak! {
             id: "hide_recommended",
             category: "desktop",
@@ -567,11 +449,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
                 crate::reg_dword!("HKCU", r"SOFTWARE\Policies\Microsoft\Windows\Explorer", "HideRecommendedSection", 1, RegistryValue::Delete),
                 crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\PolicyManager\current\device\Education", "IsEducationEnvironment", 1, RegistryValue::Delete),
             ],
-            disabled_ops: Some(&[
-                crate::reg_del!("HKCU", r"SOFTWARE\Policies\Microsoft\Windows\Explorer", "HideRecommendedSection", RegistryValue::Delete),
-                crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\PolicyManager\current\device\Education", "IsEducationEnvironment", RegistryValue::Delete),
-            ]),
-            requires_restart: true
+                        requires_restart: true
         },
         crate::tweak! {
             id: "disable_phone_link_start",
@@ -582,10 +460,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
             enabled_ops: &[
                 crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Start\Companions\Microsoft.YourPhone_8wekyb3d8bbwe", "IsEnabled", 0, RegistryValue::Delete),
             ],
-            disabled_ops: Some(&[
-                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Start\Companions\Microsoft.YourPhone_8wekyb3d8bbwe", "IsEnabled", 1, 1),
-            ]),
-        },
+                    },
         crate::tweak! {
             id: "remove_account_picture_start",
             category: "desktop",
@@ -595,10 +470,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
             enabled_ops: &[
                 crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\PolicyManager\default\Start\HideUserTile", "value", 1, 0),
             ],
-            disabled_ops: Some(&[
-                crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\PolicyManager\default\Start\HideUserTile", "value", 0, 0),
-            ]),
-        },
+                    },
         crate::tweak! {
             id: "remove_change_account_settings",
             category: "desktop",
@@ -608,10 +480,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
             enabled_ops: &[
                 crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\PolicyManager\default\Start\HideChangeAccountSettings", "value", 1, 0),
             ],
-            disabled_ops: Some(&[
-                crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\PolicyManager\default\Start\HideChangeAccountSettings", "value", 0, 0),
-            ]),
-        },
+                    },
         crate::tweak! {
             id: "remove_all_apps_start",
             category: "desktop",
@@ -622,11 +491,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
                 crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Explorer", "DisableAllApps", 1, RegistryValue::Delete),
                 crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Windows\Explorer", "DisableAllApps", 1, RegistryValue::Delete),
             ],
-            disabled_ops: Some(&[
-                crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Explorer", "DisableAllApps", RegistryValue::Delete),
-                crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Windows\Explorer", "DisableAllApps", RegistryValue::Delete),
-            ]),
-        },
+                    },
         crate::tweak! {
             id: "remove_category_view_start",
             category: "desktop",
@@ -637,11 +502,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
                 crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Explorer", "HideCategoryView", 1, RegistryValue::Delete),
                 crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Windows\Explorer", "HideCategoryView", 1, RegistryValue::Delete),
             ],
-            disabled_ops: Some(&[
-                crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Explorer", "HideCategoryView", RegistryValue::Delete),
-                crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Windows\Explorer", "HideCategoryView", RegistryValue::Delete),
-            ]),
-        },
+                    },
         crate::tweak! {
             id: "remove_common_program_groups",
             category: "desktop",
@@ -652,11 +513,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
                 crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer", "NoCommonGroups", 1, RegistryValue::Delete),
                 crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Policies\Explorer", "NoCommonGroups", 1, RegistryValue::Delete),
             ],
-            disabled_ops: Some(&[
-                crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer", "NoCommonGroups", RegistryValue::Delete),
-                crate::reg_del!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Policies\Explorer", "NoCommonGroups", RegistryValue::Delete),
-            ]),
-        },
+                    },
         crate::tweak! {
             id: "add_run_as_different_user_start",
             category: "desktop",
@@ -667,11 +524,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
                 crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Windows\Explorer", "ShowRunAsDifferentUserInStart", 1, RegistryValue::Delete),
                 crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Explorer", "ShowRunAsDifferentUserInStart", 1, RegistryValue::Delete),
             ],
-            disabled_ops: Some(&[
-                crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Windows\Explorer", "ShowRunAsDifferentUserInStart", RegistryValue::Delete),
-                crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Explorer", "ShowRunAsDifferentUserInStart", RegistryValue::Delete),
-            ]),
-        },
+                    },
         crate::tweak! {
             id: "hide_recently_added_apps",
             category: "desktop",
@@ -682,11 +535,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
                 crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Windows\Explorer", "HideRecentlyAddedApps", 1, RegistryValue::Delete),
                 crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Explorer", "HideRecentlyAddedApps", 1, RegistryValue::Delete),
             ],
-            disabled_ops: Some(&[
-                crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Windows\Explorer", "HideRecentlyAddedApps", RegistryValue::Delete),
-                crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Explorer", "HideRecentlyAddedApps", RegistryValue::Delete),
-            ]),
-        },
+                    },
         crate::tweak! {
             id: "hide_recommended_websites",
             category: "desktop",
@@ -697,11 +546,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
                 crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Windows\Explorer", "HideRecommendedPersonalizedSites", 1, RegistryValue::Delete),
                 crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Explorer", "HideRecommendedPersonalizedSites", 1, RegistryValue::Delete),
             ],
-            disabled_ops: Some(&[
-                crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Windows\Explorer", "HideRecommendedPersonalizedSites", RegistryValue::Delete),
-                crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Explorer", "HideRecommendedPersonalizedSites", RegistryValue::Delete),
-            ]),
-        },
+                    },
         crate::tweak! {
             id: "hide_power_button_start_menu",
             category: "desktop",
@@ -711,10 +556,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
             enabled_ops: &[
                 crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\PolicyManager\default\Start\HidePowerButton", "value", 1, 0),
             ],
-            disabled_ops: Some(&[
-                crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\PolicyManager\default\Start\HidePowerButton", "value", 0, 0),
-            ]),
-        },
+                    },
         crate::tweak! {
             id: "hide_restart_in_power_menu",
             category: "desktop",
@@ -724,10 +566,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
             enabled_ops: &[
                 crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\PolicyManager\default\Start\HideRestart", "value", 1, 0),
             ],
-            disabled_ops: Some(&[
-                crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\PolicyManager\default\Start\HideRestart", "value", 0, 0),
-            ]),
-        },
+                    },
         crate::tweak! {
             id: "hide_shut_down_in_power_menu",
             category: "desktop",
@@ -737,10 +576,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
             enabled_ops: &[
                 crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\PolicyManager\default\Start\HideShutDown", "value", 1, 0),
             ],
-            disabled_ops: Some(&[
-                crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\PolicyManager\default\Start\HideShutDown", "value", 0, 0),
-            ]),
-        },
+                    },
         crate::tweak! {
             id: "remove_sleep_power_menu",
             category: "desktop",
@@ -750,10 +586,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
             enabled_ops: &[
                 crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\PolicyManager\default\Settings\AllowPowerSleep", "value", 0, 1),
             ],
-            disabled_ops: Some(&[
-                crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\PolicyManager\default\Settings\AllowPowerSleep", "value", 1, 1),
-            ]),
-        },
+                    },
         crate::tweak! {
             id: "remove_sign_out_start_menu",
             category: "desktop",
@@ -763,10 +596,7 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
             enabled_ops: &[
                 crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\PolicyManager\default\Start\HideSignOut", "value", 1, 0),
             ],
-            disabled_ops: Some(&[
-                crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\PolicyManager\default\Start\HideSignOut", "value", 0, 0),
-            ]),
-        },
+                    },
         crate::tweak! {
             id: "paint_desktop_version",
             category: "desktop",
@@ -776,8 +606,5 @@ pub static DESKTOP_TWEAKS: &[Tweak] = &[
             enabled_ops: &[
                 crate::reg_dword!("HKCU", r"Control Panel\Desktop", "PaintDesktopVersion", 1, 0),
             ],
-            disabled_ops: Some(&[
-                crate::reg_dword!("HKCU", r"Control Panel\Desktop", "PaintDesktopVersion", 0, 0),
-            ]),
-        },
+                    },
 ];

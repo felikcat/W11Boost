@@ -1,6 +1,6 @@
 // Online Data Collection tweaks
 
-use super::{RegistryValue, Tweak, TweakEffect};
+use super::{Tweak, TweakEffect};
 
 pub static ONLINE_DATA_TWEAKS: &[Tweak] = &[
         crate::tweak! {
@@ -12,10 +12,7 @@ pub static ONLINE_DATA_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\AllowOnlineTips", "AllowOnlineTips", 1),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\AllowOnlineTips", "AllowOnlineTips", RegistryValue::Delete),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "disable_device_metadata",
                 category: "online_data",
@@ -25,10 +22,7 @@ pub static ONLINE_DATA_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Device Metadata", "PreventDeviceMetadataFromNetwork", 1),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Device Metadata", "PreventDeviceMetadataFromNetwork", RegistryValue::Delete),
-                ]),
-                requires_restart: true
+                                requires_restart: true
         },
         crate::tweak! {
                 id: "disable_search_companion",
@@ -39,10 +33,7 @@ pub static ONLINE_DATA_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\SearchCompanion", "DisableContentFileUpdates", 1),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\SearchCompanion", "DisableContentFileUpdates", RegistryValue::Delete),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "disable_disk_health_updates",
                 category: "online_data",
@@ -52,10 +43,7 @@ pub static ONLINE_DATA_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\StorageHealth", "AllowDiskHealthModelUpdates", 0),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\StorageHealth", "AllowDiskHealthModelUpdates", RegistryValue::Delete),
-                ]),
-                requires_restart: true
+                                requires_restart: true
         },
         crate::tweak! {
                 id: "disable_cloud_content",
@@ -69,13 +57,7 @@ pub static ONLINE_DATA_TWEAKS: &[Tweak] = &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\CloudContent", "DisableSoftLanding", 1),
                         crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\CloudContent", "DisableWindowsConsumerFeatures", 1),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\CloudContent", "DisableCloudOptimizedContent", RegistryValue::Delete),
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\CloudContent", "DisableConsumerAccountStateContent", RegistryValue::Delete),
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\CloudContent", "DisableSoftLanding", RegistryValue::Delete),
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\CloudContent", "DisableWindowsConsumerFeatures", RegistryValue::Delete),
-                ]),
-                requires_restart: true
+                                requires_restart: true
         },
         crate::tweak! {
                     id: "disable_speech_updates",
@@ -86,10 +68,7 @@ pub static ONLINE_DATA_TWEAKS: &[Tweak] = &[
                     enabled_ops: &[
                             crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Speech", "AllowSpeechModelUpdate", 0),
                     ],
-                    disabled_ops: Some(&[
-                            crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Speech", "AllowSpeechModelUpdate", RegistryValue::Delete),
-                    ]),
-                    requires_restart: true
+                                        requires_restart: true
 
         },
         crate::tweak! {
@@ -101,8 +80,5 @@ pub static ONLINE_DATA_TWEAKS: &[Tweak] = &[
             enabled_ops: &[
                 crate::reg_dword!("HKLM", r"SYSTEM\Maps", "AutoUpdateEnabled", 0, 1),
             ],
-            disabled_ops: Some(&[
-                crate::reg_del!("HKLM", r"SYSTEM\Maps", "AutoUpdateEnabled", RegistryValue::Delete),
-            ]),
-        },
+                    },
 ];

@@ -8,8 +8,9 @@ pub enum ViewMode
         #[default]
         Tweaks,
         ConfirmApply,
-        ConfirmRemove,
+
         ConfirmUnsetAll,
+        ConfirmRestorePoint,
         SelectedTweaks,
 }
 
@@ -42,4 +43,14 @@ impl Default for TweakStates
                         input_values: HashMap::new(),
                 }
         }
+}
+
+/// Snapshot of navigation state for history
+#[derive(Clone, PartialEq)]
+pub struct NavigationEntry
+{
+        pub mode: ViewMode,
+        pub selected_category: Option<String>,
+        pub selected_tweak: Option<String>,
+        pub search_query: String,
 }

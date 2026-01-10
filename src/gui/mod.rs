@@ -1,7 +1,6 @@
 pub mod app;
 pub mod config;
 
-pub mod remove_w11boost;
 pub mod shared_state;
 pub mod state;
 pub mod theme;

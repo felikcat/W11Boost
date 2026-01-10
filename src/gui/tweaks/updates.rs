@@ -1,6 +1,6 @@
 // Windows Update tweaks
 
-use super::{RegistryValue, Tweak, TweakEffect};
+use super::{Tweak, TweakEffect};
 
 pub static UPDATE_TWEAKS: &[Tweak] = &[
         crate::tweak! {
@@ -15,13 +15,7 @@ pub static UPDATE_TWEAKS: &[Tweak] = &[
                         crate::reg_str!("HKLM", r"Software\Policies\Microsoft\Windows\WindowsUpdate", "WUStatusServer", "localserver.localdomain.wsus", RegistryValue::Delete),
                         crate::reg_dword!("HKLM", r"Software\Policies\Microsoft\Windows\WindowsUpdate\AU", "UseWUServer", 1),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"Software\Policies\Microsoft\Windows\WindowsUpdate", "DoNotConnectToWindowsUpdateInternetLocations", RegistryValue::Delete),
-                        crate::reg_del!("HKLM", r"Software\Policies\Microsoft\Windows\WindowsUpdate", "WUServer", RegistryValue::Delete),
-                        crate::reg_del!("HKLM", r"Software\Policies\Microsoft\Windows\WindowsUpdate", "WUStatusServer", RegistryValue::Delete),
-                        crate::reg_del!("HKLM", r"Software\Policies\Microsoft\Windows\WindowsUpdate\AU", "UseWUServer", RegistryValue::Delete),
-                ]),
-                requires_restart: true
+                                requires_restart: true
         },
         crate::tweak! {
                 id: "defer_windows_upgrades",
@@ -34,12 +28,7 @@ pub static UPDATE_TWEAKS: &[Tweak] = &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate", "DeferUpgradePeriod", 1),
                         crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate", "DeferUpdatePeriod", 0),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate", "DeferUpgrade", RegistryValue::Delete),
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate", "DeferUpgradePeriod", RegistryValue::Delete),
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate", "DeferUpdatePeriod", RegistryValue::Delete),
-                ]),
-                requires_restart: true
+                                requires_restart: true
         },
         crate::tweak! {
                 id: "disable_driver_searching",
@@ -50,10 +39,7 @@ pub static UPDATE_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\DriverSearching", "SearchOrderConfig", 0, 1),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\DriverSearching", "SearchOrderConfig", 1, 1),
-                ]),
-                requires_restart: true
+                                requires_restart: true
         },
         crate::tweak! {
                 id: "prevent_device_metadata",
@@ -64,10 +50,7 @@ pub static UPDATE_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Device Metadata", "PreventDeviceMetadataFromNetwork", 1, 0),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Device Metadata", "PreventDeviceMetadataFromNetwork", 0, 0),
-                ]),
-                requires_restart: true
+                                requires_restart: true
         },
         crate::tweak! {
                 id: "disable_wuauserv",
@@ -79,11 +62,7 @@ pub static UPDATE_TWEAKS: &[Tweak] = &[
                         crate::reg_dword!("HKLM", r"SYSTEM\ControlSet001\Services\wuauserv", "Start", 4, 3),
                         crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Services\7971f918-a847-4430-9279-4a52d1efe18d", "RegisteredWithAU", 0, RegistryValue::Delete),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_dword!("HKLM", r"SYSTEM\ControlSet001\Services\wuauserv", "Start", 2, 3),
-                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Services\7971f918-a847-4430-9279-4a52d1efe18d", "RegisteredWithAU", 1, RegistryValue::Delete),
-                ]),
-                requires_restart: true
+                                requires_restart: true
         },
         crate::tweak! {
                 id: "disable_auto_update",
@@ -94,10 +73,7 @@ pub static UPDATE_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU", "NoAutoUpdate", 1),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU", "NoAutoUpdate", RegistryValue::Delete),
-                ]),
-                requires_restart: true
+                                requires_restart: true
         },
         crate::tweak! {
                 id: "disable_delivery_optimization",
@@ -110,12 +86,7 @@ pub static UPDATE_TWEAKS: &[Tweak] = &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization", "DODownloadMode", 0),
                         crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\DeliveryOptimization", "SystemSettingsDownloadMode", 0),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Config", "DODownloadMode", RegistryValue::Delete),
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization", "DODownloadMode", RegistryValue::Delete),
-                        crate::reg_del!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\DeliveryOptimization", "SystemSettingsDownloadMode", RegistryValue::Delete),
-                ]),
-                requires_restart: true
+                                requires_restart: true
         },
         crate::tweak! {
                 id: "disable_store_auto_update",
@@ -126,8 +97,5 @@ pub static UPDATE_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsStore\WindowsUpdate", "AutoDownload", 2),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsStore\WindowsUpdate", "AutoDownload", RegistryValue::Delete),
-                ])
-        },
+                },
 ];

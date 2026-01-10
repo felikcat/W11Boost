@@ -1,6 +1,6 @@
 // Boot & Logon tweaks
 
-use super::{RegistryValue, Tweak, TweakEffect};
+use super::{Tweak, TweakEffect};
 
 pub static BOOT_TWEAKS: &[Tweak] = &[
         crate::tweak! {
@@ -12,10 +12,7 @@ pub static BOOT_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Personalization", "NoLockScreen", 1, RegistryValue::Delete),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Personalization", "NoLockScreen", RegistryValue::Delete),
-                ]),
-                requires_restart: true
+                                requires_restart: true
         },
         crate::tweak! {
                 id: "verbose_logon",
@@ -26,10 +23,7 @@ pub static BOOT_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System", "VerboseStatus", 1, RegistryValue::Delete),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System", "VerboseStatus", RegistryValue::Delete),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "enable_startup_sound",
                 category: "boot",
@@ -40,11 +34,7 @@ pub static BOOT_TWEAKS: &[Tweak] = &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\LogonUI\BootAnimation", "DisableStartupSound", 0, 1),
                         crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\EditionOverrides", "UserSetting_DisableStartupSound", 0, RegistryValue::Delete),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\LogonUI\BootAnimation", "DisableStartupSound", 1, 1),
-                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\EditionOverrides", "UserSetting_DisableStartupSound", 1, 1),
-                ]),
-                requires_restart: true
+                                requires_restart: true
         },
         crate::tweak! {
                 id: "numlock_on_login",
@@ -55,10 +45,7 @@ pub static BOOT_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_str!("HKCU", r".DEFAULT\Control Panel\Keyboard", "InitialKeyboardIndicators", "2147483650", RegistryValue::Delete),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_str!("HKCU", r".DEFAULT\Control Panel\Keyboard", "InitialKeyboardIndicators", "2147483648", "2147483648"),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "disable_login_blur",
                 category: "boot",
@@ -68,10 +55,7 @@ pub static BOOT_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\System", "DisableAcrylicBackgroundOnLogon", 1, RegistryValue::Delete),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\System", "DisableAcrylicBackgroundOnLogon", RegistryValue::Delete),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "reduce_startup_delay",
                 category: "boot",
@@ -81,10 +65,7 @@ pub static BOOT_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\Serialize", "StartupDelayInMSec", 0, RegistryValue::Delete),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\Serialize", "StartupDelayInMSec", RegistryValue::Delete),
-                ]),
-                requires_restart: true
+                                requires_restart: true
         },
         crate::tweak! {
                 id: "disable_auto_reboot",
@@ -93,19 +74,13 @@ pub static BOOT_TWEAKS: &[Tweak] = &[
                 description: "Prevents Windows from automatically rebooting after installing updates.",
                 effect: TweakEffect::Immediate,
                 enabled_ops: &[],
-                disabled_ops: None,
-                custom_apply: Some(|ctx| {
+                                custom_apply: Some(|ctx| {
                         ctx.post_status("Disabling Reboot task...");
                         let _ = crate::run_system_command("schtasks.exe", &["/change", "/tn", r"Microsoft\Windows\UpdateOrchestrator\Reboot", "/disable"]);
                         // We skip icacls here as it might be too aggressive for a general tool, sc.exe change is usually enough for most.
                         Ok(())
                 }),
-                custom_revert: Some(|ctx| {
-                        ctx.post_status("Enabling Reboot task...");
-                        let _ = crate::run_system_command("schtasks.exe", &["/change", "/tn", r"Microsoft\Windows\UpdateOrchestrator\Reboot", "/enable"]);
-                        Ok(())
-                })
-        },
+                },
         crate::tweak! {
                 id: "dont_display_last_user",
                 category: "boot",
@@ -115,10 +90,7 @@ pub static BOOT_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System", "DontDisplayLastUserName", 1, 0),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System", "DontDisplayLastUserName", 0, 0),
-                ])
-        },
+                },
         crate::tweak! {
                 id: "hide_network_icon_signin",
                 category: "boot",
@@ -128,10 +100,7 @@ pub static BOOT_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\System", "DontDisplayNetworkSelectionUI", 1, RegistryValue::Delete),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\System", "DontDisplayNetworkSelectionUI", RegistryValue::Delete),
-                ])
-        },
+                },
         crate::tweak! {
             id: "disable_logon_animation",
             category: "boot",
@@ -141,10 +110,7 @@ pub static BOOT_TWEAKS: &[Tweak] = &[
             enabled_ops: &[
                 crate::reg_dword!("HKLM", r"Software\Microsoft\Windows\CurrentVersion\Authentication\LogonUI", "AnimationDisabled", 1, RegistryValue::Delete),
             ],
-            disabled_ops: Some(&[
-                crate::reg_del!("HKLM", r"Software\Microsoft\Windows\CurrentVersion\Authentication\LogonUI", "AnimationDisabled", RegistryValue::Delete),
-            ]),
-        },
+                    },
         crate::tweak! {
             id: "disable_power_button_signin",
             category: "boot",
@@ -154,10 +120,7 @@ pub static BOOT_TWEAKS: &[Tweak] = &[
             enabled_ops: &[
                 crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System", "shutdownwithoutlogon", 0, 1),
             ],
-            disabled_ops: Some(&[
-                crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System", "shutdownwithoutlogon", 1, 1),
-            ]),
-        },
+                    },
         crate::tweak! {
             id: "disable_scoobe",
             category: "boot",
@@ -168,9 +131,5 @@ pub static BOOT_TWEAKS: &[Tweak] = &[
                 crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\UserProfileEngagement", "ScoobeSystemSettingEnabled", 0, RegistryValue::Delete),
                 crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "SubscribedContent-310093Enabled", 0, 1),
             ],
-            disabled_ops: Some(&[
-                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\UserProfileEngagement", "ScoobeSystemSettingEnabled", 1, 1),
-                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", "SubscribedContent-310093Enabled", 1, 1),
-            ])
-        },
+            },
 ];

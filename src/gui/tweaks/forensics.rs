@@ -1,6 +1,6 @@
 // Forensics & Local Data tweaks
 
-use super::{RegistryValue, Tweak, TweakEffect};
+use super::{Tweak, TweakEffect};
 use crate::gui::shared_state::WorkerContext;
 use anyhow::Result;
 use std::sync::Arc;
@@ -15,29 +15,20 @@ pub static FORENSICS_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Perflib", "Disable Performance Counters", 1),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Perflib", "Disable Performance Counters", RegistryValue::Delete),
-                ]),
-                requires_restart: true
+                                requires_restart: true
         },
         crate::tweak! {
-                id: "disable_recent_docs_history",
-                category: "forensics",
-                name: "Disable Recent Documents History",
-                description: "Stops tracking recently opened files. Clears on exit and removes from Start Menu.",
-                effect: TweakEffect::Logoff,
-                enabled_ops: &[
-                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer", "NoRecentDocsHistory", 1),
-                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Explorer", "NoRecentDocsMenu", 1),
-                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Policies\Explorer", "ClearRecentDocsOnExit", 1),
-                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Policies\Explorer", "NoRecentDocsNetHood", 1),
-                ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer", "NoRecentDocsHistory", RegistryValue::Delete),
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Explorer", "NoRecentDocsMenu", RegistryValue::Delete),
-                        crate::reg_del!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Policies\Explorer", "ClearRecentDocsOnExit", RegistryValue::Delete),
-                        crate::reg_del!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Policies\Explorer", "NoRecentDocsNetHood", RegistryValue::Delete),
-                ])
+        id: "disable_recent_docs_history",
+        category: "forensics",
+        name: "Disable Recent Documents History",
+        description: "Stops tracking recently opened files. Clears on exit and removes from Start Menu.",
+        effect: TweakEffect::Logoff,
+        enabled_ops: &[
+                crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer", "NoRecentDocsHistory", 1),
+                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Explorer", "NoRecentDocsMenu", 1),
+                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Policies\Explorer", "ClearRecentDocsOnExit", 1),
+                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Policies\Explorer", "NoRecentDocsNetHood", 1),
+        ],
         },
         crate::tweak! {
                 id: "disable_superfetch",
@@ -49,11 +40,7 @@ pub static FORENSICS_TWEAKS: &[Tweak] = &[
                         crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Services\SysMain", "Start", 4, 2),
                         crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Control\Session Manager\Management", "EnableSuperfetch", 0),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Services\SysMain", "Start", 2, 2),
-                        crate::reg_del!("HKLM", r"SYSTEM\CurrentControlSet\Control\Session Manager\Management", "EnableSuperfetch", RegistryValue::Delete),
-                ]),
-                requires_restart: true
+                                requires_restart: true
         },
         crate::tweak! {
                 id: "disable_prefetch",
@@ -64,10 +51,7 @@ pub static FORENSICS_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\PrefetchParameters", "EnablePrefetcher", 0, 3),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\PrefetchParameters", "EnablePrefetcher", 3, 3),
-                ]),
-                requires_restart: true
+                                requires_restart: true
         },
         crate::tweak! {
                 id: "disable_app_compat_tracking",
@@ -85,72 +69,45 @@ pub static FORENSICS_TWEAKS: &[Tweak] = &[
                         crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Services\PcaSvc", "Start", 4, 2),
                         crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Services\AeLookupSvc", "Start", 4, RegistryValue::Delete),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\AppCompat", "AITEnable", RegistryValue::Delete),
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\AppCompat", "DisablePCA", RegistryValue::Delete),
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\AppCompat", "DisableEngine", RegistryValue::Delete),
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\AppCompat", "SbEnable", RegistryValue::Delete),
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\AppCompat", "DisableUAR", RegistryValue::Delete),
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\AppCompat", "DisableInventory", RegistryValue::Delete),
-                        crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Services\PcaSvc", "Start", 3, 2),
-                        crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Services\AeLookupSvc", "Start", 3, 3),
-                ]),
-                requires_restart: true
+                                requires_restart: true
         },
         crate::tweak! {
-                id: "disable_api_install_tracking",
-                category: "forensics",
-                name: "Disable API & Install Tracking",
-                description: "Disables API sampling, application footprint monitoring, and install tracing.",
-                effect: TweakEffect::Logoff,
-                enabled_ops: &[
-                        crate::reg_dword!("HKCU", r"SOFTWARE\Policies\Microsoft\Windows\AppCompat", "DisableAPISampling", 1),
-                        crate::reg_dword!("HKCU", r"SOFTWARE\Policies\Microsoft\Windows\AppCompat", "DisableApplicationFootprint", 1),
-                        crate::reg_dword!("HKCU", r"SOFTWARE\Policies\Microsoft\Windows\AppCompat", "DisableInstallTracing", 1),
-                        crate::reg_dword!("HKCU", r"SOFTWARE\Policies\Microsoft\Windows\AppCompat", "DisableWin32AppBackup", 1),
-                ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKCU", r"SOFTWARE\Policies\Microsoft\Windows\AppCompat", "DisableAPISampling", RegistryValue::Delete),
-                        crate::reg_del!("HKCU", r"SOFTWARE\Policies\Microsoft\Windows\AppCompat", "DisableApplicationFootprint", RegistryValue::Delete),
-                        crate::reg_del!("HKCU", r"SOFTWARE\Policies\Microsoft\Windows\AppCompat", "DisableInstallTracing", RegistryValue::Delete),
-                        crate::reg_del!("HKCU", r"SOFTWARE\Policies\Microsoft\Windows\AppCompat", "DisableWin32AppBackup", RegistryValue::Delete),
-                ])
+        id: "disable_api_install_tracking",
+        category: "forensics",
+        name: "Disable API & Install Tracking",
+        description: "Disables API sampling, application footprint monitoring, and install tracing.",
+        effect: TweakEffect::Logoff,
+        enabled_ops: &[
+                crate::reg_dword!("HKCU", r"SOFTWARE\Policies\Microsoft\Windows\AppCompat", "DisableAPISampling", 1),
+                crate::reg_dword!("HKCU", r"SOFTWARE\Policies\Microsoft\Windows\AppCompat", "DisableApplicationFootprint", 1),
+                crate::reg_dword!("HKCU", r"SOFTWARE\Policies\Microsoft\Windows\AppCompat", "DisableInstallTracing", 1),
+                crate::reg_dword!("HKCU", r"SOFTWARE\Policies\Microsoft\Windows\AppCompat", "DisableWin32AppBackup", 1),
+        ],
         },
         crate::tweak! {
-                id: "disable_perftrack",
-                category: "forensics",
-                name: "Disable PerfTrack",
-                description: "Disables performance tracking and Customer Experience Improvement Program.",
-                effect: TweakEffect::Immediate,
-                enabled_ops: &[
-                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\WDI\{9c5a40da-b965-4fc3-8781-88dd50a6299d}", "ScenarioExecutionEnabled", 0),
-                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Messenger\Client", "CEIP", 2),
-                ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\WDI\{9c5a40da-b965-4fc3-8781-88dd50a6299d}", "ScenarioExecutionEnabled", RegistryValue::Delete),
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Messenger\Client", "CEIP", RegistryValue::Delete),
-                ])
+        id: "disable_perftrack",
+        category: "forensics",
+        name: "Disable PerfTrack",
+        description: "Disables performance tracking and Customer Experience Improvement Program.",
+        effect: TweakEffect::Immediate,
+        enabled_ops: &[
+                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\WDI\{9c5a40da-b965-4fc3-8781-88dd50a6299d}", "ScenarioExecutionEnabled", 0),
+                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Messenger\Client", "CEIP", 2),
+        ],
         },
         crate::tweak! {
-                id: "disable_program_tracking",
-                category: "forensics",
-                name: "Disable Program Startup Tracking",
-                description: "Disables tracking of application startups and most frequently used programs.",
-                effect: TweakEffect::Logoff,
-                enabled_ops: &[
-                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\EdgeUI", "DisableMFUTracking", 1),
-                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "Start_TrackProgs", 0),
-                        crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Windows\EdgeUI", "DisableMFUTracking", 1),
-                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer", "NoStartMenuMFUprogramsList", 1),
-                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Policies\Explorer", "ClearRecentProgForNewUserInStartMenu", 1),
-                ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\EdgeUI", "DisableMFUTracking", RegistryValue::Delete),
-                        crate::reg_del!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "Start_TrackProgs", RegistryValue::Dword(1)),
-                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Windows\EdgeUI", "DisableMFUTracking", RegistryValue::Delete),
-                        crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer", "NoStartMenuMFUprogramsList", RegistryValue::Delete),
-                        crate::reg_del!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Policies\Explorer", "ClearRecentProgForNewUserInStartMenu", RegistryValue::Delete),
-                ])
+        id: "disable_program_tracking",
+        category: "forensics",
+        name: "Disable Program Startup Tracking",
+        description: "Disables tracking of application startups and most frequently used programs.",
+        effect: TweakEffect::Logoff,
+        enabled_ops: &[
+                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\EdgeUI", "DisableMFUTracking", 1),
+                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "Start_TrackProgs", 0),
+                crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Windows\EdgeUI", "DisableMFUTracking", 1),
+                crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer", "NoStartMenuMFUprogramsList", 1),
+                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Policies\Explorer", "ClearRecentProgForNewUserInStartMenu", 1),
+        ],
         },
         crate::tweak! {
                 id: "disable_activity_feed_forensics",
@@ -163,72 +120,51 @@ pub static FORENSICS_TWEAKS: &[Tweak] = &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\System", "PublishUserActivities", 0),
                         crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\System", "UploadUserActivities", 0),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\System", "EnableActivityFeed", RegistryValue::Delete),
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\System", "PublishUserActivities", RegistryValue::Delete),
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\System", "UploadUserActivities", RegistryValue::Delete),
-                ]),
-                requires_restart: true
+                                requires_restart: true
         },
         crate::tweak! {
-                id: "disable_link_tracking",
-                category: "forensics",
-                name: "Disable Shortcut Link Tracking",
-                description: "Prevents searching disks to fix missing shortcuts and disables link resolve tracking.",
-                effect: TweakEffect::Immediate,
-                enabled_ops: &[
-                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Policies\Explorer", "LinkResolveIgnoreLinkInfo", 1),
-                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Policies\Explorer", "NoResolveSearch", 1),
-                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Policies\Explorer", "NoResolveTrack", 1),
-                ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Policies\Explorer", "LinkResolveIgnoreLinkInfo", RegistryValue::Delete),
-                        crate::reg_del!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Policies\Explorer", "NoResolveSearch", RegistryValue::Delete),
-                        crate::reg_del!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Policies\Explorer", "NoResolveTrack", RegistryValue::Delete),
-                ])
+        id: "disable_link_tracking",
+        category: "forensics",
+        name: "Disable Shortcut Link Tracking",
+        description: "Prevents searching disks to fix missing shortcuts and disables link resolve tracking.",
+        effect: TweakEffect::Immediate,
+        enabled_ops: &[
+                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Policies\Explorer", "LinkResolveIgnoreLinkInfo", 1),
+                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Policies\Explorer", "NoResolveSearch", 1),
+                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Policies\Explorer", "NoResolveTrack", 1),
+        ],
         },
         crate::tweak! {
-                id: "disable_search_history",
-                category: "forensics",
-                name: "Disable Search History",
-                description: "Disables device search history and Explorer search history.",
-                effect: TweakEffect::Immediate,
-                enabled_ops: &[
-                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\SearchSettings", "IsDeviceSearchHistoryEnabled", 0),
-                        crate::reg_dword!("HKCU", r"SOFTWARE\Policies\Microsoft\Windows\Explorer", "DisableSearchHistory", 1),
-                ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\SearchSettings", "IsDeviceSearchHistoryEnabled", RegistryValue::Delete),
-                        crate::reg_del!("HKCU", r"SOFTWARE\Policies\Microsoft\Windows\Explorer", "DisableSearchHistory", RegistryValue::Delete),
-                ])
+        id: "disable_search_history",
+        category: "forensics",
+        name: "Disable Search History",
+        description: "Disables device search history and Explorer search history.",
+        effect: TweakEffect::Immediate,
+        enabled_ops: &[
+                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\SearchSettings", "IsDeviceSearchHistoryEnabled", 0),
+                crate::reg_dword!("HKCU", r"SOFTWARE\Policies\Microsoft\Windows\Explorer", "DisableSearchHistory", 1),
+        ],
         },
         crate::tweak! {
-                id: "disable_file_history",
-                category: "forensics",
-                name: "Disable File History",
-                description: "Disables Windows File History backup feature.",
-                effect: TweakEffect::Immediate,
-                enabled_ops: &[
-                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\FileHistory", "Disabled", 1),
-                ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\FileHistory", "Disabled", RegistryValue::Delete),
-                ])
+        id: "disable_file_history",
+        category: "forensics",
+        name: "Disable File History",
+        description: "Disables Windows File History backup feature.",
+        effect: TweakEffect::Immediate,
+        enabled_ops: &[
+                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\FileHistory", "Disabled", 1),
+        ],
         },
         crate::tweak! {
-                id: "disable_userassist",
-                category: "forensics",
-                name: "Disable UserAssist",
-                description: "Disables UserAssist which tracks program execution count and last run time.",
-                effect: TweakEffect::Logoff,
-                enabled_ops: &[
-                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\{CEBFF5CD-ACE2-4F4F-9178-9926F41749EA}\Settings", "NoLog", 1),
-                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\{F4E57C4B-2036-45F0-A9AB-443BCFE33D9F}\Settings", "NoLog", 1),
-                ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\{CEBFF5CD-ACE2-4F4F-9178-9926F41749EA}\Settings", "NoLog", RegistryValue::Delete),
-                        crate::reg_del!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\{F4E57C4B-2036-45F0-A9AB-443BCFE33D9F}\Settings", "NoLog", RegistryValue::Delete),
-                ])
+        id: "disable_userassist",
+        category: "forensics",
+        name: "Disable UserAssist",
+        description: "Disables UserAssist which tracks program execution count and last run time.",
+        effect: TweakEffect::Logoff,
+        enabled_ops: &[
+                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\{CEBFF5CD-ACE2-4F4F-9178-9926F41749EA}\Settings", "NoLog", 1),
+                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\{F4E57C4B-2036-45F0-A9AB-443BCFE33D9F}\Settings", "NoLog", 1),
+        ],
         },
         crate::tweak! {
                 id: "disable_bam_dam",
@@ -240,110 +176,81 @@ pub static FORENSICS_TWEAKS: &[Tweak] = &[
                         crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Services\bam", "Start", 4, 1),
                         crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Services\dam", "Start", 4, 1),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Services\bam", "Start", 1, 1),
-                        crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Services\dam", "Start", 1, 1),
-                ]),
-                requires_restart: true
+                                requires_restart: true
         },
         crate::tweak! {
-                id: "disable_open_save_mru",
-                category: "forensics",
-                name: "Disable Open/Save Dialog History",
-                description: "Disables storing history in common Open/Save dialogs (ComDlg32 MRU).",
-                effect: TweakEffect::Immediate,
-                enabled_ops: &[
-                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Policies\comdlg32", "NoFileMru", 1),
-                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Policies\comdlg32", "NoBackButton", 0),
-                ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Policies\comdlg32", "NoFileMru", RegistryValue::Delete),
-                        crate::reg_del!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Policies\comdlg32", "NoBackButton", RegistryValue::Delete),
-                ])
+        id: "disable_open_save_mru",
+        category: "forensics",
+        name: "Disable Open/Save Dialog History",
+        description: "Disables storing history in common Open/Save dialogs (ComDlg32 MRU).",
+        effect: TweakEffect::Immediate,
+        enabled_ops: &[
+                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Policies\comdlg32", "NoFileMru", 1),
+                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Policies\comdlg32", "NoBackButton", 0),
+        ],
         },
         crate::tweak! {
-                id: "disable_clipboard_history_forensics",
-                category: "forensics",
-                name: "Disable Clipboard History",
-                description: "Disables Windows clipboard history which can store sensitive copied data.",
-                effect: TweakEffect::Immediate,
-                enabled_ops: &[
-                        crate::reg_dword!("HKLM", r"Software\Policies\Microsoft\Windows\System", "AllowClipboardHistory", 0),
-                ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"Software\Policies\Microsoft\Windows\System", "AllowClipboardHistory", RegistryValue::Delete),
-                ])
+        id: "disable_clipboard_history_forensics",
+        category: "forensics",
+        name: "Disable Clipboard History",
+        description: "Disables Windows clipboard history which can store sensitive copied data.",
+        effect: TweakEffect::Immediate,
+        enabled_ops: &[
+                crate::reg_dword!("HKLM", r"Software\Policies\Microsoft\Windows\System", "AllowClipboardHistory", 0),
+        ],
         },
         crate::tweak! {
-                id: "disable_jump_list_remote",
-                category: "forensics",
-                name: "Disable Remote Files in Jump Lists",
-                description: "Prevents tracking of remote/network files in taskbar Jump Lists.",
-                effect: TweakEffect::Immediate,
-                enabled_ops: &[
-                        crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Windows\Explorer", "NoRemoteDestinations", 1),
-                ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKCU", r"Software\Policies\Microsoft\Windows\Explorer", "NoRemoteDestinations", RegistryValue::Delete),
-                ])
+        id: "disable_jump_list_remote",
+        category: "forensics",
+        name: "Disable Remote Files in Jump Lists",
+        description: "Prevents tracking of remote/network files in taskbar Jump Lists.",
+        effect: TweakEffect::Immediate,
+        enabled_ops: &[
+                crate::reg_dword!("HKCU", r"Software\Policies\Microsoft\Windows\Explorer", "NoRemoteDestinations", 1),
+        ],
         },
         crate::tweak! {
-                id: "disable_error_reporting_log",
-                category: "forensics",
-                name: "Disable Error Reporting Logging",
-                description: "Disables Windows Error Reporting logging to system event log.",
-                effect: TweakEffect::Immediate,
-                enabled_ops: &[
-                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Windows Error Reporting", "LoggingDisabled", 1),
-                        crate::reg_dword!("HKCU", r"SOFTWARE\Policies\Microsoft\Windows\Windows Error Reporting", "LoggingDisabled", 1),
-                ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Windows Error Reporting", "LoggingDisabled", RegistryValue::Delete),
-                        crate::reg_del!("HKCU", r"SOFTWARE\Policies\Microsoft\Windows\Windows Error Reporting", "LoggingDisabled", RegistryValue::Delete),
-                ])
+        id: "disable_error_reporting_log",
+        category: "forensics",
+        name: "Disable Error Reporting Logging",
+        description: "Disables Windows Error Reporting logging to system event log.",
+        effect: TweakEffect::Immediate,
+        enabled_ops: &[
+                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Windows Error Reporting", "LoggingDisabled", 1),
+                crate::reg_dword!("HKCU", r"SOFTWARE\Policies\Microsoft\Windows\Windows Error Reporting", "LoggingDisabled", 1),
+        ],
         },
         crate::tweak! {
-                id: "disable_handwriting_reports",
-                category: "forensics",
-                name: "Disable Handwriting Error Reports",
-                description: "Prevents handwriting recognition error reports from being sent.",
-                effect: TweakEffect::Immediate,
-                enabled_ops: &[
-                        crate::reg_dword!("HKLM", r"Software\Policies\Microsoft\Windows\HandwritingErrorReports", "PreventHandwritingErrorReports", 1),
-                ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"Software\Policies\Microsoft\Windows\HandwritingErrorReports", "PreventHandwritingErrorReports", RegistryValue::Delete),
-                ])
+        id: "disable_handwriting_reports",
+        category: "forensics",
+        name: "Disable Handwriting Error Reports",
+        description: "Prevents handwriting recognition error reports from being sent.",
+        effect: TweakEffect::Immediate,
+        enabled_ops: &[
+                crate::reg_dword!("HKLM", r"Software\Policies\Microsoft\Windows\HandwritingErrorReports", "PreventHandwritingErrorReports", 1),
+        ],
         },
         crate::tweak! {
-                id: "limit_diagnostic_collection",
-                category: "forensics",
-                name: "Limit Diagnostic & Dump Collection",
-                description: "Limits diagnostic log and crash dump collection to minimum levels.",
-                effect: TweakEffect::Immediate,
-                enabled_ops: &[
-                        crate::reg_dword!("HKLM", r"Software\Policies\Microsoft\Windows\DataCollection", "LimitDiagnosticLogCollection", 1),
-                        crate::reg_dword!("HKLM", r"Software\Policies\Microsoft\Windows\DataCollection", "LimitDumpCollection", 1),
-                ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"Software\Policies\Microsoft\Windows\DataCollection", "LimitDiagnosticLogCollection", RegistryValue::Delete),
-                        crate::reg_del!("HKLM", r"Software\Policies\Microsoft\Windows\DataCollection", "LimitDumpCollection", RegistryValue::Delete),
-                ])
+        id: "limit_diagnostic_collection",
+        category: "forensics",
+        name: "Limit Diagnostic & Dump Collection",
+        description: "Limits diagnostic log and crash dump collection to minimum levels.",
+        effect: TweakEffect::Immediate,
+        enabled_ops: &[
+                crate::reg_dword!("HKLM", r"Software\Policies\Microsoft\Windows\DataCollection", "LimitDiagnosticLogCollection", 1),
+                crate::reg_dword!("HKLM", r"Software\Policies\Microsoft\Windows\DataCollection", "LimitDumpCollection", 1),
+        ],
         },
         crate::tweak! {
-                id: "disable_explorer_settings_save",
-                category: "forensics",
-                name: "Disable Explorer Typed Paths",
-                description: "Prevents Explorer from storing typed paths in address bar and uses PowerShell on Win+X.",
-                effect: TweakEffect::Immediate,
-                enabled_ops: &[
-                        crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "DontUsePowerShellOnWinX", 0),
-                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Explorer", "NoSaveSettings", 0),
-                ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "DontUsePowerShellOnWinX", RegistryValue::Delete),
-                        crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Explorer", "NoSaveSettings", RegistryValue::Delete),
-                ])
+        id: "disable_explorer_settings_save",
+        category: "forensics",
+        name: "Disable Explorer Typed Paths",
+        description: "Prevents Explorer from storing typed paths in address bar and uses PowerShell on Win+X.",
+        effect: TweakEffect::Immediate,
+        enabled_ops: &[
+                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "DontUsePowerShellOnWinX", 0),
+                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Explorer", "NoSaveSettings", 0),
+        ],
         },
         crate::tweak! {
                 id: "disable_last_access_time",
@@ -352,23 +259,18 @@ pub static FORENSICS_TWEAKS: &[Tweak] = &[
                 description: "Disables NTFS last access time updates to reduce file system forensic artifacts.",
                 effect: TweakEffect::Restart,
                 enabled_ops: &[],
-                disabled_ops: None,
-                custom_apply: Some(disable_last_access_apply),
-                custom_revert: Some(enable_last_access_apply),
-                requires_restart: true
+                                custom_apply: Some(disable_last_access_apply),
+                                requires_restart: true
         },
         crate::tweak! {
-            id: "bsod_details",
-            category: "forensics",
-            name: "Show BSOD Details",
-            description: "Shows detailed crash parameters on Blue Screen instead of just the sad face.",
-            effect: TweakEffect::Immediate,
-            enabled_ops: &[
-                    crate::reg_dword!("HKLM", r"System\CurrentControlSet\Control\CrashControl", "DisplayParameters", 1),
-            ],
-            disabled_ops: Some(&[
-                    crate::reg_del!("HKLM", r"System\CurrentControlSet\Control\CrashControl", "DisplayParameters", RegistryValue::Delete),
-            ])
+        id: "bsod_details",
+        category: "forensics",
+        name: "Show BSOD Details",
+        description: "Shows detailed crash parameters on Blue Screen instead of just the sad face.",
+        effect: TweakEffect::Immediate,
+        enabled_ops: &[
+                crate::reg_dword!("HKLM", r"System\CurrentControlSet\Control\CrashControl", "DisplayParameters", 1),
+        ],
         },
 ];
 
@@ -376,14 +278,6 @@ fn disable_last_access_apply(ctx: &Arc<WorkerContext>) -> Result<()>
 {
         ctx.post_status("fsutil behavior set disablelastaccess 3");
         crate::run_system_command("fsutil.exe", &["behavior", "set", "disablelastaccess", "3"])?;
-        ctx.report_progress();
-        Ok(())
-}
-
-fn enable_last_access_apply(ctx: &Arc<WorkerContext>) -> Result<()>
-{
-        ctx.post_status("fsutil behavior set disablelastaccess 2");
-        crate::run_system_command("fsutil.exe", &["behavior", "set", "disablelastaccess", "2"])?;
         ctx.report_progress();
         Ok(())
 }

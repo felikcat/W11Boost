@@ -1,6 +1,6 @@
 // Network tweaks
 
-use super::{RegistryValue, Tweak, TweakEffect};
+use super::{Tweak, TweakEffect};
 
 pub static NETWORK_TWEAKS: &[Tweak] = &[
         crate::tweak! {
@@ -12,9 +12,6 @@ pub static NETWORK_TWEAKS: &[Tweak] = &[
         enabled_ops: &[
                 crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\DefaultMediaCost", "Ethernet", 2, 1),
         ],
-        disabled_ops: Some(&[
-                crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\DefaultMediaCost", "Ethernet", 1, 1),
-        ])
         },
         crate::tweak! {
         id: "enable_ip_routing",
@@ -25,10 +22,7 @@ pub static NETWORK_TWEAKS: &[Tweak] = &[
         enabled_ops: &[
                 crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Services\Tcpip\Parameters", "IPEnableRouter", 1, 0),
         ],
-        disabled_ops: Some(&[
-                crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Services\Tcpip\Parameters", "IPEnableRouter", 0, 0),
-        ]),
-        requires_restart: true
+                requires_restart: true
         },
         crate::tweak! {
                 id: "msmq_tcp_nodelay",
@@ -39,10 +33,7 @@ pub static NETWORK_TWEAKS: &[Tweak] = &[
                 enabled_ops: &[
                         crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\MSMQ\parameters", "TCPNoDelay", 1),
                 ],
-                disabled_ops: Some(&[
-                        crate::reg_del!("HKLM", r"SOFTWARE\Microsoft\MSMQ\parameters", "TCPNoDelay", RegistryValue::Delete),
-                ]),
-                requires_restart: true
+                                requires_restart: true
         },
         crate::tweak! {
             id: "disable_llmnr",
@@ -53,10 +44,7 @@ pub static NETWORK_TWEAKS: &[Tweak] = &[
             enabled_ops: &[
                 crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows NT\DNSClient", "EnableMulticast", 0),
             ],
-            disabled_ops: Some(&[
-                crate::reg_del!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows NT\DNSClient", "EnableMulticast", RegistryValue::Delete),
-            ]),
-            requires_restart: true
+                        requires_restart: true
         },
         crate::tweak! {
             id: "disable_remote_assistance",
@@ -67,10 +55,7 @@ pub static NETWORK_TWEAKS: &[Tweak] = &[
             enabled_ops: &[
                 crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Control\Remote Assistance", "fAllowToGetHelp", 0, 1),
             ],
-            disabled_ops: Some(&[
-                crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Control\Remote Assistance", "fAllowToGetHelp", 1, 1),
-            ]),
-        },
+                    },
         crate::tweak! {
             id: "disable_remote_desktop",
             category: "network",
@@ -80,8 +65,5 @@ pub static NETWORK_TWEAKS: &[Tweak] = &[
             enabled_ops: &[
                 crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Control\Terminal Server", "fDenyTSConnections", 1, 1),
             ],
-            disabled_ops: Some(&[
-                crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Control\Terminal Server", "fDenyTSConnections", 0, 0),
-            ]),
-        },
+                    },
 ];
