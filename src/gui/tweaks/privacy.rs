@@ -30,19 +30,6 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
         ],
         },
         crate::tweak! {
-        id: "disable_background_apps",
-        category: "privacy",
-        name: "Disable Background Apps",
-        description: "Prevents UWP apps from running in the background, improving privacy and performance.",
-        effect: TweakEffect::Logoff,
-        enabled_ops: &[
-                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications", "GlobalUserDisabled", 1, RegistryValue::Delete),
-                crate::reg_dword!("HKLM", r"Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications", "GlobalUserDisabled", 1, RegistryValue::Delete),
-                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\appprivacy", "LetAppsRunInBackground", 2, RegistryValue::Delete),
-                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\Search", "BackgroundAppGlobalToggle", 0, RegistryValue::Delete),
-        ],
-        },
-        crate::tweak! {
                 id: "disable_activity_history",
                 category: "privacy",
                 name: "Disable Activity History/Timeline",
@@ -1044,18 +1031,6 @@ pub static PRIVACY_TWEAKS: &[Tweak] = &[
         effect: TweakEffect::Immediate,
         enabled_ops: &[
             crate::reg_dword!("HKLM", r"Software\Microsoft\Windows\CurrentVersion\PushNotifications", "NoCloudApplicationNotification", 1, 0),
-        ],
-                },
-        crate::tweak! {
-        id: "disable_background_apps_policy",
-        category: "privacy",
-        name: "Disable Background Apps",
-        description: "Prevents apps from running in the background to save resources and improve privacy.",
-        effect: TweakEffect::Immediate,
-        enabled_ops: &[
-            crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\appprivacy", "LetAppsRunInBackground", 2),
-            crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\appprivacy", "LetAppsActivateWithVoice", 2),
-            crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\appprivacy", "LetAppsSyncWithDevices", 2),
         ],
                 },
         crate::tweak! {
