@@ -1,6 +1,6 @@
 [package]
 name = "W11Boost"
-version = "2.0.0-dev1"
+version = "2.0.0-dev2"
 edition = "2024"
 build = "build.rs"
 authors = ["felikcat"]
@@ -55,10 +55,7 @@ lto = "fat"
 
 [dependencies]
 anyhow = "1.0.100"
-eframe = { version = "0.33.3", default-features = false, features = [
-    "glow",
-    "default_fonts",
-] }
+eframe = { version = "0.33.3", default-features = false, features = ["glow"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0.149"
 rfd = "0.17.1"
@@ -89,7 +86,8 @@ features = [
 ]
 
 [build-dependencies]
-winresource = "0.1.28"
+winresource = "0.1.29"
+image = "0.25"
 
 [dependencies.winsafe]
 version = "0.0.27"
@@ -97,3 +95,8 @@ features = ["user", "shell", "advapi", "kernel"]
 
 [dev-dependencies]
 tempfile = "3.24.0"
+
+[dependencies.image]
+version = "0.25"
+default-features = false
+features = ["png", "ico"]

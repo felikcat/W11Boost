@@ -1,6 +1,6 @@
 // Performance tweaks
 
-use super::{Tweak, TweakEffect};
+use super::Tweak;
 use winsafe;
 
 pub static QOS_GAMES_LIST: &str = "100orange.exe;100orange_x86.exe;7DaysToDie.exe;AbioticFactor.exe;AC3MP.exe;AC4BFMP.exe;ACBMP.exe;ACC.exe;\
@@ -65,177 +65,138 @@ pub static QOS_GAMES_LIST: &str = "100orange.exe;100orange_x86.exe;7DaysToDie.ex
 
 pub static PERFORMANCE_TWEAKS: &[Tweak] = &[
         crate::tweak! {
-                id: "disable_animations",
-                category: "performance",
-                name: "Disable Animations",
-                description: "Disables window animations for faster, snappier UI.",
-                effect: TweakEffect::Immediate,
-                enabled_ops: &[
-                        crate::reg_str!("HKCU", r"Control Panel\Desktop\WindowMetrics", "MinAnimate", "0", "0"),
-                        crate::reg_dword!("HKCU", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "TaskbarAnimations", 0, 1),
-                ],
-                },
-        crate::tweak! {
-                id: "disable_aero_peek",
-                category: "performance",
-                name: "Disable Aero Peek",
-                description: "Disables the Aero Peek feature (preview desktop when hovering taskbar).",
-                effect: TweakEffect::Immediate,
-                enabled_ops: &[
-                        crate::reg_dword!("HKCU", r"SOFTWARE\Microsoft\Windows\DWM", "EnableAeroPeek", 0, 1),
-                ],
-                },
-        crate::tweak! {
-                id: "disable_power_throttling",
-                category: "performance",
-                name: "Disable Power Throttling",
-                description: "Disables CPU power throttling for background apps. May increase power usage.",
-                effect: TweakEffect::Restart,
-                enabled_ops: &[
-                        crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Control\Power\PowerThrottling", "PowerThrottlingOff", 1, RegistryValue::Delete),
-                ],
-                                requires_restart: true
+        id: "disable_aero_peek",
+        category: "performance",
+        name: "Disable Aero Peek",
+        description: "Disables the Aero Peek feature (preview desktop when hovering taskbar).",
+        enabled_ops: &[
+                crate::reg_dword!("HKCU", r"SOFTWARE\Microsoft\Windows\DWM", "EnableAeroPeek", 0),
+        ],
         },
         crate::tweak! {
-                id: "disable_fth",
-                category: "performance",
-                name: "Disable Fault Tolerant Heap",
-                description: "Disables FTH which mitigates application crashes but uses resources.",
-                effect: TweakEffect::Restart,
-                enabled_ops: &[
-                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\FTH", "Enabled", 0, 1),
-                ],
-                                requires_restart: true
+        id: "disable_animations",
+        category: "performance",
+        name: "Disable Animations",
+        description: "Disables window animations for faster, snappier UI.",
+        enabled_ops: &[
+                crate::reg_str!("HKCU", r"Control Panel\Desktop\WindowMetrics", "MinAnimate", "0"),
+                crate::reg_dword!("HKCU", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "TaskbarAnimations", 0),
+        ],
         },
         crate::tweak! {
-                id: "disable_scheduled_diagnostics",
-                category: "performance",
-                name: "Disable Scheduled Diagnostics",
-                description: "Prevents automatic system diagnostics from running in the background.",
-                effect: TweakEffect::Immediate,
-                enabled_ops: &[
-                        crate::reg_dword!("HKLM", r"Software\Microsoft\Windows\ScheduledDiagnostics", "EnabledExecution", 0, 1),
-                ],
-                },
-        crate::tweak! {
-                id: "ntfs_nonpaged_pool",
-                category: "performance",
-                name: "Increase NTFS Memory Usage",
-                description: "Increases NTFS memory cache for better disk performance.",
-                effect: TweakEffect::Restart,
-                enabled_ops: &[
-                        crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Control\FileSystem", "NtfsMemoryUsage", 2, 1),
-                ],
-                                requires_restart: true
-        },
-        crate::tweak! {
-                id: "disable_paging_executive",
-                category: "performance",
-                name: "Disable Paging Executive",
-                description: "Keeps kernel drivers in memory instead of paging them to disk.",
-                effect: TweakEffect::Restart,
-                enabled_ops: &[
-                        crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management", "DisablePagingExecutive", 1, 0),
-                ],
-                                requires_restart: true
-        },
-        crate::tweak! {
-                id: "system_responsiveness",
-                category: "performance",
-                name: "Optimize System Responsiveness",
-                description: "Prioritizes system tasks over multimedia tasks.",
-                effect: TweakEffect::Restart,
-                enabled_ops: &[
-                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile", "SystemResponsiveness", 0, 20),
-                ],
-                                requires_restart: true
-        },
-        crate::tweak! {
-                id: "priority_separation",
-                category: "performance",
-                name: "Optimize Processor Scheduling",
-                description: "Optimizes CPU scheduling for best performance of foreground apps.",
-                effect: TweakEffect::Restart,
-                enabled_ops: &[
-                        crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Control\PriorityControl", "Win32PrioritySeparation", 38, 2),
-                ],
-                                requires_restart: true
+            id: "disable_driver_updates",
+            category: "performance",
+            name: "Disable Automatic Driver Updates",
+            description: "Prevents Windows Update from automatically installing drivers.",
+            enabled_ops: &[
+                crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\DriverSearching", "SearchOrderConfig", 0),
+                crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\DeviceSetup\Settings", "PreventDeviceDriverUpdate", 1),
+                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate", "ExcludeWUDriversInQualityUpdate", 1),
+            ],
         },
         crate::tweak! {
                 id: "disable_bandwidth_throttling",
                 category: "performance",
                 name: "Disable Bandwidth Throttling",
                 description: "Disables network bandwidth throttling for non-multimedia traffic.",
-                effect: TweakEffect::Restart,
                 enabled_ops: &[
-                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Psched", "NonBestEffortLimit", 0, RegistryValue::Delete),
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Psched", "NonBestEffortLimit", 0),
                 ],
-                                requires_restart: true
         },
+        crate::tweak! {
+            id: "disable_device_power_saving",
+            category: "performance",
+            name: "Disable Device Power Saving",
+            description: "Prevents Windows from turning off devices (USB, Network, etc.) to save power.",
+            enabled_ops: &[],
+                        custom_apply: Some(|ctx| {
+                ctx.post_status("Disabling device power saving...");
+                let cmd = r#"Get-WmiObject MSPower_DeviceEnable -Namespace root\wmi | ForEach-Object { $_.enable = $false; $_.psbase.put() }"#;
+                let _ = crate::run_powershell_command(cmd);
+                Ok(())
+            }),
+                        command: Some("Get-WmiObject MSPower_DeviceEnable -Namespace root\\wmi | ForEach-Object { $_.enable = $false; $_.psbase.put() }"),
+        },
+        crate::tweak! {
+                id: "disable_fth",
+                category: "performance",
+                name: "Disable Fault Tolerant Heap",
+                description: "Disables FTH which mitigates application crashes but uses resources.",
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\FTH", "Enabled", 0),
+                ],
+        },
+        crate::tweak! {
+        id: "disable_game_dvr_recording",
+        category: "performance",
+        name: "Disable Game DVR Background Recording",
+        description: "Disables background recording of gameplay (GameDVR) to save resources.",
+        enabled_ops: &[
+            crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\GameDVR", "HistoricalCaptureEnabled", 0),
+            crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\GameDVR", "AppCaptureEnabled", 0),
+            crate::reg_dword!("HKCU", r"System\GameConfigStore", "GameDVR_Enabled", 0),
+            crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\GameDVR", "AllowGameDVR", 0),
+        ],
+                },
         crate::tweak! {
                 id: "disable_last_access",
                 category: "performance",
                 name: "Disable NTFS Last Access Update",
                 description: "Disables updating the 'Last Accessed' timestamp on files to improve disk performance.",
-                effect: TweakEffect::Restart,
                 enabled_ops: &[
-                        crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Control\FileSystem", "NtfsDisableLastAccessUpdate", 1, 0),
+                        crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Control\FileSystem", "NtfsDisableLastAccessUpdate", 1),
                 ],
-                                requires_restart: true
+        },
+        crate::tweak! {
+                id: "disable_paging_executive",
+                category: "performance",
+                name: "Disable Paging Executive",
+                description: "Keeps kernel drivers in memory instead of paging them to disk.",
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management", "DisablePagingExecutive", 1),
+                ],
+        },
+        crate::tweak! {
+                id: "disable_power_throttling",
+                category: "performance",
+                name: "Disable Power Throttling",
+                description: "Disables CPU power throttling for background apps. May increase power usage.",
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Control\Power\PowerThrottling", "PowerThrottlingOff", 1),
+                ],
+        },
+        crate::tweak! {
+        id: "disable_scheduled_diagnostics",
+        category: "performance",
+        name: "Disable Scheduled Diagnostics",
+        description: "Prevents automatic system diagnostics from running in the background.",
+        enabled_ops: &[
+                crate::reg_dword!("HKLM", r"Software\Microsoft\Windows\ScheduledDiagnostics", "EnabledExecution", 0),
+        ],
         },
         crate::tweak! {
                 id: "disable_experimentation",
                 category: "performance",
                 name: "Disable Windows Experimentation",
                 description: "Disables Microsoft experimentation features.",
-                effect: TweakEffect::Restart,
                 enabled_ops: &[
-                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\PolicyManager\default\System\AllowExperimentation", "value", 0, RegistryValue::Delete),
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\PolicyManager\default\System\AllowExperimentation", "value", 0),
                 ],
-                                requires_restart: true
         },
         crate::tweak! {
-            id: "game_bar_tweaks",
-            category: "performance",
-            name: "Optimize Game Bar",
-            description: "Enables Auto Game Mode and disables Game Bar features.",
-            effect: TweakEffect::Immediate,
-            enabled_ops: &[
-                crate::reg_dword!("HKCU", r"Software\Microsoft\GameBar", "AutoGameModeEnabled", 1, 1),
-                crate::reg_dword!("HKCU", r"Software\Microsoft\GameBar", "AllowAutoGameMode", 1, 1),
-                crate::reg_dword!("HKCU", r"Software\Microsoft\GameBar", "UseNexusForGameBarEnabled", 0, 1),
-                crate::reg_dword!("HKCU", r"Software\Microsoft\GameBar", "ShowStartupPanel", 0, 1),
-            ],
-                    },
-        crate::tweak! {
-            id: "directx_swap_effect_upgrade",
-            category: "performance",
-            name: "Enable DirectX Swap Effect Upgrade",
-            description: "Enables DirectX Swap Effect Upgrade for better performance.",
-            effect: TweakEffect::Immediate,
-            enabled_ops: &[
-                crate::reg_dword!("HKCU", r"Software\Microsoft\DirectX\GraphicsSettings", "SwapEffectUpgradeCache", 1, RegistryValue::Delete),
-            ],
-                    },
-        crate::tweak! {
-            id: "disable_game_dvr_recording",
-            category: "performance",
-            name: "Disable Game DVR Background Recording",
-            description: "Disables background recording of gameplay (GameDVR) to save resources.",
-            effect: TweakEffect::Immediate,
-            enabled_ops: &[
-                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\GameDVR", "HistoricalCaptureEnabled", 0, 1),
-                crate::reg_dword!("HKCU", r"Software\Microsoft\Windows\CurrentVersion\GameDVR", "AppCaptureEnabled", 0, 1),
-                crate::reg_dword!("HKCU", r"System\GameConfigStore", "GameDVR_Enabled", 0, 1),
-                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\GameDVR", "AllowGameDVR", 0, RegistryValue::Delete),
-            ],
-                    },
+        id: "directx_swap_effect_upgrade",
+        category: "performance",
+        name: "Enable DirectX Swap Effect Upgrade",
+        description: "Enables DirectX Swap Effect Upgrade for better performance.",
+        enabled_ops: &[
+            crate::reg_dword!("HKCU", r"Software\Microsoft\DirectX\GraphicsSettings", "SwapEffectUpgradeCache", 1),
+        ],
+                },
         crate::tweak! {
             id: "enable_qos_dscp_marking",
             category: "performance",
             name: "Enable QoS DSCP Marking & Priority",
             description: "Enables QoS packet tagging and sets High Priority (DSCP 46) for specified processes.",
-            effect: TweakEffect::Restart,
             enabled_ops: &[],
                         custom_apply: Some(|ctx| {
                 ctx.post_status("Enabling QoS DSCP Marking...");
@@ -270,127 +231,51 @@ pub static PERFORMANCE_TWEAKS: &[Tweak] = &[
                 }
                 Ok(())
             }),
-                        requires_restart: true,
             has_custom_input: true,
             default_text: Some(QOS_GAMES_LIST),
         },
         crate::tweak! {
-            id: "optimize_timer_resolution",
-            category: "performance",
-            name: "Optimize Timer Resolution",
-            description: "Configures the system timer resolution for lower latency.",
-            effect: TweakEffect::Restart,
-            enabled_ops: &[
-                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Psched", "TimerResolution", 1, RegistryValue::Delete),
-            ],
-                        requires_restart: true,
-        },
-        crate::tweak! {
-            id: "network_throttling_index",
-            category: "performance",
-            name: "Disable Network Throttling Index",
-            description: "Disables network throttling mechanism for non-multimedia traffic (default limits ~10 packets/ms).",
-            effect: TweakEffect::Restart,
-            enabled_ops: &[
-                crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile", "NetworkThrottlingIndex", 0xffffffff, 10),
-            ],
-                        requires_restart: true,
-        },
-        crate::tweak! {
-            id: "gaming_task_priority",
-            category: "performance",
-            name: "Set High Priority for Games",
-            description: "Sets the system scheduler priority for gaming tasks to High.",
-            effect: TweakEffect::Restart,
-            enabled_ops: &[
-                crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games", "Priority", 6, 2),
-                crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games", "Scheduling Category", "High", "Medium"),
-                crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games", "SFIO Priority", "High", "Normal"),
-            ],
-                        requires_restart: true,
-        },
-        crate::tweak! {
-            id: "disable_device_power_saving",
-            category: "performance",
-            name: "Disable Device Power Saving",
-            description: "Prevents Windows from turning off devices (USB, Network, etc.) to save power.",
-            effect: TweakEffect::Immediate,
-            enabled_ops: &[],
-                        custom_apply: Some(|ctx| {
-                ctx.post_status("Disabling device power saving...");
-                let cmd = r#"Get-WmiObject MSPower_DeviceEnable -Namespace root\wmi | ForEach-Object { $_.enable = $false; $_.psbase.put() }"#;
-                let _ = crate::run_powershell_command(cmd);
-                Ok(())
-            }),
-                        command: Some("Get-WmiObject MSPower_DeviceEnable -Namespace root\\wmi | ForEach-Object { $_.enable = $false; $_.psbase.put() }"),
-        },
-        crate::tweak! {
-            id: "disable_driver_updates",
-            category: "performance",
-            name: "Disable Automatic Driver Updates",
-            description: "Prevents Windows Update from automatically installing drivers.",
-            effect: TweakEffect::Restart,
-            enabled_ops: &[
-                crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\DriverSearching", "SearchOrderConfig", 0, 1),
-                crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows\CurrentVersion\DeviceSetup\Settings", "PreventDeviceDriverUpdate", 1, 0),
-                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate", "ExcludeWUDriversInQualityUpdate", 1, RegistryValue::Delete),
-            ],
-                        requires_restart: true,
-        },
-        crate::tweak! {
-            id: "optimize_browser_policies",
-            category: "performance",
-            name: "Optimize Browser Policies (Edge, Chrome, Brave)",
-            description: "Disables background running and startup boost for major browsers.",
-            effect: TweakEffect::Restart,
-            enabled_ops: &[
-                // Edge
-                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "BackgroundModeEnabled", 0, RegistryValue::Delete),
-                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "StartupBoostEnabled", 0, RegistryValue::Delete),
-                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "UserFeedbackAllowed", 0, RegistryValue::Delete),
-                // Chrome
-                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Google\Chrome", "BackgroundModeEnabled", 0, RegistryValue::Delete),
-                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Google\Chrome", "MetricsReportingEnabled", 0, RegistryValue::Delete),
-                // Brave
-                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\BraveSoftware\Brave", "BackgroundModeEnabled", 0, RegistryValue::Delete),
-            ],
-                        requires_restart: true,
+                id: "ntfs_nonpaged_pool",
+                category: "performance",
+                name: "Increase NTFS Memory Usage",
+                description: "Increases NTFS memory cache for better disk performance.",
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Control\FileSystem", "NtfsMemoryUsage", 2),
+                ],
         },
         crate::tweak! {
             id: "optimize_app_timeouts",
             category: "performance",
             name: "Optimize App Termination Timeouts",
             description: "Reduces the time Windows waits for hung apps to close during shutdown or when force-closing.",
-            effect: TweakEffect::Restart,
             enabled_ops: &[
-                crate::reg_str!("HKCU", r"Control Panel\Desktop", "WaitToKillAppTimeout", "2000", "20000"),
-                crate::reg_str!("HKCU", r"Control Panel\Desktop", "HungAppTimeout", "1000", "5000"),
-                crate::reg_str!("HKCU", r"Control Panel\Desktop", "AutoEndTasks", "1", "0"),
+                crate::reg_str!("HKCU", r"Control Panel\Desktop", "WaitToKillAppTimeout", "2000"),
+                crate::reg_str!("HKCU", r"Control Panel\Desktop", "HungAppTimeout", "1000"),
+                crate::reg_str!("HKCU", r"Control Panel\Desktop", "AutoEndTasks", "1"),
             ],
-                        requires_restart: true,
         },
         crate::tweak! {
-                id: "visual_fx_performance",
-                category: "performance",
-                name: "Visual Effects for Performance",
-                description: "Sets visual effects to performance mode while keeping useful effects enabled.",
-                effect: TweakEffect::Immediate,
-                enabled_ops: &[
-                        crate::reg_dword!("HKCU", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects", "VisualFXSetting", 3, RegistryValue::Delete),
-                        // Keep listview alpha selection
-                        crate::reg_dword!("HKCU", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ListviewAlphaSelect", 1, 1),
-                        // Keep listview shadows
-                        crate::reg_dword!("HKCU", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ListviewShadow", 1, 1),
-                        // Keep font smoothing
-                        crate::reg_str!("HKCU", r"Control Panel\Desktop", "FontSmoothing", "2", "2"),
-                ],
-                },
+            id: "optimize_browser_policies",
+            category: "performance",
+            name: "Optimize Browser Policies (Edge, Chrome, Brave)",
+            description: "Disables background running and startup boost for major browsers.",
+            enabled_ops: &[
+                // Edge
+                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "BackgroundModeEnabled", 0),
+                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "StartupBoostEnabled", 0),
+                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Edge", "UserFeedbackAllowed", 0),
+                // Chrome
+                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Google\Chrome", "BackgroundModeEnabled", 0),
+                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Google\Chrome", "MetricsReportingEnabled", 0),
+                // Brave
+                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\BraveSoftware\Brave", "BackgroundModeEnabled", 0),
+            ],
+        },
         crate::tweak! {
             id: "optimize_platform_tick",
             category: "performance",
             name: "Optimize Platform Tick & Timers",
             description: "Optimizes system timers by disabling dynamic tick and enhancing TSC synchronization (BCD).",
-            effect: TweakEffect::Restart,
             enabled_ops: &[],
                         custom_apply: Some(|ctx| {
                 ctx.post_status("Optimizing platform tick...");
@@ -400,7 +285,59 @@ pub static PERFORMANCE_TWEAKS: &[Tweak] = &[
                 let _ = crate::run_system_command("bcdedit", &["/set", "tscsyncpolicy", "enhanced"]);
                 Ok(())
             }),
-                        requires_restart: true,
             command: Some("bcdedit /deletevalue useplatformclock\nbcdedit /deletevalue useplatformtick\nbcdedit /set disabledynamictick yes\nbcdedit /set tscsyncpolicy enhanced"),
+        },
+        crate::tweak! {
+                id: "priority_separation",
+                category: "performance",
+                name: "Optimize Processor Scheduling",
+                description: "Optimizes CPU scheduling for best performance of foreground apps.",
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SYSTEM\CurrentControlSet\Control\PriorityControl", "Win32PrioritySeparation", 38),
+                ],
+        },
+        crate::tweak! {
+                id: "system_responsiveness",
+                category: "performance",
+                name: "Optimize System Responsiveness",
+                description: "Prioritizes system tasks over multimedia tasks.",
+                enabled_ops: &[
+                        crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile", "SystemResponsiveness", 0),
+                ],
+        },
+        crate::tweak! {
+            id: "optimize_timer_resolution",
+            category: "performance",
+            name: "Optimize Timer Resolution",
+            description: "Configures the system timer resolution for lower latency.",
+            enabled_ops: &[
+                crate::reg_dword!("HKLM", r"SOFTWARE\Policies\Microsoft\Windows\Psched", "TimerResolution", 1),
+            ],
+        },
+        crate::tweak! {
+            id: "gaming_task_priority",
+            category: "performance",
+            name: "Set High Priority for Games",
+            description: "Sets the system scheduler priority for gaming tasks to High.",
+            enabled_ops: &[
+                crate::reg_dword!("HKLM", r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games", "Priority", 6),
+                crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games", "Scheduling Category", "High"),
+                crate::reg_str!("HKLM", r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games", "SFIO Priority", "High"),
+            ],
+        },
+        crate::tweak! {
+        id: "visual_fx_performance",
+        category: "performance",
+        name: "Visual Effects for Performance",
+        description: "Sets visual effects to performance mode while keeping useful effects enabled.",
+        enabled_ops: &[
+                crate::reg_dword!("HKCU", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects", "VisualFXSetting", 3),
+                // Keep listview alpha selection
+                crate::reg_dword!("HKCU", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ListviewAlphaSelect", 1),
+                // Keep listview shadows
+                crate::reg_dword!("HKCU", r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ListviewShadow", 1),
+                // Keep font smoothing
+                crate::reg_str!("HKCU", r"Control Panel\Desktop", "FontSmoothing", "2"),
+        ],
         },
 ];

@@ -9,3 +9,5 @@ implemented_tweaks_inventory.md
 *.log
 *.py
 *.txt
+sign_build.ps1
+*.cer

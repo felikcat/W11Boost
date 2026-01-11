@@ -120,9 +120,7 @@ fn setup_fonts(ctx: &Context)
         // Embed Roboto font
         fonts.font_data.insert(
                 "Roboto".to_owned(),
-                std::sync::Arc::new(FontData::from_static(include_bytes!(
-                        "../../fonts/Roboto-VariableFont_wdth,wght.ttf"
-                ))),
+                std::sync::Arc::new(FontData::from_static(include_bytes!("../../fonts/Roboto-Regular.ttf"))),
         );
 
         // Load Segoe UI Emoji for color icons

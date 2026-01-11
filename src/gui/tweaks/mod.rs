@@ -18,19 +18,19 @@ mod performance;
 mod power;
 mod privacy;
 mod remove_ai;
-mod repair;
 mod security;
 mod software;
 mod sync;
 
-mod third_party_telemetry;
+pub mod bulk;
+pub use bulk::BULK_OPERATIONS_TWEAKS;
 mod tools;
 mod updates;
 
 use super::shared_state::WorkerContext;
 use crate::common::{delete_value, remove_subkey, set_binary, set_dword, set_expand_sz, set_string};
 use anyhow::Result;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use std::sync::Arc;
 use winsafe::HKEY;
 
@@ -50,38 +50,13 @@ pub use performance::PERFORMANCE_TWEAKS;
 pub use power::POWER_TWEAKS;
 pub use privacy::PRIVACY_TWEAKS;
 pub use remove_ai::REMOVE_AI_TWEAKS;
-pub use repair::REPAIR_TWEAKS;
 
 pub use security::SECURITY_TWEAKS;
 pub use software::SOFTWARE_TWEAKS;
 pub use sync::SYNC_TWEAKS;
 
-pub use third_party_telemetry::THIRD_PARTY_TELEMETRY_TWEAKS;
 pub use tools::TOOLS_TWEAKS;
 pub use updates::UPDATE_TWEAKS;
-
-/// Effect type when applying a tweak
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub enum TweakEffect
-{
-        Immediate,
-        ExplorerRestart,
-        Logoff,
-        Restart,
-}
-
-impl TweakEffect
-{
-        pub const fn description(self) -> &'static str
-        {
-                match self {
-                        Self::Immediate => "Takes effect immediately",
-                        Self::ExplorerRestart => "Requires Explorer restart",
-                        Self::Logoff => "Requires sign out/sign in",
-                        Self::Restart => "Requires restart",
-                }
-        }
-}
 
 /// Category for organizing tweaks
 #[derive(Clone, Debug, Serialize)]
@@ -149,12 +124,9 @@ pub struct Tweak
         pub category: &'static str,
         pub name: &'static str,
         pub description: &'static str,
-        pub effect: TweakEffect,
         pub enabled_ops: &'static [RegistryOp],
         #[serde(skip)]
         pub custom_apply: Option<TweakFn>,
-        pub requires_restart: bool,
-        pub is_hidden: bool,
         pub sub_tweaks: &'static [&'static Tweak],
         pub has_custom_input: bool,
         pub default_text: Option<&'static str>,
@@ -169,11 +141,8 @@ impl Tweak
                 category: "",
                 name: "",
                 description: "",
-                effect: TweakEffect::Immediate,
                 enabled_ops: &[],
                 custom_apply: None,
-                requires_restart: false,
-                is_hidden: false,
                 sub_tweaks: &[],
                 has_custom_input: false,
                 default_text: None,
@@ -279,6 +248,14 @@ macro_rules! reg_binary {
 
 #[macro_export]
 macro_rules! reg_del {
+        ($hkey:expr, $subkey:expr, $name:expr) => {
+                $crate::gui::tweaks::RegistryOp {
+                        hkey: $hkey,
+                        subkey: $subkey,
+                        value_name: $name,
+                        value: $crate::gui::tweaks::RegistryValue::Delete,
+                }
+        };
         ($hkey:expr, $subkey:expr, $name:expr, $stock:expr) => {
                 $crate::gui::tweaks::RegistryOp {
                         hkey: $hkey,
@@ -291,6 +268,14 @@ macro_rules! reg_del {
 
 #[macro_export]
 macro_rules! reg_del_key {
+        ($hkey:expr, $subkey:expr, $name:expr) => {
+                $crate::gui::tweaks::RegistryOp {
+                        hkey: $hkey,
+                        subkey: $subkey,
+                        value_name: $name,
+                        value: $crate::gui::tweaks::RegistryValue::DeleteKey,
+                }
+        };
         ($hkey:expr, $subkey:expr, $name:expr, $stock:expr) => {
                 $crate::gui::tweaks::RegistryOp {
                         hkey: $hkey,
@@ -303,6 +288,13 @@ macro_rules! reg_del_key {
 
 #[macro_export]
 macro_rules! gpo_dword {
+        ($subkey:expr, $name:expr, $val:expr) => {
+                $crate::gui::tweaks::GpoOp {
+                        subkey: $subkey,
+                        value_name: $name,
+                        value: $crate::gui::tweaks::RegistryValue::Dword($val),
+                }
+        };
         ($subkey:expr, $name:expr, $val:expr, $stock:literal) => {
                 $crate::gui::tweaks::GpoOp {
                         subkey: $subkey,
@@ -321,6 +313,13 @@ macro_rules! gpo_dword {
 
 #[macro_export]
 macro_rules! gpo_str {
+        ($subkey:expr, $name:expr, $val:expr) => {
+                $crate::gui::tweaks::GpoOp {
+                        subkey: $subkey,
+                        value_name: $name,
+                        value: $crate::gui::tweaks::RegistryValue::String($val),
+                }
+        };
         ($subkey:expr, $name:expr, $val:expr, $stock:literal) => {
                 $crate::gui::tweaks::GpoOp {
                         subkey: $subkey,
@@ -339,6 +338,13 @@ macro_rules! gpo_str {
 
 #[macro_export]
 macro_rules! gpo_del {
+        ($subkey:expr, $name:expr) => {
+                $crate::gui::tweaks::GpoOp {
+                        subkey: $subkey,
+                        value_name: $name,
+                        value: $crate::gui::tweaks::RegistryValue::Delete,
+                }
+        };
         ($subkey:expr, $name:expr, $stock:expr) => {
                 $crate::gui::tweaks::GpoOp {
                         subkey: $subkey,
@@ -358,7 +364,7 @@ fn get_hkey(hkey_str: &str) -> HKEY
         }
 }
 
-fn execute_registry_op(op: &RegistryOp, ctx: &Arc<WorkerContext>, prefix: &str) -> Result<()>
+pub fn execute_registry_op(op: &RegistryOp, ctx: &Arc<WorkerContext>, prefix: &str) -> Result<()>
 {
         let hkey = get_hkey(op.hkey);
         ctx.post_status(&format!("{} {}\\{}\\{}", prefix, op.hkey, op.subkey, op.value_name));
@@ -405,19 +411,34 @@ pub static CATEGORIES: &[TweakCategory] = &[
                 description: "Accessibility features and settings",
         },
         TweakCategory {
-                id: "privacy",
-                name: "Privacy & Telemetry",
-                description: "Control Windows data collection, telemetry, and privacy settings",
+                id: "appearance",
+                name: "Appearance",
+                description: "Visual customization and theme settings",
         },
         TweakCategory {
-                id: "remove_ai",
-                name: "Remove AI",
-                description: "Disable Copilot, Recall, and other AI/NPU features",
+                id: "behavior",
+                name: "Behavior",
+                description: "Window behavior, Aero features, and input settings",
         },
         TweakCategory {
-                id: "repair",
-                name: "Repair & Restore",
-                description: "Restore default Windows behavior and fix common issues",
+                id: "boot",
+                name: "Boot & Logon",
+                description: "Startup, login, and boot configuration",
+        },
+        TweakCategory {
+                id: "bulk",
+                name: "Bulk Operations",
+                description: "Comprehensive telemetry blocking and system repair operations",
+        },
+        TweakCategory {
+                id: "sync",
+                name: "Cloud Sync",
+                description: "Windows cloud sync, backup, and cross-device settings",
+        },
+        TweakCategory {
+                id: "context_menu",
+                name: "Context Menu",
+                description: "Add or remove context menu items",
         },
         TweakCategory {
                 id: "debloat",
@@ -435,54 +456,9 @@ pub static CATEGORIES: &[TweakCategory] = &[
                 description: "File Explorer behavior and view settings",
         },
         TweakCategory {
-                id: "context_menu",
-                name: "Context Menu",
-                description: "Add or remove context menu items",
-        },
-        TweakCategory {
-                id: "boot",
-                name: "Boot & Logon",
-                description: "Startup, login, and boot configuration",
-        },
-        TweakCategory {
-                id: "security",
-                name: "Security",
-                description: "Windows Defender, SmartScreen, and UAC settings",
-        },
-        TweakCategory {
-                id: "updates",
-                name: "Windows Update",
-                description: "Control Windows Update behavior",
-        },
-        TweakCategory {
-                id: "appearance",
-                name: "Appearance",
-                description: "Visual customization and theme settings",
-        },
-        TweakCategory {
-                id: "behavior",
-                name: "Behavior",
-                description: "Window behavior, Aero features, and input settings",
-        },
-        TweakCategory {
-                id: "network",
-                name: "Network",
-                description: "Network and connectivity settings",
-        },
-        TweakCategory {
-                id: "edge",
-                name: "Microsoft Edge",
-                description: "Microsoft Edge browser tweaks",
-        },
-        TweakCategory {
-                id: "tools",
-                name: "System Tools",
-                description: "System utilities and maintenance settings",
-        },
-        TweakCategory {
-                id: "performance",
-                name: "Performance",
-                description: "Performance optimizations and power settings",
+                id: "forensics",
+                name: "Forensics & Local Data",
+                description: "Minimize local forensic artifacts and usage tracking data stored on disk",
         },
         TweakCategory {
                 id: "software",
@@ -490,19 +466,14 @@ pub static CATEGORIES: &[TweakCategory] = &[
                 description: "Install recommended software via winget",
         },
         TweakCategory {
-                id: "forensics",
-                name: "Forensics & Local Data",
-                description: "Minimize local forensic artifacts and usage tracking data stored on disk",
+                id: "edge",
+                name: "Microsoft Edge",
+                description: "Microsoft Edge browser tweaks",
         },
         TweakCategory {
-                id: "power",
-                name: "Power & Sleep",
-                description: "Sleep, hibernate, and power management settings",
-        },
-        TweakCategory {
-                id: "sync",
-                name: "Cloud Sync",
-                description: "Windows cloud sync, backup, and cross-device settings",
+                id: "network",
+                name: "Network",
+                description: "Network and connectivity settings",
         },
         TweakCategory {
                 id: "online_data",
@@ -510,36 +481,65 @@ pub static CATEGORIES: &[TweakCategory] = &[
                 description: "Control Microsoft online services and cloud data collection",
         },
         TweakCategory {
-                id: "thirdparty_telemetry",
-                name: "Third-party Telemetry",
-                description: "Disable telemetry in developer tools and third-party software",
+                id: "performance",
+                name: "Performance",
+                description: "Performance optimizations and power settings",
+        },
+        TweakCategory {
+                id: "power",
+                name: "Power & Sleep",
+                description: "Sleep, hibernate, and power management settings",
+        },
+        TweakCategory {
+                id: "privacy",
+                name: "Privacy & Telemetry",
+                description: "Control Windows data collection, telemetry, and privacy settings",
+        },
+        TweakCategory {
+                id: "remove_ai",
+                name: "Remove AI",
+                description: "Disable Copilot, Recall, and other AI/NPU features",
+        },
+        TweakCategory {
+                id: "security",
+                name: "Security",
+                description: "Windows Defender, SmartScreen, and UAC settings",
+        },
+        TweakCategory {
+                id: "tools",
+                name: "System Tools",
+                description: "System utilities and maintenance settings",
+        },
+        TweakCategory {
+                id: "updates",
+                name: "Windows Update",
+                description: "Control Windows Update behavior",
         },
 ];
 
 const ALL_TWEAK_LISTS: &[&[Tweak]] = &[
-        PRIVACY_TWEAKS,
-        REMOVE_AI_TWEAKS,
         ACCESSIBILITY_TWEAKS,
-        DESKTOP_TWEAKS,
-        EXPLORER_TWEAKS,
-        BOOT_TWEAKS,
         APPEARANCE_TWEAKS,
         BEHAVIOR_TWEAKS,
-        UPDATE_TWEAKS,
-        EDGE_TWEAKS,
-        TOOLS_TWEAKS,
-        PERFORMANCE_TWEAKS,
-        NETWORK_TWEAKS,
-        SECURITY_TWEAKS,
+        BOOT_TWEAKS,
+        BULK_OPERATIONS_TWEAKS,
         CONTEXT_MENU_TWEAKS,
-        FORENSICS_TWEAKS,
-        REPAIR_TWEAKS,
-        POWER_TWEAKS,
-        SYNC_TWEAKS,
-        ONLINE_DATA_TWEAKS,
-        THIRD_PARTY_TELEMETRY_TWEAKS,
         DEBLOAT_TWEAKS,
+        DESKTOP_TWEAKS,
+        EDGE_TWEAKS,
+        EXPLORER_TWEAKS,
+        FORENSICS_TWEAKS,
+        NETWORK_TWEAKS,
+        ONLINE_DATA_TWEAKS,
+        PERFORMANCE_TWEAKS,
+        POWER_TWEAKS,
+        PRIVACY_TWEAKS,
+        REMOVE_AI_TWEAKS,
+        SECURITY_TWEAKS,
         SOFTWARE_TWEAKS,
+        SYNC_TWEAKS,
+        TOOLS_TWEAKS,
+        UPDATE_TWEAKS,
 ];
 
 /// Get all tweaks for a given category
@@ -548,12 +548,26 @@ pub fn get_tweaks_for_category(category_id: &str) -> Vec<&'static Tweak>
         ALL_TWEAK_LISTS
                 .iter()
                 .flat_map(|list| list.iter())
-                .filter(|tweak| tweak.category == category_id && !tweak.is_hidden)
+                .filter(|tweak| tweak.category == category_id)
                 .collect()
 }
 
-/// Get all tweaks
+fn collect_recursive(tweak: &'static Tweak, out: &mut Vec<&'static Tweak>)
+{
+        out.push(tweak);
+        for sub in tweak.sub_tweaks {
+                collect_recursive(sub, out);
+        }
+}
+
+/// Get all tweaks (recursively including sub-tweaks)
 pub fn get_all_tweaks() -> Vec<&'static Tweak>
 {
-        ALL_TWEAK_LISTS.iter().flat_map(|list| list.iter()).collect()
+        let mut all = Vec::with_capacity(500);
+        for list in ALL_TWEAK_LISTS {
+                for tweak in *list {
+                        collect_recursive(tweak, &mut all);
+                }
+        }
+        all
 }

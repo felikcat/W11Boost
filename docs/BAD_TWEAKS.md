@@ -2,7 +2,7 @@
 
 **WARNING:** Do not apply these registry edits. They are known to cause critical system instability, broken user interfaces, boot loops, or security risks on Windows 10 and Windows 11.
 
-## 1. System Killers (BSODs & Boot Loops)
+## 1. System Killers (BSODs, Boot Loops & Update Blocks)
 
 ### Forcing Native NVMe Drivers (Server 2025 Hack)
 *   **Key:** `HKLM\SYSTEM\CurrentControlSet\Policies\Microsoft\FeatureManagement\Overrides`
@@ -10,16 +10,52 @@
 *   **The Risk:** Often promoted to "boost SSD speed," this forces an enterprise driver path not fully supported on consumer hardware.
 *   **Result:** Frequently causes **Inaccessible Boot Device** BSODs, breaks Safe Mode, and can corrupt disk identifiers, causing backups to fail.
 
+### WD SSD "HMB" Boost (Host Memory Buffer)
+*   **Key:** `HKLM\SYSTEM\CurrentControlSet\Control\StorPort`
+*   **Value:** `HmbAllocationPolicy` (Set to `0` or modified)
+*   **The Risk:** A trending tweak to "boost" DRAM-less NVMe SSD performance.
+*   **Result:** On **Windows 11 24H2**, this triggers a firmware bug in **Western Digital (SN770/SN580)** drives, causing immediate and repeated **Blue Screens (CRITICAL_PROCESS_DIED)** or file corruption.
+
+### MSConfig "Number of Processors"
+*   **Location:** `msconfig.exe` > Boot > Advanced Options
+*   **The Myth:** Checking this box and selecting the max number "activates" all cores to speed up boot.
+*   **Reality:** Windows uses all cores by default. This setting is a **debug limit** for developers to test software on *fewer* cores.
+*   **Result:** Causes **Blue Screen (BAD_SYSTEM_CONFIG_INFO)** or permanently caps your high-end CPU to 1 core, crippling performance.
+
 ### Disabling Desktop Window Manager (DWM)
 *   **Key:** `HKLM\SOFTWARE\Microsoft\Windows\DWM` (Various hacks to force "Composition" off)
 *   **The Risk:** Attempting to remove the Windows compositor to "reduce input lag."
 *   **Result:** Windows 10/11 require DWM. Disabling it results in a **Black Screen** with only a cursor, rendering the system unusable.
+
+### Disable GPU Timeout Detection (TDR)
+*   **Key:** `HKLM\SYSTEM\CurrentControlSet\Control\GraphicsDrivers`
+*   **Value:** `TdrLevel` = `0`
+*   **The Myth:** Fixes game crashes by stopping Windows from resetting the driver.
+*   **The Risk:** TDR is a safety mechanism. If your GPU hangs for >2 seconds, Windows resets the driver to recover the desktop.
+*   **Result:** With TDR disabled, a simple GPU hiccup or game freeze causes your **entire PC to lock up permanently**, requiring a physical hard reboot and risking data corruption.
+
+### ExplorerPatcher / StartAllBack "Leftovers" (24H2)
+*   **Risk:** Updating to Windows 11 24H2 with active registry hooks from third-party shell tools.
+*   **The Mechanism:** These tools inject old DLLs (like `dxgi.dll` or `ExplorerFrame.dll`) to restore the Windows 10 taskbar.
+*   **Result:** Windows 11 24H2 blocks these DLLs. If forced via registry or left behind after a dirty uninstall, `explorer.exe` will **crash loop instantly** on login (flashing black screen), preventing access to the desktop.
 
 ### Disabling Critical Services (AppXSvc)
 *   **Key:** `HKLM\SYSTEM\CurrentControlSet\Services\AppXSvc`
 *   **Value:** `Start` set to `4` (Disabled)
 *   **The Risk:** Disabling the "AppX Deployment Service" to save RAM.
 *   **Result:** Breaks the **Start Menu, Taskbar, Notification Center, and all Microsoft Store apps** (Calculator, Photos, Settings). Can also cause login loops.
+
+### Disabling DNS Client (Dnscache)
+*   **Key:** `HKLM\SYSTEM\CurrentControlSet\Services\Dnscache`
+*   **Value:** `Start` = `4` (Disabled)
+*   **The Myth:** "Stops telemetry" or saves RAM.
+*   **Result:** Unlike Windows 7, the DNS Client in Windows 11 is a hard dependency for the Network Store Interface (NSI). Disabling it results in **Total Internet Loss** (WiFi and Ethernet) for all Store apps, Windows Update, and modern browsers.
+
+### Disabling Windows Event Log
+*   **Key:** `HKLM\SYSTEM\CurrentControlSet\Services\EventLog`
+*   **Value:** `Start` = `4` (Disabled)
+*   **The Myth:** Saves disk I/O and improves privacy.
+*   **Result:** Crucial services (Network List Service, Task Scheduler) depend on this. Disabling it causes **massively long boot times**, breaks WiFi/Ethernet detection, and leaves you with zero logs to troubleshoot issues.
 
 ### "Instant" Shutdown (Zero Timeout)
 *   **Key:** `HKLM\SYSTEM\CurrentControlSet\Control`
@@ -42,6 +78,17 @@
 *   **The Risk:** Disables the background execution permission for all modern apps.
 *   **Result:** Unlike Windows 10, Windows 11 relies on this for core features. **Alarms will not ring**, Mail/Calendar will not sync, and Phone Link will break.
 
+### Force-Disabling IPv6
+*   **Key:** `HKLM\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters`
+*   **Value:** `DisabledComponents` = `0xFFFFFFFF`
+*   **The Myth:** "Speeds up internet" or "lowers ping."
+*   **Result:** Windows 11 core components rely on IPv6 loopback. Disabling it breaks **Phone Link**, **Nearby Sharing**, **Miracast**, and causes the **Microsoft Store** to fail downloading apps.
+
+### Removing WebView2 (The "De-Google" Script)
+*   **Target:** Removing `Microsoft.WebView2` via script or registry brute-force.
+*   **The Risk:** Treating WebView2 like "bloatware."
+*   **Result:** WebView2 is a core OS dependency, distinct from the Edge Browser. Removing it breaks **Outlook (New), Teams, Copilot, Widgets, and the System Login/OOBE screens**. Reinstalling it often fails, requiring a full Windows reset.
+
 ### Force Move/Resize Taskbar (Windows 11)
 *   **Keys:** `HKCU\...\Explorer\StuckRects3` or `TaskbarSi`
 *   **The Risk:** Modifying binary data to force the Taskbar to the Top/Left or change its size.
@@ -53,9 +100,12 @@
 ### Setting the `CI` environment variable to `1`
 *   **The Risk:** Breaks gemini-cli.
 
+### Removing "Microsoft.SecHealthUI"
+*   **Method:** PowerShell debloat scripts removing AppX packages blindly.
+*   **The Risk:** Removes the UI for Windows Defender.
+*   **Result:** You cannot open Windows Security to manage antivirus or firewall exceptions. The antivirus still runs in the background (blocking files), but you have **no interface** to allow them or see what is happening.
 
 ## 3. "Snake Oil" & Performance Degraders
-These tweaks are legacies from the Windows XP/7 era. They do **not** improve performance on modern systems and often cause stuttering or memory errors.
 
 ### Large System Cache
 *   **Key:** `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management`
@@ -63,11 +113,24 @@ These tweaks are legacies from the Windows XP/7 era. They do **not** improve per
 *   **The Myth:** Optimizes file caching speed.
 *   **Reality:** Designed for Servers. On desktops, it aggressively steals RAM from games and apps to cache files, leading to **micro-stuttering** and "Out of Memory" errors.
 
+### Second Level Data Cache (L2 Cache)
+*   **Key:** `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management`
+*   **Value:** `SecondLevelDataCache`
+*   **The Myth:** "Tell Windows your CPU's L2 cache size to boost speed."
+*   **Reality:** Windows automatically retrieves this from the hardware (`CPUID`) at boot. Entering the wrong value can force the OS to optimize for the *wrong* cache size, **degrading performance**.
+
 ### Disable Paging Executive
 *   **Key:** `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management`
 *   **Value:** `DisablePagingExecutive` = `1`
 *   **The Myth:** Keeps core drivers in RAM for speed.
 *   **Reality:** Useless on systems with ample RAM. If memory *does* run low, the kernel refuses to page out idle data, forcing active applications to crash instead.
+
+### Force-Disabling the Page File
+*   **Key:** `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management`
+*   **Value:** `PagingFiles` (Deleted/Empty)
+*   **The Myth:** "I have 32GB RAM, I don't need a Page File. It slows me down."
+*   **The Risk:** Windows is designed to use the Page File for memory commit guarantees.
+*   **Result:** Causes random **crashes to desktop** in heavy apps (Cyberpunk 2077, Chrome, Video Editors) even with free RAM available. It also prevents **BSOD Mini Dumps** from being created, making diagnosis impossible.
 
 ### Realtime CPU Priority
 *   **Key:** `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\{Game.exe}\PerfOptions`
@@ -80,6 +143,12 @@ These tweaks are legacies from the Windows XP/7 era. They do **not** improve per
 *   **Value:** `ClearPageFileAtShutdown` = `1`
 *   **The Myth:** Frees up space or "cleans" RAM.
 *   **Reality:** Forces Windows to overwrite the virtual memory file with zeros at shutdown. Adds **minutes** to shutdown time with zero performance benefit.
+
+### Always Unload DLL
+*   **Key:** `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer`
+*   **Value:** `AlwaysUnloadDll` = `1`
+*   **The Myth:** Forces Windows to free RAM immediately.
+*   **Reality:** This feature was removed in **Windows 2000**. The key is placebo and does absolutely nothing in modern Windows.
 
 ### Disable SvcHost Splitting
 *   **Key:** `HKLM\SYSTEM\CurrentControlSet\Control`
@@ -96,6 +165,12 @@ These tweaks are legacies from the Windows XP/7 era. They do **not** improve per
 *   **Command:** `netsh interface tcp set global autotuninglevel=disabled`
 *   **The Myth:** "Stabilizes" ping or connection speed.
 *   **Reality:** Prevents Windows from dynamically adjusting the TCP receive window size. This effectively caps your download speed at ancient 1990s levels (often <10Mbps) on high-speed fiber connections.
+
+### QoS Bandwidth Limit (The "20% Speed" Myth)
+*   **Key:** `HKLM\SOFTWARE\Policies\Microsoft\Windows\Psched`
+*   **Value:** `NonBestEffortLimit` = `0`
+*   **The Myth:** "Windows reserves 20% of your internet bandwidth. Set to 0 to unlock it."
+*   **Reality:** Windows *only* reserves bandwidth if a high-priority system task (like Windows Update) is active *and* the network is congested. If you are gaming/browsing, you already have 100%. Setting this to 0 has no impact on daily speed.
 
 ### Disabling SysMain (Superfetch)
 *   **Service:** SysMain
@@ -187,3 +262,132 @@ Tweaks for features that have been removed from the operating system entirely or
 | **Action Center** | **Key:** `HKCU\Control Panel\Quick Actions`<br>**Value:** `PinnedQuickActionSlotCount` | Customized the 4xN grid of Quick Actions. | **Replaced**<br>Action Center is split into "Notifications" and "Quick Settings." The legacy layout blobs do not apply to the new Quick Settings UI. |
 | **Volume Mixer** | **Key:** `HKLM\Software\Microsoft\Windows NT\CurrentVersion\MTCUVC`<br>**Value:** `EnableMtcUvc` | `0` = Restored the legacy (Win7 style) volume mixer flyout. | **Ignored**<br>Windows 11 enforces the modern volume flyout and Settings-based mixer; this key no longer reverts it. |
 | **Ribbon UI** | **Key:** `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Ribbon`<br>**Value:** `MinimizedStateTabletModeOff` | Controlled if the Explorer Ribbon was minimized or expanded. | **Obsolete**<br>The Ribbon UI has been replaced by a modern XAML Command Bar. |
+
+---
+
+# CAUTION: Use with Care
+
+The following registry edits are functional but may cause annoyances, minor glitches, or unexpected behavior in specific scenarios.
+
+## 1. Interface & Responsiveness
+
+### Disabling Widgets via Registry (UCPD)
+*   **Key:** `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced`
+*   **Value:** `TaskbarDa` = `0`
+*   **The Issue:** In Windows 11 23H2+, this key is protected by the **User Choice Protection Driver (UCPD)**.
+*   **Side Effect:** Manually toggling this key in the registry often causes it to revert instantly or can destabilize `explorer.exe`. Use the official Taskbar Settings toggle or Group Policy instead.
+
+### Disable Notification Center
+*   **Key:** `HKCU\Software\Policies\Microsoft\Windows\Explorer`
+*   **Value:** `DisableNotificationCenter` = `1`
+*   **Side Effect:** In Windows 11, the Notifications and **Calendar** are combined. Enabling this tweak prevents you from opening the Calendar flyout to check dates.
+
+### Auto End Tasks
+*   **Key:** `HKCU\Control Panel\Desktop`
+*   **Value:** `AutoEndTasks` = `1`
+*   **The Tweak:** Automatically kills hung apps at shutdown.
+*   **Side Effect:** If you have an unsaved document (Word/Notepad) and shut down, Windows may kill the app **before you can hit 'Save'**, causing data loss.
+
+### Menu Show Delay
+*   **Key:** `HKCU\Control Panel\Desktop`
+*   **Value:** `MenuShowDelay` (Default: 400)
+*   **Tweak:** Setting to `0`.
+*   **Side Effect:** Menus open instantly but become **difficult to navigate**. If your mouse moves 1 pixel off the path, the menu vanishes immediately.
+*   **Recommendation:** Set to `20` or `100`, not `0`.
+
+### Startup Delay (Serialize)
+*   **Key:** `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Serialize`
+*   **Value:** `StartupDelayInMSec` = `0`
+*   **Tweak:** Removes the delay before startup apps launch.
+*   **Side Effect:** Causes a massive **CPU/Disk spike** immediately after login if you have multiple startup apps (Steam, Discord, etc.), freezing the system for several seconds.
+
+---
+
+## 2. Gaming, Network & Performance
+
+### Disabling Memory Compression
+*   **Command:** `Disable-MMAgent -mc`
+*   **The Myth:** "Compression uses CPU, turning it off boosts FPS."
+*   **Reality:** Windows compresses stale RAM (nanoseconds) to avoid writing to the slow SSD (milliseconds).
+*   **Side Effect:** On systems with <32GB RAM, disabling this forces Windows to swap to disk much earlier. This causes **massive stuttering** when alt-tabbing or running background apps (Discord/Spotify) while gaming.
+
+### MSI Mode "High Priority"
+*   **Tool:** MSI Utility v3 / Registry
+*   **Value:** Priority `High`
+*   **The Myth:** Reduces latency by prioritizing GPU interrupts.
+*   **Side Effect:** Unless the driver explicitly supports it, forcing High Priority can starve other devices (USB, Audio), leading to **crackling audio**, mouse micro-stutters, and random BSODs (DPC_WATCHDOG_VIOLATION).
+
+### Disabling VBS (Core Isolation / Memory Integrity)
+*   **Action:** Turning off "Memory Integrity" in Windows Security.
+*   **The Trade-off:** This *does* increase gaming performance by ~5-10% on some systems.
+*   **Why Caution?:** It disables **Kernel Data Protection**. If you download a malicious file or a game cheat that contains a rootkit, your entire OS can be compromised at the hardware level.
+
+### Unparking CPU Cores
+*   **Tools:** ParkControl / Registry Hacks
+*   **The Myth:** Preventing cores from sleeping boosts FPS.
+*   **Reality:** Modern schedulers (Intel Thread Director / AMD Ryzen) manage this efficiently.
+*   **Side Effect:** Forcing all cores to stay awake generates excess heat. On modern CPUs, this can cause the chip to hit thermal limits faster, preventing P-Cores from boosting to their maximum turbo frequency, actually **lowering** gaming performance.
+
+### Network Throttling Index
+*   **Key:** `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile`
+*   **Value:** `NetworkThrottlingIndex` = `ffffffff`
+*   **Tweak:** Disables Windows network throttling for non-multimedia tasks.
+*   **Side Effect:** Can cause **audio crackling**, driver instability, or glitches in video streaming (YouTube/Twitch) if you are downloading a game in the background.
+
+### TCP Acknowledgement Frequency
+*   **Key:** `HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces\{NIC-ID}`
+*   **Values:** `TcpAckFrequency` = `1`, `TCPNoDelay` = `1`
+*   **Tweak:** Forces immediate packet acknowledgement (disables Nagle's Algorithm).
+*   **Side Effect:** May lower ping slightly in old games, but significantly **reduces raw download speeds** and increases CPU usage during heavy network traffic (torrenting/downloads).
+
+### Win32 Priority Separation
+*   **Key:** `HKLM\SYSTEM\CurrentControlSet\Control\PriorityControl`
+*   **Value:** `Win32PrioritySeparation` (e.g., `26`, `28`, `6`)
+*   **Tweak:** Changes CPU scheduling priority for foreground vs. background.
+*   **Side Effect:** Setting this incorrectly can cause **micro-stuttering** in games or cause background apps (Discord voice, OBS streaming) to lag/cut out because they are starved of CPU time.
+
+
+### Disable Game Bar
+*   **Key:** `HKCU\Software\Microsoft\GameBar`
+*   **Tweak:** Disables the Xbox Game Bar overlay and background recording.
+*   **Side Effect:** This breaks **Xbox Game Pass invites**, Achievement notifications, and **Xbox Party Chat**. It also disables the built-in screen recorder (`Win+Alt+R`).
+
+---
+
+
+## 3. Privacy & Updates
+
+### Disabling Telemetry
+*   **Key:** `HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection`
+*   **Value:** `AllowTelemetry` = `0`
+*   **Tweak:** Reduces diagnostic data sent to Microsoft.
+*   **Side Effect:**
+    *   **Breaks Windows Insider:** You cannot receive beta builds.
+    *   **Settings Lock:** You will see "Some settings are managed by your organization" in the Settings app.
+
+### Disable Web Search (Start Menu)
+*   **Key:** `HKCU\Software\Policies\Microsoft\Windows\Explorer`
+*   **Value:** `DisableSearchBoxSuggestions` = `1`
+*   **Tweak:** Removes Bing results from Start Menu.
+*   **Side Effect:** Can leave a large **blank space** in the Search UI in some builds of Windows 11. You also lose calculator/conversion features in the search bar.
+
+---
+
+## 4. Risky Combinations
+
+### The "Gaming Priority" Clash
+*   **Edit 1:** `Win32PrioritySeparation` (Processor Scheduling) set to emphasize foreground.
+*   **Edit 2:** `SystemResponsiveness` set to `0` (Multimedia Profile).
+*   **Result:** Combining these can totally starve background processes. If you stream (OBS) or use voice chat (Discord) while gaming, your **mic may cut out or the stream may stutter** because the background apps are not getting enough CPU cycles to function.
+
+## 5. Hardware Specific
+
+### Show Seconds in System Clock
+*   **Key:** `HKCU\...\Explorer\Advanced` -> `ShowSecondsInSystemClock` = `1`
+*   **Side Effect:** Microsoft confirms this prevents the CPU from entering low-power "C-States" because the screen must refresh every second. This **measurably increases battery drain** on laptops.
+
+### Fast Startup (Hiberboot) for Dual Booters
+*   **Key:** `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Power`
+*   **Value:** `HiberbootEnabled` = `1` (Default)
+*   **The Risk:** Hibernates the kernel to speed up boot.
+*   **Side Effect:** **Data Corruption** for Dual Boot users. If you mount your Windows drive in Linux while Fast Startup is active, the NTFS partition is in a "dirty" state. Writing to it from Linux will corrupt the partition table.

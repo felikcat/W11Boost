@@ -11,6 +11,7 @@ pub enum ViewMode
 
         ConfirmUnsetAll,
         ConfirmRestorePoint,
+        ConfirmLoadDefaults,
         SelectedTweaks,
 }
 

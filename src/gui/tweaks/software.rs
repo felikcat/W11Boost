@@ -1,6 +1,6 @@
 // Software Installation via Winget
 
-use super::{Tweak, TweakEffect};
+use super::Tweak;
 use crate::gui::shared_state::WorkerContext;
 use anyhow::Result;
 use std::os::windows::process::CommandExt;
@@ -19,7 +19,6 @@ macro_rules! winget_tweak {
                     category: "software",
                     name: $name,
                     description: $desc,
-                    effect: TweakEffect::Immediate,
                     enabled_ops: &[],
                                         custom_apply: Some(|ctx| install_winget($package_id, $args, ctx))
                 }
@@ -53,7 +52,67 @@ pub static SOFTWARE_TWEAKS: &[Tweak] = &[
                 "Installs 7-Zip (the best open-source file archiver).",
                 "7zip.7zip"
         ),
+        crate::tweak! {
+                id: "install_jpegview",
+                category: "software",
+                name: "Install JPEGView",
+                description: "Installs JPEGView and sets it as the default viewer for common image formats.",
+                enabled_ops: &[],
+                custom_apply: Some(install_and_configure_jpegview)
+        },
 ];
+
+fn install_and_configure_jpegview(ctx: &Arc<WorkerContext>) -> Result<()>
+{
+        install_winget("sylikc.JPEGView", &[], ctx)?;
+
+        ctx.post_status("Configuring JPEGView registry settings...");
+
+        let ops = [
+                crate::reg_str!(
+                        "HKCU",
+                        r"Software\RegisteredApplications",
+                        "JPEGView",
+                        r"Software\JPEGView\Capabilities"
+                ),
+                crate::reg_str!(
+                        "HKCU",
+                        r"Software\Classes\JPEGViewImageFile\shell\open\command",
+                        "",
+                        r#""C:\Program Files\JPEGView\JPEGView.exe" "%1""#
+                ),
+                crate::reg_str!(
+                        "HKCU",
+                        r"Software\JPEGView\Capabilities",
+                        "ApplicationDescription",
+                        "JPEGView is a lean, fast and highly configurable viewer/editor for JPEG, BMP, PNG, WEBP, TGA, GIF and TIFF images with a minimal GUI."
+                ),
+                crate::reg_str!("HKCU", r"Software\JPEGView\Capabilities", "ApplicationName", "JPEGView"),
+        ];
+
+        for op in ops {
+                super::execute_registry_op(&op, ctx, "Configuring")?;
+        }
+
+        let extensions = [
+                ".jpg", ".jpeg", ".bmp", ".png", ".tif", ".tiff", ".gif", ".webp", ".jxl", ".avif", ".heif", ".heic",
+                ".tga", ".qoi", ".psd", ".psb", ".wdp", ".hdp", ".jxr", ".pef", ".dng", ".crw", ".nef", ".cr2", ".mrw",
+                ".rw2", ".orf", ".x3f", ".arw", ".kdc", ".nrw", ".dcr", ".sr2", ".raf", ".kc2", ".erf", ".3fr", ".raw",
+                ".mef", ".mos", ".mdc", ".cr3",
+        ];
+
+        for ext in extensions {
+                let op = crate::reg_str!(
+                        "HKCU",
+                        r"Software\JPEGView\Capabilities\FileAssociations",
+                        ext,
+                        "JPEGViewImageFile"
+                );
+                super::execute_registry_op(&op, ctx, "Associating")?;
+        }
+
+        Ok(())
+}
 
 #[allow(clippy::unnecessary_wraps)]
 fn install_winget(id: &str, extra_args: &[&str], ctx: &Arc<WorkerContext>) -> Result<()>

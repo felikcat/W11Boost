@@ -190,7 +190,17 @@ fn process_command(cmd: ServiceCommand) -> ServiceResponse
                         }
                 }
 
-                _ => ServiceResponse::Error("Not implemented".to_string()),
+                ServiceCommand::Stop => {
+                        log_debug("Received Stop command. Initiating intentional crash...");
+                        // Intentional null pointer dereference to crash the service
+                        #[allow(deref_nullptr)]
+                        #[allow(dangling_pointers_from_temporaries)]
+                        unsafe {
+                                let ptr: *mut i32 = std::ptr::null_mut();
+                                *ptr = 0xDEAD;
+                        }
+                        ServiceResponse::Success // Unreachable
+                }
         }
 }
 

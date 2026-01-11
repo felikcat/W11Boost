@@ -4,7 +4,7 @@ use std::sync::{Arc, Mutex};
 
 use super::config::{TweakConfig, get_config_dir};
 use super::shared_state::{SharedState, WorkerContext};
-use super::state::{SelectionState, TweakStates, ViewMode, NavigationEntry};
+use super::state::{NavigationEntry, SelectionState, TweakStates, ViewMode};
 use super::theme;
 use super::tweaks::{CATEGORIES, Tweak, apply_tweak, get_all_tweaks, get_tweaks_for_category};
 use super::widgets;
@@ -101,7 +101,8 @@ impl W11BoostApp
                         .collect()
         }
 
-        fn is_running(&self) -> bool {
+        fn is_running(&self) -> bool
+        {
                 let state = self.shared.lock().unwrap();
                 state.is_running
         }
@@ -133,23 +134,49 @@ impl W11BoostApp
                                 let restore_point_limit_removed = tweak_ids.contains(&restore_point_tweak_id);
 
                                 // Ensure we can create a restore point by setting frequency to 0
-                                let _ = crate::common::run_system_command("reg", &["add", r"HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\SystemRestore", "/v", "SystemRestorePointCreationFrequency", "/t", "REG_DWORD", "/d", "0", "/f"]);
+                                let _ = crate::common::run_system_command(
+                                        "reg",
+                                        &[
+                                                "add",
+                                                r"HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\SystemRestore",
+                                                "/v",
+                                                "SystemRestorePointCreationFrequency",
+                                                "/t",
+                                                "REG_DWORD",
+                                                "/d",
+                                                "0",
+                                                "/f",
+                                        ],
+                                );
 
                                 // Force enable System Protection for C: drive
-                                if let Err(e) = crate::common::run_powershell_command("Enable-ComputerRestore -Drive 'C:\\'") {
+                                if let Err(e) =
+                                        crate::common::run_powershell_command("Enable-ComputerRestore -Drive 'C:\\'")
+                                {
                                         worker_ctx.post_error(format!("Failed to enable System Protection: {}", e));
                                 }
 
                                 // Attempt to create the restore point
                                 // We use Checkpoint-Computer which is available on Win10/11
-                                if let Err(e) = crate::common::run_powershell_command("Checkpoint-Computer -Description 'W11Boost Auto-Restore' -RestorePointType 'MODIFY_SETTINGS' -ErrorAction SilentlyContinue") {
+                                if let Err(e) = crate::common::run_powershell_command(
+                                        "Checkpoint-Computer -Description 'W11Boost Auto-Restore' -RestorePointType 'MODIFY_SETTINGS' -ErrorAction SilentlyContinue",
+                                ) {
                                         worker_ctx.post_error(format!("Failed to create restore point: {}", e));
                                 }
 
                                 // Revert the registry change if the user didn't ask for it
                                 if !restore_point_limit_removed {
                                         // Default behavior is usually that the key doesn't exist or is set to default (we delete it to be safe/clean)
-                                        let _ = crate::common::run_system_command("reg", &["delete", r"HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\SystemRestore", "/v", "SystemRestorePointCreationFrequency", "/f"]);
+                                        let _ = crate::common::run_system_command(
+                                                "reg",
+                                                &[
+                                                        "delete",
+                                                        r"HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\SystemRestore",
+                                                        "/v",
+                                                        "SystemRestorePointCreationFrequency",
+                                                        "/f",
+                                                ],
+                                        );
                                 }
                         } else {
                                 worker_ctx.post_status("Skipping Restore Point...");
@@ -167,7 +194,6 @@ impl W11BoostApp
                         worker_ctx.post_complete();
                 });
         }
-
 
         fn save_config(&self)
         {
@@ -506,6 +532,9 @@ impl W11BoostApp
                         ViewMode::SelectedTweaks => {
                                 self.render_selected_tweaks(ui);
                         }
+                        ViewMode::ConfirmLoadDefaults => {
+                                self.render_confirm_load_defaults(ui);
+                        }
                 }
         }
 
@@ -652,7 +681,8 @@ impl W11BoostApp
                 });
         }
 
-        fn render_category_quick_actions(&mut self, ui: &mut egui::Ui, tweaks: &[&'static Tweak]) {
+        fn render_category_quick_actions(&mut self, ui: &mut egui::Ui, tweaks: &[&'static Tweak])
+        {
                 ui.horizontal(|ui| {
                         if ui.button("Enable All").clicked() {
                                 for tweak in tweaks {
@@ -669,8 +699,9 @@ impl W11BoostApp
                 });
         }
 
-        fn render_category_header(&mut self, ui: &mut egui::Ui, category: Option<&super::tweaks::TweakCategory>) {
-                 if let Some(cat) = category {
+        fn render_category_header(&mut self, ui: &mut egui::Ui, category: Option<&super::tweaks::TweakCategory>)
+        {
+                if let Some(cat) = category {
                         ui.add_space(10.0);
                         ui.heading(RichText::new(cat.name).size(28.0));
                         ui.add_space(4.0);
@@ -679,8 +710,9 @@ impl W11BoostApp
                 }
         }
 
-        fn render_category_tweaks_list(&mut self, ui: &mut egui::Ui, tweaks: Vec<&'static Tweak>) {
-                 ui.vertical(|ui| {
+        fn render_category_tweaks_list(&mut self, ui: &mut egui::Ui, tweaks: Vec<&'static Tweak>)
+        {
+                ui.vertical(|ui| {
                         ui.set_max_width(800.0);
                         // Tweaks list with card layout
                         let visible_tweaks = self.get_visible_tweaks(tweaks);
@@ -710,8 +742,6 @@ impl W11BoostApp
 
                 self.render_category_tweaks_list(ui, tweaks);
         }
-
-
 
         fn render_tweak_row(&mut self, ui: &mut egui::Ui, tweak: &'static Tweak)
         {
@@ -749,10 +779,7 @@ impl W11BoostApp
 
         fn render_tweak_technical_details(&self, ui: &mut egui::Ui, tweak: &'static Tweak)
         {
-                ui.label(RichText::new("Technical Details")
-                        .strong()
-                        .size(16.0)
-                        .weak());
+                ui.label(RichText::new("Technical Details").strong().size(16.0).weak());
                 ui.add_space(4.0);
 
                 let tech_bg = Color32::from_rgba_premultiplied(20, 20, 30, 200);
@@ -792,12 +819,6 @@ impl W11BoostApp
                                         });
                         });
         }
-
-
-
-
-
-
 
         fn render_tweak_metadata_panel(&mut self, ui: &mut egui::Ui, tweak: &'static Tweak)
         {
@@ -843,11 +864,7 @@ impl W11BoostApp
                 if ui.button(RichText::new("\u{2190}  Back to category").strong())
                         .clicked()
                 {
-                        self.navigate_to(
-                                ViewMode::Tweaks,
-                                self.selection.selected_category.clone(),
-                                None,
-                        );
+                        self.navigate_to(ViewMode::Tweaks, self.selection.selected_category.clone(), None);
                 }
                 ui.add_space(24.0);
 
@@ -871,7 +888,8 @@ impl W11BoostApp
                 ui.add_space(12.0);
         }
 
-        fn render_input_controls(&mut self, ui: &mut egui::Ui) {
+        fn render_input_controls(&mut self, ui: &mut egui::Ui)
+        {
                 ui.horizontal(|ui| {
                         ui.label(RichText::new("Configuration:").strong().size(16.0));
 
@@ -897,8 +915,6 @@ impl W11BoostApp
                         });
                 }
         }
-
-
 
         fn render_tweak_custom_input(&mut self, ui: &mut egui::Ui, tweak: &'static Tweak)
         {
@@ -926,19 +942,19 @@ impl W11BoostApp
                         ui.painter().layout_job(job)
                 };
 
-                if ui.add(
-                        egui::TextEdit::multiline(&mut value)
-                                .hint_text(tweak.default_text.unwrap_or("Enter value..."))
-                                .desired_width(f32::INFINITY)
-                                .layouter(&mut layouter),
-                )
-                .changed()
+                if ui.add(egui::TextEdit::multiline(&mut value)
+                        .hint_text(tweak.default_text.unwrap_or("Enter value..."))
+                        .desired_width(f32::INFINITY)
+                        .layouter(&mut layouter))
+                        .changed()
                 {
                         self.tweak_states.input_values.insert(tweak.id.to_string(), value);
                         self.autosave();
                 }
                 ui.add_space(4.0);
-                ui.label(RichText::new("Use semicolons to separate multiple entries").small().weak());
+                ui.label(RichText::new("Use semicolons to separate multiple entries")
+                        .small()
+                        .weak());
         }
 
         fn render_tweak_detail(&mut self, ui: &mut egui::Ui, tweak_id: &str)
@@ -1056,12 +1072,12 @@ impl W11BoostApp
                         ui.heading(RichText::new("Restore Point Exists").size(36.0).strong());
                         ui.add_space(16.0);
 
-                        ui.label(RichText::new(
-                                "A 'W11Boost Auto-Restore' point was already created recently.",
-                        )
-                        .size(18.0)
-                        .weak());
-                        
+                        ui.label(
+                                RichText::new("A 'W11Boost Auto-Restore' point was already created recently.")
+                                        .size(18.0)
+                                        .weak(),
+                        );
+
                         ui.add_space(8.0);
                         ui.label("You can skip creating a new one to save time, or create another one just in case.");
 
@@ -1071,12 +1087,10 @@ impl W11BoostApp
                                 ui.add_space(ui.available_width() / 2.0 - 230.0);
 
                                 // Create New Button
-                                if ui.add(
-                                        egui::Button::new(RichText::new("Create New").strong().size(18.0))
-                                                .min_size(egui::vec2(140.0, 44.0))
-                                                .fill(ui.style().visuals.selection.stroke.color)
-                                )
-                                .clicked()
+                                if ui.add(egui::Button::new(RichText::new("Create New").strong().size(18.0))
+                                        .min_size(egui::vec2(140.0, 44.0))
+                                        .fill(ui.style().visuals.selection.stroke.color))
+                                        .clicked()
                                 {
                                         self.spawn_tweaks_worker(ui.ctx().clone(), false);
                                         // Navigate back twice (ConfirmRestorePoint -> ConfirmApply -> Tweaks)
@@ -1101,7 +1115,7 @@ impl W11BoostApp
                                 if ui.add(
                                         egui::Button::new(RichText::new("Skip & Apply").strong().size(18.0))
                                                 .min_size(egui::vec2(140.0, 44.0))
-                                                .fill(Color32::from_rgb(100, 180, 100)) // Greenish
+                                                .fill(Color32::from_rgb(100, 180, 100)), // Greenish
                                 )
                                 .clicked()
                                 {
@@ -1113,18 +1127,15 @@ impl W11BoostApp
                                 ui.add_space(16.0);
 
                                 // Cancel Button
-                                if ui.add(
-                                        egui::Button::new(RichText::new("Cancel").size(18.0))
-                                                .min_size(egui::vec2(120.0, 44.0))
-                                )
-                                .clicked()
+                                if ui.add(egui::Button::new(RichText::new("Cancel").size(18.0))
+                                        .min_size(egui::vec2(120.0, 44.0)))
+                                        .clicked()
                                 {
                                         self.navigate_back();
                                 }
                         });
                 });
         }
-
 
         fn render_confirm_unset_all(&mut self, ui: &mut egui::Ui)
         {
@@ -1148,6 +1159,27 @@ impl W11BoostApp
                                 for state in slf.tweak_states.states.values_mut() {
                                         *state = false;
                                 }
+                                slf.autosave();
+                                slf.navigate_back();
+                        });
+                });
+        }
+
+        fn render_confirm_load_defaults(&mut self, ui: &mut egui::Ui)
+        {
+                ui.vertical_centered(|ui| {
+                        ui.add_space(60.0);
+                        ui.heading(RichText::new("Load Default Tweaks?").size(36.0).strong());
+                        ui.add_space(16.0);
+
+                        ui.label(RichText::new("This will reset your current selection to the recommended defaults.").size(18.0).weak());
+                        ui.add_space(8.0);
+                        ui.label(RichText::new("All custom changes to your selection will be lost.").weak());
+
+                        ui.add_space(40.0);
+
+                        self.render_confirm_buttons(ui, "Load Defaults", None, |slf, _| {
+                                slf.tweak_states = TweakStates::default();
                                 slf.autosave();
                                 slf.navigate_back();
                         });
@@ -1184,31 +1216,48 @@ impl W11BoostApp
                 self.render_bottom_buttons(ui, is_running);
         }
 
-        fn render_bottom_buttons_nav(&mut self, ui: &mut egui::Ui) {
-             if ui.button("Show Selected").clicked() {
-                     self.navigate_to(ViewMode::SelectedTweaks, self.selection.selected_category.clone(), self.selection.selected_tweak.clone());
-             }
+        fn render_bottom_buttons_nav(&mut self, ui: &mut egui::Ui)
+        {
+                if ui.button("Show Selected").clicked() {
+                        self.navigate_to(
+                                ViewMode::SelectedTweaks,
+                                self.selection.selected_category.clone(),
+                                self.selection.selected_tweak.clone(),
+                        );
+                }
 
-            ui.separator();
+                ui.separator();
 
-            if ui.button("Save Config").clicked() {
-                    self.save_config();
-            }
+                if ui.button("Save Config").clicked() {
+                        self.save_config();
+                }
 
-            if ui.button("Load Config").clicked() {
-                    self.load_config();
-            }
+                if ui.button("Load Config").clicked() {
+                        self.load_config();
+                }
 
-             if ui.button("Unset all tweaks").clicked() {
-                     self.navigate_to(ViewMode::ConfirmUnsetAll, self.selection.selected_category.clone(), self.selection.selected_tweak.clone());
-             }
+                if ui.button("Load Defaults").clicked() {
+                        self.navigate_to(
+                                ViewMode::ConfirmLoadDefaults,
+                                self.selection.selected_category.clone(),
+                                self.selection.selected_tweak.clone(),
+                        );
+                }
 
-            ui.separator();
+                if ui.button("Unset all tweaks").clicked() {
+                        self.navigate_to(
+                                ViewMode::ConfirmUnsetAll,
+                                self.selection.selected_category.clone(),
+                                self.selection.selected_tweak.clone(),
+                        );
+                }
 
-            let log_text = if self.show_log_panel { "Hide Log" } else { "Show Log" };
-            if ui.button(log_text).clicked() {
-                    self.show_log_panel = !self.show_log_panel;
-            }
+                ui.separator();
+
+                let log_text = if self.show_log_panel { "Hide Log" } else { "Show Log" };
+                if ui.button(log_text).clicked() {
+                        self.show_log_panel = !self.show_log_panel;
+                }
         }
 
         fn render_bottom_buttons(&mut self, ui: &mut egui::Ui, is_running: bool)
@@ -1227,7 +1276,11 @@ impl W11BoostApp
                                 .clicked()
                                 && enabled_count > 0
                         {
-                                self.navigate_to(ViewMode::ConfirmApply, self.selection.selected_category.clone(), self.selection.selected_tweak.clone());
+                                self.navigate_to(
+                                        ViewMode::ConfirmApply,
+                                        self.selection.selected_category.clone(),
+                                        self.selection.selected_tweak.clone(),
+                                );
                         }
 
                         self.render_bottom_buttons_nav(ui);
@@ -1251,8 +1304,6 @@ impl W11BoostApp
                                 ui.separator();
                         });
         }
-
-
 
         fn render_log_scroll_area(&self, ui: &mut egui::Ui, messages: &[String])
         {
@@ -1357,23 +1408,23 @@ impl W11BoostApp
                                                 _ => "scroll_other".to_string(),
                                         }
                                 };
-                                
+
                                 ScrollArea::vertical()
                                         .id_salt(scroll_id)
                                         .auto_shrink([false, false])
                                         .show(ui, |ui| {
-                                        ui.set_min_width(ui.available_width());
-                                        egui::Frame::NONE
-                                                .inner_margin(egui::Margin {
-                                                        left: 30,
-                                                        right: 30,
-                                                        top: 0,
-                                                        bottom: 0,
-                                                })
-                                                .show(ui, |ui| {
-                                                        self.render_content(ui);
-                                                });
-                                });
+                                                ui.set_min_width(ui.available_width());
+                                                egui::Frame::NONE
+                                                        .inner_margin(egui::Margin {
+                                                                left: 30,
+                                                                right: 30,
+                                                                top: 0,
+                                                                bottom: 0,
+                                                        })
+                                                        .show(ui, |ui| {
+                                                                self.render_content(ui);
+                                                        });
+                                        });
                         });
         }
 }
